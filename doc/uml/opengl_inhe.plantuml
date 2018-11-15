@@ -1,0 +1,246 @@
+@startuml
+
+' OpenGL class inheritance
+
+note as NoteBegin
+T is GLenum or GLint. handle is set by create()
+
+begin() {
+  if (need_create) { need_create = create() || exit(); }
+  activate();
+  if (need_setup) { need_setup = setup() || exit(); }
+  if (need_update) { need_update = update(); }
+}
+
+end() {
+  deactivate();
+}
+end note
+
+NoteBegin .. IGLObject
+class IGLObject<T> {
++ gpuID(): T
++ name(): string
++ handleIsValid(): bool
++ begin()
++ end()
+-{abstract} create(): bool = 0
+-{abstract} setup(): bool = 0
+-{abstract} activate() = 0
+-{abstract} update(): bool = 0
+-{abstract} deactivate() = 0
+-{abstract} release(): bool = 0
+- handle: T
+- target: GLenum
+}
+
+class PendingData {
++ PendingData()
++ PendingData(nb_elt: size_t)
++ clearPending()
++ setPending(first: size_t, last: size_t)
++ setPending(elt: size_t)
++ std::pair<first, last> getPending()
++ hasPending(): bool
+}
+
+class PendingContainer<C> {
+-std::container<C> container
++operator=(std::container<C>)
++operator*=(std::container<C>)
++operator*=(C)
++operator+=(std::container<C>)
++operator+=(C)
++append(std::container<C>)
+}
+
+PendingData <|-- PendingContainer
+
+class IGLTexture<GLenum> {
++IGLTexture(target: GLenum)
+-{abstract} create(): bool
+-{abstract} setup(): bool
+-{abstract} activate()
+-{abstract} update(): bool
+-{abstract} deactivate()
+-{abstract} release(): bool
+}
+
+class GLTexture2D {
+-image[]: byte
++IGLTexture(GL_TEXTURE_2D)
++load(filename: string): bool
++operator[](uint32_t): uint8_t&
++operator[](uint32_t) const: uint8_t& const
++width(): uint32_t
++height(): uint32_t
+-gpu_format = GL_RGBA
+-cpu_format = GL_RGBA
+}
+
+class GLTextureDepth2D {
+-gpu_format = GL_DEPTH_COMPONENT
+-cpu_format = GL_DEPTH_COMPONENT
+}
+
+class GLTexture3D {
++IGLTexture(GL_TEXTURE_CUBE_MAP)
+}
+
+class GLTexture1D {
++IGLTexture(GL_TEXTURE_1D)
+}
+
+IGLTexture <|-- GLTexture1D
+IGLTexture <|-- GLTexture2D
+GLTexture2D <|-- GLTextureDepth2D
+IGLTexture <|-- GLTexture3D
+
+class GLShaders<GLuint> {
++GLShaders(target: GLenum)
++load(std::string)
+-{abstract} create(): bool
+-{abstract} setup(): bool
+-{abstract} activate()
+-{abstract} update(): bool
+-{abstract} deactivate()
+-{abstract} release(): bool
+}
+
+class GLVertexShader {
++GLShaders(GL_VERTEX_SHADER)
+}
+
+class GLFragmentShader {
++GLShaders(GL_FRAGMENT_SHADER)
+}
+
+class GLGeometryShader {
++GLShaders(GL_GEOMETRY_SHADER)
+}
+
+GLShaders <|-- GLVertexShader
+GLShaders <|-- GLFragmentShader
+GLShaders <|-- GLGeometryShader
+
+class GLProgram<GLenum> {
++attach(GLShaders)
++operator(std::string const&): GLLocation&
+-list: std::map<std::string, GLLocation>
+-{abstract} create(): bool
+-{abstract} setup(): bool
+-{abstract} activate()
+-{abstract} update(): bool
+-{abstract} deactivate()
+-{abstract} release(): bool
+-GLShaders shaders
+}
+
+class GLVAO<GLenum> {
+-{abstract} create(): bool
+-{abstract} setup(): bool
+-{abstract} activate()
+-{abstract} update(): bool
+-{abstract} deactivate()
+-{abstract} release(): bool
+}
+
+class GLRenderBuffer<GLenum> {
++ GLRenderBuffer(target : GLenum)
+-{abstract} create(): bool
+-{abstract} setup(): bool
+-{abstract} activate()
+-{abstract} update(): bool
+-{abstract} deactivate()
+-{abstract} release(): bool
+}
+
+class GLColorBuffer {
+-format=GL_RGBA
+}
+
+class GLDepthBuffer {
+-format=GL_DEPTH_COMPONENT
+}
+
+class GLStencilBuffer {
+-format=GL_STENCIL_INDEX8
+}
+
+class GLVBO<C, T=GLenum> {
+-container: PendingContainer<C>
+-{abstract} create(): bool
+-{abstract} setup(): bool
+-{abstract} activate()
+-{abstract} update(): bool
+-{abstract} deactivate()
+-{abstract} release(): bool
+}
+
+class GLLocation<GLint> {
++GLLocation(name: string, location: GLint, dim: GLint)
++location(): GLint
++dim(): GLint
+}
+
+class GLUniform<T> {
++operator=(val: T&)
+-{abstract} create(): bool
+-{abstract} setup(): bool
+-{abstract} activate()
+-{abstract} update(): bool
+-{abstract} deactivate()
+-{abstract} release(): bool
+-data: T
+}
+
+class GLSampler<T> {
++operator=(val: T&)
+-{abstract} activate()
+-update(): bool
+-data: T
+}
+
+class GLSampler1D<T=GLTexture1D> {
+-data: GLTexture1D
+}
+
+class GLSampler2D<T=GLTexture2D> {
+-data: GLTexture2D
+}
+
+class GLSampler3D<T=GLTexture3D> {
+-data: GLTexture3D
+}
+
+class GLAttribute {
+-{abstract} create(): bool
+-{abstract} setup(): bool
+-{abstract} activate()
+-{abstract} update(): bool
+-{abstract} deactivate()
+-{abstract} release(): bool
+}
+
+GLLocation <|-- GLAttribute
+GLLocation <|-- GLUniform
+GLUniform <|-- GLSampler
+GLSampler  <|-- GLSampler1D
+GLSampler  <|-- GLSampler2D
+GLSampler  <|-- GLSampler3D
+
+PendingData <|-- IGLTexture
+IGLObject <|-- IGLTexture
+IGLObject <|-- GLVBO
+PendingContainer <|-- GLVBO
+IGLObject <|-- GLVAO
+IGLObject <|-- GLShaders
+IGLObject <|-- GLProgram
+GLLocation -|> IGLObject
+
+IGLObject <|-- GLRenderBuffer
+GLRenderBuffer <|-- GLColorBuffer
+GLRenderBuffer <|-- GLDepthBuffer
+GLRenderBuffer <|-- GLStencilBuffer
+
+@enduml

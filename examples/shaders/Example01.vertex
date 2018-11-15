@@ -1,0 +1,21 @@
+#version 150
+
+uniform float  u_scale;
+uniform mat4   u_model;         // Model matrix
+uniform mat4   u_view;          // View matrix
+uniform mat4   u_projection;    // Projection matrix
+uniform vec4   u_color;         // Global color
+attribute vec3 a_position;      // Vertex position
+attribute vec2 a_texcoord;      // Vertex texture coordinates
+varying vec2   v_texcoord;      // Interpolated fragment texture coordinates (out)
+varying vec4   v_color;         // Interpolated fragment color (out)
+
+void main()
+{
+    // Assign varying variables
+    v_texcoord  = a_texcoord;
+    v_color = u_color;
+
+    // Final position
+    gl_Position = u_projection * u_view * u_model * vec4(u_scale * a_position, 1.0);
+}

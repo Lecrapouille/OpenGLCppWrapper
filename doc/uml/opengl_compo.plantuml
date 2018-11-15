@@ -1,0 +1,44 @@
+@startuml
+
+' OpenGL class composition
+
+class GLVertexShader
+class GLFragmentShader
+class GLGeometryShader
+class GLProgram {
+-binded: VAO*
+-attribs: map<string, GLAttribute*>
+-uniforms: map<string, GLUniform*>
++attach(GLShaders[])
++bind(VAO&)
++compile()
++draw() /* binded VAO */
+}
+class GLUniform
+class GLAttribute
+class GLVAO {
+-VBOs: map<string, GLVBO*>
+}
+class Client {
+-VAOs: map<string, GLVAO*>
+}
+class GLVBO
+
+GLVertexShader --> GLProgram : attach
+GLFragmentShader --> GLProgram : attach
+GLGeometryShader ..> GLProgram : attach
+
+GLProgram -> GLProgram : compile
+GLProgram --> GLAttribute: create
+GLProgram --> GLUniform :  create
+
+GLAttribute --> GLVBO: locate
+
+Client *-- "*" GLVAO: VAOs
+GLVAO *-- "*" GLVBO: VBOs
+Client -> GLProgram: bind VAO
+Client -> GLProgram: draw
+GLProgram --> GLVAO: populate VBOs
+
+
+@enduml

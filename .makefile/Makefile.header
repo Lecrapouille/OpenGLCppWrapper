@@ -1,0 +1,122 @@
+# -*- mode: makefile -*-
+##=====================================================================
+## OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
+## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+##
+## This file is part of OpenGLCppWrapper.
+##
+## OpenGLCppWrapper is free software: you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
+##=====================================================================
+
+###################################################
+# Define colors
+CLR_DEFAULT = $(shell echo '\033[00m')
+CLR_RED     = $(shell echo '\033[31m')
+CLR_GREEN   = $(shell echo '\033[32m')
+CLR_YELLOW  = $(shell echo '\033[33m')
+CLR_BLUE    = $(shell echo '\033[34m')
+CLR_PURPLE  = $(shell echo '\033[35m')
+CLR_CYAN    = $(shell echo '\033[36m')
+
+###################################################
+# Display predefine colorful messages
+print-simple = \
+	@echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT)"
+print-from = \
+	@echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT) <= $(CLR_YELLOW)$3$(CLR_DEFAULT)"
+print-to = \
+	@echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT) => $(CLR_YELLOW)$3$(CLR_DEFAULT) $4"
+
+###################################################
+# Detect the operating system: Unix, OSX and Windows
+#
+ifeq ($(OS),Windows_NT)
+ARCHI := Windows
+else
+ARCHI := $(shell uname -s)
+endif
+
+###################################################
+# Default path storing compilation files (*.o ...)
+ifeq ($(BUILD),)
+BUILD = build
+endif
+
+###################################################
+#
+VERSION := $(shell cat VERSION)
+TARGET_VERSION := $(shell cat $(P)/VERSION)
+# For installing link symbolic of shared library
+TARGET_MAJOR_VERSION := $(shell cat $(P)/VERSION | cut -d"." -f1)
+
+###################################################
+# Where to install project runnable and project data
+ifeq ($(PREFIX),)
+PREFIX = /usr
+endif
+
+BINDIR = $(DESTDIR)$(PREFIX)/bin
+DATADIR = $(DESTDIR)$(PREFIX)/share
+LIBDIR = $(DESTDIR)$(PREFIX)/lib
+DOCDIR = $(DATADIR)/doc
+PROJECT_EXE = $(BINDIR)/$(TARGET)-$(TARGET_VERSION)
+PROJECT_DATA_ROOT = $(DATADIR)/$(PROJECT)/$(TARGET_VERSION)
+PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
+PROJECT_DOC_PATH = $(PROJECT_DATA_ROOT)/doc
+
+###################################################
+# Select your favorite c++ compiler.
+ifeq ($(PREFERED_CXX),)
+#PREFERED_CXX=g++-6
+#PREFERED_CXX=g++-5
+#PREFERED_CXX=clang++-4.0
+endif
+
+# Leave it empty for Travis-CI
+ifneq ($(CI),true)
+ifneq ($(PREFERED_CXX),)
+CXX = $(PREFERED_CXX)
+endif
+endif
+
+###################################################
+# Inform Makefile where to find header files
+INCLUDES = -I$(BUILD) -I$(P)/external/backward-cpp \
+-I$(P)/external	-I$(P)/external/SOIL -I$(P)/src/private \
+-I$(P)/src
+
+###################################################
+# Inform Makefile where to find *.cpp and *.o files
+VPATH=\
+$(BUILD):\
+$(P)/external/backward-cpp:\
+$(P)/external/SOIL:\
+$(P)/src/private: \
+$(P)/src
+
+###################################################
+# Common defines
+DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\" -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+
+###################################################
+# Path where to store the generated coverage docs
+DOC = $(P)/doc/coverage
+# Path where to store lcov rapport
+RAPPORT = $(BUILD)/rapport.info
+
+###################################################
+# Store files dependencies in *.d files.  When a file
+# is modified compile others which depend on it.
+DEPFLAGS = -MT $@ -MMD -MP -MF $(BUILD)/$*.Td
+POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d

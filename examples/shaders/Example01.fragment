@@ -1,0 +1,14 @@
+#version 150
+
+uniform sampler2D u_texture;  // Texture
+varying vec2      v_texcoord; // Interpolated fragment texture coordinates (in)
+varying vec4      v_color;    // Interpolated fragment color (in)
+
+void main()
+{
+    // Get texture color
+    vec4 t_color = texture2D(u_texture, v_texcoord) * v_color;
+
+    // Final color
+    gl_FragColor = t_color;
+}
