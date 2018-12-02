@@ -79,14 +79,15 @@ public:
   //FIXME: ajouter nombre de vertex pour reserver taille
   //FIXME: gerer duplicata de noms ?
   template<typename T>
-  bool createVBO(const char *name)
+  bool createVBO(const char *name,
+                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
   {
     if (unlikely(hasVBO(name)))
       {
         LOGE("Try to create a VBO with name '%s' already used", name);
         return false;
       }
-    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name);
+    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, usage);
     LOGD("allocate new VBO '%s' %p", name, m_vbos[name].get());
     return true;
   }

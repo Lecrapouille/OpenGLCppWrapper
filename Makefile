@@ -57,8 +57,8 @@ ARFLAGS  = cr
 
 ###################################################
 #
-INCLUDES += -I$(P)/src -I$(P)/external -I$(P)/external/imgui
-VPATH += $(P)/src:$(P)/external:$(P)/external/imgui
+INCLUDES += -I$(P)/src -I$(P)/src/private -I$(P)/external -I$(P)/external/imgui
+VPATH += $(P)/src:$(P)/src/private:$(P)/external:$(P)/external/imgui
 
 ###################################################
 # Project defines

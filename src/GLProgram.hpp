@@ -30,7 +30,6 @@
 //! \brief This file contains the class managing OpenGL shaders :
 //! read, compile, load into the GPU.
 
-#  include "NonCppStd.hpp"
 #  include "GLShaders.hpp"
 #  include "GLLocation.tpp"
 #  include <map>
@@ -280,13 +279,13 @@ public:
   template<class T>
   inline PendingContainer<T>& attribute(const char *name)
   {
-    return getVBO<T>(name).m_container;
+    return getVBO<T>(name);
   }
 
   template<class T>
   inline const PendingContainer<T>& attribute(const char *name) const
   {
-    return getVBO<T>(name).m_container;
+    return getVBO<T>(name);
   }
 
   //------------------------------------------------------------------
@@ -363,7 +362,7 @@ public:
   //------------------------------------------------------------------
   //! \brief Render primitives
   //------------------------------------------------------------------
-  void draw(GLenum mode, GLint first, GLsizei count) // FIXME pass VAO en param au lieu de bind()
+  void draw(DrawPrimitive const mode, GLint first, GLsizei count) // FIXME pass VAO en param au lieu de bind()
   {
     LOGD("Prog '%s' draw {", name().c_str());
     throw_if_not_compiled();
@@ -374,7 +373,7 @@ public:
     // il suffisait entre 16 et 35
     begin();
     //m_vao->begin();
-    glCheck(glDrawArrays(mode, first, count));
+    glCheck(glDrawArrays(static_cast<GLenum>(mode), first, count));
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     //m_vao->end();
     end();
@@ -384,20 +383,21 @@ public:
   //------------------------------------------------------------------
   //! \brief Render all primitives
   //------------------------------------------------------------------
-  inline void draw(GLenum /*mode*/)
+  inline void draw(DrawPrimitive const /*mode*/)
   {
     //throw_if_not_compiled();
     //throw_if_inconsitency_attrib_sizes();
-    //draw(mode, 0, m_attributes.begin()->second->size());
+    //draw(static_cast<GLenum>(mode), 0, m_attributes.begin()->second->size());
   }
 
   //------------------------------------------------------------------
   //! \brief Render primitives from their indices
   //------------------------------------------------------------------
   template<class T>
-  void draw(GLenum mode, GLIndexBuffer<T> const& index) // FIXME: wrapper mode pour eviter des modes non desires
+  void draw(DrawPrimitive const mode, GLIndexBuffer<T>& index)
   {
-    LOGD("Prog::drawIndex");
+    LOGD("Prog::drawIndex %d elements", index.size());
+
     throw_if_not_compiled();
     throw_if_not_vao_binded();
     throw_if_inconsitency_attrib_sizes();
@@ -405,7 +405,7 @@ public:
     //m_vao->begin();
     begin();
     index.begin();
-    glCheck(glDrawElements(mode, index.size(), index.type(), 0));
+    glCheck(glDrawElements(static_cast<GLenum>(mode), index.size(), index.type(), 0));
     index.end();
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
@@ -422,6 +422,16 @@ public:
     }*/
 
   //------------------------------------------------------------------
+  //! \brief Choose if the usage of coming VBO created will be
+  //! GL_DYNAMIC_DRAW or GL_STATIC_DRAW or GL_STREAM_DRAW. If this
+  //! method is not called default usage will be GL_DYNAMIC_DRAW
+  //------------------------------------------------------------------
+  void setBufferUsage(BufferUsage const usage)
+  {
+    m_usage = usage;
+  }
+
+  //------------------------------------------------------------------
   //! \brief Create the VAO which will contain the list of VBOs. The
   //! list of VBOs is created in accordance of the list of attributes.
   //------------------------------------------------------------------
@@ -436,16 +446,16 @@ public:
         switch (it.second->dim())
           {
           case 1:
-            vao.createVBO<float>(name);
+            vao.createVBO<float>(name, m_usage);
             break;
           case 2:
-            vao.createVBO<Vector2f>(name);
+            vao.createVBO<Vector2f>(name, m_usage);
             break;
           case 3:
-            vao.createVBO<Vector3f>(name);
+            vao.createVBO<Vector3f>(name, m_usage);
             break;
           case 4:
-            vao.createVBO<Vector4f>(name);
+            vao.createVBO<Vector4f>(name, m_usage);
             break;
           }
       }
@@ -733,15 +743,15 @@ private:
 
     if (unlikely(nullptr == name))
       {
-        throw std::invalid_argument("nullptr passed to getUniform");
+        throw OpenGLException("nullptr passed to getUniform");
       }
 
     if (unlikely(false == hasUniform(name)))
       {
         // TODO: create the variable: call addNewUniform
         // TODO: http://www.cplusplus.com/forum/general/21246/#msg112085
-        throw std::out_of_range("GLUniform '" + std::string(name) +
-                                "' does not exist");
+        throw OpenGLException("GLUniform '" + std::string(name) +
+                              "' does not exist");
       }
 
     auto ptr = m_uniforms[name].get();
@@ -799,7 +809,8 @@ private:
         glCheck(glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &length));
         std::vector<char> log(static_cast<size_t>(length));
         glCheck(glGetProgramInfoLog(obj, length, &length, &log[0U]));
-        m_error_msg += '\n' + &log[0U];
+        m_error_msg += '\n';
+        m_error_msg += &log[0U];
         LOGES("%s", m_error_msg.c_str());
       }
     else
@@ -818,6 +829,7 @@ private:
   std::string            m_error_msg;
   uint32_t               m_textures_count = 0u;
   bool                   m_compiled = false;
+  BufferUsage            m_usage = BufferUsage::DYNAMIC_DRAW;
 };
 
 #endif /* GLPROGRAM_HPP_ */

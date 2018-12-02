@@ -31,8 +31,7 @@
 //#  include "ClassCounter.tpp"
 #  include "Logger.hpp"
 #  include "NonCppStd.hpp"
-#  include <assert.h>
-#  include <cstdint>
+#  include "GLEnum.hpp"
 
 // **************************************************************
 //! \class IGLObject IGLObject.hpp
@@ -191,6 +190,9 @@ public:
   //-------------------------------------------------------------
   void destroy()
   {
+    if (false == opengl::hasCreatedContext())
+      return ;
+
     if (isValid())
       {
         deactivate();

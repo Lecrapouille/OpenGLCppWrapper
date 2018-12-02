@@ -6,109 +6,44 @@
 //! part of the scene graph.
 //------------------------------------------------------------------
 
-CubicRobot::CubicRobot(const char *name, GLVAO& cube)
+CubicRobot::CubicRobot(VAOPtr cube, const char *name)
   : SceneNode(nullptr, name)
 {
   LOGI("Cstr CubicRobot");
 
   // Body
-  m_body = new SceneNode(cube, "Body");
+  m_body = attach(cube, "Body");
   m_body->localScale(Vector3f(10.0f, 15.0f, 5.0f));
   m_body->position(Vector3f(0.0f, 35.0f, 0.0f));
-  add(*m_body);
 
   // Head
-  m_head = new SceneNode(cube, "Head");
+  m_head = m_body->attach(cube, "Head");
   m_head->localScale(Vector3f(5.0f));
   m_head->position(Vector3f(0.0f, 30.0f, 0.0f));
-  m_body->add(*m_head);
 
   // Left arm
-  m_leftArm = new SceneNode(cube, "Left Arm");
+  m_leftArm = m_body->attach(cube, "Left Arm");
   m_leftArm->localScale(Vector3f(3.0f, -18.0f, 3.0f));
   m_leftArm->position(Vector3f(-12.0f, 30.0f, -1.0f));
-  m_body->add(*m_leftArm);
 
   // Right arm
-  m_rightArm = new SceneNode(cube, "Right Arm");
+  m_rightArm = m_body->attach(cube, "Right Arm");
   m_rightArm->localScale(Vector3f(3.0f, -18.0f, 3.0f));
   m_rightArm->position(Vector3f(12.0f, 30.0f, -1.0f));
-  m_body->add(*m_rightArm);
 
   // Left leg
-  m_leftLeg = new SceneNode(cube, "Left Leg");
+  m_leftLeg = m_body->attach(cube, "Left Leg");
   m_leftLeg->localScale(Vector3f(3.0f, -17.5f, 3.0f));
   m_leftLeg->position(Vector3f(-8.0f, 0.0f, 0.0f));
-  m_body->add(*m_leftLeg);
 
   // Right leg
-  m_rightLeg = new SceneNode(cube, "Right Leg");
+  m_rightLeg = m_body->attach(cube, "Right Leg");
   m_rightLeg->localScale(Vector3f(3.0f, -17.5f, 3.0f));
   m_rightLeg->position(Vector3f(8.0f, 0.0f, 0.0f));
-  m_body->add(*m_rightLeg);
 }
 
 //------------------------------------------------------------------
-//! \brief Paint the GUI
-//------------------------------------------------------------------
-void GLImGUI::drawNode(SceneNode_t &node)
-{
-  if (ImGui::TreeNode(node.m_name.c_str()))
-    {
-      if (nullptr != node.mesh())
-        {
-          std::string name("Mesh '" + node.mesh()->name() + "'");
-          ImGui::Text(name.c_str());
-        }
-      else
-        {
-          ImGui::Text("No Mesh");
-        }
-
-      if (ImGui::TreeNode("Transf. Matrix"))
-        {
-          std::stringstream ss;
-          ss << node.worldTransform();
-          ImGui::Text(ss.str().c_str());
-          ImGui::TreePop();
-        }
-
-      if (ImGui::TreeNode("Child"))
-        {
-          std::vector<SceneNode_t*> const &children = node.children();
-          for (auto i: children)
-            {
-              drawNode(*i);
-            }
-          ImGui::TreePop();
-        }
-      ImGui::TreePop();
-    }
-}
-
-//------------------------------------------------------------------
-//! \brief Paint the GUI
-//------------------------------------------------------------------
-bool GLImGUI::render()
-{
-  ImGui::Begin("Hello, world!");
-
-  if (ImGui::TreeNode("Scene graph"))
-    {
-      if (nullptr != m_root)
-        {
-          drawNode(*m_root);
-        }
-      ImGui::TreePop();
-    }
-  ImGui::Separator();
-
-  ImGui::End();
-  return true;
-}
-
-//------------------------------------------------------------------
-//! \brief Move part of the body of robots
+//! \brief Move element of the robot body
 //------------------------------------------------------------------
 void CubicRobot::update(float const dt)
 {
@@ -126,12 +61,73 @@ void CubicRobot::update(float const dt)
 }
 
 //------------------------------------------------------------------
+//! \brief Paint the GUI
+//------------------------------------------------------------------
+void GLImGUI::observeNode(SceneNode const& node) const
+{
+  std::string nodename("Node '" + node.id() + "'");
+  if (ImGui::TreeNode(nodename.c_str()))
+    {
+      VAOPtr const& mesh = node.renderable();
+      if (nullptr != mesh)
+        {
+          std::string name("Meshes '" + mesh->name() + "'");
+          ImGui::TextUnformatted(name.c_str());
+        }
+      else
+        {
+          ImGui::Text("Has no meshes");
+        }
+
+      ImGui::Text("Transf. Matrix:");
+      std::stringstream ss;
+      ss << node.worldTransform();
+      ImGui::TextUnformatted(ss.str().c_str());
+
+      if (ImGui::TreeNode("Child Nodes:"))
+        {
+          for (auto const& i: node.children())
+            {
+              observeNode(*i);
+            }
+          ImGui::TreePop();
+        }
+      ImGui::TreePop();
+    }
+}
+
+//------------------------------------------------------------------
+//! \brief Paint the GUI
+//------------------------------------------------------------------
+bool GLImGUI::render()
+{
+  ImGui::Begin("Hello, world!");
+
+  if (ImGui::TreeNode("Scene graph"))
+    {
+      if (nullptr != m_graph)
+        {
+          auto const& root = m_graph->root();
+          if (nullptr != root)
+            {
+              observeNode(*root);
+            }
+        }
+      ImGui::TreePop();
+    }
+  ImGui::Separator();
+
+  ImGui::End();
+  return true;
+}
+
+//------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void GLExample02::onWindowSizeChanged(const float width, const float height)
+void GLExample02::onWindowSizeChanged(float const width, float const height)
 {
   // Note: height is never zero !
-  float ratio = width / height;
+  const float ratio = width / height;
 
   m_prog.uniform<Matrix44f>("u_projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
@@ -141,8 +137,7 @@ void GLExample02::onWindowSizeChanged(const float width, const float height)
 //! \brief Create three robots and add them in the graph scene.
 //------------------------------------------------------------------
 GLExample02::GLExample02()
-  : m_cube("VAO_cube"),
-    m_prog("GLProgram")
+  : m_prog("GLProgram")
 {
 }
 
@@ -150,14 +145,15 @@ GLExample02::~GLExample02()
 {
   LOGD("---------------- quit -----------------");
   std::cout << "Bye" << std::endl;
-  delete m_root;
 }
 
 void GLExample02::CreateCube()
 {
+  m_cube = std::make_shared<GLVAO>("VAO_cube");
+
   // Mandatory: bind VAO to program to get
   // it populated of VBOs.
-  m_prog.bind(m_cube);
+  m_prog.bind(*m_cube);
 
   // Fill the VBO for vertices
   m_prog.attribute<Vector3f>("a_position") =
@@ -305,8 +301,8 @@ bool GLExample02::setup()
     }
 
   // Create the texture
-  m_prog.uniform<GLTexture2D>("u_texture").interpolation(GL_LINEAR);
-  m_prog.uniform<GLTexture2D>("u_texture").wrapping(GL_CLAMP_TO_EDGE);
+  m_prog.uniform<GLTexture2D>("u_texture").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.uniform<GLTexture2D>("u_texture").wrapping(TextureWrap::CLAMP_TO_EDGE);
   if (false == m_prog.uniform<GLTexture2D>("u_texture").load("wooden-crate.jpg"))
     return false;
 
@@ -321,62 +317,49 @@ bool GLExample02::setup()
   m_prog.uniform<float>("u_scale") = 1.0f;
   m_prog.uniform<Vector4f>("u_color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
 
+  // Attach 3 robots in the scene graph. Each robot is a scene node.
+  LOGD("Create graph scene");
+
   // Init VAO and its VBOs.
   CreateCube();
 
-  // Create 3 nodes of the scene graph: 3 robots
-  LOGD("Create graph scene");
-  m_root = new SceneNode_t("Root");
-  m_robot1 = new CubicRobot("CubicRobot1", m_cube);
-  m_robot2 = new CubicRobot("CubicRobot2", m_cube);
-  m_robot3 = new CubicRobot("CubicRobot3", m_cube);
+  // Create 3 robots
+  SceneNodePtr root = std::make_shared<SceneNode>(nullptr, "root");
+  SceneNodePtr robot1 = std::make_shared<CubicRobot>(m_cube, "CubicRobot1");
+  SceneNodePtr robot2 = std::make_shared<CubicRobot>(m_cube, "CubicRobot2");
+  SceneNodePtr robot3 = std::make_shared<CubicRobot>(m_cube, "CubicRobot3");
 
   // Link nodes of the scene graph
-  m_root->add(*m_robot1);
-  m_root->add(*m_robot2);
-  m_root->add(*m_robot3);
+  m_scenegraph.attach(root);
+  root->attach(robot1);
+  root->attach(robot2);
+  root->attach(robot3);
 
   // Place robots on the scene
-  m_robot2->position(Vector3f(30.0f, 0.0f, 0.0f));
-  m_robot3->position(Vector3f(60.0f, 0.0f, 0.0f));
+  robot2->position(Vector3f(30.0f, 0.0f, 0.0f));
+  robot3->position(Vector3f(60.0f, 0.0f, 0.0f));
 
   // Show the scene graph in the GUI. Note: this method is not safe
   // against tree reorganisation. This is just for the example !
-  m_gui.setNode(*m_root);
+  m_gui.observeGraph(m_scenegraph);
+
+  // This is an example for searching a node.
+  // Be careful: this is not a robust method: this function does not
+  // manage nodes with duplicated identifier: it will halt on the
+  // first id.
+  std::string key("CubicRobot2");
+  SceneNodePtr node = m_scenegraph.findNode(key);
+  if (nullptr == node)
+    {
+      std::cout << "I did not found '" << key << "'" << std::endl;
+    }
+  else
+    {
+      std::cout << "I found node " << node << " " << node->id() << std::endl;
+    }
+
   return true;
 }
-
-//------------------------------------------------------------------
-//! Draw recursively a node from a scene graph
-//------------------------------------------------------------------
-void GLExample02::drawNode(SceneNode_t &node)
-{
-  LOGI("Renderer:drawNode '%s'", node.m_name.c_str());
-
-  // Get the 3D model from the node
-  GLVAO* vao = node.mesh();
-
-  // 3D models are optional, so do not forget to check against nullptr
-  if (nullptr != vao)
-    {
-      // Apply the matrix making 3D objects moving along the scene
-      Matrix44f transform = matrix::scale(node.worldTransform(), node.localScale());
-      m_prog.uniform<Matrix44f>("u_model") = transform;
-
-      // Draw the 3D model
-      m_prog.bind(*vao);
-      m_prog.draw(GL_TRIANGLES, 0, 36);
-    }
-
-  // FIXME: This code should not be here but in SceneGraph algorithm
-  // TODO: make this code not recursive
-  // Recursive iteration of the graph for drawing other node
-  std::vector<SceneNode_t*> const &children = node.children();
-  for (auto i: children)
-    {
-      drawNode(*i);
-    }
- }
 
 //------------------------------------------------------------------
 //! Draw scene graph (made of robots)
@@ -385,22 +368,31 @@ bool GLExample02::draw()
 {
   LOGI("GLExample02::draw()");
 
-  if (nullptr == m_root)
-    return false;
-
   // clear everything
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
   // Move robots
-  m_root->update(dt());
+  m_scenegraph.update(dt());
 
   // Draw robots
-  drawNode(*m_root);
+  m_scenegraph.draw(*this);
 
   // Paint the GUI
   if (false == m_gui.draw())
     return false;
 
   return true;
+}
+
+//------------------------------------------------------------------
+//! Draw recursively a node from a scene graph
+//------------------------------------------------------------------
+void GLExample02::drawNode(GLVAO& vao, Matrix44f const& transform)
+{
+  m_prog.uniform<Matrix44f>("u_model") = transform;
+
+  // Draw the 3D model
+  m_prog.bind(vao);
+  m_prog.draw(DrawPrimitive::TRIANGLES, 0, 36);
 }
