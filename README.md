@@ -1,8 +1,9 @@
 # OpenGLCppWrapper
 
 A C++11 OpenGL Core (3.3) wrapper in the aim to write OpenGL code
-within few lines. This API is largely inspired by the
-[GLumpy](https://github.com/glumpy/glumpy) python project.
+within few lines. This API is largely inspired by projects such as:
+* [GLumpy](https://github.com/glumpy/glumpy) python project.
+* [opengl4csharp](https://github.com/giawa/opengl4csharp) C# project.
 
 ## Why another C++ wrapper for OpenGL ?
 
