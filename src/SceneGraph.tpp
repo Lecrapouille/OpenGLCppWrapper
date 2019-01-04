@@ -37,7 +37,8 @@ class ISceneGraphRenderer
 public:
 
   virtual ~ISceneGraphRenderer() {}
-  virtual void drawNode(R& renderable, Matrix<T, D + 1u, D + 1u> const& transformation) = 0;
+  // FIXME should ideally be a const method with a const renderable
+  virtual void drawSceneNode(R& renderable, Matrix<T, D + 1u, D + 1u> const& transformation) = 0;
 };
 
 // *************************************************************************************************
@@ -224,7 +225,7 @@ public:
         {
           Matrix<T, D + 1u, D + 1u> transform =
             matrix::scale(m_world_transform, m_local_scaling);
-          renderer.drawNode(*m_renderable, transform);
+          renderer.drawSceneNode(*m_renderable, transform);
         }
 
       // Recursive iteration of the graph for drawing other node
@@ -251,6 +252,14 @@ public:
     inline Vector<T, D> const &localScale() const
     {
       return m_local_scaling;
+    }
+
+    //-----------------------------------------------------------------
+    //! \brief Return the number of children
+    //-----------------------------------------------------------------
+    inline size_t nbChildren() const
+    {
+      return m_children.size();
     }
 
     //-----------------------------------------------------------------
@@ -298,13 +307,13 @@ public:
   ~SceneGraph_t()
   {
     std::cout << "Destroy SceneGraph" << std::endl;
-    m_root = nullptr;
+    reset();
   }
 
   //-----------------------------------------------------------------
   //! \brief
   //-----------------------------------------------------------------
-  void draw(ISceneGraphRenderer<R, T, D>& renderer) // const
+  void drawnBy(ISceneGraphRenderer<R, T, D>& renderer) // const
   {
     if (nullptr != m_root)
       m_root->draw(renderer);
@@ -335,7 +344,7 @@ public:
   //-----------------------------------------------------------------
   ObjPtr findRenderable(I const& id)
   {
-    ObjPtr o = find(id, m_root);
+    NodePtr o = findNode(id, m_root);
     if (nullptr != o)
       return o->renderable();
     return nullptr;
@@ -395,6 +404,18 @@ public:
   {
     return m_root;
   }
+
+  //-----------------------------------------------------------------
+  //! \brief Delete all Scene graph nodes.
+  //-----------------------------------------------------------------
+  inline void reset()
+  {
+    m_root = nullptr;
+  }
+
+  // TODO: void debug()
+  // https://stackoverflow.com/questions/36311991/c-sharp-display-a-binary-search-tree-in-console/36313190
+  //
 
 private:
 

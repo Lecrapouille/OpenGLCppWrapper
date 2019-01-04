@@ -189,6 +189,7 @@ private:
 
   virtual void deactivate() override
   {
+    LOGD("Uniform '%s' deactivate", name().c_str());
   }
 
   virtual bool setup() override

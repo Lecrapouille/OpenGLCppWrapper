@@ -120,7 +120,7 @@ private:
   virtual bool setup() override;
   virtual bool draw() override;
   void CreateCube();
-  virtual void drawNode(GLVAO& vao, Matrix44f const& transformation) override;
+  virtual void drawSceneNode(GLVAO& vao, Matrix44f const& transformation) override;
 
 private:
 

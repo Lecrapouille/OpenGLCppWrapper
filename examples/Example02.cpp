@@ -84,7 +84,9 @@ void GLImGUI::observeNode(SceneNode const& node) const
       ss << node.worldTransform();
       ImGui::TextUnformatted(ss.str().c_str());
 
-      if (ImGui::TreeNode("Child Nodes:"))
+      ss.str("");
+      ss << "Has child " << node.nbChildren() << " Nodes:";
+      if (ImGui::TreeNode(ss.str().c_str()))
         {
           for (auto const& i: node.children())
             {
@@ -362,7 +364,7 @@ bool GLExample02::setup()
 }
 
 //------------------------------------------------------------------
-//! Draw scene graph (made of robots)
+//! Draw the scene graph (made of robots)
 //------------------------------------------------------------------
 bool GLExample02::draw()
 {
@@ -372,11 +374,12 @@ bool GLExample02::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  // Move robots
+  // Traverse the scene graph for moving robots
   m_scenegraph.update(dt());
 
-  // Draw robots
-  m_scenegraph.draw(*this);
+  // Traverse the scene graph for drawing robots.
+  // drawScene() will be called for each node.
+  m_scenegraph.drawnBy(*this);
 
   // Paint the GUI
   if (false == m_gui.draw())
@@ -386,13 +389,12 @@ bool GLExample02::draw()
 }
 
 //------------------------------------------------------------------
-//! Draw recursively a node from a scene graph
+//! Draw the current Scene node (= draw a part of robots)
 //------------------------------------------------------------------
-void GLExample02::drawNode(GLVAO& vao, Matrix44f const& transform)
+void GLExample02::drawSceneNode(GLVAO& vao, Matrix44f const& transform)
 {
   m_prog.uniform<Matrix44f>("u_model") = transform;
 
   // Draw the 3D model
-  m_prog.bind(vao);
-  m_prog.draw(DrawPrimitive::TRIANGLES, 0, 36);
+  m_prog.draw(vao, DrawPrimitive::TRIANGLES, 0, 36); // FIXME: use implicit vertices count
 }

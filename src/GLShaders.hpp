@@ -169,7 +169,7 @@ private:
   //------------------------------------------------------------------
   virtual void release() override
   {
-    LOGD("Shader::release");
+    LOGD("Shader '%s' release", name().c_str());
     glCheck(glDeleteShader(m_handle));
   }
 
