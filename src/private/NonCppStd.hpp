@@ -44,4 +44,17 @@ namespace std
 #    define unlikely(x)     __builtin_expect(!!(x),0)
 # endif
 
+//------------------------------------------------------------------
+//! \brief give the file name with its extension from a given path
+//------------------------------------------------------------------
+inline static std::string file_name(std::string const& path)
+{
+  std::string::size_type pos = path.find_last_of("\\/");
+  if (pos != std::string::npos)
+    return path.substr(pos + 1, std::string::npos);
+  return path;
+}
+
+#  include "Verbose.h"
+
 #endif

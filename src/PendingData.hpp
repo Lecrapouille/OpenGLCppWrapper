@@ -21,7 +21,6 @@
 #ifndef PENDINGDATA_HPP_
 #  define PENDINGDATA_HPP_
 
-#  include "Logger.hpp"
 #  include "NonCppStd.hpp"
 
 // **************************************************************

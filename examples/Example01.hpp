@@ -23,6 +23,8 @@
 
 #  include "OpenGL.hpp"
 #  include "Movable.tpp"
+#  include "Maths.hpp"
+#  include <iostream>
 
 class GLExample01: public IGLWindow
 {

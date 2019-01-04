@@ -43,8 +43,7 @@ OBJ += backward.o
 else
 OBJ  =
 endif
-OBJ += Exception.o PendingData.o Maths.o
-OBJ += File.o ILogger.o Logger.o
+OBJ += Exception.o PendingData.o
 OBJ += GLException.o OpenGL.o GLWindow.o
 
 OBJ += imgui_draw.o imgui_widgets.o imgui.o imgui_impl_glfw.o imgui_impl_opengl3.o
@@ -62,7 +61,7 @@ VPATH += $(P)/src:$(P)/src/private:$(P)/external:$(P)/external/imgui
 
 ###################################################
 # Project defines
-DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
+DEFINES += -DCHECK_OPENGL -DERROR -UDEBUG
 DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 
 ###################################################

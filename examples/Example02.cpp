@@ -1,4 +1,5 @@
 #include "Example02.hpp"
+#include <sstream>
 
 //------------------------------------------------------------------
 //! \file Display a scere graphe made of 3 moving robots. Each robots
@@ -9,7 +10,7 @@
 CubicRobot::CubicRobot(VAOPtr cube, const char *name)
   : SceneNode(nullptr, name)
 {
-  LOGI("Cstr CubicRobot");
+  DEBUG("Cstr CubicRobot");
 
   // Body
   m_body = attach(cube, "Body");
@@ -47,7 +48,7 @@ CubicRobot::CubicRobot(VAOPtr cube, const char *name)
 //------------------------------------------------------------------
 void CubicRobot::update(float const dt)
 {
-  LOGI("Robot::update");
+  DEBUG("Robot::update");
 
   const GLfloat degreesPerSecond = 1.0f;
   degreesRotated += dt * degreesPerSecond;
@@ -145,7 +146,7 @@ GLExample02::GLExample02()
 
 GLExample02::~GLExample02()
 {
-  LOGD("---------------- quit -----------------");
+  DEBUG("---------------- quit -----------------");
   std::cout << "Bye" << std::endl;
 }
 
@@ -278,7 +279,7 @@ void GLExample02::CreateCube()
 //------------------------------------------------------------------
 bool GLExample02::setup()
 {
-  LOGI("GLExample02::setup()");
+  DEBUG("GLExample02::setup()");
 
   // Init the context of the DearIMgui library
   if (false == m_gui.setup(*this))
@@ -320,7 +321,7 @@ bool GLExample02::setup()
   m_prog.uniform<Vector4f>("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
 
   // Attach 3 robots in the scene graph. Each robot is a scene node.
-  LOGD("Create graph scene");
+  DEBUG("Create graph scene");
 
   // Init VAO and its VBOs.
   CreateCube();
@@ -368,7 +369,7 @@ bool GLExample02::setup()
 //------------------------------------------------------------------
 bool GLExample02::draw()
 {
-  LOGI("GLExample02::draw()");
+  DEBUG("GLExample02::draw()");
 
   // clear everything
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));

@@ -26,7 +26,6 @@
 // New Castle University, Tutorial 6: Scene Graphs
 // https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/scenegraphs/Tutorial%206%20-%20Scene%20Graphs.pdf
 
-#  include "Logger.hpp"
 #  include "Movable.tpp"
 #  include <memory>
 #  include <vector>
@@ -109,7 +108,6 @@ public:
     //-----------------------------------------------------------------
     virtual ~Node()
     {
-      CPP_LOG(logger::Info) << "SceneGraph delete node '" << m_id << "'\n";
       m_children.clear();
     }
 
@@ -193,7 +191,6 @@ public:
     //-----------------------------------------------------------------
     virtual void update(float const dt)
     {
-      CPP_LOG(logger::Info) << "ScenGraph::updating '" << m_id << "'\n";
       if (nullptr != m_parent)
         {
           // This  node  has a parent
@@ -219,7 +216,6 @@ public:
     //-----------------------------------------------------------------
     virtual void draw(ISceneGraphRenderer<R, T, D>& renderer) //const
     {
-      CPP_LOG(logger::Info) << "ScenGraph::draw '" << m_id << "'\n";
       // Sheets are optional, so do not forget to check against nullptr
       if (nullptr != m_renderable)
         {
@@ -306,7 +302,6 @@ public:
   //-----------------------------------------------------------------
   ~SceneGraph_t()
   {
-    std::cout << "Destroy SceneGraph" << std::endl;
     reset();
   }
 
@@ -438,26 +433,22 @@ private:
     // This case is suppose to never happen
     if (nullptr == res)
       {
-        std::cout << "nullptr error" << std::endl;
+        ERROR("nullptr error");
         return nullptr;
       }
 
-    std::cout << "Compare " << res->m_id << " " << id << std::endl;
     if (res->m_id == id)
       {
-        std::cout << "Found " << res->m_id << std::endl;
         return res;
       }
 
     for (auto i: res->m_children)
       {
-        std::cout << "Finding child" << std::endl;
         NodePtr n = findNode(id, i);
         if (nullptr != n)
           return n;
       }
 
-    std::cout << "Finding nothing" << std::endl;
     return nullptr;
   }
 

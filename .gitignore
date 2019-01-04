@@ -35,6 +35,7 @@
 build
 tests/build
 doc/coverage
+doc/html
 examples/build
 examples/imgui.ini
 external/SOIL

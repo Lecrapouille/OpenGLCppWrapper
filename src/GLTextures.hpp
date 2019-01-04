@@ -140,7 +140,7 @@ class GLTexture2D: public IGLTexture
   {
     void operator()(unsigned char* buf)
     {
-      std::cout << "Texture deleter" << std::endl;
+      DEBUG("Texture deleter");
       if (buf != nullptr)
         SOIL_free_image_data(buf);
     }
@@ -179,7 +179,7 @@ public:
     int width, height;
     bool res;
 
-    LOGI("Loading texture '%s'", filename);
+    DEBUG("Loading texture '%s'", filename);
 
     // FIXME: SOIL_LOAD_RGBA should adapt from moptions.cpuPixelFormat
     TextBufPtr buf(SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGBA));
@@ -193,15 +193,15 @@ public:
         if (rename || name().empty())
           {
             name() = filename;
-            LOGI("Renaming texture '%s'", filename);
+            DEBUG("Renaming texture '%s'", filename);
           }
         PendingData::tagAsPending(0_z, m_width * m_height);
-        LOGI("Successfuly load picture file '%s'", filename);
+        DEBUG("Successfuly load picture file '%s'", filename);
         res = true;
       }
     else
       {
-        LOGES("Failed loading picture file '%s'", filename);
+        ERROR("Failed loading picture file '%s'", filename);
         res = false;
       }
 
@@ -238,12 +238,12 @@ private:
 
   virtual bool setup() override
   {
-    LOGD("Texture '%s' setup", name().c_str());
+    DEBUG("Texture '%s' setup", name().c_str());
 
     // Note: m_buffer can nullptr
     if (unlikely((0 == m_width) || (0 == m_height)))
       {
-        LOGE("Cannot setup texture with width or hieght set to 0");
+        ERROR("Cannot setup texture with width or hieght set to 0");
         return true;
       }
 
@@ -261,7 +261,7 @@ private:
 
   virtual bool update() override
   {
-    LOGD("Texture '%s' update", name().c_str());
+    DEBUG("Texture '%s' update", name().c_str());
     size_t pos_start;
     size_t pos_end;
     PendingData::getPendingData(pos_start, pos_end);

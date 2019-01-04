@@ -18,7 +18,6 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "Logger.hpp"
 #define protected public
 #define private public
 #include "OpenGL.hpp"

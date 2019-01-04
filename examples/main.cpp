@@ -1,6 +1,7 @@
 #include "Example01.hpp"
 #include "Example02.hpp"
 #include "Example03.hpp"
+#include <iostream>
 
 #define MAX_EXAMPLES 3
 

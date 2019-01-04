@@ -537,14 +537,14 @@ namespace matrix
 
     for (i = 0; i < rows - 1; ++i)
       {
-        double max = maths::abs(A[i][i]);
+        double max = std::abs(A[i][i]);
         size_t pivot = i;
 
         for (j = i + 1u; j < rows; ++j)
           {
-            if (maths::abs(A[j][i]) > max)
+            if (std::abs(A[j][i]) > max)
               {
-                max = maths::abs(A[j][i]);
+                max = std::abs(A[j][i]);
                 pivot = j;
               }
           }
@@ -555,7 +555,7 @@ namespace matrix
             matrix::swapRows(P, i, pivot);
           }
 
-        // WARNING:
+        // ERROR:
         // -- original code:  if (A[i][i] != 0.0)
         // -- new code which seems to give less good results: if (fabs(A[i][i]) > 0.00001)
         // we cannot use == with floats or double !!!!

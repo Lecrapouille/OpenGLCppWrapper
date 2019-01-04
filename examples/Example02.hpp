@@ -24,6 +24,8 @@
 #  include "GLImGUI.hpp"
 #  include "OpenGL.hpp"
 #  include "SceneGraph.tpp"
+#  include "Maths.hpp"
+#  include <iostream>
 
 //------------------------------------------------------------------
 //! \brief Define a 3D SceneGraph node (matrix 4x4 of float + VAO)
@@ -83,7 +85,7 @@ public:
   CubicRobot(VAOPtr cube, const char *name);
   ~CubicRobot()
   {
-    LOGD("---------------- destroy CubicRobot -----------------");
+    DEBUG("---------------- destroy CubicRobot -----------------");
   }
 
   virtual void update(float const dt) override;

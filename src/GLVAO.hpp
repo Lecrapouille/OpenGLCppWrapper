@@ -84,11 +84,11 @@ public:
   {
     if (unlikely(hasVBO(name)))
       {
-        LOGE("Try to create a VBO with name '%s' already used", name);
+        ERROR("Try to create a VBO with name '%s' already used", name);
         return false;
       }
     m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, usage);
-    LOGD("allocate new VBO '%s' %p", name, m_vbos[name].get());
+    DEBUG("allocate new VBO '%s' %p", name, m_vbos[name].get());
     return true;
   }
 
@@ -124,7 +124,7 @@ public:
                                     "' exists but has wrong template type");
       }
 
-    LOGD("VAO::GetVBO '%s' %p", name, vbo);
+    DEBUG("VAO::GetVBO '%s' %p", name, vbo);
     return *vbo;
   }
 
@@ -132,26 +132,26 @@ private:
 
   virtual bool create() override
   {
-    LOGD("VAO '%s' create", name().c_str());
+    DEBUG("VAO '%s' create", name().c_str());
     glCheck(glGenVertexArrays(1, &m_handle));
     return false;
   }
 
   virtual void release() override
   {
-    LOGD("VAO '%s' release", name().c_str());
+    DEBUG("VAO '%s' release", name().c_str());
     glCheck(glDeleteVertexArrays(1, &m_handle));
   }
 
   virtual void activate() override
   {
-    LOGD("VAO '%s' activate", name().c_str());
+    DEBUG("VAO '%s' activate", name().c_str());
     glCheck(glBindVertexArray(m_handle));
   }
 
   virtual void deactivate() override
   {
-    LOGD("VAO '%s' deactivate", name().c_str());
+    DEBUG("VAO '%s' deactivate", name().c_str());
     glCheck(glBindVertexArray(0U));
   }
 

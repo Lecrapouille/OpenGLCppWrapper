@@ -66,7 +66,7 @@ public:
 
   GLProgram& attachShader(GLShader& shader)
   {
-    LOGD("Prog::attachShader");
+    DEBUG("Prog::attachShader");
     m_shaders.push_back(shader);
     return *this;
   }
@@ -75,7 +75,7 @@ public:
                            GLFragmentShader& fragment_shader,
                            GLGeometryShader& geometry_shader)
   {
-    LOGD("Prog::attachShaders");
+    DEBUG("Prog::attachShaders");
     m_shaders.push_back(vertex_shader);
     m_shaders.push_back(fragment_shader);
     m_shaders.push_back(geometry_shader);
@@ -85,7 +85,7 @@ public:
   GLProgram& attachShaders(GLVertexShader&   vertex_shader,
                            GLFragmentShader& fragment_shader)
   {
-    LOGD("Prog::attachShaders");
+    DEBUG("Prog::attachShaders");
     m_shaders.push_back(vertex_shader);
     m_shaders.push_back(fragment_shader);
     return *this;
@@ -95,16 +95,16 @@ public:
   // TODO: compiler le prog s'il ne l'est pas
   inline bool bind(GLVAO& vao)
   {
-    LOGD("Gonna bind Prog '%s' with VAO named '%s'", name().c_str(), vao.name().c_str());
+    DEBUG("Gonna bind Prog '%s' with VAO named '%s'", name().c_str(), vao.name().c_str());
     if (!compiled())
       {
-        LOGE("Binding VAO on non compiled GLProgram");
+        ERROR("Binding VAO on non compiled GLProgram");
         return false;
       }
 
     if (vao.prog != m_handle)
       {
-        LOGD("Prog '%s' will init VAO named '%s'", name().c_str(), vao.name().c_str());
+        DEBUG("Prog '%s' will init VAO named '%s'", name().c_str(), vao.name().c_str());
         initVAO(vao);
       }
     m_vao = &vao;
@@ -367,7 +367,7 @@ public:
   //------------------------------------------------------------------
   void draw(DrawPrimitive const mode, GLint first, GLsizei count)
   {
-    LOGD("Prog '%s' draw {", name().c_str());
+    DEBUG("Prog '%s' draw {", name().c_str());
     throw_if_not_compiled();
     throw_if_not_vao_binded();
     throw_if_inconsitency_attrib_sizes();
@@ -380,7 +380,7 @@ public:
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     //m_vao->end();
     end();
-    LOGD("} Prog '%s' draw", name().c_str());
+    DEBUG("} Prog '%s' draw", name().c_str());
   }
 
   //------------------------------------------------------------------
@@ -403,7 +403,7 @@ public:
   //------------------------------------------------------------------
   inline void draw(DrawPrimitive const /*mode*/)
   {
-    std::cerr << "Draw with implicit number of vertices is not yet implemented" << std::endl;
+    ERROR("Draw with implicit number of vertices is not yet implemented");
     //throw_if_not_compiled();
     //throw_if_inconsitency_attrib_sizes();
     //draw(static_cast<GLenum>(mode), 0, m_attributes.begin()->second->size());
@@ -429,7 +429,7 @@ public:
   template<class T>
   void draw(DrawPrimitive const mode, GLIndexBuffer<T>& index)
   {
-    LOGD("Prog::drawIndex %d elements", index.size());
+    DEBUG("Prog::drawIndex %d elements", index.size());
 
     throw_if_not_compiled();
     throw_if_not_vao_binded();
@@ -462,7 +462,7 @@ public:
   //------------------------------------------------------------------
   /*inline virtual bool isValid() const override
   {
-    LOGD("Prog::isValid %d", compiled());
+    DEBUG("Prog::isValid %d", compiled());
     return compiled();
     }*/
 
@@ -520,7 +520,7 @@ private:
   //------------------------------------------------------------------
   virtual bool create() override
   {
-    LOGD("Prog '%s' create", name().c_str());
+    DEBUG("Prog '%s' create", name().c_str());
     m_handle = glCheck(glCreateProgram());
     return false;
   }
@@ -533,7 +533,7 @@ private:
     bool failure = false;
 
     // Compile shaders if they have not yet compiled
-    LOGD("Prog '%s' setup: compile shaders", name().c_str());
+    DEBUG("Prog '%s' setup: compile shaders", name().c_str());
     for (auto &it: m_shaders)
       {
         it.begin();
@@ -543,7 +543,7 @@ private:
               "Shader '" + it.name() +
               "' has not been compiled: reason was '" +
               it.error() + "'";
-            LOGE("%s", msg.c_str());
+            ERROR("%s", msg.c_str());
             m_error_msg += '\n' + msg;
             failure = true;
           }
@@ -552,7 +552,7 @@ private:
     if (!failure)
       {
         // Attach shaders to program
-        LOGD("Prog '%s' setup: attach shaders", name().c_str());
+        DEBUG("Prog '%s' setup: attach shaders", name().c_str());
         for (auto &it: m_shaders)
           {
             glCheck(glAttachShader(m_handle, it.gpuID()));
@@ -560,7 +560,7 @@ private:
           }
 
         // Compile the program
-        LOGD("Prog '%s' setup: compile prog", name().c_str());
+        DEBUG("Prog '%s' setup: compile prog", name().c_str());
         glCheck(glLinkProgram(m_handle));
         m_compiled = checkLinkageStatus(m_handle);
         if (m_compiled)
@@ -581,7 +581,7 @@ private:
   //------------------------------------------------------------------
   virtual void activate() override
   {
-    LOGD("Prog '%s' activate", name().c_str());
+    DEBUG("Prog '%s' activate", name().c_str());
 
     if (unlikely(!compiled()))
       return ;
@@ -616,7 +616,7 @@ private:
   //------------------------------------------------------------------
   virtual void deactivate() override
   {
-    LOGD("Prog '%s' deactivate", name().c_str());
+    DEBUG("Prog '%s' deactivate", name().c_str());
     glCheck(glUseProgram(0U));
 
     for (auto& it: m_uniforms)
@@ -637,7 +637,7 @@ private:
   //------------------------------------------------------------------
   virtual void release() override
   {
-    LOGD("Prog '%s' release", name().c_str());
+    DEBUG("Prog '%s' release", name().c_str());
     detachAllShaders();
     glCheck(glDeleteProgram(m_handle));
   }
@@ -656,14 +656,14 @@ private:
     GLenum type;
 
     // Create the list of uniforms
-    LOGD("Prog::get all attrib and uniform");
+    DEBUG("Prog::get all attrib and uniform");
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
     i = static_cast<GLuint>(count);
     while (i--)
       {
         glCheck(glGetActiveUniform(m_handle, i, bufSize, &length,
                                    &size, &type, name));
-        LOGD("Uniform #%u Type: %u Name: %s", i, type, name);
+        DEBUG("Uniform #%u Type: %u Name: %s", i, type, name);
         addNewUniform(type, name);
       }
 
@@ -674,7 +674,7 @@ private:
       {
         glCheck(glGetActiveAttrib(m_handle, i, bufSize, &length,
                                   &size, &type, name));
-        LOGD("Attribute #%u Type: %u Name: %s", i, type, name);
+        DEBUG("Attribute #%u Type: %u Name: %s", i, type, name);
         addNewAttribute(type, name);
       }
   }
@@ -703,7 +703,7 @@ private:
         break;
       default:
         std::string msg = "Attribute '" + std::string(name) + "' type is not managed";
-        LOGE("%s", msg.c_str());
+        ERROR("%s", msg.c_str());
         m_error_msg += '\n' + msg;
         break;
       }
@@ -764,7 +764,7 @@ private:
         break;*/
       default:
         std::string msg = "Uniform '" + std::string(name) + "' type is not managed";
-        LOGE("%s", msg.c_str());
+        ERROR("%s", msg.c_str());
         m_error_msg += '\n' + msg;
         break;
       }
@@ -828,7 +828,7 @@ private:
 
   void detachAllShaders()
   {
-    LOGD("Prog::detachAllshaders");
+    DEBUG("Prog::detachAllshaders");
     for (auto &it: m_shaders)
       {
         if (m_handle == it.attached())
@@ -855,7 +855,7 @@ private:
         glCheck(glGetProgramInfoLog(obj, length, &length, &log[0U]));
         m_error_msg += '\n';
         m_error_msg += &log[0U];
-        LOGES("%s", m_error_msg.c_str());
+        ERROR("%s", m_error_msg.c_str());
       }
     else
       {

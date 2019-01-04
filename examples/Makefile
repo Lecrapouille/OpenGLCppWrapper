@@ -57,7 +57,7 @@ VPATH += $(P)/src:$(P)/external/backward-cpp:$(P)/external/imgui
 
 ###################################################
 # Project defines
-DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
+DEFINES += -DCHECK_OPENGL -DERROR -UDEBUG
 DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 
 ###################################################

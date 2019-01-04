@@ -22,7 +22,6 @@
 #  define CONFIG_HPP_
 
 #  include "version.h"
-#  include "File.hpp"
 
 namespace config
 {
@@ -31,8 +30,6 @@ namespace config
 
   //! \brief
   static const Mode mode = config::Debug;
-  //! \brief Either create a new log file or smash the older log.
-  static const bool separated_logs = false;
   //! \brief Used for logs and GUI.
   static const std::string project_name("OpenGLCppWrapper");
   //! \brief Major version of project
@@ -46,14 +43,6 @@ namespace config
   //! \brief Pathes where default project resources have been installed
   //! (when called  by the shell command: sudo make install).
   static const std::string data_path(PROJECT_DATA_PATH);
-  //! \brief Location for storing temporary files
-  static const std::string tmp_path(false == separated_logs ?
-                                    PROJECT_TEMP_DIR :
-                                    File::generateTempFileName(PROJECT_TEMP_DIR, "/"));
-  //! \brief Give a name to the default project log file.
-  static const std::string log_name(project_name + ".log");
-  //! \brief Define the full path for the project.
-  static const std::string log_path(tmp_path + log_name);
 }
 
 #endif /* CONFIG_HPP_ */

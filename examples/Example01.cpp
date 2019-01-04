@@ -28,7 +28,7 @@ void GLExample01::onWindowSizeChanged(const float width, const float height)
 //------------------------------------------------------------------
 bool GLExample01::setup()
 {
-  LOGD("Setup");
+  DEBUG("Setup");
 
   // Enable some OpenGL states
   glCheck(glEnable(GL_DEPTH_TEST));
@@ -256,7 +256,7 @@ bool GLExample01::setup()
     matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
 
   // -- Perform some debug
-  LOGD("Instropection:");
+  DEBUG("Instropection:");
   std::vector<std::string> vbos = m_vao_quad.VBONames();
   for (auto& it: vbos)
     {
@@ -266,7 +266,7 @@ bool GLExample01::setup()
   // TODO Check if everything is ok (attrib/uniform are set, prog compiled ...)
 
   // We have terminated creating our 3D scene, we can now paint it.
-  LOGD("GLExample01::draw");
+  DEBUG("GLExample01::draw");
   return true;
 }
 

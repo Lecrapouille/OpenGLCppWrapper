@@ -19,7 +19,9 @@
 //=====================================================================
 
 #include "GLWindow.hpp"
-#include "OpenGL.hpp" //FIXME
+#include "OpenGL.hpp"
+#include <stdexcept>
+#include <iostream>
 #include <sstream>
 
 static void on_error(int /*errorCode*/, const char* msg)
