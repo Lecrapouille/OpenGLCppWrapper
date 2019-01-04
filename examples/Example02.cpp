@@ -158,7 +158,7 @@ void GLExample02::CreateCube()
   m_prog.bind(*m_cube);
 
   // Fill the VBO for vertices
-  m_prog.attribute<Vector3f>("a_position") =
+  m_prog.attribute<Vector3f>("position") =
     {
       //  X     Y     Z
 
@@ -215,11 +215,11 @@ void GLExample02::CreateCube()
   // first version of the SceneGraph example
   // the cube was not centered. So let see
   // how to translate it.
-  m_prog.attribute<Vector3f>("a_position")
+  m_prog.attribute<Vector3f>("position")
     += Vector3f(0.0f, 1.0f, 0.0f);
 
   // Fill the VBO for texture coordiantes
-  m_prog.attribute<Vector2f>("a_texcoord") =
+  m_prog.attribute<Vector2f>("UV") =
     {
       //  U     V
 
@@ -303,21 +303,21 @@ bool GLExample02::setup()
     }
 
   // Create the texture
-  m_prog.uniform<GLTexture2D>("u_texture").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.uniform<GLTexture2D>("u_texture").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.uniform<GLTexture2D>("u_texture").load("wooden-crate.jpg"))
+  m_prog.uniform<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.uniform<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_prog.uniform<GLTexture2D>("texID").load("wooden-crate.jpg"))
     return false;
 
   // Projection matrices
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
-  m_prog.uniform<Matrix44f>("u_projection") =
+  m_prog.uniform<Matrix44f>("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10000.0f);
-  m_prog.uniform<Matrix44f>("u_view") =
+  m_prog.uniform<Matrix44f>("view") =
     matrix::lookAt(Vector3f(0.0f, 10.0f, 100.0f), Vector3f(30), Vector3f(0,1,0));
 
   // Uniforms from the Example01
-  m_prog.uniform<float>("u_scale") = 1.0f;
-  m_prog.uniform<Vector4f>("u_color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
+  m_prog.uniform<float>("scale") = 1.0f;
+  m_prog.uniform<Vector4f>("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
 
   // Attach 3 robots in the scene graph. Each robot is a scene node.
   LOGD("Create graph scene");
@@ -393,7 +393,7 @@ bool GLExample02::draw()
 //------------------------------------------------------------------
 void GLExample02::drawSceneNode(GLVAO& vao, Matrix44f const& transform)
 {
-  m_prog.uniform<Matrix44f>("u_model") = transform;
+  m_prog.uniform<Matrix44f>("model") = transform;
 
   // Draw the 3D model
   m_prog.draw(vao, DrawPrimitive::TRIANGLES, 0, 36); // FIXME: use implicit vertices count

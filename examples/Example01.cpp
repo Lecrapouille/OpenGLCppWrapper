@@ -19,7 +19,7 @@ void GLExample01::onWindowSizeChanged(const float width, const float height)
   // Note: height is never zero !
   float ratio = width / height;
 
-  m_prog.uniform<Matrix44f>("u_projection") =
+  m_prog.uniform<Matrix44f>("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 }
 
@@ -58,7 +58,7 @@ bool GLExample01::setup()
 
   // Now we have to fill VBOs with data: here vertices. Because in
   // vertex shader a_position is vect3 we have to cast to Vector3f.
-  m_prog.attribute<Vector3f>("a_position") =
+  m_prog.attribute<Vector3f>("position") =
     {
       Vector3f(-0.5f, 0.0f, 0.5f),
       Vector3f(0.5f, 0.0f, 0.5f),
@@ -81,7 +81,7 @@ bool GLExample01::setup()
    // Now we have to fill VBOs with data: here texture coordinates.
   // Because in vertex shader a_texcoord is vect2 we have to cast
   // to Vector2f.
-  m_prog.attribute<Vector2f>("a_texcoord") =
+  m_prog.attribute<Vector2f>("UV") =
     {
       Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
       Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
@@ -101,7 +101,7 @@ bool GLExample01::setup()
 
   // Now we have to fill VBOs with data: here vertices. Because in
   // vertex shader a_position is vect3 we have to cast to Vector3f.
-  m_prog.attribute<Vector3f>("a_position") =
+  m_prog.attribute<Vector3f>("position") =
     {
       //  X     Y     Z
 
@@ -157,7 +157,7 @@ bool GLExample01::setup()
   // Now we have to fill VBOs with data: here texture coordinates.
   // Because in vertex shader a_texcoord is vect2 we have to cast
   // to Vector2f.
-  m_prog.attribute<Vector2f>("a_texcoord") =
+  m_prog.attribute<Vector2f>("UV") =
     {
       //  U     V
 
@@ -220,7 +220,7 @@ bool GLExample01::setup()
 
   // Now we have to fill VBOs with data: here vertices. Because in
   // vertex shader a_position is vect3 we have to cast to Vector3f.
-  m_prog.attribute<Vector3f>("a_position") =
+  m_prog.attribute<Vector3f>("position") =
     {
       Vector3f(5, -1.5,  5), Vector3f(-5, -1.5,  5), Vector3f(-5, -1.5, -5),
       Vector3f(5, -1.5,  5), Vector3f(-5, -1.5, -5), Vector3f(5, -1.5, -5)
@@ -229,8 +229,8 @@ bool GLExample01::setup()
   // Now we have to fill VBOs with data: here texture coordinates.
   // Because in vertex shader a_texcoord is vect2 we have to cast
   // to Vector2f.
-  m_prog.attribute<Vector3f>("a_position") *= Vector3f(2.0f, 1.0, 2.0f);
-  m_prog.attribute<Vector2f>("a_texcoord") =
+  m_prog.attribute<Vector3f>("position") *= Vector3f(2.0f, 1.0, 2.0f);
+  m_prog.attribute<Vector2f>("UV") =
     {
       Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(0.0f, 1.0f),
       Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
@@ -239,20 +239,20 @@ bool GLExample01::setup()
   // --- Create a texture
 
   // Texture FIXME 1 texture par VAO
-  m_prog.uniform<GLTexture2D>("u_texture").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.uniform<GLTexture2D>("u_texture").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.uniform<GLTexture2D>("u_texture").load("wooden-crate.jpg"))
+  m_prog.uniform<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.uniform<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_prog.uniform<GLTexture2D>("texID").load("wooden-crate.jpg"))
     return false;
 
   // --- Init OpenGL shader uniforms
-  m_prog.uniform<float>("u_scale") = 1.0f;
+  m_prog.uniform<float>("scale") = 1.0f;
 
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
-  m_prog.uniform<Matrix44f>("u_projection") =
+  m_prog.uniform<Matrix44f>("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 
-  m_prog.uniform<Matrix44f>("u_model") = m_movable1.transform();
-  m_prog.uniform<Matrix44f>("u_view") =
+  m_prog.uniform<Matrix44f>("model") = m_movable1.transform();
+  m_prog.uniform<Matrix44f>("view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
 
   // -- Perform some debug
@@ -286,7 +286,7 @@ bool GLExample01::draw()
 
   // FIXME: a ameliorer
   // Apply the texture to paint
-  if (false == m_prog.uniform<GLTexture2D>("u_texture").load("hazard.png"))
+  if (false == m_prog.uniform<GLTexture2D>("texID").load("hazard.png"))
     return false;
 
   // --- Draw the turning cube and apply to it a "pinkished" coloration.
@@ -297,12 +297,12 @@ bool GLExample01::draw()
   m_prog.bind(m_vao_quad);
 
   // Applied the "pinkished" coloration.
-  m_prog.uniform<Vector4f>("u_color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
+  m_prog.uniform<Vector4f>("color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
 
   // Apply a translation and a rotation to our cube to make it spin.
   m_movable1.rotate(4.0f * ct, Vector3f(0, 1, 0));
   m_movable1.position(Vector3f(-1.0f, 0.0f, -1.0f));
-  m_prog.uniform<Matrix44f>("u_model") = m_movable1.transform();
+  m_prog.uniform<Matrix44f>("model") = m_movable1.transform();
 
 #ifdef DRAW_CUBE_WITH_INDICES
 
@@ -324,12 +324,12 @@ bool GLExample01::draw()
   m_prog.bind(m_vao_quad);
 
   // Applied the "pinkished" coloration.
-  m_prog.uniform<Vector4f>("u_color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
+  m_prog.uniform<Vector4f>("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
 
   // Apply a translation to our cube.
   m_movable2.reset();
   m_movable2.position(Vector3f(3.0f, 0.0f, 0.0f));
-  m_prog.uniform<Matrix44f>("u_model") = m_movable2.transform();
+  m_prog.uniform<Matrix44f>("model") = m_movable2.transform();
 
 #ifdef DRAW_CUBE_WITH_INDICES
 
@@ -347,7 +347,7 @@ bool GLExample01::draw()
 
   // FIXME: a ameliorer
   // Apply the texture to paint
-  if (false == m_prog.uniform<GLTexture2D>("u_texture").load("wooden-crate.jpg"))
+  if (false == m_prog.uniform<GLTexture2D>("texID").load("wooden-crate.jpg"))
     return false;
 
   // Important: bind the VAO to the OpenGL shader to let it know to
@@ -356,10 +356,10 @@ bool GLExample01::draw()
   m_prog.bind(m_vao_floor);
 
   // Applied a "shadow" coloration.
-  m_prog.uniform<Vector4f>("u_color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
+  m_prog.uniform<Vector4f>("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
   m_movable3.reset();
   m_movable3.position(Vector3f(0.0f, 0.0f, 0.0f));
-  m_prog.uniform<Matrix44f>("u_model") = m_movable3.transform();
+  m_prog.uniform<Matrix44f>("model") = m_movable3.transform();
   m_prog.draw(DrawPrimitive::TRIANGLES, 0, 6);
 
   return true;

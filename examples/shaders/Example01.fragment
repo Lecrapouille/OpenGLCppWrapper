@@ -1,14 +1,11 @@
-#version 150
+#version 330 core
 
-uniform sampler2D u_texture;  // Texture
-varying vec2      v_texcoord; // Interpolated fragment texture coordinates (in)
-varying vec4      v_color;    // Interpolated fragment color (in)
+uniform sampler2D  texID;     // Texture sampler
+in  vec2           texUV;     // Texture coordinate
+in  vec4           texColor;  // from vertex shader
+out vec4           fragColor;
 
 void main()
 {
-    // Get texture color
-    vec4 t_color = texture2D(u_texture, v_texcoord) * v_color;
-
-    // Final color
-    gl_FragColor = t_color;
+    fragColor = texture(texID, texUV) * texColor;
 }
