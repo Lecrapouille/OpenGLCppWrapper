@@ -71,12 +71,12 @@ TESTSUITE(Programs)
       try {
         prog.uniform<int>("aaa");
         ASSERT_TRUE("Exception should have occured");
-      } catch(std::out_of_range) { }
+      } catch(OpenGLException) { }
 
       try {
         prog.uniform<int>(nullptr);
         ASSERT_TRUE("Exception should have occured");
-      } catch(std::invalid_argument) { }
+      } catch(OpenGLException) { }
 
       // TODO: try add name conflict wit different types
       prog.addNewUniform(GL_FLOAT, "u1");
@@ -101,10 +101,11 @@ TESTSUITE(Programs)
       ASSERT_EQ(true, prog.binded());
       ASSERT_EQ(42, vao.prog);
       ASSERT_EQ(true, prog.m_vao == &vao);
+
       try {
         prog.getVBO<int>("");
         ASSERT_TRUE("Exception should have occured");
-      } catch(std::out_of_range) { }
+      } catch(OpenGLException) { }
 
       // TODO: try add name conflict wit different types
       ASSERT_EQ(0_z, prog.attributeNames().size());

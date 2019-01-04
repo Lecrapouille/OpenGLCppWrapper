@@ -186,15 +186,15 @@ public:
   //! \brief Delete the object from GPU memory. The object will
   //! be created() back when calling begin().
   //-------------------------------------------------------------
-  void destroy()
+  virtual void destroy()
   {
-    if (false == opengl::hasCreatedContext())
-      return ;
-
-    if (isValid())
+    if (opengl::hasCreatedContext())
       {
-        deactivate();
-        release();
+        if (isValid())
+          {
+            deactivate();
+            release();
+          }
       }
     init();
   }

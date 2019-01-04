@@ -107,21 +107,21 @@ public:
   {
     if (unlikely(nullptr == name))
       {
-        throw std::invalid_argument("nullptr passed to getVBO");
+        throw OpenGLException("nullptr passed to getVBO");
       }
 
     auto ptr = m_vbos[name].get();
     if (unlikely(nullptr == ptr))
       {
-        throw std::out_of_range("GLVertexBuffer '" + std::string(name) +
-                                "' does not exist");
+        throw OpenGLException("GLVertexBuffer '" + std::string(name) +
+                              "' does not exist");
       }
 
     GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(ptr);
     if (unlikely(nullptr == vbo))
       {
-        throw std::invalid_argument("GLVertexBuffer '" + std::string(name) +
-                                    "' exists but has wrong template type");
+        throw OpenGLException("GLVertexBuffer '" + std::string(name) +
+                              "' exists but has wrong template type");
       }
 
     DEBUG("VAO::GetVBO '%s' %p", name, vbo);
