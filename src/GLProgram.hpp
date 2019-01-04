@@ -574,17 +574,16 @@ private:
     LOGD("Prog '%s' deactivate", name().c_str());
     glCheck(glUseProgram(0U));
 
-    for (auto& it: m_attributes)
-      {
-        m_vao->m_vbos[it.first]->end();
-        //m_vao->VBO<float>(it.first.c_str()).end(); // FIXME
-        it.second->end();
-      }
     for (auto& it: m_uniforms)
       {
         it.second->end();
       }
-    m_vao->end();
+    for (auto& it: m_attributes)
+      {
+        it.second->end();
+      }
+
+    m_vao = nullptr;
   }
 
   //------------------------------------------------------------------
