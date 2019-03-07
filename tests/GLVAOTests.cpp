@@ -71,6 +71,7 @@ TESTSUITE(VAOs)
       // Add the second VBO. Check it has been inserted.
       ASSERT_EQ(true, vao.createVBO<float>("vbo2"));
       vbo_names = vao.VBONames();
+      std::sort(vbo_names.begin(), vbo_names.end());
       ASSERT_EQ(2_z, vbo_names.size());
       ASSERT_EQ(true, vbo_names[0] == "vbo1");
       ASSERT_EQ(true, vbo_names[1] == "vbo2");

@@ -32,7 +32,7 @@
 
 #  include "GLShaders.hpp"
 #  include "GLLocation.tpp"
-#  include <map>
+#  include <unordered_map>
 
 // TODO: verifier les GLVariables non init dans le GPU
 
@@ -43,7 +43,7 @@
 class GLProgram: public IGLObject<GLenum>
 {
   using GLLocationPtr = std::unique_ptr<GLLocation>;
-  using mapGLLocation = std::map<std::string, GLLocationPtr>;
+  using mapGLLocation = std::unordered_map<std::string, GLLocationPtr>;
 
 public:
 

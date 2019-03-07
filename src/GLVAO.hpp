@@ -28,7 +28,7 @@
 #  define GL_VERTEX_ARRAY_HPP_
 
 #  include "GLVBO.tpp"
-#  include <map>
+#  include <unordered_map>
 #  include <vector>
 
 class GLVAO: public IGLObject<GLenum>
@@ -168,7 +168,7 @@ private:
 private:
 public: //FIXME
 
-  std::map<std::string, std::unique_ptr<IGLObject>> m_vbos;
+  std::unordered_map<std::string, std::unique_ptr<IGLObject>> m_vbos;
   GLenum prog; // attached prog
 };
 
