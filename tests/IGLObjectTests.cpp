@@ -100,6 +100,7 @@ TESTSUITE(TS_IGLObject)
 {
   TEST(T_GLObject)
     {
+      //opengl::hasCreatedContext() = true;
       FakeObject obj;
 
       // --- Check init

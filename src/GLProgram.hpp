@@ -91,26 +91,44 @@ public:
     return *this;
   }
 
-  // TODO: verifier si VAO est compatible au prog
-  // TODO: compiler le prog s'il ne l'est pas
   inline bool bind(GLVAO& vao)
   {
     DEBUG("Gonna bind Prog '%s' with VAO named '%s'", name().c_str(), vao.name().c_str());
-    if (!compiled())
+
+    // Try compile the GLProgram
+    if (unlikely(!compiled()))
       {
-        ERROR("Binding VAO on non compiled GLProgram");
-        return false;
+        if (!compile())
+          {
+            ERROR("Tried binding VAO on a non compilable GLProgram");
+            return false;
+          }
       }
 
-    if (vao.prog != m_handle)
+    if (unlikely(0 == vao.prog))
       {
+        // When binding the VAO to GLProgram for the first time:
+        // create VBOs to the VAO.
         DEBUG("Prog '%s' will init VAO named '%s'", name().c_str(), vao.name().c_str());
         initVAO(vao);
       }
+    else if (unlikely(m_handle != vao.prog))
+      {
+        // Check if VAO has been previously binded by this GLProgram. If not
+        // This is probably an error of the developper.
+        ERROR("You tried to bind VAO %s which never been binded by GLProg %s",
+              vao.name().c_str(), name().c_str());
+        return false;
+      }
+
+    // Bind the VAO to the GLProgram
     m_vao = &vao;
     return true;
   }
 
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
   inline bool binded() const
   {
     return nullptr != m_vao;
@@ -350,7 +368,7 @@ public:
   //------------------------------------------------------------------
   void draw(GLVAO& vao, DrawPrimitive const mode, GLint first, GLsizei count)
   {
-    bind(vao);
+    throw_if_vao_cannot_be_binded(vao);
     draw(mode, first, count);
   }
 
@@ -376,7 +394,7 @@ public:
   //------------------------------------------------------------------
   inline void draw(GLVAO& vao, DrawPrimitive const mode)
   {
-    bind(vao);
+    throw_if_vao_cannot_be_binded(vao);
     draw(mode);
   }
 
@@ -412,7 +430,7 @@ public:
   template<class T>
   void draw(GLVAO& vao, DrawPrimitive const mode, GLIndexBuffer<T>& index)
   {
-    bind(vao);
+    throw_if_vao_cannot_be_binded(vao);
     draw(mode, index);
   }
 
@@ -460,6 +478,17 @@ private:
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
+  void throw_if_vao_cannot_be_binded(GLVAO& vao)
+  {
+    if (unlikely(!bind(vao)))
+      {
+        throw OpenGLException("Failed binding VAO to OpenGL program");
+      }
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
   void throw_if_vao_not_binded()
   {
     if (unlikely(!binded()))
@@ -469,22 +498,17 @@ private:
   }
 
   //------------------------------------------------------------------
-  //! \brief check if all GLAttribute have their VBO with the
-  //! same size. TODO change this method to a callback: on_GLVariable_changed()
+  //! \brief check if the binded VAO has all its VBO with the
+  //! same size.
+  //! \note this function does not check if VAO is binded call before
+  //! throw_if_vao_not_binded().
   //------------------------------------------------------------------
-  void throw_if_inconsitency_attrib_sizes(/* updated_size */)
+  void throw_if_inconsitency_attrib_sizes()
   {
-    /* TODO
-    if (likely(!GLVariable_modified)) return ;
-
-    for (auto& it: m_attributes)
+    if (!m_vao->checkVBOSizes())
       {
-        if (it.size() != updated_size)
-          {
-            throw OpenGLException("Failed OpenGL attributes have not the same size");
-          }
+        throw OpenGLException("Failed OpenGL attributes have not the same size");
       }
-    */
   }
 
   //------------------------------------------------------------------

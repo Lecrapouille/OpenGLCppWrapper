@@ -41,7 +41,6 @@ public:
   GLVAO()
     : IGLObject()
   {
-    prog = 0;
     m_target = GL_ARRAY_BUFFER;
   }
 
@@ -49,7 +48,6 @@ public:
   GLVAO(const char *name)
     : IGLObject(name)
   {
-    prog = 0;
     m_target = GL_ARRAY_BUFFER;
   }
 
@@ -106,6 +104,31 @@ public:
 
     DEBUG("VAO::GetVBO '%s' %p", name, vbo);
     return *vbo;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Check if all VBOs have the same size.
+  //! \return true if all VBO have the same size, else return false.
+  //------------------------------------------------------------------
+  bool checkVBOSizes()
+  {
+    if (m_vbos.empty())
+      {
+        return true;
+      }
+    /* FIXME
+    size_t size = m_vbos.begin().second->size();
+    for (auto const& it: m_vbos)
+      {
+        if (size != it.second->size())
+          {
+            ERROR("VAO %s does not have all of its VBOs with the same size",
+                  name().c_str());
+            return false;
+          }
+      }
+    */
+    return true;
   }
 
 private:
@@ -169,7 +192,7 @@ private:
 private:
 
   std::unordered_map<std::string, std::unique_ptr<IGLObject>> m_vbos;
-  GLenum prog; // attached prog
+  GLenum prog = 0; // unbinded prog
 };
 
 #endif /* GL_VERTEX_ARRAY_HPP_ */

@@ -24,7 +24,7 @@
 .PHONY: coverage
 coverage: $(TARGET)
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
-	@./build/$(TARGET)
+	@./build/$(TARGET) || echo ""
 	@$(call print-to,"Documentation","$(RAPPORT)","$(DOC)","")
 	@lcov --quiet --directory .. -c -o $(RAPPORT)
 	@lcov --quiet --remove $(RAPPORT) '/usr*' 'external/*' 'tests/*' -o $(RAPPORT)
