@@ -319,47 +319,6 @@ public:
       }*/
 
   //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
-  void throw_if_not_compiled()
-  {
-    if (unlikely(!compiled()))
-      {
-        throw OpenGLException("Failed OpenGL program has not been compiled");
-      }
-  }
-
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
-  void throw_if_not_vao_binded()
-  {
-    if (unlikely(!binded()))
-      {
-        throw OpenGLException("Failed OpenGL program has not been binded to a VAO");
-      }
-  }
-
-  //------------------------------------------------------------------
-  //! \brief check if all GLAttribute have their VBO with the
-  //! same size. TODO change this method to a callback: on_GLVariable_changed()
-  //------------------------------------------------------------------
-  void throw_if_inconsitency_attrib_sizes(/* updated_size */)
-  {
-    /* TODO
-    if (likely(!GLVariable_modified)) return ;
-
-    for (auto& it: m_attributes)
-      {
-        if (it.size() != updated_size)
-          {
-            throw OpenGLException("Failed OpenGL attributes have not the same size");
-          }
-      }
-    */
-  }
-
-  //------------------------------------------------------------------
   //! \brief Render the binded VAO. Use as params the first and count
   //! vertices (see glDrawArrays OpenGL official documentation).
   //! \throw if the program has not been compiled or if the VAO has not
@@ -369,7 +328,7 @@ public:
   {
     DEBUG("Prog '%s' draw {", name().c_str());
     throw_if_not_compiled();
-    throw_if_not_vao_binded();
+    throw_if_vao_not_binded();
     throw_if_inconsitency_attrib_sizes();
 
     // FIXME: A optimiser car ca prend 43 appels OpenGL alors qu'avant
@@ -432,7 +391,7 @@ public:
     DEBUG("Prog::drawIndex %d elements", index.size());
 
     throw_if_not_compiled();
-    throw_if_not_vao_binded();
+    throw_if_vao_not_binded();
     throw_if_inconsitency_attrib_sizes();
 
     //m_vao->begin();
@@ -458,6 +417,27 @@ public:
   }
 
   //------------------------------------------------------------------
+  //! \brief Choose if the usage of coming VBO created will be
+  //! GL_DYNAMIC_DRAW or GL_STATIC_DRAW or GL_STREAM_DRAW. If this
+  //! method is not called default usage will be GL_DYNAMIC_DRAW
+  //------------------------------------------------------------------
+  void setBufferUsage(BufferUsage const usage)
+  {
+    m_vbo_usage = usage;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Change how many elements are pre-allocated when creating
+  //! VBOs.
+  //------------------------------------------------------------------
+  void setInitVBOSize(size_t const size)
+  {
+    m_vbo_init_size = size;
+  }
+
+private:
+
+  //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
   /*inline virtual bool isValid() const override
@@ -467,13 +447,44 @@ public:
     }*/
 
   //------------------------------------------------------------------
-  //! \brief Choose if the usage of coming VBO created will be
-  //! GL_DYNAMIC_DRAW or GL_STATIC_DRAW or GL_STREAM_DRAW. If this
-  //! method is not called default usage will be GL_DYNAMIC_DRAW
+  //! \brief
   //------------------------------------------------------------------
-  void setBufferUsage(BufferUsage const usage)
+  void throw_if_not_compiled()
   {
-    m_usage = usage;
+    if (unlikely(!compiled()))
+      {
+        throw OpenGLException("Failed OpenGL program has not been compiled");
+      }
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  void throw_if_vao_not_binded()
+  {
+    if (unlikely(!binded()))
+      {
+        throw OpenGLException("Failed OpenGL program has not been binded to a VAO");
+      }
+  }
+
+  //------------------------------------------------------------------
+  //! \brief check if all GLAttribute have their VBO with the
+  //! same size. TODO change this method to a callback: on_GLVariable_changed()
+  //------------------------------------------------------------------
+  void throw_if_inconsitency_attrib_sizes(/* updated_size */)
+  {
+    /* TODO
+    if (likely(!GLVariable_modified)) return ;
+
+    for (auto& it: m_attributes)
+      {
+        if (it.size() != updated_size)
+          {
+            throw OpenGLException("Failed OpenGL attributes have not the same size");
+          }
+      }
+    */
   }
 
   //------------------------------------------------------------------
@@ -491,16 +502,16 @@ public:
         switch (it.second->dim())
           {
           case 1:
-            vao.createVBO<float>(name, m_usage);
+            vao.createVBO<float>(name, m_vbo_init_size, m_vbo_usage);
             break;
           case 2:
-            vao.createVBO<Vector2f>(name, m_usage);
+            vao.createVBO<Vector2f>(name, m_vbo_init_size, m_vbo_usage);
             break;
           case 3:
-            vao.createVBO<Vector3f>(name, m_usage);
+            vao.createVBO<Vector3f>(name, m_vbo_init_size, m_vbo_usage);
             break;
           case 4:
-            vao.createVBO<Vector4f>(name, m_usage);
+            vao.createVBO<Vector4f>(name, m_vbo_init_size, m_vbo_usage);
             break;
           }
       }
@@ -510,8 +521,6 @@ public:
     // vao.textures[] = it.texture().gpuID()
     vao.prog = m_handle;
   }
-
-private:
 
   //------------------------------------------------------------------
   //! \brief
@@ -822,7 +831,7 @@ private:
       {
         begin();
       }
-    throw_if_not_vao_binded();
+    throw_if_vao_not_binded();
     return m_vao->VBO<T>(name);
   }
 
@@ -873,7 +882,8 @@ private:
   std::string            m_error_msg;
   uint32_t               m_textures_count = 0u;
   bool                   m_compiled = false;
-  BufferUsage            m_usage = BufferUsage::DYNAMIC_DRAW;
+  BufferUsage            m_vbo_usage = BufferUsage::DYNAMIC_DRAW;
+  size_t                 m_vbo_init_size = 0_z;
 };
 
 #endif /* GLPROGRAM_HPP_ */

@@ -51,7 +51,7 @@ TESTSUITE(VAOs)
       ASSERT_EQ(false, vao.hasVBO(""));
 
       // Add the first VBO. Check it has been inserted.
-      ASSERT_EQ(true, vao.createVBO<float>("vbo1"));
+      ASSERT_EQ(true, vao.createVBO<float>("vbo1", 0_z, BufferUsage::DYNAMIC_DRAW));
       vbo_names = vao.VBONames();
       ASSERT_EQ(1_z, vbo_names.size());
       ASSERT_EQ(true, vbo_names[0] == "vbo1");
@@ -61,7 +61,7 @@ TESTSUITE(VAOs)
       // FIXME: is it a wanted behavior ?
       // Add another VBO: same name but different type.
       // Check it has not been inserted.
-      ASSERT_EQ(false, vao.createVBO<int>("vbo1"));
+      ASSERT_EQ(false, vao.createVBO<int>("vbo1", 0_z, BufferUsage::DYNAMIC_DRAW));
       vbo_names = vao.VBONames();
       ASSERT_EQ(1_z, vbo_names.size());
       ASSERT_EQ(true, vbo_names[0] == "vbo1");
@@ -69,7 +69,7 @@ TESTSUITE(VAOs)
       ASSERT_EQ(false, vao.hasVBO("vbo2"));
 
       // Add the second VBO. Check it has been inserted.
-      ASSERT_EQ(true, vao.createVBO<float>("vbo2"));
+      ASSERT_EQ(true, vao.createVBO<float>("vbo2", 0_z, BufferUsage::DYNAMIC_DRAW));
       vbo_names = vao.VBONames();
       std::sort(vbo_names.begin(), vbo_names.end());
       ASSERT_EQ(2_z, vbo_names.size());

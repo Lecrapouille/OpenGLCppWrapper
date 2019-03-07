@@ -33,6 +33,8 @@
 
 class GLVAO: public IGLObject<GLenum>
 {
+  friend class GLProgram;
+
 public:
 
   //! \brief Empty constructor without name
@@ -68,28 +70,6 @@ public:
         list.push_back(it.first);
       }
     return list;
-  }
-
-  static void unbind()
-  {
-    glCheck(glBindVertexArray(0U));
-  }
-
-  //FIXME: private + friend GLProg
-  //FIXME: ajouter nombre de vertex pour reserver taille
-  //FIXME: gerer duplicata de noms ?
-  template<typename T>
-  bool createVBO(const char *name,
-                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
-  {
-    if (unlikely(hasVBO(name)))
-      {
-        ERROR("Try to create a VBO with name '%s' already used", name);
-        return false;
-      }
-    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, usage);
-    DEBUG("allocate new VBO '%s' %p", name, m_vbos[name].get());
-    return true;
   }
 
   inline bool hasVBOs() const
@@ -130,6 +110,21 @@ public:
 
 private:
 
+  //! \note: name duplicata is not managed because this case should
+  //! never happen.
+  template<typename T>
+  bool createVBO(const char *name, size_t const vbo_init_size, BufferUsage const usage)
+  {
+    if (unlikely(hasVBO(name)))
+      {
+        ERROR("Try to create a VBO with name '%s' already used", name);
+        return false;
+      }
+    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
+    DEBUG("allocate new VBO '%s' %p", name, m_vbos[name].get());
+    return true;
+  }
+
   virtual bool create() override
   {
     DEBUG("VAO '%s' create", name().c_str());
@@ -165,8 +160,13 @@ private:
     return false;
   }
 
+  //Callable by GLProgram
+  //static void unbind()
+  //{
+  //  glCheck(glBindVertexArray(0U));
+  //}
+
 private:
-public: //FIXME
 
   std::unordered_map<std::string, std::unique_ptr<IGLObject>> m_vbos;
   GLenum prog; // attached prog

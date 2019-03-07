@@ -62,6 +62,28 @@ public:
     m_usage = static_cast<GLenum>(usage);
   }
 
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLBuffer(std::string const& name, const GLenum target, const size_t init_size,
+           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+    : IGLObject(name),
+      PendingContainer<T>(init_size)
+  {
+    IGLObject::m_target = target;
+    m_usage = static_cast<GLenum>(usage);
+  }
+
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLBuffer(const char *name, const GLenum target, const size_t init_size,
+           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+    : IGLObject(name),
+      PendingContainer<T>(init_size)
+  {
+    IGLObject::m_target = target;
+    m_usage = static_cast<GLenum>(usage);
+  }
+
   virtual ~GLBuffer() override
   {
     destroy();
@@ -157,6 +179,22 @@ public:
     : GLBuffer<T>(name, GL_ARRAY_BUFFER, usage)
   {
   }
+
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLVertexBuffer(std::string const& name, const size_t init_size,
+                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+    : GLBuffer<T>(name, GL_ARRAY_BUFFER, init_size, usage)
+  {
+  }
+
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLVertexBuffer(const char *name, const size_t init_size,
+                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+    : GLBuffer<T>(name, GL_ARRAY_BUFFER, init_size, usage)
+  {
+  }
 };
 
 // **************************************************************
@@ -178,6 +216,22 @@ public:
   GLIndexBuffer(const char *name,
                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
+  {
+  }
+
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLIndexBuffer(std::string const& name, const size_t init_size,
+                BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+    : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, init_size, usage)
+  {
+  }
+
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLIndexBuffer(const char *name, const size_t init_size,
+                BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+    : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, init_size, usage)
   {
   }
 
