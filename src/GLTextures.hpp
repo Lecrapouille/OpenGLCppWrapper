@@ -30,6 +30,22 @@
 #  include "IGLObject.tpp"
 #  include "PendingData.hpp"
 #  include "SOIL/SOIL.h"
+#  include <array>
+
+// **************************************************************
+//
+// **************************************************************
+struct TextureOptions
+{
+  TextureMinFilter minFilter = TextureMinFilter::LINEAR;
+  TextureMagFilter magFilter = TextureMagFilter::LINEAR;
+  TextureWrap wrapS = TextureWrap::REPEAT;
+  TextureWrap wrapT = TextureWrap::REPEAT;
+  PixelFormat cpuPixelFormat = PixelFormat::RGBA;
+  PixelFormat gpuPixelFormat = PixelFormat::RGBA;
+  PixelType pixelType = PixelType::UNSIGNED_BYTE;
+  bool generateMipmaps = false;
+};
 
 // **************************************************************
 //
@@ -57,6 +73,8 @@ public:
     destroy();
   }
 
+  virtual inline bool loaded() const = 0;
+
   void interpolation(TextureMinFilter const min_filter,
                      TextureMagFilter const mag_filter)
   {
@@ -75,6 +93,16 @@ public:
   void options(TextureOptions const& options)
   {
     m_options = options;
+  }
+
+  virtual uint8_t dimension() const
+  {
+    return 0u;
+  }
+
+  inline uint32_t width() const
+  {
+    return m_width;
   }
 
 protected:
@@ -120,15 +148,10 @@ private:
     glCheck(glBindTexture(m_target, 0U));
   }
 
-  virtual bool setup() override
-  {
-    applyTextureParam();
-    return false;
-  }
-
 protected:
 
   TextureOptions m_options;
+  uint32_t m_width = 0;
 };
 
 // **************************************************************
@@ -136,6 +159,8 @@ protected:
 // **************************************************************
 class GLTexture2D: public IGLTexture
 {
+  friend class GLTexture3D;
+
   struct SOILDeleter
   {
     void operator()(unsigned char* buf)
@@ -164,7 +189,17 @@ public:
   {
   }
 
-  inline bool loaded() const
+  virtual uint8_t dimension() const override
+  {
+    return 2u;
+  }
+
+  inline uint32_t height() const
+  {
+    return m_height;
+  }
+
+  virtual inline bool loaded() const override
   {
     return nullptr != m_buffer.get();
   }
@@ -190,6 +225,7 @@ public:
       {
         m_width = static_cast<uint32_t>(width);
         m_height = static_cast<uint32_t>(height);
+        DEBUG("texture dimension %ux%u", m_width, m_height);
         if (rename || name().empty())
           {
             name() = filename;
@@ -224,30 +260,10 @@ public:
     return m_buffer.get()[nth];
   }
 
-  inline uint32_t width() const
-  {
-    return m_width;
-  }
-
-  inline uint32_t height() const
-  {
-    return m_height;
-  }
-
 private:
 
-  virtual bool setup() override
+  inline void doGLTexImage2D() const
   {
-    DEBUG("Texture '%s' setup", name().c_str());
-
-    // Note: m_buffer can nullptr
-    if (unlikely((0 == m_width) || (0 == m_height)))
-      {
-        ERROR("Cannot setup texture with width or hieght set to 0");
-        return true;
-      }
-
-    applyTextureParam();
     glCheck(glTexImage2D(m_target, 0,
                          static_cast<GLint>(m_options.gpuPixelFormat),
                          static_cast<GLsizei>(m_width),
@@ -256,6 +272,22 @@ private:
                          static_cast<GLenum>(m_options.cpuPixelFormat),
                          static_cast<GLenum>(m_options.pixelType),
                          m_buffer.get()));
+  }
+
+  virtual bool setup() override
+  {
+    DEBUG("Texture '%s' setup", name().c_str());
+
+    // Note: m_buffer can nullptr
+    if (unlikely((0u == m_width) || (0u == m_height)))
+      {
+        ERROR("Cannot setup texture '%s' with width or height set to 0", name().c_str());
+        return true;
+      }
+
+    applyTextureParam();
+    glBindTexture(m_target, m_handle);
+    doGLTexImage2D();
     return false;
   }
 
@@ -284,8 +316,9 @@ private:
     return false;
   };
 
-  uint32_t m_width = 0;
-  uint32_t m_height = 0;
+private:
+
+  uint32_t   m_height = 0;
   TextBufPtr m_buffer;
 };
 

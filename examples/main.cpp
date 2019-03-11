@@ -1,9 +1,10 @@
 #include "Example01.hpp"
 #include "Example02.hpp"
 #include "Example03.hpp"
+#include "Example04.hpp"
 #include <iostream>
 
-#define MAX_EXAMPLES 3
+#define MAX_EXAMPLES 4
 
 static void usage(char *argv[])
 {
@@ -13,6 +14,7 @@ static void usage(char *argv[])
   std::cout << "  1: Display a 3d scene with differents objects" << std::endl;
   std::cout << "  2: Display a 3d scene graph with imgui debug" << std::endl;
   std::cout << "  3: Display a generated sphere" << std::endl;
+  std::cout << "  4: Display a multi-textured plane" << std::endl;
   exit(1);
 }
 
@@ -43,6 +45,10 @@ int main(int argc, char *argv[])
       break;
     case 3:
       win = std::make_unique<GLExample03>();
+      win->start();
+      break;
+    case 4:
+      win = std::make_unique<GLExample04>();
       win->start();
       break;
     default:

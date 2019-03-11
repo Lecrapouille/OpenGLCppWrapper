@@ -238,6 +238,18 @@ public:
     return list;
   }
 
+  std::vector<std::string> texturesNames()
+  {
+    std::vector<std::string> list;
+
+    list.reserve(m_textures.size());
+    for (auto& it: m_textures)
+      {
+        list.push_back(it.first);
+      }
+    return list;
+  }
+
   //------------------------------------------------------------------
   //! \brief Check if the uniform variable exists in the shader code
   //------------------------------------------------------------------
@@ -304,6 +316,29 @@ public:
   inline const PendingContainer<T>& attribute(const char *name) const
   {
     return getVBO<T>(name);
+  }
+
+  inline bool hasTexture(const char *name) const
+  {
+    if (unlikely(nullptr == name)) return false;
+    return m_textures.end() != m_textures.find(name);
+  }
+
+  inline bool hasTextures() const
+  {
+    return 0_z != m_textures.size();
+  }
+
+  template<class T>
+  inline T& texture(const char *name)
+  {
+    return getTexture<T>(name);
+  }
+
+  template<class T>
+  inline const T& texture(const char *name) const
+  {
+    return getTexture<T>(name);
   }
 
   //------------------------------------------------------------------
@@ -540,9 +575,32 @@ private:
           }
       }
 
-    // TODO Get all texture samplers
-    // for (auto& it: m_samplers) ???
-    // vao.textures[] = it.texture().gpuID()
+    // Create all texture samplers
+    for (auto& it: m_textures)
+      {
+        const char *name = it.first.c_str();
+        const GLenum gltype = it.second->target();
+        switch (gltype)
+          {
+            //case GL_SAMPLER_1D:
+            //vao.createTexture<GLTexture1D>(name);
+            //break;
+          case GL_SAMPLER_2D:
+            vao.createTexture<GLTexture2D>(name);
+            break;
+            //FIXME
+            //case GL_SAMPLER_2D_DEPTH:
+            //vao.createTexture<GLTextureDepth2D>(name);
+            //break;
+            //case GL_SAMPLER_3D:
+            //vao.createTexture<GLTexture3D>(name);
+            //break;
+          default:
+            ERROR("This kind of sampler is not yet managed: %u", gltype);
+            break;
+          }
+      }
+
     vao.prog = m_handle;
   }
 
@@ -626,12 +684,18 @@ private:
     for (auto& it: m_attributes)
       {
         m_vao->m_vbos[it.first]->begin();
-        //m_vao->VBO<float>(it.first.c_str()).begin(); // FIXME
         it.second->begin();
       }
     for (auto& it: m_uniforms)
       {
         it.second->begin();
+      }
+    for (auto& it: m_textures)
+      {
+        // Important: activate the texture unit first before binding
+        // texture
+        it.second->begin();
+        m_vao->m_textures[it.first]->begin();
       }
   }
 
@@ -653,6 +717,10 @@ private:
     glCheck(glUseProgram(0U));
 
     for (auto& it: m_uniforms)
+      {
+        it.second->end();
+      }
+    for (auto& it: m_textures)
       {
         it.second->end();
       }
@@ -783,18 +851,18 @@ private:
       case GL_FLOAT_MAT4:
         m_uniforms[name] = std::make_unique<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, gpuID());
         break;
-        /*case GL_SAMPLER_1D:
-        m_uniforms[name] = std::make_unique<GLSampler1D>(name, m_textures_count, gpuID());
-        m_textures_count += 1u;
-        break;*/
+        //case GL_SAMPLER_1D:
+        //m_uniforms[name] = std::make_unique<GLSampler1D>(name, m_textures_count, gpuID());
+        //m_textures_count += 1u;
+        //break;
       case GL_SAMPLER_2D:
-        m_uniforms[name] = std::make_unique<GLSampler2D>(name, m_textures_count, gpuID());
+        m_textures[name] = std::make_unique<GLSampler2D>(name, m_textures_count, gpuID());
         m_textures_count += 1u;
         break;
-        /*case GL_SAMPLER_CUBE:
-        m_uniforms[name] = std::make_unique<GLSampler3D>(name, m_textures_count, gpuID());
-        m_textures_count += 1u;
-        break;*/
+        //case GL_SAMPLER_CUBE:
+        //m_uniforms[name] = std::make_unique<GLSampler3D>(name, m_textures_count, gpuID());
+        //m_textures_count += 1u;
+        //break;
       default:
         std::string msg = "Uniform '" + std::string(name) + "' type is not managed";
         ERROR("%s", msg.c_str());
@@ -808,7 +876,6 @@ private:
   //! \return the uniform instance if found else throw the exception
   //! std::out_of_range
   //------------------------------------------------------------------
-
   template<class T>
   IGLUniform<T>& getUniform(const char *name)
   {
@@ -859,6 +926,17 @@ private:
     return m_vao->VBO<T>(name);
   }
 
+  template<class T>
+  T& getTexture(const char *name)
+  {
+    if (unlikely(!compiled()))
+      {
+        begin();
+      }
+    throw_if_vao_not_binded();
+    return m_vao->texture<T>(name);
+  }
+
   void detachAllShaders()
   {
     DEBUG("Prog::detachAllshaders");
@@ -901,6 +979,7 @@ private:
 
   mapGLLocation          m_attributes;
   mapGLLocation          m_uniforms;
+  std::unordered_map<std::string, std::unique_ptr<GLSampler>> m_textures;
   std::vector<GLShader>  m_shaders;
   GLVAO                 *m_vao = nullptr;
   std::string            m_error_msg;

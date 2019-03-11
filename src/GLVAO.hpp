@@ -28,6 +28,7 @@
 #  define GL_VERTEX_ARRAY_HPP_
 
 #  include "GLVBO.tpp"
+#  include "GLTextures.hpp"
 #  include <unordered_map>
 #  include <vector>
 
@@ -70,6 +71,17 @@ public:
     return list;
   }
 
+  std::vector<std::string> TextureNames()
+  {
+    std::vector<std::string> list;
+    list.reserve(m_textures.size());
+    for (auto& it: m_textures)
+      {
+        list.push_back(it.first);
+      }
+    return list;
+  }
+
   inline bool hasVBOs() const
   {
     return 0_z != m_vbos.size();
@@ -80,12 +92,22 @@ public:
     return m_vbos.end() != m_vbos.find(name);
   }
 
+  inline bool hasTextures() const
+  {
+    return 0_z != m_textures.size();
+  }
+
+  inline bool hasTexture(const char *name) const
+  {
+    return m_textures.end() != m_textures.find(name);
+  }
+
   template<typename T>
   GLVertexBuffer<T>& VBO(const char *name)
   {
     if (unlikely(nullptr == name))
       {
-        throw OpenGLException("nullptr passed to getVBO");
+        throw OpenGLException("nullptr passed to VBO()");
       }
 
     auto ptr = m_vbos[name].get();
@@ -104,6 +126,32 @@ public:
 
     DEBUG("VAO::GetVBO '%s' %p", name, vbo);
     return *vbo;
+  }
+
+  template<typename T>
+  T& texture(const char *name)
+  {
+    if (unlikely(nullptr == name))
+      {
+        throw OpenGLException("nullptr passed to texture()");
+      }
+
+    auto ptr = m_textures[name].get();
+    if (unlikely(nullptr == ptr))
+      {
+        throw OpenGLException("GLTexture '" + std::string(name) +
+                              "' does not exist");
+      }
+
+    T* texture = dynamic_cast<T*>(ptr);
+    if (unlikely(nullptr == texture))
+      {
+        throw OpenGLException("GLTexture '" + std::string(name) +
+                              "' exists but has wrong template type");
+      }
+
+    DEBUG("VAO::GetTexture '%s' %p", name, texture);
+    return *texture;
   }
 
   //------------------------------------------------------------------
@@ -145,6 +193,19 @@ private:
       }
     m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
     DEBUG("allocate new VBO '%s' %p", name, m_vbos[name].get());
+    return true;
+  }
+
+  template<typename T>
+  bool createTexture(const char *name)
+  {
+    if (unlikely(hasTexture(name)))
+      {
+        ERROR("Try to create a texture with name '%s' already used", name);
+        return false;
+      }
+    m_textures[name] = std::make_unique<T>(name);
+    DEBUG("allocate new Texture '%s' %p", name, m_textures[name].get());
     return true;
   }
 
@@ -192,6 +253,7 @@ private:
 private:
 
   std::unordered_map<std::string, std::unique_ptr<IGLObject>> m_vbos;
+  std::unordered_map<std::string, std::unique_ptr<IGLTexture>> m_textures;
   GLenum prog = 0; // unbinded prog
 };
 

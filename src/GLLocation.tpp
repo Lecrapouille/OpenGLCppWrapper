@@ -43,7 +43,7 @@ public:
     : IGLObject(name)
   {
     m_dim = dim;
-    m_gltype = gltype;
+    m_target = gltype;
     m_program = prog;
   }
 
@@ -58,11 +58,15 @@ public:
     return m_dim;
   }
 
+  inline GLenum gltype() const
+  {
+    return m_target;
+  }
+
 protected:
 
   GLint  m_dim;
-  GLenum  m_gltype;
-  GLuint  m_program;
+  GLuint m_program;
 };
 
 // **************************************************************
@@ -105,7 +109,7 @@ private:
     glCheck(glEnableVertexAttribArray(m_index));
     glCheck(glVertexAttribPointer(m_index,
                                   m_dim,
-                                  m_gltype,
+                                  m_target,
                                   GL_FALSE,
                                   m_stride,
                                   (const GLvoid*) m_offset));
@@ -309,78 +313,60 @@ inline void GLUniform<Matrix44f>::setValue(const Matrix44f& value) const
 // **************************************************************
 //! \brief A GLSampler is an Opengl uniform for texture
 // **************************************************************
-template<class T>
-class GLSampler: public IGLUniform<T>
+class GLSampler: public IGLUniform<uint32_t>
 {
 public:
 
   GLSampler(const char *name, GLenum gltype, uint32_t texture_count, GLuint prog)
-    : IGLUniform<T>(name, 0, gltype, prog)
+    : IGLUniform<uint32_t>(name, 0, gltype, prog)
   {
-    m_texture_count = texture_count;
+    m_data = texture_count;
+    forceUpdate();
   }
 
   inline uint32_t textureID() const
   {
-    return m_texture_count;
-  }
-
-  inline T const& texture() const
-  {
-    return IGLUniform<T>::data();
-  }
-
-  inline T& texture()
-  {
-    return IGLUniform<T>::data();
+    return m_data;
   }
 
 private:
 
   virtual void activate() override
   {
-    DEBUG("Sampler '%s' activate", IGLUniform<T>::name().c_str());
-    glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_count));
-    IGLUniform<T>::m_data.begin();
+    DEBUG("Sampler '%s' activate GL_TEXTURE0 + %u", IGLUniform<uint32_t>::name().c_str(), m_data);
+    glCheck(glActiveTexture(GL_TEXTURE0 + m_data));
   }
 
   virtual bool update() override
   {
-    DEBUG("Sampler '%s' update", IGLUniform<T>::name().c_str());
-    glCheck(glUniform1i(IGLUniform<T>::m_handle,
-                        static_cast<GLint>(m_texture_count)));
+    DEBUG("Sampler '%s' update", IGLUniform<uint32_t>::name().c_str());
+    glCheck(glUniform1i(IGLUniform<uint32_t>::m_handle, static_cast<GLint>(m_data)));
     return false;
   }
-
-private:
-
-  uint32_t m_texture_count = 0;
 };
 
 // **************************************************************
-//! TODO
+//!
 // **************************************************************
-#if 0
-class GLSampler1D: public GLSampler<GLTexture1D>
+class GLSampler1D: public GLSampler
 {
 public:
 
   GLSampler1D(const char *name, uint32_t texture_count, GLuint prog)
-    : GLSampler<GLTexture1D>(name, GL_SAMPLER_1D, texture_count, prog)
+    : GLSampler(name, GL_SAMPLER_1D, texture_count, prog)
   {
   }
 };
-#endif
 
 // **************************************************************
 //!
 // **************************************************************
-class GLSampler2D: public GLSampler<GLTexture2D>
+class GLSampler2D: public GLSampler
 {
 public:
 
   GLSampler2D(const char *name, uint32_t texture_count, GLuint prog)
-    : GLSampler<GLTexture2D>(name, GL_SAMPLER_2D, texture_count, prog)
+    : GLSampler(name, GL_SAMPLER_2D, texture_count, prog)
   {
   }
 };
@@ -388,16 +374,14 @@ public:
 // **************************************************************
 //!
 // **************************************************************
-#if 0
-class GLSampler3D: public GLSampler<GLTexture3D>
+class GLSampler3D: public GLSampler
 {
 public:
 
   GLSampler3D(const char *name, uint32_t texture_count, GLuint prog)
-    : GLSampler<GLTexture3D>(name, GL_SAMPLER_CUBE, texture_count, prog)
+    : GLSampler(name, GL_SAMPLER_CUBE, texture_count, prog)
   {
   }
 };
-#endif
 
 #endif

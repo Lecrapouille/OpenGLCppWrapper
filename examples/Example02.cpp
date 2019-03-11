@@ -150,7 +150,7 @@ GLExample02::~GLExample02()
   std::cout << "Bye" << std::endl;
 }
 
-void GLExample02::CreateCube()
+bool GLExample02::CreateCube()
 {
   m_cube = std::make_shared<GLVAO>("VAO_cube");
 
@@ -272,6 +272,14 @@ void GLExample02::CreateCube()
       Vector2f(0.0f, 0.0f),
       Vector2f(0.0f, 1.0f)
     };
+
+  // Create the texture
+  m_prog.texture<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.texture<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_prog.texture<GLTexture2D>("texID").load("textures/wooden-crate.jpg"))
+    return false;
+
+  return true;
 }
 
 //------------------------------------------------------------------
@@ -303,12 +311,6 @@ bool GLExample02::setup()
       return false;
     }
 
-  // Create the texture
-  m_prog.uniform<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.uniform<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.uniform<GLTexture2D>("texID").load("wooden-crate.jpg"))
-    return false;
-
   // Projection matrices
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
   m_prog.uniform<Matrix44f>("projection") =
@@ -324,7 +326,8 @@ bool GLExample02::setup()
   DEBUG("Create graph scene");
 
   // Init VAO and its VBOs.
-  CreateCube();
+  if (!CreateCube())
+    return false;
 
   // Create 3 robots
   SceneNodePtr root = std::make_shared<SceneNode>(nullptr, "root");

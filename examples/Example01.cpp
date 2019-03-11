@@ -212,6 +212,14 @@ bool GLExample01::setup()
 
 #endif // DRAW_CUBE_WITH_INDICES
 
+  // --- Create a texture
+
+  // --- Init VAO texture named texID
+  m_prog.texture<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.texture<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_prog.texture<GLTexture2D>("texID").load("textures/hazard.png"))
+    return false;
+
   // --- Create a plane (for the floor)
 
   // Binding empty VAO to OpenGL program will make it be populated
@@ -238,10 +246,10 @@ bool GLExample01::setup()
 
   // --- Create a texture
 
-  // Texture FIXME 1 texture par VAO
-  m_prog.uniform<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.uniform<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.uniform<GLTexture2D>("texID").load("wooden-crate.jpg"))
+  // --- Init VAO texture named texID
+  m_prog.texture<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.texture<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_prog.texture<GLTexture2D>("texID").load("textures/wooden-crate.jpg"))
     return false;
 
   // --- Init OpenGL shader uniforms
@@ -284,12 +292,9 @@ bool GLExample01::draw()
   time += dt();
   float ct = cosf(time);
 
-  // FIXME: a ameliorer
-  // Apply the texture to paint
-  if (false == m_prog.uniform<GLTexture2D>("texID").load("hazard.png"))
-    return false;
-
+  // ---
   // --- Draw the turning cube and apply to it a "pinkished" coloration.
+  // ---
 
   // Important: bind the VAO to the OpenGL shader to let it know to
   // OpenGL which one to paint. Contrary to bind() in setup(), his
@@ -316,7 +321,9 @@ bool GLExample01::draw()
 
 #endif
 
+  // ---
   // --- Draw a fixed cube and apply to it a "darkished" coloration.
+  // ---
 
   // Important: bind the VAO to the OpenGL shader to let it know to
   // OpenGL which one to paint. Contrary to bind() in setup(), his
@@ -343,12 +350,9 @@ bool GLExample01::draw()
 
 #endif
 
+  // ---
   // --- Draw a floor
-
-  // FIXME: a ameliorer
-  // Apply the texture to paint
-  if (false == m_prog.uniform<GLTexture2D>("texID").load("wooden-crate.jpg"))
-    return false;
+  // ---
 
   // Important: bind the VAO to the OpenGL shader to let it know to
   // OpenGL which one to paint. Contrary to bind() in setup(), his

@@ -121,7 +121,7 @@ private:
                                    float const height) override;
   virtual bool setup() override;
   virtual bool draw() override;
-  void CreateCube();
+  bool CreateCube();
   virtual void drawSceneNode(GLVAO& vao, Matrix44f const& transformation) override;
 
 private:
