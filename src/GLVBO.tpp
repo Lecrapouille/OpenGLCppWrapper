@@ -45,8 +45,7 @@ class GLBuffer
 public:
 
   //! \brief Constructor with the object name
-  GLBuffer(std::string const& name, const GLenum target,
-           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  GLBuffer(std::string const& name, const GLenum target, BufferUsage const usage)
     : IGLObject(name)
   {
     IGLObject::m_target = target;
@@ -54,8 +53,7 @@ public:
   }
 
   //! \brief Constructor with the object name
-  GLBuffer(const char *name, const GLenum target,
-           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  GLBuffer(const char *name, const GLenum target, BufferUsage const usage)
     : IGLObject(name)
   {
     IGLObject::m_target = target;
@@ -64,8 +62,7 @@ public:
 
   //! \brief Constructor with the object name and reserved number of
   //! elements.
-  GLBuffer(std::string const& name, const GLenum target, const size_t init_size,
-           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  GLBuffer(std::string const& name, const GLenum target, const size_t init_size, BufferUsage const usage)
     : IGLObject(name),
       PendingContainer<T>(init_size)
   {
@@ -75,8 +72,7 @@ public:
 
   //! \brief Constructor with the object name and reserved number of
   //! elements.
-  GLBuffer(const char *name, const GLenum target, const size_t init_size,
-           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  GLBuffer(const char *name, const GLenum target, const size_t init_size, BufferUsage const usage)
     : IGLObject(name),
       PendingContainer<T>(init_size)
   {
