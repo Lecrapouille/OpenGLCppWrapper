@@ -497,6 +497,21 @@ public:
     m_vbo_init_size = size;
   }
 
+  inline GLTexture1D& texture1D(const char *name)
+  {
+    return getTexture<GLTexture1D>(name);
+  }
+
+  inline GLTexture2D& texture2D(const char *name)
+  {
+    return getTexture<GLTexture2D>(name);
+  }
+
+  inline GLTexture3D& texture3D(const char *name)
+  {
+    return getTexture<GLTexture3D>(name);
+  }
+
 private:
 
   //------------------------------------------------------------------

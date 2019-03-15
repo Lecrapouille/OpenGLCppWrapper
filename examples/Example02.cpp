@@ -274,9 +274,9 @@ bool GLExample02::CreateCube()
     };
 
   // Create the texture
-  m_prog.texture<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.texture<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.texture<GLTexture2D>("texID").load("textures/wooden-crate.jpg"))
+  m_prog.texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_prog.texture2D("texID").load("textures/wooden-crate.jpg"))
     return false;
 
   return true;

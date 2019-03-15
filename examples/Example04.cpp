@@ -60,11 +60,11 @@ bool GLExample04::setup()
   // --- Create textures
 
   // --- Init VAO textures
-  if (false == m_prog.texture<GLTexture2D>("blendMap").load("textures/blendMap.png")) return false;
-  if (false == m_prog.texture<GLTexture2D>("backgroundTexture").load("textures/grassy2.png")) return false;
-  if (false == m_prog.texture<GLTexture2D>("rTexture").load("textures/mud.png")) return false;
-  if (false == m_prog.texture<GLTexture2D>("gTexture").load("textures/grassFlowers.png")) return false;
-  if (false == m_prog.texture<GLTexture2D>("bTexture").load("textures/path.png")) return false;
+  if (!m_prog.texture2D("blendMap").load("textures/blendMap.png")) return false;
+  if (!m_prog.texture2D("backgroundTexture").load("textures/grassy2.png")) return false;
+  if (!m_prog.texture2D("rTexture").load("textures/mud.png")) return false;
+  if (!m_prog.texture2D("gTexture").load("textures/grassFlowers.png")) return false;
+  if (!m_prog.texture2D("bTexture").load("textures/path.png")) return false;
 
   return true;
 }

@@ -215,9 +215,9 @@ bool GLExample01::setup()
   // --- Create a texture
 
   // --- Init VAO texture named texID
-  m_prog.texture<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.texture<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.texture<GLTexture2D>("texID").load("textures/hazard.png"))
+  m_prog.texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_prog.texture2D("texID").load("textures/hazard.png"))
     return false;
 
   // --- Create a plane (for the floor)
@@ -247,9 +247,9 @@ bool GLExample01::setup()
   // --- Create a texture
 
   // --- Init VAO texture named texID
-  m_prog.texture<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.texture<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.texture<GLTexture2D>("texID").load("textures/wooden-crate.jpg"))
+  m_prog.texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_prog.texture2D("texID").load("textures/wooden-crate.jpg"))
     return false;
 
   // --- Init OpenGL shader uniforms
