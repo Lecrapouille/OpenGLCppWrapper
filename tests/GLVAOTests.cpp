@@ -18,7 +18,6 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "Logger.hpp"
 #define protected public
 #define private public
 #include "OpenGL.hpp"
@@ -52,7 +51,7 @@ TESTSUITE(VAOs)
       ASSERT_EQ(false, vao.hasVBO(""));
 
       // Add the first VBO. Check it has been inserted.
-      ASSERT_EQ(true, vao.createVBO<float>("vbo1"));
+      ASSERT_EQ(true, vao.createVBO<float>("vbo1", 0_z, BufferUsage::DYNAMIC_DRAW));
       vbo_names = vao.VBONames();
       ASSERT_EQ(1_z, vbo_names.size());
       ASSERT_EQ(true, vbo_names[0] == "vbo1");
@@ -62,7 +61,7 @@ TESTSUITE(VAOs)
       // FIXME: is it a wanted behavior ?
       // Add another VBO: same name but different type.
       // Check it has not been inserted.
-      ASSERT_EQ(false, vao.createVBO<int>("vbo1"));
+      ASSERT_EQ(false, vao.createVBO<int>("vbo1", 0_z, BufferUsage::DYNAMIC_DRAW));
       vbo_names = vao.VBONames();
       ASSERT_EQ(1_z, vbo_names.size());
       ASSERT_EQ(true, vbo_names[0] == "vbo1");
@@ -70,8 +69,9 @@ TESTSUITE(VAOs)
       ASSERT_EQ(false, vao.hasVBO("vbo2"));
 
       // Add the second VBO. Check it has been inserted.
-      ASSERT_EQ(true, vao.createVBO<float>("vbo2"));
+      ASSERT_EQ(true, vao.createVBO<float>("vbo2", 0_z, BufferUsage::DYNAMIC_DRAW));
       vbo_names = vao.VBONames();
+      std::sort(vbo_names.begin(), vbo_names.end());
       ASSERT_EQ(2_z, vbo_names.size());
       ASSERT_EQ(true, vbo_names[0] == "vbo1");
       ASSERT_EQ(true, vbo_names[1] == "vbo2");
@@ -93,7 +93,7 @@ TESTSUITE(VAOs)
         std::cout << vboi.name() << std::endl;
         ASSERT_FALSE("Unknown VBO Exception not caught");
       }
-      catch (std::invalid_argument) { }
+      catch (OpenGLException) { }
 
       // Nullptr exception
       try
@@ -102,7 +102,7 @@ TESTSUITE(VAOs)
           std::cout << vbo.name() << std::endl;
           ASSERT_FALSE("Nullptr Exception not caught");
         }
-      catch (std::invalid_argument) { }
+      catch (OpenGLException) { }
 
       // Unknown VBO
       try
@@ -111,7 +111,7 @@ TESTSUITE(VAOs)
           std::cout << vbo.name() << std::endl;
           ASSERT_FALSE("Unknown VBO Exception not caught");
         }
-      catch (std::out_of_range) { }
+      catch (OpenGLException) { }
 
       // Bad cast VBO
        try
@@ -120,6 +120,6 @@ TESTSUITE(VAOs)
           std::cout << vbo.name() << std::endl;
           ASSERT_FALSE("Bad casted VBO Exception not caught");
         }
-        catch (std::invalid_argument) { }
+        catch (OpenGLException) { }
     }
 }

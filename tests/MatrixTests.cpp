@@ -18,7 +18,6 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "Logger.hpp"
 #define protected public
 #define private public
 #include "Matrix.tpp"
@@ -144,7 +143,7 @@ static void compareMatricesEps(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
 {
   for (size_t i = 0_z; i < r * c; ++i)
     {
-      ASSERT_EQ(true, maths::abs(a.m_data[i] - b.m_data[i]) < T(0.000001));
+      ASSERT_EQ(true, std::abs(a.m_data[i] - b.m_data[i]) < T(0.000001));
     }
 }
 
@@ -203,9 +202,9 @@ static inline void checkVector3f(Vector3f const& v, const float x, const float y
 //--------------------------------------------------------------------------
 static inline void checkAlmostVectorEps(Vector3g const& v, const double x, const double y, const double z)
 {
-  ASSERT_EQ(true, maths::abs(x - v.x) < 0.000001);
-  ASSERT_EQ(true, maths::abs(y - v.y) < 0.000001);
-  ASSERT_EQ(true, maths::abs(z - v.z) < 0.000001);
+  ASSERT_EQ(true, std::abs(x - v.x) < 0.000001);
+  ASSERT_EQ(true, std::abs(y - v.y) < 0.000001);
+  ASSERT_EQ(true, std::abs(z - v.z) < 0.000001);
 }
 
 //--------------------------------------------------------------------------

@@ -24,3 +24,8 @@ Example 03:
 
 Plot a sphere of points (VBO + EBO). Comes from
 https://github.com/invor/simplestGraphRendering
+
+Example 04:
+===========
+
+Draw a multi-textured triangle.

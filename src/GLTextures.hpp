@@ -30,6 +30,22 @@
 #  include "IGLObject.tpp"
 #  include "PendingData.hpp"
 #  include "SOIL/SOIL.h"
+#  include <array>
+
+// **************************************************************
+//
+// **************************************************************
+struct TextureOptions
+{
+  TextureMinFilter minFilter = TextureMinFilter::LINEAR;
+  TextureMagFilter magFilter = TextureMagFilter::LINEAR;
+  TextureWrap wrapS = TextureWrap::REPEAT;
+  TextureWrap wrapT = TextureWrap::REPEAT;
+  PixelFormat cpuPixelFormat = PixelFormat::RGBA;
+  PixelFormat gpuPixelFormat = PixelFormat::RGBA;
+  PixelType pixelType = PixelType::UNSIGNED_BYTE;
+  bool generateMipmaps = false;
+};
 
 // **************************************************************
 //
@@ -57,6 +73,8 @@ public:
     destroy();
   }
 
+  virtual inline bool loaded() const = 0;
+
   void interpolation(TextureMinFilter const min_filter,
                      TextureMagFilter const mag_filter)
   {
@@ -75,6 +93,16 @@ public:
   void options(TextureOptions const& options)
   {
     m_options = options;
+  }
+
+  virtual uint8_t dimension() const
+  {
+    return 0u;
+  }
+
+  inline uint32_t width() const
+  {
+    return m_width;
   }
 
 protected:
@@ -120,15 +148,10 @@ private:
     glCheck(glBindTexture(m_target, 0U));
   }
 
-  virtual bool setup() override
-  {
-    applyTextureParam();
-    return false;
-  }
-
 protected:
 
   TextureOptions m_options;
+  uint32_t m_width = 0;
 };
 
 // **************************************************************
@@ -136,11 +159,13 @@ protected:
 // **************************************************************
 class GLTexture2D: public IGLTexture
 {
+  friend class GLTexture3D;
+
   struct SOILDeleter
   {
     void operator()(unsigned char* buf)
     {
-      std::cout << "Texture deleter" << std::endl;
+      DEBUG("Texture deleter");
       if (buf != nullptr)
         SOIL_free_image_data(buf);
     }
@@ -164,7 +189,17 @@ public:
   {
   }
 
-  inline bool loaded() const
+  virtual uint8_t dimension() const override
+  {
+    return 2u;
+  }
+
+  inline uint32_t height() const
+  {
+    return m_height;
+  }
+
+  virtual inline bool loaded() const override
   {
     return nullptr != m_buffer.get();
   }
@@ -179,7 +214,7 @@ public:
     int width, height;
     bool res;
 
-    LOGI("Loading texture '%s'", filename);
+    DEBUG("Loading texture '%s'", filename);
 
     // FIXME: SOIL_LOAD_RGBA should adapt from moptions.cpuPixelFormat
     TextBufPtr buf(SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGBA));
@@ -190,18 +225,19 @@ public:
       {
         m_width = static_cast<uint32_t>(width);
         m_height = static_cast<uint32_t>(height);
+        DEBUG("texture dimension %ux%u", m_width, m_height);
         if (rename || name().empty())
           {
             name() = filename;
-            LOGI("Renaming texture '%s'", filename);
+            DEBUG("Renaming texture '%s'", filename);
           }
         PendingData::tagAsPending(0_z, m_width * m_height);
-        LOGI("Successfuly load picture file '%s'", filename);
+        DEBUG("Successfuly load picture file '%s'", filename);
         res = true;
       }
     else
       {
-        LOGES("Failed loading picture file '%s'", filename);
+        ERROR("Failed loading picture file '%s'", filename);
         res = false;
       }
 
@@ -224,30 +260,10 @@ public:
     return m_buffer.get()[nth];
   }
 
-  inline uint32_t width() const
-  {
-    return m_width;
-  }
-
-  inline uint32_t height() const
-  {
-    return m_height;
-  }
-
 private:
 
-  virtual bool setup() override
+  inline void doGLTexImage2D() const
   {
-    LOGD("Texture '%s' setup", name().c_str());
-
-    // Note: m_buffer can nullptr
-    if (unlikely((0 == m_width) || (0 == m_height)))
-      {
-        LOGE("Cannot setup texture with width or hieght set to 0");
-        return true;
-      }
-
-    applyTextureParam();
     glCheck(glTexImage2D(m_target, 0,
                          static_cast<GLint>(m_options.gpuPixelFormat),
                          static_cast<GLsizei>(m_width),
@@ -256,12 +272,28 @@ private:
                          static_cast<GLenum>(m_options.cpuPixelFormat),
                          static_cast<GLenum>(m_options.pixelType),
                          m_buffer.get()));
+  }
+
+  virtual bool setup() override
+  {
+    DEBUG("Texture '%s' setup", name().c_str());
+
+    // Note: m_buffer can nullptr
+    if (unlikely((0u == m_width) || (0u == m_height)))
+      {
+        ERROR("Cannot setup texture '%s' with width or height set to 0", name().c_str());
+        return true;
+      }
+
+    applyTextureParam();
+    glBindTexture(m_target, m_handle);
+    doGLTexImage2D();
     return false;
   }
 
   virtual bool update() override
   {
-    LOGD("Texture '%s' update", name().c_str());
+    DEBUG("Texture '%s' update", name().c_str());
     size_t pos_start;
     size_t pos_end;
     PendingData::getPendingData(pos_start, pos_end);
@@ -284,29 +316,223 @@ private:
     return false;
   };
 
-  uint32_t m_width = 0;
-  uint32_t m_height = 0;
+private:
+
+  uint32_t   m_height = 0;
   TextBufPtr m_buffer;
 };
 
 // **************************************************************
 //!
 // **************************************************************
-/*class GLTextureDepth2D: public GLTexture2D
+class GLTextureDepth2D: public GLTexture2D
 {
   GLTextureDepth2D()
     : GLTexture2D()
   {
-    m_options.gpuPixelFormat = GL_DEPTH_COMPONENT; // FIXME incompatible avec load() ??
-    m_options.cpuPixelFormat = GL_DEPTH_COMPONENT;
+    m_options.gpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
+    m_options.cpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
   }
 
   GLTextureDepth2D(std::string const& name)
     : GLTexture2D(name)
   {
-    m_options.gpuPixelFormat = GL_DEPTH_COMPONENT;
-    m_options.cpuPixelFormat = GL_DEPTH_COMPONENT;
+    m_options.gpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
+    m_options.cpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
   }
-  };*/
+};
+
+// **************************************************************
+//!
+// **************************************************************
+class GLTexture1D: public IGLTexture
+{
+  struct SOILDeleter
+  {
+    void operator()(unsigned char* buf)
+    {
+      DEBUG("Texture deleter");
+      if (buf != nullptr)
+        SOIL_free_image_data(buf);
+    }
+  };
+
+  using TextBufPtr = std::unique_ptr<unsigned char, SOILDeleter>;
+
+public:
+
+  GLTexture1D()
+    : IGLTexture(GL_TEXTURE_1D)
+  {
+  }
+
+  GLTexture1D(std::string const& name)
+    : IGLTexture(name, GL_TEXTURE_1D)
+  {
+  }
+
+  virtual uint8_t dimension() const override
+  {
+    return 1u;
+  }
+
+  virtual inline bool loaded() const override
+  {
+    return nullptr != m_buffer.get();
+  }
+
+  virtual bool setup() override
+  {
+    if (unlikely(0 == m_width))
+      {
+        ERROR("Cannot setup texture '%s' with width set to 0", name().c_str());
+        return true;
+      }
+
+    applyTextureParam();
+    glBindTexture(m_target, m_handle);
+    glCheck(glTexImage1D(m_target, 0,
+                         static_cast<GLint>(m_options.gpuPixelFormat),
+                         static_cast<GLsizei>(m_width),
+                         0,
+                         static_cast<GLenum>(m_options.cpuPixelFormat),
+                         static_cast<GLenum>(m_options.pixelType),
+                         nullptr));
+    return false;
+  }
+
+  virtual bool update() override
+  {
+    DEBUG("Texture '%s' update", name().c_str());
+    size_t pos_start;
+    size_t pos_end;
+    PendingData::getPendingData(pos_start, pos_end);
+
+    // FIXME: pour le moment on envoie toute la texture entiere
+    // au lieu de la portion modifiee.
+    // TODO pendingData --> x,width
+    const GLint x = 0U;
+    const GLsizei width = static_cast<GLsizei>(m_width);
+
+    glCheck(glBindTexture(m_target, m_handle));
+    glCheck(glTexSubImage1D(m_target, 0, x, width,
+                            static_cast<GLenum>(m_options.cpuPixelFormat),
+                            static_cast<GLenum>(m_options.pixelType),
+                            m_buffer.get()));
+
+    PendingData::clearPending();
+    return false;
+  }
+
+private:
+
+  TextBufPtr m_buffer;
+};
+
+// **************************************************************
+//!
+// **************************************************************
+class GLTexture3D: public IGLTexture
+{
+public:
+
+  GLTexture3D()
+    : IGLTexture(GL_TEXTURE_CUBE_MAP)
+  {
+  }
+
+  GLTexture3D(std::string const& name)
+    : IGLTexture(name, GL_TEXTURE_CUBE_MAP)
+  {
+  }
+
+  virtual uint8_t dimension() const override
+  {
+    return 3u;
+  }
+
+  inline uint32_t depth() const
+  {
+    return m_depth;
+  }
+
+  virtual inline bool loaded() const override
+  {
+    for (uint8_t i = 0; i < 6u; ++i)
+      {
+        if (false == m_textures[i].loaded())
+          return false;
+      }
+    return true;
+  }
+
+  bool load(CubeMap const target, const char *const filename)
+  {
+    return m_textures[static_cast<int>(target)].load(filename, false);
+  }
+
+private:
+
+  virtual bool setup() override
+  {
+    // Note: m_buffer can nullptr
+    m_depth = computeDepth();
+    if (6u != m_depth)
+      {
+        ERROR("Cannot setup texture '%s' with width or height set to 0"
+              "or depth != 6", name().c_str());
+        return true;
+      }
+
+    applyTextureParam();
+    glBindTexture(m_target, m_handle);
+    for (uint8_t i = 0; i < 6u; ++i)
+      {
+        m_textures[i].m_handle = m_targets[i];
+        m_textures[i].options(m_options);
+        m_textures[i].doGLTexImage2D();
+      }
+    return true;
+  }
+
+  virtual bool update() override
+  {
+    glCheck(glBindTexture(m_target, m_handle));
+    for (uint8_t i = 0; i < 6u; ++i)
+      {
+        m_textures[i].update();
+      }
+    return false;
+  }
+
+  uint8_t computeDepth()
+  {
+    uint8_t depth = 0u;
+    for (uint8_t i = 0; i < 6u; ++i)
+      {
+        if (m_textures[i].loaded())
+          ++depth;
+      }
+    return depth;
+  }
+
+private:
+
+  // TODO: static
+  // https://stackoverflow.com/questions/11709859/how-to-have-static-data-members-in-a-header-only-library
+  const std::array<GLenum,6> m_targets {{
+    GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+    GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+    GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+  }};
+
+  uint8_t m_depth = 0u;
+  std::array<GLTexture2D, 6> m_textures;
+};
+
+
 
 #endif /* GLTEXTURES_HPP_ */

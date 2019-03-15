@@ -28,18 +28,20 @@
 #  define GL_VERTEX_ARRAY_HPP_
 
 #  include "GLVBO.tpp"
-#  include <map>
+#  include "GLTextures.hpp"
+#  include <unordered_map>
 #  include <vector>
 
 class GLVAO: public IGLObject<GLenum>
 {
+  friend class GLProgram;
+
 public:
 
   //! \brief Empty constructor without name
   GLVAO()
     : IGLObject()
   {
-    prog = 0;
     m_target = GL_ARRAY_BUFFER;
   }
 
@@ -47,7 +49,6 @@ public:
   GLVAO(const char *name)
     : IGLObject(name)
   {
-    prog = 0;
     m_target = GL_ARRAY_BUFFER;
   }
 
@@ -70,26 +71,15 @@ public:
     return list;
   }
 
-  static void unbind()
+  std::vector<std::string> TextureNames()
   {
-    glCheck(glBindVertexArray(0U));
-  }
-
-  //FIXME: private + friend GLProg
-  //FIXME: ajouter nombre de vertex pour reserver taille
-  //FIXME: gerer duplicata de noms ?
-  template<typename T>
-  bool createVBO(const char *name,
-                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
-  {
-    if (unlikely(hasVBO(name)))
+    std::vector<std::string> list;
+    list.reserve(m_textures.size());
+    for (auto& it: m_textures)
       {
-        LOGE("Try to create a VBO with name '%s' already used", name);
-        return false;
+        list.push_back(it.first);
       }
-    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, usage);
-    LOGD("allocate new VBO '%s' %p", name, m_vbos[name].get());
-    return true;
+    return list;
   }
 
   inline bool hasVBOs() const
@@ -102,56 +92,145 @@ public:
     return m_vbos.end() != m_vbos.find(name);
   }
 
+  inline bool hasTextures() const
+  {
+    return 0_z != m_textures.size();
+  }
+
+  inline bool hasTexture(const char *name) const
+  {
+    return m_textures.end() != m_textures.find(name);
+  }
+
   template<typename T>
   GLVertexBuffer<T>& VBO(const char *name)
   {
     if (unlikely(nullptr == name))
       {
-        throw std::invalid_argument("nullptr passed to getVBO");
+        throw OpenGLException("nullptr passed to VBO()");
       }
 
     auto ptr = m_vbos[name].get();
     if (unlikely(nullptr == ptr))
       {
-        throw std::out_of_range("GLVertexBuffer '" + std::string(name) +
-                                "' does not exist");
+        throw OpenGLException("GLVertexBuffer '" + std::string(name) +
+                              "' does not exist");
       }
 
     GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(ptr);
     if (unlikely(nullptr == vbo))
       {
-        throw std::invalid_argument("GLVertexBuffer '" + std::string(name) +
-                                    "' exists but has wrong template type");
+        throw OpenGLException("GLVertexBuffer '" + std::string(name) +
+                              "' exists but has wrong template type");
       }
 
-    LOGD("VAO::GetVBO '%s' %p", name, vbo);
+    DEBUG("VAO::GetVBO '%s' %p", name, vbo);
     return *vbo;
+  }
+
+  template<typename T>
+  T& texture(const char *name)
+  {
+    if (unlikely(nullptr == name))
+      {
+        throw OpenGLException("nullptr passed to texture()");
+      }
+
+    auto ptr = m_textures[name].get();
+    if (unlikely(nullptr == ptr))
+      {
+        throw OpenGLException("GLTexture '" + std::string(name) +
+                              "' does not exist");
+      }
+
+    T* texture = dynamic_cast<T*>(ptr);
+    if (unlikely(nullptr == texture))
+      {
+        throw OpenGLException("GLTexture '" + std::string(name) +
+                              "' exists but has wrong template type");
+      }
+
+    DEBUG("VAO::GetTexture '%s' %p", name, texture);
+    return *texture;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Check if all VBOs have the same size.
+  //! \return true if all VBO have the same size, else return false.
+  //------------------------------------------------------------------
+  bool checkVBOSizes()
+  {
+    if (m_vbos.empty())
+      {
+        return true;
+      }
+    /* FIXME
+    size_t size = m_vbos.begin().second->size();
+    for (auto const& it: m_vbos)
+      {
+        if (size != it.second->size())
+          {
+            ERROR("VAO %s does not have all of its VBOs with the same size",
+                  name().c_str());
+            return false;
+          }
+      }
+    */
+    return true;
   }
 
 private:
 
+  //! \note: name duplicata is not managed because this case should
+  //! never happen.
+  template<typename T>
+  bool createVBO(const char *name, size_t const vbo_init_size, BufferUsage const usage)
+  {
+    if (unlikely(hasVBO(name)))
+      {
+        ERROR("Try to create a VBO with name '%s' already used", name);
+        return false;
+      }
+    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
+    DEBUG("allocate new VBO '%s' %p", name, m_vbos[name].get());
+    return true;
+  }
+
+  template<typename T>
+  bool createTexture(const char *name)
+  {
+    if (unlikely(hasTexture(name)))
+      {
+        ERROR("Try to create a texture with name '%s' already used", name);
+        return false;
+      }
+    m_textures[name] = std::make_unique<T>(name);
+    DEBUG("allocate new Texture '%s' %p", name, m_textures[name].get());
+    return true;
+  }
+
   virtual bool create() override
   {
-    LOGD("VAO '%s' create", name().c_str());
+    DEBUG("VAO '%s' create", name().c_str());
     glCheck(glGenVertexArrays(1, &m_handle));
     return false;
   }
 
   virtual void release() override
   {
-    LOGD("VAO '%s' release", name().c_str());
+    DEBUG("VAO '%s' release", name().c_str());
     glCheck(glDeleteVertexArrays(1, &m_handle));
   }
 
   virtual void activate() override
   {
-    LOGD("VAO '%s' activate", name().c_str());
+    DEBUG("VAO '%s' activate", name().c_str());
     glCheck(glBindVertexArray(m_handle));
   }
 
   virtual void deactivate() override
   {
-    LOGD("VAO '%s' deactivate", name().c_str());
+    DEBUG("VAO '%s' deactivate", name().c_str());
     glCheck(glBindVertexArray(0U));
   }
 
@@ -165,11 +244,17 @@ private:
     return false;
   }
 
-private:
-public: //FIXME
+  //Callable by GLProgram
+  //static void unbind()
+  //{
+  //  glCheck(glBindVertexArray(0U));
+  //}
 
-  std::map<std::string, std::unique_ptr<IGLObject>> m_vbos;
-  GLenum prog; // attached prog
+private:
+
+  std::unordered_map<std::string, std::unique_ptr<IGLObject>> m_vbos;
+  std::unordered_map<std::string, std::unique_ptr<IGLTexture>> m_textures;
+  GLenum prog = 0; // unbinded prog
 };
 
 #endif /* GL_VERTEX_ARRAY_HPP_ */

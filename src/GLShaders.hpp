@@ -28,8 +28,47 @@
 #  define GLSHADER_HPP_
 
 #  include "IGLObject.tpp"
-#  include "File.hpp"
 #  include <vector>
+
+//------------------------------------------------------------------
+//! \param filename the file path to read.
+//! \param the buffer receiving the content of the file.
+//! \return true if success, else false.
+//------------------------------------------------------------------
+static bool readAllFile(std::string const& filename, std::string& buffer)
+{
+  std::ifstream infile;
+  bool res = false;
+
+  // Read the shader code from a file
+  infile.open(filename, std::ifstream::in);
+  if (infile.is_open())
+    {
+      infile.seekg(0, std::ios::end);
+      std::streampos pos = infile.tellg();
+      if (pos > 0)
+        {
+          buffer.resize(static_cast<size_t>(pos));
+          infile.seekg(0, std::ios::beg);
+          infile.read(&buffer[0U],
+                      static_cast<std::streamsize>(buffer.size()));
+          res = infile.good();
+          if (!res)
+            {
+              ERROR("Failed reading the whole file '%s'. Reason is '%s'",
+                    filename.c_str(), strerror(errno));
+            }
+        }
+      infile.close();
+    }
+  else
+    {
+      ERROR("Failed open file '%s'. Reason is '%s'",
+            filename.c_str(), strerror(errno));
+    }
+
+  return res;
+}
 
 // **************************************************************
 //! \class GLShader GLShader.hpp this class allows to load a
@@ -89,15 +128,15 @@ public:
   {
     throw_if_already_compiled();
 
-    name() = File::fileName(filename);
+    name() = file_name(filename);
 
-    bool loaded = File::readAllFile(filename, m_shader_code);
-    LOGI("FromFile: Shader: '%s'", m_shader_code.c_str());
+    bool loaded = readAllFile(filename, m_shader_code);
+    DEBUG("FromFile: Shader: '%s'", m_shader_code.c_str());
     if (false == loaded)
       {
         std::string msg = "Failed loading shader code '"
           + filename + "'";
-        LOGES("%s", msg.c_str());
+        ERROR("%s", msg.c_str());
         m_error_msg += '\n' + msg;
       }
     return loaded;
@@ -159,7 +198,7 @@ private:
   //------------------------------------------------------------------
   virtual bool create() override
   {
-    LOGD("Shader::create %s", name().c_str());
+    DEBUG("Shader::create %s", name().c_str());
     m_handle = glCheck(glCreateShader(m_target));
     return false;
   }
@@ -169,7 +208,7 @@ private:
   //------------------------------------------------------------------
   virtual void release() override
   {
-    LOGD("Shader::release");
+    DEBUG("Shader '%s' release", name().c_str());
     glCheck(glDeleteShader(m_handle));
   }
 
@@ -194,7 +233,7 @@ private:
   //------------------------------------------------------------------
   virtual bool setup() override
   {
-    LOGD("Shader::setup %s", name().c_str());
+    DEBUG("Shader::setup %s", name().c_str());
     if (loaded() && !compiled())
       {
         char const *source = m_shader_code.c_str();
@@ -202,7 +241,7 @@ private:
         glCheck(glShaderSource(m_handle, 1, &source, &length));
         glCheck(glCompileShader(m_handle));
         m_compiled = checkCompilationStatus(m_handle);
-        LOGD("Shader::setup %d", m_compiled);
+        DEBUG("Shader::setup %d", m_compiled);
       }
     else
       {
@@ -210,7 +249,7 @@ private:
           "Cannot compile the shader %s. Reason is "
           "'already compiled or no shader code attached'";
         m_error_msg += '\n' + msg;
-        LOGW("%s", msg.c_str());
+        ERROR("%s", msg.c_str());
       }
     return !m_compiled;
   }
@@ -243,7 +282,7 @@ private:
         glCheck(glGetShaderInfoLog(obj, length, &length, &log[0U]));
         std::string msg = &log[0U];
         m_error_msg += '\n' + msg;
-        LOGES("%s", msg.c_str());
+        ERROR("%s", msg.c_str());
       }
     else
       {

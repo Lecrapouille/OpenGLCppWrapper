@@ -28,8 +28,6 @@
 #ifndef IGLOBJECT_HPP_
 #  define IGLOBJECT_HPP_
 
-//#  include "ClassCounter.tpp"
-#  include "Logger.hpp"
 #  include "NonCppStd.hpp"
 #  include "GLEnum.hpp"
 
@@ -41,7 +39,7 @@
 //! Texture will derivate from this class.
 // **************************************************************
 template<class T>
-class IGLObject//: protected InstanceCounter<IGLObject<T>>
+class IGLObject
 {
 public:
 
@@ -145,7 +143,7 @@ public:
   {
     /* FIXME if (unlikely(!opengl::hasCreatedContext()))
        {
-       LOGD("O::begin perdu");
+       DEBUG("O::begin perdu");
        return ;
        }
     */
@@ -188,15 +186,15 @@ public:
   //! \brief Delete the object from GPU memory. The object will
   //! be created() back when calling begin().
   //-------------------------------------------------------------
-  void destroy()
+  virtual void destroy()
   {
-    if (false == opengl::hasCreatedContext())
-      return ;
-
-    if (isValid())
+    if (opengl::hasCreatedContext())
       {
-        deactivate();
-        release();
+        if (isValid())
+          {
+            deactivate();
+            release();
+          }
       }
     init();
   }

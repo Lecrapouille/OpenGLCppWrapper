@@ -346,6 +346,11 @@ make coverage -j4
 
 If all tests passed the coverage report is created in `doc/coverage/index.html` and is opened automaticaly.
 
+### Verbose
+
+To activate console logs for debuging, see in `src/Makefile` and in `examples/Makefile` gcc flags `-DERROR -UDEBUG` and set to
+`-DERROR -DDEBUG`.
+
 ## API Documentation
 
 * [Work to be finished](https://github.com/Lecrapouille/OpenGLCppWrapper/issues/1)

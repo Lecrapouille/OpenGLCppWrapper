@@ -1,1 +1,28 @@
-0.1: initial version
+version 0.3:
+
+    GLProg can reserve number of elements when creating VBOs.
+    GLProg can do more checks on VAO.
+    GLProgram no longer store internally textures. VAO do it. This fix case where two VAO use the same texture of the same GLProgram.
+    Make private some public methods.
+    Add more draw() methods.
+    Use GLSL 330 fin shaders.
+    Remove useless files: Logger, File, Singleton.
+    Split Maths file into several files.
+    Add multi-texturing example.
+
+version 0.2:
+
+    Fix possible segfault when OpenGL context is not created.
+    Fix segfault on GLProgram destructor when VAO is not binded.
+    SceneGraph: Smart pointers and cleaning class.
+    Change in public interfaces glenum by strong c++ type. This will help the developper to detect typage errors.
+    PendingData: Replacing std::valarray by std::vector because it's not faster even for math operations.
+    VBO: PendingData is no longer a member variable but inherit.
+    Fix missing type() method for index buffer array (EBO).
+    Adding an example of drawing VBO with indices.
+    Reduce number #include.
+    Replace std::exception with this library exceptions.
+
+version 0.1:
+
+    Basic but functional features.

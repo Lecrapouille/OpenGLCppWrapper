@@ -43,7 +43,7 @@ OBJ   += backward.o
 else
 OBJ   +=
 endif
-OBJ   += Example01.o Example02.o Example03.o main.o
+OBJ   += Example01.o Example02.o Example03.o Example04.o main.o
 
 ###################################################
 # Compilation options.
@@ -57,7 +57,7 @@ VPATH += $(P)/src:$(P)/external/backward-cpp:$(P)/external/imgui
 
 ###################################################
 # Project defines
-DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
+DEFINES += -DCHECK_OPENGL -DERROR -UDEBUG
 DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 
 ###################################################

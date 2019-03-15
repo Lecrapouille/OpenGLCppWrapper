@@ -45,8 +45,7 @@ class GLBuffer
 public:
 
   //! \brief Constructor with the object name
-  GLBuffer(std::string const& name, const GLenum target,
-           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  GLBuffer(std::string const& name, const GLenum target, BufferUsage const usage)
     : IGLObject(name)
   {
     IGLObject::m_target = target;
@@ -54,9 +53,28 @@ public:
   }
 
   //! \brief Constructor with the object name
-  GLBuffer(const char *name, const GLenum target,
-           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  GLBuffer(const char *name, const GLenum target, BufferUsage const usage)
     : IGLObject(name)
+  {
+    IGLObject::m_target = target;
+    m_usage = static_cast<GLenum>(usage);
+  }
+
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLBuffer(std::string const& name, const GLenum target, const size_t init_size, BufferUsage const usage)
+    : IGLObject(name),
+      PendingContainer<T>(init_size)
+  {
+    IGLObject::m_target = target;
+    m_usage = static_cast<GLenum>(usage);
+  }
+
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLBuffer(const char *name, const GLenum target, const size_t init_size, BufferUsage const usage)
+    : IGLObject(name),
+      PendingContainer<T>(init_size)
   {
     IGLObject::m_target = target;
     m_usage = static_cast<GLenum>(usage);
@@ -76,32 +94,32 @@ private:
 
   virtual bool create() override
   {
-    LOGD("VBO '%s' create", name().c_str());
+    DEBUG("VBO '%s' create", name().c_str());
     glCheck(glGenBuffers(1, &m_handle));
     return false;
   }
 
   virtual void release() override
   {
-    LOGD("VBO '%s' release", name().c_str());
+    DEBUG("VBO '%s' release", name().c_str());
     glCheck(glDeleteBuffers(1, &m_handle));
   }
 
   virtual void activate() override
   {
-    LOGD("VBO '%s' activate", name().c_str());
+    DEBUG("VBO '%s' activate", name().c_str());
     glCheck(glBindBuffer(m_target, m_handle));
   }
 
   virtual void deactivate() override
   {
-    LOGD("VBO '%s' deactivate", name().c_str());
+    DEBUG("VBO '%s' deactivate", name().c_str());
     glCheck(glBindBuffer(m_target, 0));
   }
 
   virtual bool setup() override
   {
-    LOGD("VBO '%s' setup", name().c_str());
+    DEBUG("VBO '%s' setup", name().c_str());
     const GLsizeiptr bytes = static_cast<GLsizeiptr>
       (PendingContainer<T>::capacity() * sizeof (T));
     glCheck(glBufferData(m_target, bytes, NULL, m_usage));
@@ -119,7 +137,7 @@ private:
     size_t pos_start, pos_end;
     PendingContainer<T>::getPendingData(pos_start, pos_end);
     PendingContainer<T>::clearPending();
-    LOGD("VBO '%s' update %u -> %u",
+    DEBUG("VBO '%s' update %u -> %u",
          name().c_str(), pos_start, pos_end);
 
     size_t offset = sizeof (T) * pos_start;
@@ -157,6 +175,22 @@ public:
     : GLBuffer<T>(name, GL_ARRAY_BUFFER, usage)
   {
   }
+
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLVertexBuffer(std::string const& name, const size_t init_size,
+                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+    : GLBuffer<T>(name, GL_ARRAY_BUFFER, init_size, usage)
+  {
+  }
+
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLVertexBuffer(const char *name, const size_t init_size,
+                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+    : GLBuffer<T>(name, GL_ARRAY_BUFFER, init_size, usage)
+  {
+  }
 };
 
 // **************************************************************
@@ -178,6 +212,22 @@ public:
   GLIndexBuffer(const char *name,
                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
+  {
+  }
+
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLIndexBuffer(std::string const& name, const size_t init_size,
+                BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+    : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, init_size, usage)
+  {
+  }
+
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLIndexBuffer(const char *name, const size_t init_size,
+                BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+    : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, init_size, usage)
   {
   }
 

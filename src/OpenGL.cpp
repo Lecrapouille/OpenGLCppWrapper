@@ -64,9 +64,8 @@ namespace opengl
         // Do not use directly LOG macros because it will catch this
         // filename and its line instead of the faulty file/line which
         // produced the OpenGL error.
-        Logger::instance().log(&std::cerr, logger::Error,
-                               "[%s::%d] Failed executing '%s'. Reason is '%s'\n",
-                               filename, line, expression, error);
+        ERROR("Failed executing '%s'. Reason is '%s'",
+              filename, line, expression, error);
       }
   }
 } // namespace

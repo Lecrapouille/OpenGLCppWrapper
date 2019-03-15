@@ -18,7 +18,6 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "Logger.hpp"
 #define protected public
 #define private public
 #include "OpenGL.hpp"
@@ -101,6 +100,7 @@ TESTSUITE(TS_IGLObject)
 {
   TEST(T_GLObject)
     {
+      //opengl::hasCreatedContext() = true;
       FakeObject obj;
 
       // --- Check init
@@ -181,12 +181,12 @@ TESTSUITE(TS_IGLObject)
       ASSERT_EQ(obj.m_need_setup, true);
       ASSERT_EQ(obj.m_need_create, true);
       ASSERT_EQ(obj.m_need_update, false);
-      ASSERT_EQ(obj.m_position, 9);
+      ASSERT_EQ(obj.m_position, 7);
       ASSERT_EQ(obj.m_create_position, 0);
       ASSERT_EQ(obj.m_activate_position, 4);
       ASSERT_EQ(obj.m_setup_position, 2);
-      ASSERT_EQ(obj.m_deactivate_position, 7);
+      ASSERT_EQ(obj.m_deactivate_position, 6);
       ASSERT_EQ(obj.m_update_position, 5);
-      ASSERT_EQ(obj.m_release_position, 8);
+      ASSERT_EQ(obj.m_release_position, 0);
     }
 }

@@ -15,7 +15,7 @@
 #ifndef EXCEPTION_HPP_
 #  define EXCEPTION_HPP_
 
-#  include "File.hpp"
+#  include <string>
 #  include <typeinfo>
 
 class Exception: public std::exception

@@ -105,11 +105,18 @@ public:
   }
 
   //! \brief Set the orientation of the object.
-  inline void rotate(T const angle, Vector<T, 3U> const &v)
+  inline void rotate(T const angle, Vector<T, n> const &v)
   {
     m_rot_angle = angle;
     m_rot_axis = v;
     m_to_update = true;
+  }
+
+  inline Vector<T, n + 1u> rotation()
+  {
+    // FIXME Make x, y, z implicit like Vector<T, n + 1u> r(m_rot_axis, m_rot_angle);
+    Vector<T, n + 1u> r(m_rot_axis.x, m_rot_axis.y, m_rot_axis.z, m_rot_angle);
+    return r;
   }
 
   //! \brief Set the orientation of the object.

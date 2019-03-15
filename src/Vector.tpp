@@ -28,9 +28,71 @@
 // and http://www.ogre3d.org
 // *************************************************************************************************
 
-#  include "Maths.hpp"
 #  include <initializer_list>
 #  include <algorithm>
+#  include "NonCppStd.hpp"
+#  include <cstdint>
+#  include <cassert>
+#  include <cmath>
+#  include <fstream>
+
+namespace maths
+{
+//! \brief
+static uint32_t maxUlps = 4U;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+inline bool almostEqual(float const A, float const B)
+{
+  if (A == B)
+    return true;
+
+  // Make sure maxUlps is non-negative and small enough that the
+  // default NAN won't compare as equal to anything.
+  assert(maths::maxUlps < 4U * 1024U * 1024U);
+
+  int aInt = *(int*) &A;
+
+  // Make aInt lexicographically ordered as a twos-complement int
+  if (aInt < 0)
+    aInt = 0x80000000 - aInt;
+
+  // Make bInt lexicographically ordered as a twos-complement int
+  int bInt = *(int*) &B;
+
+  if (bInt < 0)
+    bInt = 0x80000000 - bInt;
+
+  int intDiff = std::abs(aInt - bInt);
+  if (intDiff <= (int) maths::maxUlps)
+    return true;
+  return false;
+}
+#pragma GCC diagnostic pop
+
+inline bool almostZero(float const A)
+{
+  return almostEqual(A, 0.0f);
+}
+
+//! \brief Constrain value: std::min(std::max(a[i], lower), upper)
+template<typename T>
+inline T clamp(T const value, T const lower, T const upper)
+{
+  if (value < lower)
+    return lower;
+
+  if (value > upper)
+    return upper;
+
+  return value;
+}
+} // namespace
 
 // *************************************************************************************************
 //! \brief Macro for building constructors
@@ -454,7 +516,7 @@ namespace vector
   //! \brief Return a matrix where each e
   DEFINE_FUN2_OPERATOR(min, std::min)
   DEFINE_FUN2_OPERATOR(max, std::max)
-  DEFINE_FUN1_OPERATOR(abs, maths::abs)
+  DEFINE_FUN1_OPERATOR(abs, std::abs)
   DEFINE_BOOL_OPERATOR(ge, >=)
   DEFINE_BOOL_OPERATOR(gt, >)
   DEFINE_BOOL_OPERATOR(le, <=)
@@ -615,7 +677,7 @@ namespace vector
   template <typename T, size_t n>
   inline T length(Vector<T, n> const &a)
   {
-    return maths::sqrt(squaredLength(a));
+    return std::sqrt(squaredLength(a));
   }
 
   template <typename T, size_t n>
@@ -633,7 +695,7 @@ namespace vector
   template <typename T, size_t n>
   inline T distance(Vector<T, n> const &a, Vector<T, n> const &b)
   {
-    return maths::sqrt(squaredDistance(a, b));
+    return std::sqrt(squaredDistance(a, b));
   }
 
   template <typename T, size_t n>
@@ -677,7 +739,7 @@ namespace vector
   {
     // Implementation due to Sam Hocevar - see blog post:
     // http://lolengine.net/blog/2013/09/21/picking-orthogonal-Vector-combing-coconuts
-    if (maths::abs(a.x) > maths::abs(a.z))
+    if (std::abs(a.x) > std::abs(a.z))
       return { -a.y, a.x, T(0) };
     else
       return { T(0), -a.z, a.y };

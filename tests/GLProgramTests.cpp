@@ -18,7 +18,6 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "Logger.hpp"
 #define protected public
 #define private public
 #include "OpenGL.hpp"
@@ -72,12 +71,12 @@ TESTSUITE(Programs)
       try {
         prog.uniform<int>("aaa");
         ASSERT_TRUE("Exception should have occured");
-      } catch(std::out_of_range) { }
+      } catch(OpenGLException) { }
 
       try {
         prog.uniform<int>(nullptr);
         ASSERT_TRUE("Exception should have occured");
-      } catch(std::invalid_argument) { }
+      } catch(OpenGLException) { }
 
       // TODO: try add name conflict wit different types
       prog.addNewUniform(GL_FLOAT, "u1");
@@ -102,10 +101,11 @@ TESTSUITE(Programs)
       ASSERT_EQ(true, prog.binded());
       ASSERT_EQ(42, vao.prog);
       ASSERT_EQ(true, prog.m_vao == &vao);
+
       try {
         prog.getVBO<int>("");
         ASSERT_TRUE("Exception should have occured");
-      } catch(std::out_of_range) { }
+      } catch(OpenGLException) { }
 
       // TODO: try add name conflict wit different types
       ASSERT_EQ(0_z, prog.attributeNames().size());
@@ -140,5 +140,27 @@ TESTSUITE(Programs)
 
       // Restore uninitialized prog else OpenGL will segfault
       prog.m_handle = 0;
+    }
+
+    TEST(bindVAOtoWrongGLProg)
+    {
+      GLProgram prog1("prog1");
+      prog1.m_handle = 42;
+      prog1.m_compiled = true;
+      GLProgram prog2("prog2");
+      prog2.m_handle = 43;
+      prog2.m_compiled = true;
+      GLVAO vao1;
+      GLVAO vao2;
+
+      ASSERT_EQ(0, vao1.prog);
+      ASSERT_EQ(0, vao2.prog);
+      ASSERT_EQ(true, prog1.bind(vao1));
+      ASSERT_EQ(true, prog2.bind(vao2));
+      ASSERT_EQ(42, vao1.prog);
+      ASSERT_EQ(43, vao2.prog);
+      // Try binding VAO to the wrong GLProg
+      ASSERT_EQ(false, prog1.bind(vao2));
+      ASSERT_EQ(false, prog2.bind(vao1));
     }
 }

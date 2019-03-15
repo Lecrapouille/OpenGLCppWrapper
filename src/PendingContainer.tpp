@@ -26,6 +26,7 @@
 #  include <vector>
 #  include <algorithm>
 #  include <cmath>
+#  include <fstream>
 
 // **************************************************************
 //! \brief PendingContainer is a std::valarray memorizing elements
@@ -53,7 +54,7 @@ public:
  PendingContainer(PendingContainer const& other)
    : PendingData(other.getPendingData()),
       m_container(other.m_container)
-  {std::cout << "cstCopyPendingContainer: " << std::endl;
+  {
   }
 
   PendingContainer(std::vector<T> const& other)

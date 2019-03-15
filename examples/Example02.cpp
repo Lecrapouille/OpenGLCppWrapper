@@ -1,4 +1,5 @@
 #include "Example02.hpp"
+#include <sstream>
 
 //------------------------------------------------------------------
 //! \file Display a scere graphe made of 3 moving robots. Each robots
@@ -9,7 +10,7 @@
 CubicRobot::CubicRobot(VAOPtr cube, const char *name)
   : SceneNode(nullptr, name)
 {
-  LOGI("Cstr CubicRobot");
+  DEBUG("Cstr CubicRobot");
 
   // Body
   m_body = attach(cube, "Body");
@@ -47,7 +48,7 @@ CubicRobot::CubicRobot(VAOPtr cube, const char *name)
 //------------------------------------------------------------------
 void CubicRobot::update(float const dt)
 {
-  LOGI("Robot::update");
+  DEBUG("Robot::update");
 
   const GLfloat degreesPerSecond = 1.0f;
   degreesRotated += dt * degreesPerSecond;
@@ -84,7 +85,9 @@ void GLImGUI::observeNode(SceneNode const& node) const
       ss << node.worldTransform();
       ImGui::TextUnformatted(ss.str().c_str());
 
-      if (ImGui::TreeNode("Child Nodes:"))
+      ss.str("");
+      ss << "Has child " << node.nbChildren() << " Nodes:";
+      if (ImGui::TreeNode(ss.str().c_str()))
         {
           for (auto const& i: node.children())
             {
@@ -143,11 +146,11 @@ GLExample02::GLExample02()
 
 GLExample02::~GLExample02()
 {
-  LOGD("---------------- quit -----------------");
+  DEBUG("---------------- quit -----------------");
   std::cout << "Bye" << std::endl;
 }
 
-void GLExample02::CreateCube()
+bool GLExample02::CreateCube()
 {
   m_cube = std::make_shared<GLVAO>("VAO_cube");
 
@@ -156,7 +159,7 @@ void GLExample02::CreateCube()
   m_prog.bind(*m_cube);
 
   // Fill the VBO for vertices
-  m_prog.attribute<Vector3f>("a_position") =
+  m_prog.attribute<Vector3f>("position") =
     {
       //  X     Y     Z
 
@@ -213,11 +216,11 @@ void GLExample02::CreateCube()
   // first version of the SceneGraph example
   // the cube was not centered. So let see
   // how to translate it.
-  m_prog.attribute<Vector3f>("a_position")
+  m_prog.attribute<Vector3f>("position")
     += Vector3f(0.0f, 1.0f, 0.0f);
 
   // Fill the VBO for texture coordiantes
-  m_prog.attribute<Vector2f>("a_texcoord") =
+  m_prog.attribute<Vector2f>("UV") =
     {
       //  U     V
 
@@ -269,6 +272,14 @@ void GLExample02::CreateCube()
       Vector2f(0.0f, 0.0f),
       Vector2f(0.0f, 1.0f)
     };
+
+  // Create the texture
+  m_prog.texture<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.texture<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_prog.texture<GLTexture2D>("texID").load("textures/wooden-crate.jpg"))
+    return false;
+
+  return true;
 }
 
 //------------------------------------------------------------------
@@ -276,7 +287,7 @@ void GLExample02::CreateCube()
 //------------------------------------------------------------------
 bool GLExample02::setup()
 {
-  LOGI("GLExample02::setup()");
+  DEBUG("GLExample02::setup()");
 
   // Init the context of the DearIMgui library
   if (false == m_gui.setup(*this))
@@ -300,28 +311,23 @@ bool GLExample02::setup()
       return false;
     }
 
-  // Create the texture
-  m_prog.uniform<GLTexture2D>("u_texture").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.uniform<GLTexture2D>("u_texture").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.uniform<GLTexture2D>("u_texture").load("wooden-crate.jpg"))
-    return false;
-
   // Projection matrices
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
-  m_prog.uniform<Matrix44f>("u_projection") =
+  m_prog.uniform<Matrix44f>("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10000.0f);
-  m_prog.uniform<Matrix44f>("u_view") =
+  m_prog.uniform<Matrix44f>("view") =
     matrix::lookAt(Vector3f(0.0f, 10.0f, 100.0f), Vector3f(30), Vector3f(0,1,0));
 
   // Uniforms from the Example01
-  m_prog.uniform<float>("u_scale") = 1.0f;
-  m_prog.uniform<Vector4f>("u_color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
+  m_prog.uniform<float>("scale") = 1.0f;
+  m_prog.uniform<Vector4f>("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
 
   // Attach 3 robots in the scene graph. Each robot is a scene node.
-  LOGD("Create graph scene");
+  DEBUG("Create graph scene");
 
   // Init VAO and its VBOs.
-  CreateCube();
+  if (!CreateCube())
+    return false;
 
   // Create 3 robots
   SceneNodePtr root = std::make_shared<SceneNode>(nullptr, "root");
@@ -362,21 +368,22 @@ bool GLExample02::setup()
 }
 
 //------------------------------------------------------------------
-//! Draw scene graph (made of robots)
+//! Draw the scene graph (made of robots)
 //------------------------------------------------------------------
 bool GLExample02::draw()
 {
-  LOGI("GLExample02::draw()");
+  DEBUG("GLExample02::draw()");
 
   // clear everything
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  // Move robots
+  // Traverse the scene graph for moving robots
   m_scenegraph.update(dt());
 
-  // Draw robots
-  m_scenegraph.draw(*this);
+  // Traverse the scene graph for drawing robots.
+  // drawScene() will be called for each node.
+  m_scenegraph.drawnBy(*this);
 
   // Paint the GUI
   if (false == m_gui.draw())
@@ -386,13 +393,12 @@ bool GLExample02::draw()
 }
 
 //------------------------------------------------------------------
-//! Draw recursively a node from a scene graph
+//! Draw the current Scene node (= draw a part of robots)
 //------------------------------------------------------------------
-void GLExample02::drawNode(GLVAO& vao, Matrix44f const& transform)
+void GLExample02::drawSceneNode(GLVAO& vao, Matrix44f const& transform)
 {
-  m_prog.uniform<Matrix44f>("u_model") = transform;
+  m_prog.uniform<Matrix44f>("model") = transform;
 
   // Draw the 3D model
-  m_prog.bind(vao);
-  m_prog.draw(DrawPrimitive::TRIANGLES, 0, 36);
+  m_prog.draw(vao, DrawPrimitive::TRIANGLES, 0, 36); // FIXME: use implicit vertices count
 }
