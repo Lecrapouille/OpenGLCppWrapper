@@ -28,69 +28,85 @@
 //------------------------------------------------------------------
 //! \brief Define a 3D SceneGraph node (matrix 4x4 of float + VAO)
 //------------------------------------------------------------------
-typedef SceneNode<GLVAO, float, 3U> SceneNode_t;
+using SceneGraph    = SceneGraph_t<std::string, GLVAO, float, 3u>;
+using SceneNode     = SceneGraph::Node;
+using SceneNodePtr  = std::shared_ptr<SceneNode>;
+using VAOPtr = std::shared_ptr<GLVAO>;
 
-//------------------------------------------------------------------
-//! \brief This class allows to display a GUI for debuging the scene
-//! graph.
-//------------------------------------------------------------------
+// *****************************************************************
+//! \brief This class allows to display a GUI for debuging a scene
+//! graph attached to it.
+// *****************************************************************
 class GLImGUI: public IGLImGUI
 {
 public:
 
   GLImGUI()
-    : m_root(nullptr)
-  {
-  }
+  {}
 
-  inline void setNode(SceneNode_t &root)
+  //------------------------------------------------------------------
+  //! \brief Attach a scene graph for its monotoring
+  //------------------------------------------------------------------
+  inline void observeGraph(SceneGraph& graph)
   {
-    m_root = &root;
+    m_graph = &graph;
   }
 
 protected:
 
+  //------------------------------------------------------------------
+  //! \brief override IGLImGUI method: debug the scenegraph
+  //------------------------------------------------------------------
   virtual bool render() override;
-  void drawNode(SceneNode_t &node);
+
+  //------------------------------------------------------------------
+  //! \brief Iterate on scene nodes for their display.
+  //------------------------------------------------------------------
+  void observeNode(SceneNode const& node) const;
 
 private:
 
-  SceneNode_t *m_root;
+  SceneGraph* m_graph = nullptr;
 };
 
-//------------------------------------------------------------------
+// *****************************************************************
 //! \brief a CubicRobot is an robot made of cubes. A CubicRobot is a
 //! node of the scene graph. A robot is made of a head, body, legs
-//! and arms which are also a node of the scene graph.
-//------------------------------------------------------------------
-class CubicRobot: public SceneNode_t
+//! and arms which are also a node of the scene graph. To make it
+//! simple we create a single 3D cube model for each nodes but feel
+//! free to add more complex 3D objects.
+// *****************************************************************
+class CubicRobot: public SceneNode
 {
 public:
 
-  CubicRobot(const char *name, GLVAO& cube);
+  CubicRobot(VAOPtr cube, const char *name);
   ~CubicRobot()
   {
     LOGD("---------------- destroy CubicRobot -----------------");
   }
+
   virtual void update(float const dt) override;
 
 private:
 
-  SceneNode_t *m_body;
-  SceneNode_t *m_head;
-  SceneNode_t *m_leftArm;
-  SceneNode_t *m_rightArm;
-  SceneNode_t *m_leftLeg;
-  SceneNode_t *m_rightLeg;
+  SceneNodePtr m_body;
+  SceneNodePtr m_head;
+  SceneNodePtr m_leftArm;
+  SceneNodePtr m_rightArm;
+  SceneNodePtr m_leftLeg;
+  SceneNodePtr m_rightLeg;
   float degreesRotated = 0.0f;
 };
 
-//------------------------------------------------------------------
+// *****************************************************************
 //! \brief Display a scere graphe made of 3 moving robots. Each robots
 //! are nodes of the scere graph. Each element of robots is also a
 //! part of the scene graph.
-//------------------------------------------------------------------
-class GLExample02: public IGLWindow
+// *****************************************************************
+class GLExample02
+  : public IGLWindow,
+    public ISceneGraphRenderer<GLVAO, float, 3u>
 {
 public:
 
@@ -99,23 +115,21 @@ public:
 
 private:
 
-  virtual void onWindowSizeChanged(const float width, const float height) override;
+  virtual void onWindowSizeChanged(float const width,
+                                   float const height) override;
   virtual bool setup() override;
   virtual bool draw() override;
-  void drawNode(SceneNode_t &node);
   void CreateCube();
+  virtual void drawNode(GLVAO& vao, Matrix44f const& transformation) override;
 
 private:
 
-  GLVertexShader     vs;
-  GLFragmentShader   fs;
-  GLVAO              m_cube; // FIXME interverting with m_prog produce a crash
-  GLProgram          m_prog; // FIXME
-  CubicRobot        *m_robot1;
-  CubicRobot        *m_robot2;
-  CubicRobot        *m_robot3;
-  SceneNode_t       *m_root;
-  GLImGUI            m_gui;
+  GLVertexShader    vs;
+  GLFragmentShader  fs;
+  VAOPtr            m_cube;
+  GLProgram         m_prog;
+  SceneGraph        m_scenegraph;
+  GLImGUI           m_gui;
 };
 
 #endif // EXAMPLE_02_HPP

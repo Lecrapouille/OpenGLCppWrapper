@@ -43,7 +43,7 @@ OBJ   += backward.o
 else
 OBJ   +=
 endif
-OBJ   += Example01.o Example02.o main.o
+OBJ   += Example01.o Example02.o Example03.o main.o
 
 ###################################################
 # Compilation options.

@@ -92,7 +92,7 @@ public:
     name() = File::fileName(filename);
 
     bool loaded = File::readAllFile(filename, m_shader_code);
-    LOGI("FromFile: Shader: '" + m_shader_code + "'");
+    LOGI("FromFile: Shader: '%s'", m_shader_code.c_str());
     if (false == loaded)
       {
         std::string msg = "Failed loading shader code '"

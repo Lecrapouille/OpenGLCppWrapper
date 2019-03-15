@@ -27,10 +27,7 @@
 #ifndef GLTEXTURES_HPP_
 #  define GLTEXTURES_HPP_
 
-#  include "NonCppStd.hpp"
-#  include <memory>
 #  include "IGLObject.tpp"
-//#  include "Resource.hpp"
 #  include "PendingData.hpp"
 #  include "SOIL/SOIL.h"
 
@@ -39,7 +36,6 @@
 // **************************************************************
 class IGLTexture
   : public IGLObject<GLenum>,
-    //public Resource,
     protected PendingData
 {
 public:
@@ -61,35 +57,39 @@ public:
     destroy();
   }
 
-  void interpolation(const float min_filter, const float  mag_filter)
+  void interpolation(TextureMinFilter const min_filter,
+                     TextureMagFilter const mag_filter)
   {
-    m_min_filter = min_filter;
-    m_mag_filter = mag_filter;
+    m_options.minFilter = min_filter;
+    m_options.magFilter = mag_filter;
     redoSetup();
   }
 
-  void interpolation(const float min_filter)
+  void wrapping(TextureWrap const wrap)
   {
-    m_min_filter = min_filter;
-    m_mag_filter = min_filter;
+    m_options.wrapS = wrap;
+    m_options.wrapT = wrap;
     redoSetup();
   }
 
-  void wrapping(const float wrap)
+  void options(TextureOptions const& options)
   {
-    m_wrapping = wrap;
-    redoSetup();
+    m_options = options;
   }
 
 protected:
 
   void applyTextureParam()
   {
-    glCheck(glTexParameterf(m_target, GL_TEXTURE_MIN_FILTER, m_min_filter));
-    glCheck(glTexParameterf(m_target, GL_TEXTURE_MAG_FILTER, m_mag_filter));
-    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_S, m_wrapping));
-    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_T, m_wrapping));
-    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+    glCheck(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER,
+                            static_cast<GLint>(m_options.minFilter)));
+    glCheck(glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER,
+                            static_cast<GLint>(m_options.magFilter)));
+    glCheck(glTexParameteri(m_target, GL_TEXTURE_WRAP_S,
+                            static_cast<GLint>(m_options.wrapS)));
+    glCheck(glTexParameteri(m_target, GL_TEXTURE_WRAP_T,
+                            static_cast<GLint>(m_options.wrapT)));
+    glCheck(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
   }
 
 private:
@@ -126,9 +126,9 @@ private:
     return false;
   }
 
-  float m_min_filter = GL_NEAREST;
-  float m_mag_filter = GL_NEAREST;
-  float m_wrapping = GL_CLAMP_TO_EDGE;
+protected:
+
+  TextureOptions m_options;
 };
 
 // **************************************************************
@@ -181,6 +181,7 @@ public:
 
     LOGI("Loading texture '%s'", filename);
 
+    // FIXME: SOIL_LOAD_RGBA should adapt from moptions.cpuPixelFormat
     TextBufPtr buf(SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGBA));
     m_buffer = std::move(buf);
 
@@ -247,10 +248,14 @@ private:
       }
 
     applyTextureParam();
-    glCheck(glTexImage2D(m_target, 0, m_gpu_format,
+    glCheck(glTexImage2D(m_target, 0,
+                         static_cast<GLint>(m_options.gpuPixelFormat),
                          static_cast<GLsizei>(m_width),
                          static_cast<GLsizei>(m_height),
-                         0, m_cpu_format, m_type, m_buffer.get()));
+                         0,
+                         static_cast<GLenum>(m_options.cpuPixelFormat),
+                         static_cast<GLenum>(m_options.pixelType),
+                         m_buffer.get()));
     return false;
   }
 
@@ -271,7 +276,9 @@ private:
 
     glCheck(glBindTexture(m_target, m_handle));
     glCheck(glTexSubImage2D(m_target, 0, x, y, width, height,
-                            m_cpu_format, m_type, m_buffer.get()));
+                            static_cast<GLenum>(m_options.cpuPixelFormat),
+                            static_cast<GLenum>(m_options.pixelType),
+                            m_buffer.get()));
 
     PendingData::clearPending();
     return false;
@@ -279,9 +286,6 @@ private:
 
   uint32_t m_width = 0;
   uint32_t m_height = 0;
-  GLenum m_cpu_format = GL_RGBA;
-  GLint m_gpu_format = GL_RGBA;
-  GLenum m_type = GL_UNSIGNED_BYTE;
   TextBufPtr m_buffer;
 };
 
@@ -293,15 +297,15 @@ private:
   GLTextureDepth2D()
     : GLTexture2D()
   {
-    m_gpu_format = GL_DEPTH_COMPONENT; // FIXME incompatible avec load() ??
-    m_cpu_format = GL_DEPTH_COMPONENT;
+    m_options.gpuPixelFormat = GL_DEPTH_COMPONENT; // FIXME incompatible avec load() ??
+    m_options.cpuPixelFormat = GL_DEPTH_COMPONENT;
   }
 
   GLTextureDepth2D(std::string const& name)
     : GLTexture2D(name)
   {
-    m_gpu_format = GL_DEPTH_COMPONENT;
-    m_cpu_format = GL_DEPTH_COMPONENT;
+    m_options.gpuPixelFormat = GL_DEPTH_COMPONENT;
+    m_options.cpuPixelFormat = GL_DEPTH_COMPONENT;
   }
   };*/
 

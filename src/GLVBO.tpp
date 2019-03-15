@@ -38,26 +38,28 @@
 //! from images or the framebuffer, and a variety of other things.
 // **************************************************************
 template<typename T>
-class GLBuffer: public IGLObject<GLenum>
+class GLBuffer
+  : public IGLObject<GLenum>,
+    public PendingContainer<T>
 {
 public:
 
   //! \brief Constructor with the object name
   GLBuffer(std::string const& name, const GLenum target,
-           const GLenum usage = GL_DYNAMIC_DRAW)
+           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : IGLObject(name)
   {
     IGLObject::m_target = target;
-    m_usage = usage;
+    m_usage = static_cast<GLenum>(usage);
   }
 
   //! \brief Constructor with the object name
   GLBuffer(const char *name, const GLenum target,
-           const GLenum usage = GL_DYNAMIC_DRAW)
+           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : IGLObject(name)
   {
     IGLObject::m_target = target;
-    m_usage = usage;
+    m_usage = static_cast<GLenum>(usage);
   }
 
   virtual ~GLBuffer() override
@@ -101,7 +103,7 @@ private:
   {
     LOGD("VBO '%s' setup", name().c_str());
     const GLsizeiptr bytes = static_cast<GLsizeiptr>
-      (m_container.capacity() * sizeof (T));
+      (PendingContainer<T>::capacity() * sizeof (T));
     glCheck(glBufferData(m_target, bytes, NULL, m_usage));
 
     return false;
@@ -109,14 +111,14 @@ private:
 
   virtual inline bool needUpdate() const override
   {
-    return m_container.hasPendingData();
+    return PendingContainer<T>::hasPendingData();
   }
 
   virtual bool update() override
   {
     size_t pos_start, pos_end;
-    m_container.getPendingData(pos_start, pos_end);
-    m_container.clearPending();
+    PendingContainer<T>::getPendingData(pos_start, pos_end);
+    PendingContainer<T>::clearPending();
     LOGD("VBO '%s' update %u -> %u",
          name().c_str(), pos_start, pos_end);
 
@@ -125,71 +127,13 @@ private:
     glCheck(glBufferSubData(m_target,
                             static_cast<GLintptr>(offset),
                             static_cast<GLsizeiptr>(nbytes),
-                            &(m_container.m_container[0])));
+                            PendingContainer<T>::to_array()));
     return false;
   }
 
 private:
 
   GLenum m_usage;
-
-public:
-
-  PendingContainer<T> m_container;
-
-
-  /*
-    dtype = [("position", np.float32, 3),
-              ("color",    np.float32, 4)]
-     V = np.zeros(4,dtype).view(gloo.VertexBuffer)
-
-doit donner:
-
-V.tofile("qq.bin")
-00000000  00 00 5c 42 00 00 5c 42  00 00 5c 42 00 00 00 00  |..\B..\B..\B....|
-00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-*
-00000070
-
-et V['position'] pointe sur element 0 alors que V['color'] pointe sur
-
-   */
-
-  //TODO std::map<std::string, PendingContainer<T>> m_containers;
-  //TODO PendingContainer<T>& operator[](std::string const& name)
-  /*
-     dtype = [("position", np.float32, 3),
-              ("color",    np.float32, 4)]
-     V = np.zeros(4,dtype).view(gloo.VertexBuffer)
-
-V['position']
-VertexBuffer([[ 55.,  55.,  55.],
-       [  0.,   0.,   0.],
-       [  0.,   0.,   0.],
-       [  0.,   0.,   0.]], dtype=float32)
-
-VertexBuffer([[ 0.,  0.,  0.,  0.],
-       [ 0.,  0.,  0.,  0.],
-       [ 0.,  0.,  0.,  0.],
-       [ 0.,  0.,  0.,  0.]], dtype=float32)
-
-
-V.pending_data
-(0, 112) // 112 = 4 * (sizeof(Vect3f) + sizeof(Vector4f))
-V._pending_data = None
-
-V['position'][0] = 42
-V.pending_data
-(0, 12)
-
-VertexBuffer([([ 42.,  42.,  42.], [ 0.,  0.,  0.,  0.]),
-       ([  0.,   0.,   0.], [ 0.,  0.,  0.,  0.]),
-       ([  0.,   0.,   0.], [ 0.,  0.,  0.,  0.]),
-       ([  0.,   0.,   0.], [ 0.,  0.,  0.,  0.])],
-      dtype=[('position', '<f4', (3,)), ('color', '<f4', (4,))])
-
-
-   */
 };
 
 // **************************************************************
@@ -201,13 +145,15 @@ class GLVertexBuffer: public GLBuffer<T>
 public:
 
   //! \brief Constructor with the object name
-  GLVertexBuffer(std::string const& name, const GLenum usage = GL_DYNAMIC_DRAW)
+  GLVertexBuffer(std::string const& name,
+                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ARRAY_BUFFER, usage)
   {
   }
 
   //! \brief Constructor with the object name
-  GLVertexBuffer(const char *name, const GLenum usage = GL_DYNAMIC_DRAW)
+  GLVertexBuffer(const char *name,
+                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ARRAY_BUFFER, usage)
   {
   }
@@ -222,16 +168,29 @@ class GLIndexBuffer: public GLBuffer<T>
 public:
 
   //! \brief Constructor with the object name
-  GLIndexBuffer(std::string const& name, const GLenum usage = GL_DYNAMIC_DRAW)
+  GLIndexBuffer(std::string const& name,
+                BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
   {
   }
 
   //! \brief Constructor with the object name
-  GLIndexBuffer(const char *name, const GLenum usage = GL_DYNAMIC_DRAW)
+  GLIndexBuffer(const char *name,
+                BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
   {
   }
+
+  inline GLenum type() const;
 };
+
+template<>
+inline GLenum GLIndexBuffer<uint32_t>::type() const { return GL_UNSIGNED_INT; }
+
+template<>
+inline GLenum GLIndexBuffer<uint16_t>::type() const { return GL_UNSIGNED_SHORT; }
+
+template<>
+inline GLenum GLIndexBuffer<uint8_t>::type() const { return GL_UNSIGNED_BYTE; }
 
 #endif /* GLVERTEX_BUFFER_HPP_ */

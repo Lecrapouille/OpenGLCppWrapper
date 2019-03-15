@@ -7,6 +7,11 @@
 //! textures.
 
 //------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------
+#undef DRAW_CUBE_WITH_INDICES
+
+//------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
 void GLExample01::onWindowSizeChanged(const float width, const float height)
@@ -48,6 +53,51 @@ bool GLExample01::setup()
   // Binding empty VAO to OpenGL program will make it be populated
   // with all VBOs needed.
   m_prog.bind(m_vao_quad);
+
+#ifdef DRAW_CUBE_WITH_INDICES
+
+  // Now we have to fill VBOs with data: here vertices. Because in
+  // vertex shader a_position is vect3 we have to cast to Vector3f.
+  m_prog.attribute<Vector3f>("a_position") =
+    {
+      Vector3f(-0.5f, 0.0f, 0.5f),
+      Vector3f(0.5f, 0.0f, 0.5f),
+      Vector3f(0.5f, 1.0f, 0.5f),
+      Vector3f(-0.5f, 1.0f, 0.5f),
+      Vector3f(-0.5f, 1.0f, -0.5f),
+      Vector3f(0.5f, 1.0f, -0.5f),
+      Vector3f(0.5f, 0.0f, -0.5f),
+      Vector3f(-0.5f, 0.0f, -0.5f),
+      Vector3f(0.5f, 0.0f, 0.5f),
+      Vector3f(0.5f, 0.0f, -0.5f),
+      Vector3f(0.5f, 1.0f, -0.5f),
+      Vector3f(0.5f, 1.0f, 0.5f),
+      Vector3f(-0.5f, 0.0f, -0.5f),
+      Vector3f(-0.5f, 0.0f, 0.5f),
+      Vector3f(-0.5f, 1.0f, 0.5f),
+      Vector3f(-0.5f, 1.0f, -0.5f)
+    };
+
+   // Now we have to fill VBOs with data: here texture coordinates.
+  // Because in vertex shader a_texcoord is vect2 we have to cast
+  // to Vector2f.
+  m_prog.attribute<Vector2f>("a_texcoord") =
+    {
+      Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
+      Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
+      Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
+      Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f)
+    };
+
+  std::vector<uint8_t> ind =
+    {
+      0,1,2,3, 4,5,6,7,
+      3,2,5,4, 7,6,1,0,
+      8,9,10,11, 12,13,14,15
+    };
+  m_indices.append(ind);
+
+#else // !DRAW_CUBE_WITH_INDICES
 
   // Now we have to fill VBOs with data: here vertices. Because in
   // vertex shader a_position is vect3 we have to cast to Vector3f.
@@ -160,6 +210,8 @@ bool GLExample01::setup()
       Vector2f(0.0f, 1.0f)
     };
 
+#endif // DRAW_CUBE_WITH_INDICES
+
   // --- Create a plane (for the floor)
 
   // Binding empty VAO to OpenGL program will make it be populated
@@ -187,8 +239,8 @@ bool GLExample01::setup()
   // --- Create a texture
 
   // Texture FIXME 1 texture par VAO
-  m_prog.uniform<GLTexture2D>("u_texture").interpolation(GL_LINEAR);
-  m_prog.uniform<GLTexture2D>("u_texture").wrapping(GL_CLAMP_TO_EDGE);
+  m_prog.uniform<GLTexture2D>("u_texture").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.uniform<GLTexture2D>("u_texture").wrapping(TextureWrap::CLAMP_TO_EDGE);
   if (false == m_prog.uniform<GLTexture2D>("u_texture").load("wooden-crate.jpg"))
     return false;
 
@@ -252,8 +304,17 @@ bool GLExample01::draw()
   m_movable1.position(Vector3f(-1.0f, 0.0f, -1.0f));
   m_prog.uniform<Matrix44f>("u_model") = m_movable1.transform();
 
+#ifdef DRAW_CUBE_WITH_INDICES
+
   // Paint the 36 verties (aka nodes) constituing a cube
-  m_prog.draw(GL_TRIANGLES, 0, 36); // FIXME 0, 36 a cacher
+  m_prog.draw(DrawPrimitive::QUADS, m_indices);
+
+#else
+
+  // Paint the 36 verties (aka nodes) constituing a cube
+  m_prog.draw(DrawPrimitive::TRIANGLES, 0, 36); // FIXME 0, 36 a cacher
+
+#endif
 
   // --- Draw a fixed cube and apply to it a "darkished" coloration.
 
@@ -270,8 +331,17 @@ bool GLExample01::draw()
   m_movable2.position(Vector3f(3.0f, 0.0f, 0.0f));
   m_prog.uniform<Matrix44f>("u_model") = m_movable2.transform();
 
+#ifdef DRAW_CUBE_WITH_INDICES
+
   // Paint the 36 verties (aka nodes) constituing a cube
-  m_prog.draw(GL_TRIANGLES, 0, 36);
+  m_prog.draw(DrawPrimitive::QUADS, m_indices);
+
+#else
+
+  // Paint the 36 verties (aka nodes) constituing a cube
+  m_prog.draw(DrawPrimitive::TRIANGLES, 0, 36);
+
+#endif
 
   // --- Draw a floor
 
@@ -290,7 +360,7 @@ bool GLExample01::draw()
   m_movable3.reset();
   m_movable3.position(Vector3f(0.0f, 0.0f, 0.0f));
   m_prog.uniform<Matrix44f>("u_model") = m_movable3.transform();
-  m_prog.draw(GL_TRIANGLES, 0, 6);
+  m_prog.draw(DrawPrimitive::TRIANGLES, 0, 6);
 
   return true;
 }

@@ -137,5 +137,8 @@ TESTSUITE(Programs)
       ASSERT_EQ(true, vao2.hasVBO("a4"));
       ASSERT_EQ(true, prog.m_vao != &vao2);
       ASSERT_EQ(true, prog.m_vao == &vao);
+
+      // Restore uninitialized prog else OpenGL will segfault
+      prog.m_handle = 0;
     }
 }
