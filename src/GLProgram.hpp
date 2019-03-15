@@ -50,9 +50,18 @@ public:
   //------------------------------------------------------------------
   //! \brief Empty constructor. Do nothing.
   //------------------------------------------------------------------
-  GLProgram(std::string const& name)//, size_t nbVertices=3)
+  GLProgram(std::string const& name)
     : IGLObject(name)
-      //TODO m_vbo_size(std::max(3, nbVertices))
+  {
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Empty constructor and set the number of elements to
+  //! reserve when allocating VBOs to binded VOA.
+  //------------------------------------------------------------------
+  GLProgram(std::string const& name, size_t const nb_vertices)
+    : IGLObject(name),
+      m_vbo_init_size(nb_vertices)
   {
   }
 
