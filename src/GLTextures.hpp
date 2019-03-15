@@ -325,21 +325,214 @@ private:
 // **************************************************************
 //!
 // **************************************************************
-/*class GLTextureDepth2D: public GLTexture2D
+class GLTextureDepth2D: public GLTexture2D
 {
   GLTextureDepth2D()
     : GLTexture2D()
   {
-    m_options.gpuPixelFormat = GL_DEPTH_COMPONENT; // FIXME incompatible avec load() ??
-    m_options.cpuPixelFormat = GL_DEPTH_COMPONENT;
+    m_options.gpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
+    m_options.cpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
   }
 
   GLTextureDepth2D(std::string const& name)
     : GLTexture2D(name)
   {
-    m_options.gpuPixelFormat = GL_DEPTH_COMPONENT;
-    m_options.cpuPixelFormat = GL_DEPTH_COMPONENT;
+    m_options.gpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
+    m_options.cpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
   }
-  };*/
+};
+
+// **************************************************************
+//!
+// **************************************************************
+class GLTexture1D: public IGLTexture
+{
+  struct SOILDeleter
+  {
+    void operator()(unsigned char* buf)
+    {
+      DEBUG("Texture deleter");
+      if (buf != nullptr)
+        SOIL_free_image_data(buf);
+    }
+  };
+
+  using TextBufPtr = std::unique_ptr<unsigned char, SOILDeleter>;
+
+public:
+
+  GLTexture1D()
+    : IGLTexture(GL_TEXTURE_1D)
+  {
+  }
+
+  GLTexture1D(std::string const& name)
+    : IGLTexture(name, GL_TEXTURE_1D)
+  {
+  }
+
+  virtual uint8_t dimension() const override
+  {
+    return 1u;
+  }
+
+  virtual inline bool loaded() const override
+  {
+    return nullptr != m_buffer.get();
+  }
+
+  virtual bool setup() override
+  {
+    if (unlikely(0 == m_width))
+      {
+        ERROR("Cannot setup texture '%s' with width set to 0", name().c_str());
+        return true;
+      }
+
+    applyTextureParam();
+    glBindTexture(m_target, m_handle);
+    glCheck(glTexImage1D(m_target, 0,
+                         static_cast<GLint>(m_options.gpuPixelFormat),
+                         static_cast<GLsizei>(m_width),
+                         0,
+                         static_cast<GLenum>(m_options.cpuPixelFormat),
+                         static_cast<GLenum>(m_options.pixelType),
+                         nullptr));
+    return false;
+  }
+
+  virtual bool update() override
+  {
+    DEBUG("Texture '%s' update", name().c_str());
+    size_t pos_start;
+    size_t pos_end;
+    PendingData::getPendingData(pos_start, pos_end);
+
+    // FIXME: pour le moment on envoie toute la texture entiere
+    // au lieu de la portion modifiee.
+    // TODO pendingData --> x,width
+    const GLint x = 0U;
+    const GLsizei width = static_cast<GLsizei>(m_width);
+
+    glCheck(glBindTexture(m_target, m_handle));
+    glCheck(glTexSubImage1D(m_target, 0, x, width,
+                            static_cast<GLenum>(m_options.cpuPixelFormat),
+                            static_cast<GLenum>(m_options.pixelType),
+                            m_buffer.get()));
+
+    PendingData::clearPending();
+    return false;
+  }
+
+private:
+
+  TextBufPtr m_buffer;
+};
+
+// **************************************************************
+//!
+// **************************************************************
+class GLTexture3D: public IGLTexture
+{
+public:
+
+  GLTexture3D()
+    : IGLTexture(GL_TEXTURE_CUBE_MAP)
+  {
+  }
+
+  GLTexture3D(std::string const& name)
+    : IGLTexture(name, GL_TEXTURE_CUBE_MAP)
+  {
+  }
+
+  virtual uint8_t dimension() const override
+  {
+    return 3u;
+  }
+
+  inline uint32_t depth() const
+  {
+    return m_depth;
+  }
+
+  virtual inline bool loaded() const override
+  {
+    for (uint8_t i = 0; i < 6u; ++i)
+      {
+        if (false == m_textures[i].loaded())
+          return false;
+      }
+    return true;
+  }
+
+  bool load(CubeMap const target, const char *const filename)
+  {
+    return m_textures[static_cast<int>(target)].load(filename, false);
+  }
+
+private:
+
+  virtual bool setup() override
+  {
+    // Note: m_buffer can nullptr
+    m_depth = computeDepth();
+    if (6u != m_depth)
+      {
+        ERROR("Cannot setup texture '%s' with width or height set to 0"
+              "or depth != 6", name().c_str());
+        return true;
+      }
+
+    applyTextureParam();
+    glBindTexture(m_target, m_handle);
+    for (uint8_t i = 0; i < 6u; ++i)
+      {
+        m_textures[i].m_handle = m_targets[i];
+        m_textures[i].options(m_options);
+        m_textures[i].doGLTexImage2D();
+      }
+    return true;
+  }
+
+  virtual bool update() override
+  {
+    glCheck(glBindTexture(m_target, m_handle));
+    for (uint8_t i = 0; i < 6u; ++i)
+      {
+        m_textures[i].update();
+      }
+    return false;
+  }
+
+  uint8_t computeDepth()
+  {
+    uint8_t depth = 0u;
+    for (uint8_t i = 0; i < 6u; ++i)
+      {
+        if (m_textures[i].loaded())
+          ++depth;
+      }
+    return depth;
+  }
+
+private:
+
+  // TODO: static
+  // https://stackoverflow.com/questions/11709859/how-to-have-static-data-members-in-a-header-only-library
+  const std::array<GLenum,6> m_targets {{
+    GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+    GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+    GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+    GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+  }};
+
+  uint8_t m_depth = 0u;
+  std::array<GLTexture2D, 6> m_textures;
+};
+
+
 
 #endif /* GLTEXTURES_HPP_ */

@@ -582,9 +582,9 @@ private:
         const GLenum gltype = it.second->target();
         switch (gltype)
           {
-            //case GL_SAMPLER_1D:
-            //vao.createTexture<GLTexture1D>(name);
-            //break;
+          case GL_SAMPLER_1D:
+            vao.createTexture<GLTexture1D>(name);
+            break;
           case GL_SAMPLER_2D:
             vao.createTexture<GLTexture2D>(name);
             break;
@@ -592,9 +592,9 @@ private:
             //case GL_SAMPLER_2D_DEPTH:
             //vao.createTexture<GLTextureDepth2D>(name);
             //break;
-            //case GL_SAMPLER_3D:
-            //vao.createTexture<GLTexture3D>(name);
-            //break;
+          case GL_SAMPLER_3D:
+            vao.createTexture<GLTexture3D>(name);
+            break;
           default:
             ERROR("This kind of sampler is not yet managed: %u", gltype);
             break;
@@ -851,18 +851,18 @@ private:
       case GL_FLOAT_MAT4:
         m_uniforms[name] = std::make_unique<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, gpuID());
         break;
-        //case GL_SAMPLER_1D:
-        //m_uniforms[name] = std::make_unique<GLSampler1D>(name, m_textures_count, gpuID());
-        //m_textures_count += 1u;
-        //break;
+      case GL_SAMPLER_1D:
+        m_uniforms[name] = std::make_unique<GLSampler1D>(name, m_textures_count, gpuID());
+        m_textures_count += 1u;
+        break;
       case GL_SAMPLER_2D:
         m_textures[name] = std::make_unique<GLSampler2D>(name, m_textures_count, gpuID());
         m_textures_count += 1u;
         break;
-        //case GL_SAMPLER_CUBE:
-        //m_uniforms[name] = std::make_unique<GLSampler3D>(name, m_textures_count, gpuID());
-        //m_textures_count += 1u;
-        //break;
+      case GL_SAMPLER_CUBE:
+        m_uniforms[name] = std::make_unique<GLSampler3D>(name, m_textures_count, gpuID());
+        m_textures_count += 1u;
+        break;
       default:
         std::string msg = "Uniform '" + std::string(name) + "' type is not managed";
         ERROR("%s", msg.c_str());
