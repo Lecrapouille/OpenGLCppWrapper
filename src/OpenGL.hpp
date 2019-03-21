@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -9,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -28,12 +28,16 @@ namespace opengl
   //! \brief Create an OpenGL context. Call it before drawing
   //! primitives.
 
+  //-------------------------------------------------------------
   //! \brief Return if the OpenGL has been created or has not been
   //! created or has failed creating.
+  //-------------------------------------------------------------
   bool& hasCreatedContext();
 
+  //-------------------------------------------------------------
   //! \brief Allow to detect if the last OpenGL command succeeded or
   //! not. In the case of failure an error is displayed and logged.
+  //-------------------------------------------------------------
   void  checkError(const char* file, uint32_t line, const char* expression);
 
   //! Macro encapsuling the OpenGL command and the fault checker.
