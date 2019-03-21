@@ -38,15 +38,8 @@ class GLVAO: public IGLObject<GLenum>
 
 public:
 
-  //! \brief Empty constructor without name
-  GLVAO()
-    : IGLObject()
-  {
-    m_target = GL_ARRAY_BUFFER;
-  }
-
   //! \brief Constructor with the object name
-  GLVAO(const char *name)
+  GLVAO(std::string const& name)
     : IGLObject(name)
   {
     m_target = GL_ARRAY_BUFFER;

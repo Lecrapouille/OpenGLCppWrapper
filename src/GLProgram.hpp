@@ -37,7 +37,8 @@
 // TODO: verifier les GLVariables non init dans le GPU
 
 // **************************************************************
-//! \class GLShader GLShader.hpp
+//! \class GLProgram GLProgram.hpp
+//!
 //! \brief
 // **************************************************************
 class GLProgram: public IGLObject<GLenum>
@@ -76,7 +77,7 @@ public:
   GLProgram& attachShader(GLShader& shader)
   {
     DEBUG("Prog::attachShader");
-    m_shaders.push_back(shader);
+    m_shaders.push_back(&shader);
     return *this;
   }
 
@@ -85,9 +86,9 @@ public:
                            GLGeometryShader& geometry_shader)
   {
     DEBUG("Prog::attachShaders");
-    m_shaders.push_back(vertex_shader);
-    m_shaders.push_back(fragment_shader);
-    m_shaders.push_back(geometry_shader);
+    m_shaders.push_back(&vertex_shader);
+    m_shaders.push_back(&fragment_shader);
+    m_shaders.push_back(&geometry_shader);
     return *this;
   }
 
@@ -95,8 +96,8 @@ public:
                            GLFragmentShader& fragment_shader)
   {
     DEBUG("Prog::attachShaders");
-    m_shaders.push_back(vertex_shader);
-    m_shaders.push_back(fragment_shader);
+    m_shaders.push_back(&vertex_shader);
+    m_shaders.push_back(&fragment_shader);
     return *this;
   }
 
@@ -192,9 +193,9 @@ public:
     std::vector<std::string> list;
 
     list.reserve(m_shaders.size());
-    for (auto &it: m_shaders)
+    for (auto const& it: m_shaders)
       {
-        list.push_back(it.name());
+        list.push_back(it->name());
       }
     return list;
   }
@@ -207,11 +208,11 @@ public:
     std::vector<std::string> list;
 
     list.reserve(4_z);
-    for (auto &it: m_shaders)
+    for (auto const& it: m_shaders)
       {
-        if (!it.compiled())
+        if (!it->compiled())
           {
-            list.push_back(it.name());
+            list.push_back(it->name());
           }
       }
     return list;
@@ -225,7 +226,7 @@ public:
     std::vector<std::string> list;
 
     list.reserve(m_uniforms.size());
-    for (auto& it: m_uniforms)
+    for (auto const& it: m_uniforms)
       {
         list.push_back(it.first);
       }
@@ -240,7 +241,7 @@ public:
     std::vector<std::string> list;
 
     list.reserve(m_attributes.size());
-    for (auto& it: m_attributes)
+    for (auto const& it: m_attributes)
       {
         list.push_back(it.first);
       }
@@ -252,7 +253,7 @@ public:
     std::vector<std::string> list;
 
     list.reserve(m_textures.size());
-    for (auto& it: m_textures)
+    for (auto const& it: m_textures)
       {
         list.push_back(it.first);
       }
@@ -649,15 +650,15 @@ private:
 
     // Compile shaders if they have not yet compiled
     DEBUG("Prog '%s' setup: compile shaders", name().c_str());
-    for (auto &it: m_shaders)
+    for (auto& it: m_shaders)
       {
-        it.begin();
-        if (it.hasErrored())
+        it->begin();
+        if (it->hasErrored())
           {
             std::string msg =
-              "Shader '" + it.name() +
+              "Shader '" + it->name() +
               "' has not been compiled: reason was '" +
-              it.error() + "'";
+              it->error() + "'";
             ERROR("%s", msg.c_str());
             m_error_msg += '\n' + msg;
             failure = true;
@@ -668,10 +669,10 @@ private:
       {
         // Attach shaders to program
         DEBUG("Prog '%s' setup: attach shaders", name().c_str());
-        for (auto &it: m_shaders)
+        for (auto& it: m_shaders)
           {
-            glCheck(glAttachShader(m_handle, it.gpuID()));
-            it.attachProg(m_handle);
+            glCheck(glAttachShader(m_handle, it->gpuID()));
+            it->attachProg(m_handle);
           }
 
         // Compile the program
@@ -964,12 +965,12 @@ private:
   void detachAllShaders()
   {
     DEBUG("Prog::detachAllshaders");
-    for (auto &it: m_shaders)
+    for (auto& it: m_shaders)
       {
-        if (m_handle == it.attached())
+        if (m_handle == it->attached())
           {
-            glCheck(glDetachShader(m_handle, it.gpuID()));
-            it.attachProg(0);
+            glCheck(glDetachShader(m_handle, it->gpuID()));
+            it->attachProg(0);
           }
       }
   }
@@ -1004,7 +1005,7 @@ private:
   mapGLLocation          m_attributes;
   mapGLLocation          m_uniforms;
   std::unordered_map<std::string, std::unique_ptr<GLSampler>> m_textures;
-  std::vector<GLShader>  m_shaders;
+  std::vector<GLShader*> m_shaders; // Note: pointer is to avoid copy
   GLVAO                 *m_vao = nullptr;
   std::string            m_error_msg;
   uint32_t               m_textures_count = 0u;

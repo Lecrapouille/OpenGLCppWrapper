@@ -31,6 +31,7 @@
 #  include "PendingData.hpp"
 #  include "SOIL/SOIL.h"
 #  include <array>
+#  include <vector>
 
 // **************************************************************
 //
@@ -55,12 +56,6 @@ class IGLTexture
     protected PendingData
 {
 public:
-
-  IGLTexture(const GLenum target)
-    : IGLObject()
-  {
-    m_target = target;
-  }
 
   IGLTexture(std::string const& name, const GLenum target)
     : IGLObject(name)
@@ -175,10 +170,6 @@ class GLTexture2D: public IGLTexture
 
 public:
 
-  GLTexture2D()
-    : IGLTexture(GL_TEXTURE_2D)
-  {
-  }
 
   GLTexture2D(std::string const& name)
     : IGLTexture(name, GL_TEXTURE_2D)
@@ -327,12 +318,7 @@ private:
 // **************************************************************
 class GLTextureDepth2D: public GLTexture2D
 {
-  GLTextureDepth2D()
-    : GLTexture2D()
-  {
-    m_options.gpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
-    m_options.cpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
-  }
+public:
 
   GLTextureDepth2D(std::string const& name)
     : GLTexture2D(name)
@@ -360,11 +346,6 @@ class GLTexture1D: public IGLTexture
   using TextBufPtr = std::unique_ptr<unsigned char, SOILDeleter>;
 
 public:
-
-  GLTexture1D()
-    : IGLTexture(GL_TEXTURE_1D)
-  {
-  }
 
   GLTexture1D(std::string const& name)
     : IGLTexture(name, GL_TEXTURE_1D)
@@ -436,11 +417,6 @@ class GLTexture3D: public IGLTexture
 {
 public:
 
-  GLTexture3D()
-    : IGLTexture(GL_TEXTURE_CUBE_MAP)
-  {
-  }
-
   GLTexture3D(std::string const& name)
     : IGLTexture(name, GL_TEXTURE_CUBE_MAP)
   {
@@ -460,7 +436,7 @@ public:
   {
     for (uint8_t i = 0; i < 6u; ++i)
       {
-        if (false == m_textures[i].loaded())
+        if (false == m_textures[i]->loaded())
           return false;
       }
     return true;
@@ -468,7 +444,7 @@ public:
 
   bool load(CubeMap const target, const char *const filename)
   {
-    return m_textures[static_cast<int>(target)].load(filename, false);
+    return m_textures[static_cast<int>(target)]->load(filename, false);
   }
 
 private:
@@ -488,9 +464,9 @@ private:
     glBindTexture(m_target, m_handle);
     for (uint8_t i = 0; i < 6u; ++i)
       {
-        m_textures[i].m_handle = m_targets[i];
-        m_textures[i].options(m_options);
-        m_textures[i].doGLTexImage2D();
+        m_textures[i]->m_handle = targets(i);
+        m_textures[i]->options(m_options);
+        m_textures[i]->doGLTexImage2D();
       }
     return true;
   }
@@ -500,7 +476,7 @@ private:
     glCheck(glBindTexture(m_target, m_handle));
     for (uint8_t i = 0; i < 6u; ++i)
       {
-        m_textures[i].update();
+        m_textures[i]->update();
       }
     return false;
   }
@@ -510,29 +486,41 @@ private:
     uint8_t depth = 0u;
     for (uint8_t i = 0; i < 6u; ++i)
       {
-        if (m_textures[i].loaded())
+        if (m_textures[i]->loaded())
           ++depth;
       }
     return depth;
   }
 
+  static GLenum targets(const uint8_t index)
+  {
+    static constexpr std::array<GLenum, 6> targets =
+      {{
+          GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+          GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+          GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+          GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+          GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+          GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+      }};
+    return targets[index];
+  }
+
 private:
 
-  // TODO: static
-  // https://stackoverflow.com/questions/11709859/how-to-have-static-data-members-in-a-header-only-library
-  const std::array<GLenum,6> m_targets {{
-    GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-    GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-    GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-    GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-    GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-    GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-  }};
-
   uint8_t m_depth = 0u;
-  std::array<GLTexture2D, 6> m_textures;
+
+  // Note: unique_ptr is to avoid calling deleted GLTexture2D copy
+  // constructor.
+  std::array<std::unique_ptr<GLTexture2D>, 6> m_textures
+  {{
+      std::make_unique<GLTexture2D>("CUBEMAP_POSITIVE_X"),
+      std::make_unique<GLTexture2D>("CUBEMAP_NEGATIVE_X"),
+      std::make_unique<GLTexture2D>("CUBEMAP_POSITIVE_Y"),
+      std::make_unique<GLTexture2D>("CUBEMAP_NEGATIVE_Y"),
+      std::make_unique<GLTexture2D>("CUBEMAP_POSITIVE_Z"),
+      std::make_unique<GLTexture2D>("CUBEMAP_NEGATIVE_Z"),
+  }};
 };
-
-
 
 #endif /* GLTEXTURES_HPP */

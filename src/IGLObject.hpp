@@ -30,114 +30,142 @@
 #  include "NonCppStd.hpp"
 #  include "GLEnum.hpp"
 
-// **************************************************************
+// *****************************************************************************
 //! \class IGLObject IGLObject.hpp
 //!
-//! \brief IGLObject is an interface and ancestor class encapsulating
-//! OpenGL functions. All OpenGL obejct like VAO, VBO, Program,
-//! Texture will derivate from this class.
-// **************************************************************
+//! \brief IGLObject interface and ancestor class for others classes
+//! wrapping OpenGL objects such as VAO, VBO, Program, Texture.
+//!
+//! T is the type of the OpenGL handle (either GLenum or GLint). C++
+//! is strongly typed and OpenGL API not very consistent (handle type
+//! changes depending on the object). T avoid to produce signed
+//! vs. unsigned conversion compilation warnings or usage of explicit
+//! static_cast.
+// *****************************************************************************
 template<class T>
-class IGLObject
+class IGLObject : private NonCopyable
 {
 public:
 
-  //-------------------------------------------------------------
-  //! \brief Empty constructor: init private states.
-  //-------------------------------------------------------------
-  IGLObject()
-  {
-    init();
-  }
-
-  //-------------------------------------------------------------
-  //! \brief Constructor with the name of the object. Init private
-  //! states.
-  //! Note: name is public and is mostly used for debug purpose.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Constructor with the name of the object. Initialize
+  //! private states of the internal sate machine.
+  //!
+  //! \param name is the name of the instance. It is mainly used as
+  //! key in lookup tables (such as GLProgram). It is also used in
+  //! logs for debug purpose.
+  //----------------------------------------------------------------------------
   IGLObject(std::string const& name)
     : m_name(name)
   {
     init();
   }
 
-  //-------------------------------------------------------------
-  //! \brief Release the memory allocated on the GPU.
-  //-------------------------------------------------------------
-  virtual ~IGLObject()
-  {
-    destroy();
-  }
+  //----------------------------------------------------------------------------
+  //! \brief Virtual destructor because of pure virtual methods.
+  //----------------------------------------------------------------------------
+  virtual ~IGLObject() {};
 
-  //-------------------------------------------------------------
-  //! \brief Return the OpenGL identifier of the object.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Return the OpenGL identifier of the object that this
+  //! class wraps.
+  //----------------------------------------------------------------------------
   inline T gpuID() const
   {
     return m_handle;
   }
 
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Return the reference of the name of the object.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   inline std::string& name()
   {
     return m_name;
   }
 
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Return the type of OpenGL object.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   inline GLenum target() const
   {
     return m_target;
   }
 
-  //-------------------------------------------------------------
-  //! \brief Return if the OpenGL object has not been created in the
-  //! GPI. Do not confuse with setup. Create is for gpu allocations.
-  //! \return true if the object has not yet been created.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Give the information if the object has been created and
+  //! exists in the GPU (its creation is made when the method create()
+  //! is called).
+  //!
+  //! \note Do not confuse with the method needSetup(), indeed the
+  //! create() is for GPU allocations (like C malloc but for GPU)
+  //! while setup() configures the object behavior.
+  //!
+  //! \return false if the object has been created by the GPU and does
+  //! not be created again. Return true if the GPU failed to create
+  //! the object and create() needs to be called again.
+  //----------------------------------------------------------------------------
   virtual inline bool needCreate() const
   {
     return m_need_create;
   }
 
-  //-------------------------------------------------------------
-  //! \brief Return if the OpenGL object has to do its setup.
-  //! Do not confuse with create. Setup is for settings.
-  //! \return true if the object has not yet performed its setup.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Give the information if the object has been setup and
+  //! by the GPU (its setup is made when the method setup()
+  //! is called).
+  //!
+  //! \note Do not confuse with the method needCreate(), indeed the
+  //! create() is for GPU allocations (like C malloc but for GPU)
+  //! while setup() configures the object behavior.
+  //!
+  //! \return false if the object has been setup by the GPU and does
+  //! not be setup again. Return true if the GPU failed to setup
+  //! the object and setup() needs to be called again.
+  //----------------------------------------------------------------------------
   virtual inline bool needSetup() const
   {
     return m_need_setup;
   }
 
-  //-------------------------------------------------------------
-  //! \brief Return if the OpenGL object has to be updated.
-  //! Update transfering CPU values to the GPU.
-  //! \return true if the object has to be updated.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Give the information if data of the object has been
+  //! transferred to the GPU (made when the method update() is called).
+  //!
+  //! Example vertices position of a VBO has been changed. They are
+  //! transferred to the GPU, the model is now updated.
+  //!
+  //! \return false if the object has been transferred to the GPU and
+  //! does not need to transferred again. Return true if the object has
+  //! to be transferred again.
+  //----------------------------------------------------------------------------
   virtual inline bool needUpdate() const
   {
     return m_need_update;
   }
 
-  //-------------------------------------------------------------
-  //! \brief Return if the OpenGL object has been created and can
-  //! be destroyed.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Return if the OpenGL object has been created by the
+  //! GPU and can be released by the GPU.
+  //!
+  //! \note this does not necessary means that the GPU will destroyed
+  //! the object. It only means that the GPU can do it. It is
+  //! equivalent to C code if (pointer != NULL).
+  //!
+  //! \return true if the GPU can release the object.
+  //----------------------------------------------------------------------------
   virtual inline bool canBeReleased() const
   {
     return false == m_need_create;
   }
 
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Activate the object on the GPU. Perform some pending
-  //! operations (cretion setup, update) if needed. These called
-  //! methods are pure virtual and has to be implemented by
-  //! derived classes.
-  //-------------------------------------------------------------
+  //! operations (creation setup, update) when needed. This method is
+  //! kind of state machine and only calls pure virtual methods (such
+  //! as create(), setup(), update() ...) which have to be implemented
+  //! in derived classes.
+  //! \throw OpenGLException Override methods may throw this exception.
+  //----------------------------------------------------------------------------
   void begin()
   {
     /* FIXME if (unlikely(!opengl::hasCreatedContext()))
@@ -170,9 +198,9 @@ public:
       }
   }
 
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Deactivate the object on the GPU.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   inline void end()
   {
     /*if (unlikely(!opengl::hasCreatedContext()))
@@ -181,10 +209,12 @@ public:
     deactivate();
   }
 
-  //-------------------------------------------------------------
-  //! \brief Delete the object from GPU memory. The object will
-  //! be created() back when calling begin().
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Release the memory allocated on CPU and GPU.
+  //!
+  //! \note the OpenGL object will be created back if the begin()
+  //! again.
+  //----------------------------------------------------------------------------
   virtual void destroy()
   {
     if (opengl::hasCreatedContext())
@@ -198,27 +228,28 @@ public:
     init();
   }
 
-  //-------------------------------------------------------------
-  //! \brief Valid object is an OpenGL has created with success.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Check if object is a valid OpenGL object (meaning which
+  //! has created with success by the GPU).
+  //----------------------------------------------------------------------------
   inline bool isValid() const
   {
-    return m_handle > handle_reset_value();
+    return m_handle > initialHandleValue();
   }
 
 protected:
 
-  //-------------------------------------------------------------
-  //! \brief
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Force redoing setup()
+  //----------------------------------------------------------------------------
   inline void redoSetup()
   {
     m_need_setup = true;
   }
 
-  //-------------------------------------------------------------
-  //! \brief
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Force redoing update()
+  //----------------------------------------------------------------------------
   inline void forceUpdate()
   {
     m_need_update = true;
@@ -226,80 +257,97 @@ protected:
 
 private:
 
-  //-------------------------------------------------------------
-  //! \brief Reset the OpenGL reference object. Because the OpenGL
-  //! API is not fully consistent depending on kind of OpenGL
-  //! objects handle can be either signed or unsigned. This is why
-  //! we add this template method to do the job.
-  //-------------------------------------------------------------
-  inline T handle_reset_value() const;
+  //----------------------------------------------------------------------------
+  //! \brief Return the reset value on OpenGL reference
+  //! object. Because the OpenGL API is not fully consistent, handle
+  //! type changes depending on OpenGL objects as well as initial
+  //! value.
+  //----------------------------------------------------------------------------
+  inline T initialHandleValue() const;
 
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Reset the states of the class: this will force creating
-  //! an OpenGL object, setup it. The update is not made.
-  //-------------------------------------------------------------
+  //! an OpenGL object, its setup it and no transfer to the GPU.
+  //----------------------------------------------------------------------------
   void init()
   {
-    m_handle = handle_reset_value();
+    m_handle = initialHandleValue();
     m_target = 0U;
     m_need_setup = true;
     m_need_create = true;
     m_need_update = false;
   }
 
-  //-------------------------------------------------------------
-  //! \brief Pure virtual. Configure the object on the GPU.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Pure virtual. Configure the object behvior on the GPU.
+  //!
+  //! \return false if the object has been setup by the GPU and does
+  //! not be setup again. Return true if the GPU failed to setup
+  //! the object and setup() needs to be called again.
+  //----------------------------------------------------------------------------
   virtual bool setup() = 0;
 
-  //-------------------------------------------------------------
-  //! \brief Pure virtual. Allocate ressources on the GPU.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Pure virtual. Allocate resources on the GPU.
+  //!
+  //! \return false if the object has been created by the GPU and does
+  //! not be created again. Return true if the GPU failed to create
+  //! the object and create() needs to be called again.
+  //----------------------------------------------------------------------------
   virtual bool create() = 0;
 
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Pure virtual. Activate the object on the GPU.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   virtual void activate() = 0;
 
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Pure virtual. Deactivate the object on the GPU.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   virtual void deactivate() = 0;
 
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Pure virtual. Delete the object from GPU memory.
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   virtual void release() = 0;
 
-  //-------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Pure virtual. Update the object on the GPU.
-  //-------------------------------------------------------------
+  //!
+  //! \return false if the object has been transferred to the GPU and
+  //! does not need to transferred again. Return true if the object has
+  //! to be transferred again.
+  //----------------------------------------------------------------------------
   virtual bool update() = 0;
 
 private:
 
-  //! Object name for debug purpose.
+  //! \brief Object name for keys in lookup tables.
   std::string m_name;
-  //! \brief
+  //! \brief hold the information if the OpenGL object has to do its
+  //! setup.
   bool m_need_setup;
-  //! \brief
+  //! \brief hold the information if the OpenGL object has to be
+  //! created.
   bool m_need_create;
-  //! \brief
+  //! \brief hold the information if the OpenGL object has to be
+  //! transfered to the GPU.
   bool m_need_update;
 
 protected:
 
-  //! \brief OpenGL object identifer GPU side.
+  //! \brief Hold the identifier of the OpenGL object.
   T m_handle;
   //! \brief the type of object on the GPU.
   GLenum m_target;
 };
 
+//----------------------------------------------------------------------------
 template<>
-inline GLenum IGLObject<GLenum>::handle_reset_value() const { return 0u; }
+inline GLenum IGLObject<GLenum>::initialHandleValue() const { return 0u; }
 
+//----------------------------------------------------------------------------
 template<>
-inline GLint IGLObject<GLint>::handle_reset_value() const { return -1; }
+inline GLint IGLObject<GLint>::initialHandleValue() const { return -1; }
 
 #endif /* IGLOBJECT_HPP */
