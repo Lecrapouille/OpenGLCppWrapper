@@ -44,7 +44,7 @@ PROJECT_NUMBER         =
 # for a project that appears at the top of each page and should give viewer a
 # quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = "OpenGL C++11 Wrapper"
+PROJECT_BRIEF          = "A Core-Profile OpenGL C++11 Wrapper"
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included
 # in the documentation. The maximum height of the logo should not exceed 55
@@ -423,7 +423,7 @@ LOOKUP_CACHE_SIZE      = 0
 # class members and static file members will be hidden unless the
 # EXTRACT_PRIVATE respectively EXTRACT_STATIC tags are set to YES.
 # Note: This will also disable the warnings about undocumented members that are
-# normally produced when ERRORS is set to YES.
+# normally produced when WARNINGS is set to YES.
 # The default value is: NO.
 EXTRACT_STATIC
 EXTRACT_ALL            = YES
@@ -717,14 +717,14 @@ CITE_BIB_FILES         =
 
 QUIET                  = NO
 
-# The ERRORS tag can be used to turn on/off the warning messages that are
-# generated to standard error (stderr) by doxygen. If ERRORS is set to YES
+# The WARNINGS tag can be used to turn on/off the warning messages that are
+# generated to standard error (stderr) by doxygen. If WARNINGS is set to YES
 # this implies that the warnings are on.
 #
 # Tip: Turn warnings on while writing the documentation.
 # The default value is: YES.
 
-ERRORS               = YES
+WARNINGS               = YES
 
 # If the WARN_IF_UNDOCUMENTED tag is set to YES then doxygen will generate
 # warnings for undocumented members. If EXTRACT_ALL is set to YES then this flag
@@ -2271,7 +2271,7 @@ GROUP_GRAPHS           = YES
 # The default value is: NO.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-UML_LOOK               = NO
+UML_LOOK               = YES
 
 # If the UML_LOOK tag is enabled, the fields and methods are shown inside the
 # class node. If there are many fields or methods and many nodes the graph may

@@ -1,7 +1,6 @@
-// -*- c++ -*- Coloration Syntaxique pour Emacs
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -10,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -19,10 +18,10 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef MOVABLE_TPP_
-#  define MOVABLE_TPP_
+#ifndef MOVABLE_HPP
+#  define MOVABLE_HPP
 
-#  include "Transformation.tpp"
+#  include "Transformation.hpp"
 
 // *************************************************************************************************
 //! \brief a Movable defines a 4x4 transformation matrix from a translation, a rotation and a scale.

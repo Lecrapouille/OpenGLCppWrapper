@@ -27,7 +27,7 @@
 #ifndef GL_VERTEX_ARRAY_HPP
 #  define GL_VERTEX_ARRAY_HPP
 
-#  include "GLVBO.tpp"
+#  include "GLVBO.hpp"
 #  include "GLTextures.hpp"
 #  include <unordered_map>
 #  include <vector>

@@ -27,7 +27,7 @@
 #ifndef GLSHADER_HPP
 #  define GLSHADER_HPP
 
-#  include "IGLObject.tpp"
+#  include "IGLObject.hpp"
 #  include <vector>
 
 //------------------------------------------------------------------

@@ -23,7 +23,7 @@
 
 #  include "GLImGUI.hpp"
 #  include "OpenGL.hpp"
-#  include "SceneGraph.tpp"
+#  include "SceneGraph.hpp"
 #  include "Maths.hpp"
 #  include <iostream>
 

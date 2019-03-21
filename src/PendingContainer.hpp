@@ -1,4 +1,3 @@
-// -*- c++ -*- Coloration Syntaxique pour Emacs
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
 // Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
@@ -19,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef PENDING_CONTAINER_HPP_
-#  define PENDING_CONTAINER_HPP_
+#ifndef PENDING_CONTAINER_HPP
+#  define PENDING_CONTAINER_HPP
 
 #  include "PendingData.hpp"
 #  include <vector>

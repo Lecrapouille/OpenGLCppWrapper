@@ -22,7 +22,7 @@
 #  define EXAMPLE_01_HPP
 
 #  include "OpenGL.hpp"
-#  include "Movable.tpp"
+#  include "Movable.hpp"
 #  include "Maths.hpp"
 #  include <iostream>
 

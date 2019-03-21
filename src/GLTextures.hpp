@@ -27,7 +27,7 @@
 #ifndef GLTEXTURES_HPP
 #  define GLTEXTURES_HPP
 
-#  include "IGLObject.tpp"
+#  include "IGLObject.hpp"
 #  include "PendingData.hpp"
 #  include "SOIL/SOIL.h"
 #  include <array>

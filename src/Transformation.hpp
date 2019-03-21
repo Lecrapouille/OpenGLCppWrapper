@@ -1,7 +1,6 @@
-// -*- c++ -*- Coloration Syntaxique pour Emacs
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -10,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -19,13 +18,13 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef TRANSFORMATION_TPP_
-#  define TRANSFORMATION_TPP_
+#ifndef TRANSFORMATION_HPP
+#  define TRANSFORMATION_HPP
 
 // Modifed from the OpenGL Mathematic library (GLM).
 // Original code: https://github.com/g-truc/glm/blob/master/glm/gtc/matrix_transform.inl
 
-#  include "Matrix.tpp"
+#  include "Matrix.hpp"
 #  include <cassert>
 
 namespace matrix
@@ -107,15 +106,15 @@ namespace matrix
   //! \param zFar     - The far clipping distance.
   // *************************************************************************************************
   template<typename T>
-  Matrix<T, 4_z, 4_z> perspective(T const fovy, T const aspect, T const zNear, T const zFar)
+  Matrix<T, 4_z, 4_z> perspective(T const fovY, T const aspect, T const zNear, T const zFar)
   {
     assert(std::abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
 
-    T const tanHalfFovy = std::tan(fovy / T(2));
+    T const tanHalfFovY = std::tan(fovY / T(2));
     Matrix<T, 4_z, 4_z> M(0);
 
-    M[0][0] = T(1) / (aspect * tanHalfFovy);
-    M[1][1] = T(1) / (tanHalfFovy);
+    M[0][0] = T(1) / (aspect * tanHalfFovY);
+    M[1][1] = T(1) / (tanHalfFovY);
     M[2][3] = T(-1);
     M[2][2] = -(zFar + zNear) / (zFar - zNear);
     M[3][2] = -(T(2) * zFar * zNear) / (zFar - zNear);
@@ -150,4 +149,4 @@ namespace matrix
   }
 }
 
-#endif /* TRANSFORMATION_TPP_ */
+#endif /* TRANSFORMATION_HPP */

@@ -31,7 +31,7 @@
 //! read, compile, load into the GPU.
 
 #  include "GLShaders.hpp"
-#  include "GLLocation.tpp"
+#  include "GLLocation.hpp"
 #  include <unordered_map>
 
 // TODO: verifier les GLVariables non init dans le GPU

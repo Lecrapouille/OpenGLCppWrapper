@@ -27,7 +27,7 @@
 #ifndef GLFRAMEBUFFERS_HPP
 #define GLFRAMEBUFFERS_HPP
 
-#  include "IGLObject.tpp"
+#  include "IGLObject.hpp"
 
 // **************************************************************
 //
