@@ -136,7 +136,7 @@ bool GLExample03::draw()
   m_prog.bind(m_vao);
 
   // Paint the 36 verties (aka nodes) constituing a cube
-  m_prog.draw(DrawPrimitive::POINTS, m_indices);
+  m_prog.draw(Primitive::POINTS, m_indices);
 
   return true;
 }

@@ -312,12 +312,12 @@ bool GLExample01::draw()
 #ifdef DRAW_CUBE_WITH_INDICES
 
   // Paint the 36 verties (aka nodes) constituing a cube
-  m_prog.draw(DrawPrimitive::QUADS, m_indices);
+  m_prog.draw(Primitive::QUADS, m_indices);
 
 #else
 
   // Paint the 36 verties (aka nodes) constituing a cube
-  m_prog.draw(DrawPrimitive::TRIANGLES, 0, 36); // FIXME 0, 36 a cacher
+  m_prog.draw(Primitive::TRIANGLES, 0, 36); // FIXME 0, 36 a cacher
 
 #endif
 
@@ -341,12 +341,12 @@ bool GLExample01::draw()
 #ifdef DRAW_CUBE_WITH_INDICES
 
   // Paint the 36 verties (aka nodes) constituing a cube
-  m_prog.draw(DrawPrimitive::QUADS, m_indices);
+  m_prog.draw(Primitive::QUADS, m_indices);
 
 #else
 
   // Paint the 36 verties (aka nodes) constituing a cube
-  m_prog.draw(DrawPrimitive::TRIANGLES, 0, 36);
+  m_prog.draw(Primitive::TRIANGLES, 0, 36);
 
 #endif
 
@@ -364,7 +364,7 @@ bool GLExample01::draw()
   m_movable3.reset();
   m_movable3.position(Vector3f(0.0f, 0.0f, 0.0f));
   m_prog.uniform<Matrix44f>("model") = m_movable3.transform();
-  m_prog.draw(DrawPrimitive::TRIANGLES, 0, 6);
+  m_prog.draw(Primitive::TRIANGLES, 0, 6);
 
   return true;
 }

@@ -386,7 +386,7 @@ public:
   //! \throw if the program has not been compiled or if the VAO has not
   //! been binded or if VBOs have not all the same sizes.
   //------------------------------------------------------------------
-  void draw(DrawPrimitive const mode, GLint first, GLsizei count)
+  void draw(Primitive const mode, GLint first, GLsizei count)
   {
     DEBUG("Prog '%s' draw {", name().c_str());
     throw_if_not_compiled();
@@ -410,7 +410,7 @@ public:
   //! \throw if the program has not been compiled or if the VAO has not
   //! been binded or if VBOs have not all the same sizes.
   //------------------------------------------------------------------
-  void draw(GLVAO& vao, DrawPrimitive const mode, GLint first, GLsizei count)
+  void draw(GLVAO& vao, Primitive const mode, GLint first, GLsizei count)
   {
     throw_if_vao_cannot_be_binded(vao);
     draw(mode, first, count);
@@ -422,7 +422,7 @@ public:
   //! \throw if the program has not been compiled or if the VAO has not
   //! been binded or if VBOs have not all the same sizes.
   //------------------------------------------------------------------
-  inline void draw(DrawPrimitive const /*mode*/)
+  inline void draw(Primitive const /*mode*/)
   {
     ERROR("Draw with implicit number of vertices is not yet implemented");
     //throw_if_not_compiled();
@@ -436,7 +436,7 @@ public:
   //! \throw if the program has not been compiled or if the VAO has not
   //! been binded or if VBOs have not all the same sizes.
   //------------------------------------------------------------------
-  inline void draw(GLVAO& vao, DrawPrimitive const mode)
+  inline void draw(GLVAO& vao, Primitive const mode)
   {
     throw_if_vao_cannot_be_binded(vao);
     draw(mode);
@@ -448,7 +448,7 @@ public:
   //! been binded or if VBOs have not all the same sizes.
   //------------------------------------------------------------------
   template<class T>
-  void draw(DrawPrimitive const mode, GLIndexBuffer<T>& index)
+  void draw(Primitive const mode, GLIndexBuffer<T>& index)
   {
     DEBUG("Prog::drawIndex %d elements", index.size());
 
@@ -472,7 +472,7 @@ public:
   //! been binded or if VBOs have not all the same sizes.
   //------------------------------------------------------------------
   template<class T>
-  void draw(GLVAO& vao, DrawPrimitive const mode, GLIndexBuffer<T>& index)
+  void draw(GLVAO& vao, Primitive const mode, GLIndexBuffer<T>& index)
   {
     throw_if_vao_cannot_be_binded(vao);
     draw(mode, index);

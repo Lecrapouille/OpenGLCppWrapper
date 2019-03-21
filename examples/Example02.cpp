@@ -400,5 +400,5 @@ void GLExample02::drawSceneNode(GLVAO& vao, Matrix44f const& transform)
   m_prog.uniform<Matrix44f>("model") = transform;
 
   // Draw the 3D model
-  m_prog.draw(vao, DrawPrimitive::TRIANGLES, 0, 36); // FIXME: use implicit vertices count
+  m_prog.draw(vao, Primitive::TRIANGLES, 0, 36); // FIXME: use implicit vertices count
 }
