@@ -153,8 +153,8 @@ inline T clamp(T const value, T const lower, T const upper)
   inline size_t size() const { return N; }                              \
                                                                         \
   /* Accessors */                                                       \
-  T& operator[](size_t i)             { return m_data[i]; }             \
-  const T& operator[](size_t i) const { return m_data[i]; }             \
+  T& operator[](int i)             { return m_data[i]; }             \
+  const T& operator[](int i) const { return m_data[i]; }             \
                                                                         \
   /* C array conversions */                                             \
   typedef T(&array_t)[N];                                               \

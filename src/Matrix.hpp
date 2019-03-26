@@ -128,13 +128,13 @@ public:
   }
 
   //! \brief Access to the nth row in write mode.
-  inline Vector<T, cols>& operator[](size_t i)
+  inline Vector<T, cols>& operator[](int i)
   {
     return reinterpret_cast<Vector<T, cols> &>(m_data[i * cols]);
   }
 
   //! \brief Acces to the nth row in read mode.
-  inline const Vector<T, cols>& operator[](size_t i) const
+  inline const Vector<T, cols>& operator[](int i) const
   {
     return reinterpret_cast<const Vector<T, cols> &>(m_data[i * cols]);
   }
