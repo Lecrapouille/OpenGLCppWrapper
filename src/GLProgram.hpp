@@ -312,22 +312,6 @@ public:
     return 0_z != m_attributes.size();
   }
 
-  //------------------------------------------------------------------
-  //! \brief Locate the attribute variable by its name and its type T.
-  //! Return the reference of the VBO.
-  //------------------------------------------------------------------
-  template<class T>
-  inline PendingContainer<T>& attribute(const char *name)
-  {
-    return getVBO<T>(name);
-  }
-
-  template<class T>
-  inline const PendingContainer<T>& attribute(const char *name) const
-  {
-    return getVBO<T>(name);
-  }
-
   inline bool hasTexture(const char *name) const
   {
     if (unlikely(nullptr == name)) return false;
@@ -338,48 +322,6 @@ public:
   {
     return 0_z != m_textures.size();
   }
-
-  template<class T>
-  inline T& texture(const char *name)
-  {
-    return getTexture<T>(name);
-  }
-
-  template<class T>
-  inline const T& texture(const char *name) const
-  {
-    return getTexture<T>(name);
-  }
-
-  //------------------------------------------------------------------
-  //! \brief Get the shader variable. If the name does not refer to a
-  //! valid variable an exception is triggered.
-  //! Example GLProgram prog; prog["position"] = { ... };
-  //------------------------------------------------------------------
-  /*inline GLLocation& operator[](std::string const& name)
-  {
-    auto it_uniform = m_uniforms.find(name);
-    auto it_attribute = m_attributes.find(name);
-
-    if ((it_uniform != m_uniforms.end()) &&
-        (it_attribute != m_attributes.end()))
-      {
-        throw std::out_of_range("OpenGL variable '" + name +
-                                "' can be either attribute or uniform");
-      }
-    else if (it_uniform != m_uniforms.end())
-      {
-        return *(it_uniform->second);
-      }
-    else if (it_attribute != m_attributes.end())
-      {
-        return *(it_attribute->second);
-      }
-    else // TODO if (!compiled()) { create() + m_unused = true } else
-      {
-        throw std::out_of_range("Name '" + name + "' is not an shader variable");
-      }
-      }*/
 
   //------------------------------------------------------------------
   //! \brief Render the binded VAO. Use as params the first and count
@@ -496,21 +438,6 @@ public:
   void setInitVBOSize(size_t const size)
   {
     m_vbo_init_size = size;
-  }
-
-  inline GLTexture1D& texture1D(const char *name)
-  {
-    return getTexture<GLTexture1D>(name);
-  }
-
-  inline GLTexture2D& texture2D(const char *name)
-  {
-    return getTexture<GLTexture2D>(name);
-  }
-
-  inline GLTexture3D& texture3D(const char *name)
-  {
-    return getTexture<GLTexture3D>(name);
   }
 
 private:
@@ -934,33 +861,6 @@ private:
   }
 
 private:
-
-  //------------------------------------------------------------------
-  //! \brief Locate the attribute variable by its name and its type T.
-  //! \return the uniform instance if found else throw the exception
-  //! std::out_of_range
-  //------------------------------------------------------------------
-  template<class T>
-  GLVertexBuffer<T>& getVBO(const char *name)
-  {
-    if (unlikely(!compiled()))
-      {
-        begin();
-      }
-    throw_if_vao_not_binded();
-    return m_vao->VBO<T>(name);
-  }
-
-  template<class T>
-  T& getTexture(const char *name)
-  {
-    if (unlikely(!compiled()))
-      {
-        begin();
-      }
-    throw_if_vao_not_binded();
-    return m_vao->texture<T>(name);
-  }
 
   void detachAllShaders()
   {

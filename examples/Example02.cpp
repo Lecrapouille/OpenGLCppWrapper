@@ -159,7 +159,7 @@ bool GLExample02::CreateCube()
   m_prog.bind(*m_cube);
 
   // Fill the VBO for vertices
-  m_prog.attribute<Vector3f>("position") =
+  m_cube->VBO<Vector3f>("position") =
     {
       //  X     Y     Z
 
@@ -216,11 +216,11 @@ bool GLExample02::CreateCube()
   // first version of the SceneGraph example
   // the cube was not centered. So let see
   // how to translate it.
-  m_prog.attribute<Vector3f>("position")
+  m_cube->VBO<Vector3f>("position")
     += Vector3f(0.0f, 1.0f, 0.0f);
 
   // Fill the VBO for texture coordiantes
-  m_prog.attribute<Vector2f>("UV") =
+  m_cube->VBO<Vector2f>("UV") =
     {
       //  U     V
 
@@ -274,9 +274,9 @@ bool GLExample02::CreateCube()
     };
 
   // Create the texture
-  m_prog.texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.texture2D("texID").load("textures/wooden-crate.jpg"))
+  m_cube->texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_cube->texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_cube->texture2D("texID").load("textures/wooden-crate.jpg"))
     return false;
 
   return true;

@@ -147,6 +147,22 @@ public:
     return *texture;
   }
 
+
+  inline GLTexture1D& texture1D(const char *name)
+  {
+    return texture<GLTexture1D>(name);
+  }
+
+  inline GLTexture2D& texture2D(const char *name)
+  {
+    return texture<GLTexture2D>(name);
+  }
+
+  inline GLTexture3D& texture3D(const char *name)
+  {
+    return texture<GLTexture3D>(name);
+  }
+
   //------------------------------------------------------------------
   //! \brief Check if all VBOs have the same size.
   //! \return true if all VBO have the same size, else return false.

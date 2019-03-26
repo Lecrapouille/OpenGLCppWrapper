@@ -44,7 +44,7 @@ bool GLExample04::setup()
 
   // Now we have to fill VBOs with data: here vertices. Because in
   // vertex shader a_position is vect3 we have to cast to Vector3f.
-  m_prog.attribute<Vector3f>("position") =
+  m_vao.VBO<Vector3f>("position") =
     {
       Vector3f(-1.0f, -1.0f, 0.0f), Vector3f(1.0f, -1.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f)
     };
@@ -52,7 +52,7 @@ bool GLExample04::setup()
   // Now we have to fill VBOs with data: here texture coordinates.
   // Because in vertex shader a_texcoord is vect2 we have to cast
   // to Vector2f.
-  m_prog.attribute<Vector2f>("UV") =
+  m_vao.VBO<Vector2f>("UV") =
     {
       Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(0.5f, 1.0f)
     };
@@ -60,11 +60,11 @@ bool GLExample04::setup()
   // --- Create textures
 
   // --- Init VAO textures
-  if (!m_prog.texture2D("blendMap").load("textures/blendMap.png")) return false;
-  if (!m_prog.texture2D("backgroundTexture").load("textures/grassy2.png")) return false;
-  if (!m_prog.texture2D("rTexture").load("textures/mud.png")) return false;
-  if (!m_prog.texture2D("gTexture").load("textures/grassFlowers.png")) return false;
-  if (!m_prog.texture2D("bTexture").load("textures/path.png")) return false;
+  if (!m_vao.texture2D("blendMap").load("textures/blendMap.png")) return false;
+  if (!m_vao.texture2D("backgroundTexture").load("textures/grassy2.png")) return false;
+  if (!m_vao.texture2D("rTexture").load("textures/mud.png")) return false;
+  if (!m_vao.texture2D("gTexture").load("textures/grassFlowers.png")) return false;
+  if (!m_vao.texture2D("bTexture").load("textures/path.png")) return false;
 
   return true;
 }

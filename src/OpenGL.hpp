@@ -51,7 +51,6 @@ namespace opengl
 
 #  include "GLImGUI.hpp"
 #  include "GLVAO.hpp"
-#  include "GLTextures.hpp"
 #  include "GLProgram.hpp"
 
 template<class T>

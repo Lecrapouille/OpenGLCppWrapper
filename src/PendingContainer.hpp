@@ -189,6 +189,34 @@ public:
     apply([](T& x){ std::cos(x); });
   }
 
+#if 0
+  inline PendingContainer<T>& operator=(PendingContainer<T> const& other)
+  {
+    const size_t my_size = m_container.size();
+    const size_t other_size = other.m_container.size();
+
+    if (other_size > my_size)
+      throw_if_cannot_expand();
+
+    m_container = other.m_container;
+    tagAsPending(0_z, other_size - 1_z);
+    return *this;
+  }
+
+  inline PendingContainer<T>& operator=(std::initializer_list<T> il)
+  {
+    const size_t my_size = m_container.size();
+    const size_t other_size = il.size();
+
+    if (other_size > my_size)
+      throw_if_cannot_expand();
+
+    m_container = il;
+    tagAsPending(0_z, other_size - 1_z);
+    return *this;
+  }
+#endif
+
   inline PendingContainer<T>& operator*=(T const& val)
   {
     //FIXME return apply([val](T& x){ x *= val; });
@@ -236,7 +264,8 @@ public:
     return &m_container[0];
   }
 
-private:
+  //private:
+protected:
 
   inline void throw_if_cannot_expand()
   {
@@ -249,11 +278,8 @@ private:
     m_can_expand = false;
   }
 
-private:
-
-  std::vector<T> m_container;
   bool m_can_expand = true;
-
+  std::vector<T> m_container;
 };
 
 #endif

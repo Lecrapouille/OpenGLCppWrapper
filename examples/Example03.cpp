@@ -30,7 +30,7 @@ void GLExample03::createSphere()
   float latitude = -90.0f;
   float longitude = -180.0f;
 
-  auto& positions = m_prog.attribute<Vector3f>("position");
+  auto& positions = m_vao.VBO<Vector3f>("position");
   positions.reserve(NbPointsLon * NbPointsLat);
   m_indices.reserve(NbPointsLon * NbPointsLat);
 

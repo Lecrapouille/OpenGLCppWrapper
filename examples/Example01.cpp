@@ -58,7 +58,7 @@ bool GLExample01::setup()
 
   // Now we have to fill VBOs with data: here vertices. Because in
   // vertex shader a_position is vect3 we have to cast to Vector3f.
-  m_prog.attribute<Vector3f>("position") =
+  m_vao_quad.VBO<Vector3f>("position") =
     {
       Vector3f(-0.5f, 0.0f, 0.5f),
       Vector3f(0.5f, 0.0f, 0.5f),
@@ -81,7 +81,7 @@ bool GLExample01::setup()
    // Now we have to fill VBOs with data: here texture coordinates.
   // Because in vertex shader a_texcoord is vect2 we have to cast
   // to Vector2f.
-  m_prog.attribute<Vector2f>("UV") =
+  m_vao_quad.VBO<Vector2f>("UV") =
     {
       Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
       Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
@@ -101,7 +101,7 @@ bool GLExample01::setup()
 
   // Now we have to fill VBOs with data: here vertices. Because in
   // vertex shader a_position is vect3 we have to cast to Vector3f.
-  m_prog.attribute<Vector3f>("position") =
+  m_vao_quad.VBO<Vector3f>("position") =
     {
       //  X     Y     Z
 
@@ -157,7 +157,7 @@ bool GLExample01::setup()
   // Now we have to fill VBOs with data: here texture coordinates.
   // Because in vertex shader a_texcoord is vect2 we have to cast
   // to Vector2f.
-  m_prog.attribute<Vector2f>("UV") =
+  m_vao_quad.VBO<Vector2f>("UV") =
     {
       //  U     V
 
@@ -215,9 +215,9 @@ bool GLExample01::setup()
   // --- Create a texture
 
   // --- Init VAO texture named texID
-  m_prog.texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.texture2D("texID").load("textures/hazard.png"))
+  m_vao_quad.texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_vao_quad.texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_vao_quad.texture2D("texID").load("textures/hazard.png"))
     return false;
 
   // --- Create a plane (for the floor)
@@ -228,7 +228,7 @@ bool GLExample01::setup()
 
   // Now we have to fill VBOs with data: here vertices. Because in
   // vertex shader a_position is vect3 we have to cast to Vector3f.
-  m_prog.attribute<Vector3f>("position") =
+  m_vao_floor.VBO<Vector3f>("position") =
     {
       Vector3f(5, -1.5,  5), Vector3f(-5, -1.5,  5), Vector3f(-5, -1.5, -5),
       Vector3f(5, -1.5,  5), Vector3f(-5, -1.5, -5), Vector3f(5, -1.5, -5)
@@ -237,8 +237,8 @@ bool GLExample01::setup()
   // Now we have to fill VBOs with data: here texture coordinates.
   // Because in vertex shader a_texcoord is vect2 we have to cast
   // to Vector2f.
-  m_prog.attribute<Vector3f>("position") *= Vector3f(2.0f, 1.0, 2.0f);
-  m_prog.attribute<Vector2f>("UV") =
+  m_vao_floor.VBO<Vector3f>("position") *= Vector3f(2.0f, 1.0, 2.0f);
+  m_vao_floor.VBO<Vector2f>("UV") =
     {
       Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(0.0f, 1.0f),
       Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
@@ -247,9 +247,9 @@ bool GLExample01::setup()
   // --- Create a texture
 
   // --- Init VAO texture named texID
-  m_prog.texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.texture2D("texID").load("textures/wooden-crate.jpg"))
+  m_vao_floor.texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_vao_floor.texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_vao_floor.texture2D("texID").load("textures/wooden-crate.jpg"))
     return false;
 
   // --- Init OpenGL shader uniforms

@@ -157,6 +157,34 @@ public:
     : GLBuffer<T>(name, GL_ARRAY_BUFFER, init_size, usage)
   {
   }
+
+  // FIXME: why cannot be placed inside PendingContainer ????
+  inline GLVertexBuffer<T>& operator=(std::initializer_list<T> il)
+  {
+    const size_t my_size = this->m_container.size();
+    const size_t other_size = il.size();
+
+    if (other_size > my_size)
+      this->throw_if_cannot_expand();
+
+    this->m_container = il;
+    this->tagAsPending(0_z, other_size - 1_z);
+    return *this;
+  }
+
+  inline GLVertexBuffer<T>& operator=(GLVertexBuffer<T> const& other)
+  {
+    const size_t my_size = this->m_container.size();
+    const size_t other_size = other.m_container.size();
+
+    if (other_size > my_size)
+      this->throw_if_cannot_expand();
+
+    this->m_container = other.m_container;
+    this->tagAsPending(0_z, other_size - 1_z);
+    return *this;
+  }
+
 };
 
 // **************************************************************
