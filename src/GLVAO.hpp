@@ -27,6 +27,7 @@
 #ifndef GL_VERTEX_ARRAY_HPP
 #  define GL_VERTEX_ARRAY_HPP
 
+#  include "Matrix.hpp"
 #  include "GLVBO.hpp"
 #  include "GLTextures.hpp"
 #  include <unordered_map>
@@ -121,6 +122,26 @@ public:
     return *vbo;
   }
 
+  inline GLVertexBuffer<Vector4f>& vector4f(const char *name)
+  {
+    return VBO<Vector4f>(name);
+  }
+
+  inline GLVertexBuffer<Vector3f>& vector3f(const char *name)
+  {
+    return VBO<Vector3f>(name);
+  }
+
+  inline GLVertexBuffer<Vector2f>& vector2f(const char *name)
+  {
+    return VBO<Vector2f>(name);
+  }
+
+  inline GLVertexBuffer<float>& scalarf(const char *name)
+  {
+    return VBO<float>(name);
+  }
+
   template<typename T>
   T& texture(const char *name)
   {
@@ -146,7 +167,6 @@ public:
     DEBUG("VAO::GetTexture '%s' %p", name, texture);
     return *texture;
   }
-
 
   inline GLTexture1D& texture1D(const char *name)
   {

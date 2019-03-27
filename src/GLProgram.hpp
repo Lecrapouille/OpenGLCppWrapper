@@ -293,6 +293,61 @@ public:
     return getUniform<T>(name).data();
   }
 
+  inline Matrix44f& matrix44f(const char *name)
+  {
+    return uniform<Matrix44f>(name);
+  }
+
+  inline Matrix33f& matrix33f(const char *name)
+  {
+    return uniform<Matrix33f>(name);
+  }
+
+  inline Matrix22f& matrix22f(const char *name)
+  {
+    return uniform<Matrix22f>(name);
+  }
+
+  inline Vector4f& vector4f(const char *name)
+  {
+    return uniform<Vector4f>(name);
+  }
+
+  inline Vector3f& vector3f(const char *name)
+  {
+    return uniform<Vector3f>(name);
+  }
+
+  inline Vector2f& vector2f(const char *name)
+  {
+    return uniform<Vector2f>(name);
+  }
+
+  inline float& scalarf(const char *name)
+  {
+    return uniform<float>(name);
+  }
+
+  inline Vector4i& vector4i(const char *name)
+  {
+    return uniform<Vector4i>(name);
+  }
+
+  inline Vector3i& vector3i(const char *name)
+  {
+    return uniform<Vector3i>(name);
+  }
+
+  inline Vector2i& vector2i(const char *name)
+  {
+    return uniform<Vector2i>(name);
+  }
+
+  inline int& scalar(const char *name)
+  {
+    return uniform<int>(name);
+  }
+
   //------------------------------------------------------------------
    //! \brief Check if the attribute variable exists in the shader code
   // FIXME if begin() a reussi

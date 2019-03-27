@@ -14,7 +14,7 @@ void GLExample03::onWindowSizeChanged(const float width, const float height)
   // Note: height is never zero !
   float ratio = width / height;
 
-  m_prog.uniform<Matrix44f>("projection") =
+  m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 }
 
@@ -30,7 +30,7 @@ void GLExample03::createSphere()
   float latitude = -90.0f;
   float longitude = -180.0f;
 
-  auto& positions = m_vao.VBO<Vector3f>("position");
+  auto& positions = m_vao.vector3f("position");
   positions.reserve(NbPointsLon * NbPointsLat);
   m_indices.reserve(NbPointsLon * NbPointsLat);
 
@@ -97,11 +97,11 @@ bool GLExample03::setup()
 
   // --- Init OpenGL shader uniforms
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
-  m_prog.uniform<Matrix44f>("projection") =
+  m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 
-  m_prog.uniform<Matrix44f>("model") = m_movable.transform();
-  m_prog.uniform<Matrix44f>("view") =
+  m_prog.matrix44f("model") = m_movable.transform();
+  m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(1,1,1), Vector3f(0,1,0));
 
   // -- Perform some debug

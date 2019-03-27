@@ -105,27 +105,27 @@ C++ code to be less boring to read.
 14:   }
 15:
 16:   // Init uniforms
-17:   prog.uniform<float>("scale") = 1.0f;
-18:   prog.uniform<Vector4f>("color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
+17:   prog.scalarf("scale") = 1.0f;
+18:   prog.vector4f("color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
 19:
 20:   // vao1 is now the active VAO
 21:   prog.bind(vao1);
 22:
 23:   // Define a 3D model (for example a cube)
-24:   prog.attribute<Vector3f>("position") = { Vector3f(...) ... Vector3f(...) };
-25:   prog.attribute<Vector2f>("UV") = { Vector2f(...) ... Vector2f(...) };
+24:   vao1.vector3f("position") = { Vector3f(...) ... Vector3f(...) };
+25:   vao1.vector2f("UV") = { Vector2f(...) ... Vector2f(...) };
 26:
 27:   // Apply a texture to the 3D model
-28:   if (!prog.texture2D("texID").load("my_texture1.jpg"))
+28:   if (!vao1.texture2D("texID").load("my_texture1.jpg"))
 29:     return false;
 30:
 31:   // vao2 is now the active VAO
 32:   prog.bind(vao2);
 33:
 34:   // Define an other 3D model (for example a plane) with different texture
-35:   prog.attribute<Vector3f>("position") = { ... };
-36:   prog.attribute<Vector2f>("UV") = { ... };
-37:   prog.texture2D("texID").load("my_texture2.jpg")
+35:   vao2.vector3f("position") = { ... };
+36:   vao2.vector2f("UV") = { ... };
+37:   vao2.texture2D("texID").load("my_texture2.jpg")
 38: }
 39:
 40: // Runtime phase:
@@ -151,9 +151,9 @@ C++ code to be less boring to read.
 60:
 61: // Camera management
 62: {
-63:   prog.uniform<Matrix44f>("projection") = { ... };
-64:   prog.uniform<Matrix44f>("view") = { ... };
-65:   prog.uniform<Matrix44f>("model") = { ... };
+63:   prog.matrix44f("projection") = { ... };
+64:   prog.matrix44f("view") = { ... };
+65:   prog.matrix44f("model") = { ... };
 66: }
 ```
 
@@ -228,10 +228,6 @@ Run-time phase:
   routine). Finally the model matrix is used for placing models over
   the world.
 
-**Note:** For attributes, it seems obscure to call
-`prog.attribute<>("") =` instead of `vao.attribute<>("") =` this is
-the same thing.
-
 **Note:** `Primitive::TRIANGLES` is a strong type alias for
 GL_TRIANGLES. For all public methods needing an OpenGL GLint or GLenum
 types I replaced them by a C++ `enum class` (see GLEnum.hpp file for
@@ -246,23 +242,30 @@ requirement, for the moment, is to use the same name both for uniform
 and attribute is not managed by the API (and I'm not sure GLSL can be
 compiled anyway).
 
+**Note:** Contrary to GLumpy where GLProgram can modify both textures,
+uniforms and attributes, in this API GLProgram only modifies uniforms
+and GLVAO only modifies attributes (named VBO) or textures.
+
 **Note:** C++ does not give the same flexibility than python for class
 typing. C++ is a strongly typing language (for classes).  An example
 is C++ does not allow container of template classes. Therefore in
 GLumpy you will write `prog['position'] =` for setting either an
-attribute or an uniform, while with this API, for the moment, you
-cannot reaches the same concise code. You'll have to explicit the
-template type and write `prog.attribute<Vector3f>("position") =` for
-attributes and `prog.uniform<float>("scale") =` for uniforms. Also,
-be careful that if you pass the wrong template type, an exception will
-be thrown telling you that the attribute/uniform name is known but the
-type is not available.
+attribute or an uniform, while with my API you cannot reaches the
+same concise code. You'll have to explicit the template type and write
+`vao.VBO<Vector3f>("position") =` for attributes and
+`prog.uniform<float>("scale") =` for uniforms. Also, be careful that
+if you pass the wrong template type, an exception will be thrown
+telling you that the attribute/uniform name is known but the type is
+not available.
 
 **Help wanted for a better C++ design allowing to shorten number of
 characters to type for setting attributes and uniforms**:
-`prog.attribute<Vector3f>("position") =` is 40 char sized for C++
+`prog.uniform<Vector3f>("position") =` is 35 char sized for C++
 while `prog['position'] =` is 18 char sized for Python (so 50%
-less).
+less). For the moment I can hide the misery of template with wrapping
+methods: for example instead of `prog.attribute<Vector3f>("position")
+=` I'll write `prog.vector3f("position") =` (so 27 chars). Same idea
+for VAO.
 
 #### Multiple objects: multiple VBOs vs. multiple VAOs
 

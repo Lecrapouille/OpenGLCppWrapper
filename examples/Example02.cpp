@@ -132,7 +132,7 @@ void GLExample02::onWindowSizeChanged(float const width, float const height)
   // Note: height is never zero !
   const float ratio = width / height;
 
-  m_prog.uniform<Matrix44f>("u_projection") =
+  m_prog.matrix44f("u_projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 }
 
@@ -216,11 +216,11 @@ bool GLExample02::CreateCube()
   // first version of the SceneGraph example
   // the cube was not centered. So let see
   // how to translate it.
-  m_cube->VBO<Vector3f>("position")
+  m_cube->vector3f("position")
     += Vector3f(0.0f, 1.0f, 0.0f);
 
   // Fill the VBO for texture coordiantes
-  m_cube->VBO<Vector2f>("UV") =
+  m_cube->vector2f("UV") =
     {
       //  U     V
 
@@ -313,14 +313,14 @@ bool GLExample02::setup()
 
   // Projection matrices
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
-  m_prog.uniform<Matrix44f>("projection") =
+  m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10000.0f);
-  m_prog.uniform<Matrix44f>("view") =
+  m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(0.0f, 10.0f, 100.0f), Vector3f(30), Vector3f(0,1,0));
 
   // Uniforms from the Example01
-  m_prog.uniform<float>("scale") = 1.0f;
-  m_prog.uniform<Vector4f>("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
+  m_prog.scalarf("scale") = 1.0f;
+  m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
 
   // Attach 3 robots in the scene graph. Each robot is a scene node.
   DEBUG("Create graph scene");
@@ -397,7 +397,7 @@ bool GLExample02::draw()
 //------------------------------------------------------------------
 void GLExample02::drawSceneNode(GLVAO& vao, Matrix44f const& transform)
 {
-  m_prog.uniform<Matrix44f>("model") = transform;
+  m_prog.matrix44f("model") = transform;
 
   // Draw the 3D model
   m_prog.draw(vao, Primitive::TRIANGLES, 0, 36); // FIXME: use implicit vertices count
