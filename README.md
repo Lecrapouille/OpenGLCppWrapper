@@ -2,42 +2,43 @@
 
 OpenGLCppWrapper is a C++11 wrapper API for writing OpenGL `Core
 Profile` applications in few lines of code. It hides for you the
-complexity of calling OpenGL functions in the correct order: you start
-with OpenGL shaders (GLSL language) and you finish with filling data
-in VBOs. This API also manages object life time and allows you to
-manipulate and change GPU data directly from your C++ memory space
-(CPU): modified data are automatically transmitted to the graphic card
-memory (GPU).
+complexity of calling in the correct order OpenGL functions. In
+addition you start writing with OpenGL shaders (GLSL language) and you
+finish with filling data in VBOs. This API also manages object life
+time (construction, destruction) and allows you to manipulate and
+change GPU data directly from your C++ memory space (CPU): dirty
+data are automatically transmitted to the graphic card memory (GPU).
+
+**Warning:** Do not confuse Core Profile OpenGL (>= 2.2) with Legacy
+OpenGL (<= 2.1).  This API does not manage OpenGL Legacy but manages
+OpenGL version >= 3.0.
 
 **Warning:** This library is not a game engine but just an oriented
 object wrapper for OpenGL that can be used in a game engine. This API,
 contrary to others C++ OpenGL API really use object oriented and does
 not just content to give a C++ flavorish name to OpenGL routines.
 
-**Warning:** Do not confuse Core Profile OpenGL (>= 2.2) with Legacy
-OpenGL (<= 2.1).  This API does not manage OpenGL Legacy but manages
-OpenGL version >= 3.0.
-
 ## API Documentation
 
 * [Code Architecture](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Architecture.md)
 * [Examples and tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md)
 
-## What can you reach with this API ?
+## Explained Hello-world example
 
 Here is the pseudo C++ code of what you will have to write for many of
-your 3D scenes.  You can compare the length of this code with any
-"hello textured triangle mixed with another color" OpenGL tutorial.
-Code explanations come after the pseudo code ! All examples included
-in this library follow this pseudo code.
+your 3D scenes (All examples included in this library follow this
+pseudo code). You can compare the length of this code with any "hello
+textured triangle" OpenGL tutorial. Explanations come after. In this
+document I consider that the reader knows basic OenGL code at least
+code found in basic tutorials.
 
 Firstly let write a basic fragment shader (named
-`my_vertex_shader.glsl`) largely explained in OpenGL tutorials that
-you will find on internet: we mix the texel color with an uniform
-color.
+`my_fragment_shader.glsl`) ike largely explained in OpenGL tutorials
+that you will find on internet. For the fun, we mix the texel color
+with an uniform color.
 
 ```
-my_vertex_shader.glsl
+my_fragment_shader.glsl
 
 01: #version 330 core
 02:
@@ -54,9 +55,9 @@ my_vertex_shader.glsl
 
 In the vertex shader named `my_vertex_shader.glsl` we pass to the
 fragment shader the texel and the color. We applied to vertices
-position a Model-View-Projection matrix. For the fun we applied an
-additional scaling factor. Again these kind of basic shaders are
-largely described on the web.
+position a Model-View-Projection matrix. Again these kind of basic
+shaders are largely described on the web. For the fun we applied an
+additional scaling factor.
 
 ```
 my_vertex_shader.glsl
@@ -157,20 +158,21 @@ C++ code to be less boring to read.
 66: }
 ```
 
-#### Explanations
+### Explanations
 
 Init phase:
-* lines 01-02, 07-08: GLxShader, GLProgram and GLVAO are some OpenGL
-  objects that the library is exposing to the developer.  A GLxShader
-  holds the GLSL code source and compile it. A GLProgram holds
-  GLxShader and link them. GLProgram also holds shaders location of
-  uniforms and attributes. GLVAO can be considered as your OpenGL
-  reference to your 3D model: it is an interface between CPU data and
-  GPU data by holding VBOs and textures. You can modify data of
-  textures and VBOs: the API transfer modified values to your
-  graphical card.
 
-* lines 07-11: You have to load and compile your GLSL code given as
+* lines 01-02 and 07-08: GLxShader, GLProgram and GLVAO are some
+  OpenGL objects that the library is exposing to the developer.  A
+  GLxShader holds the GLSL code source and compile it. A GLProgram
+  holds at least two GLxShaders and link them. GLProgram also holds
+  locations of shader uniforms and shader attributes. GLVAO can be
+  considered as the OpenGL handler to your 3D model: it is an
+  interface between CPU data and GPU data by holding VBOs and
+  textures. You can modify data of textures and VBOs: the API will
+  transfer modified values to your graphical card.
+
+* lines 07-08: You have to load and compile your GLSL code given as
   vertex and fragment shader (and optionally geometry shader). You can
   either refer the file path with `loadFromFile` or directly pass the
   code as string with `fromString`.
@@ -183,24 +185,28 @@ Init phase:
 
 * line 15: If your OpenGL has been compiled with success, the
   GLProgram will create its own list of uniforms and attributes from
-  shaders. In this example they are texID, position, UV, texColor,
-  scale, model, view, projection ...
+  shaders. In this example they are `texID, position, UV, texColor,
+  scale, model, view, projection` ...
 
 * line 17-18: Uniforms can be initialized directly because they acts
-  like constant values. Attributes needs a VAO bind to the GLProgram.
+  like constant values in shaders. Attributes needs a VAO bind to the
+  GLProgram (which is made line 21).
 
-* line 21: To initialize attributes you have to create a dummy VAO and bind
-  it to your GLProgram.  This last will allocate VBOs (and textures, if
-  present) inside the VAO instance.  This is made automatically once
-  during the first binding.  Shader attributes will give their name to
-  VBOs. In our example `vao1` and `vao2` will have a VBO named
-  `position`, `UV` and texture named `texID`. Once VAo have been bind
-  VAO to a GLProgram it cannot be used by an other GLProgram, an
-  exception would be thrown to prevent errors.
+* line 21: To initialize attributes you have to create a dummy VAO and
+  bind it to your GLProgram.  This last will allocate VBOs (and
+  textures, if present) inside the VAO instance. It can also reserve
+  some extra memory (to be passed to GLProgram constrcutor or with the
+  method `setInitVBOSize`). VBO creation is made automatically (and
+  only once) during the first binding (next binding will not create
+  VBOs). Shader attributes will give their name to VBOs. In our
+  example `vao1` and `vao2` will have a VBO named `position`, `UV` and
+  texture named `texID`. Once VAO has been bind to a GLProgram it
+  cannot be used by an other GLProgram (else an exception would be
+  thrown to prevent errors).
 
 * line 24-25: You have to initialize all VBOs with vertices, colors,
-  texture position ... (this depends on your GLSL code). All VBOs
-  shall have the same size.
+  texture position ... (which depends on your GLSL code). All VBOs
+  shall have the same size. **TODO** automatic check will be added.
 
 * line 28-29: Textures are uniforms but they are filled like
   attributes (need a bind VAO). We use the `load` method to store the
@@ -267,9 +273,9 @@ methods: for example instead of `prog.attribute<Vector3f>("position")
 =` I'll write `prog.vector3f("position") =` (so 27 chars). Same idea
 for VAO.
 
-#### Multiple objects: multiple VBOs vs. multiple VAOs
+### Multiple objects: multiple VBOs vs. multiple VAOs
 
-If you want to paint, let say for this example two cubes, you do not
+If you want to paint two cubes (let say for this example), you do not
 have to create two VAOs (one by cube) but just a single VAO and do the
 follow during the run-time process:
 
@@ -278,7 +284,7 @@ follow during the run-time process:
 * Bind your VAO to your GLProgram.
 * Use the Movable class to place (translate, rotate, scale) your first
   cube in the scene: this will create a 4x4 Matrix.
-* Apply this matrix to your shader uniform matrix usually named "model".
+* Apply this matrix to your shader uniform matrix named "model" of the Model View Projection.
 * Draw the first cube.
 * Use again the Movable for placing the second cube: redo the three
   previous steps but this time, draw the second cube (update movable,
@@ -289,10 +295,10 @@ With this method, for this example, you will save GPU memory by
 avoiding storing an additional VAO and all its VBOs needed for drawing
 a cube.
 
-### What else ?
+### What else in this API ?
 
-Not shown in examples, in future, this API will manage FrameBuffer and
-different textures type such as 1D, 3D, Depth.
+Not shown in this tutorial but in future this API will manage
+FrameBuffer and different textures type such as 1D, 3D, Depth.
 
 This API also includes features which are not directly in relation
 with wrapping OpenGL routines. It allows:
