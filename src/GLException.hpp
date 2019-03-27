@@ -21,7 +21,7 @@
 #ifndef GL_EXCEPTION_HPP
 #define GL_EXCEPTION_HPP
 
-#  include "Exception.hpp"
+#  include "private/Exception.hpp"
 
 // ***********************************************************************************************
 //! \brief This macro will declare a class OpenGLException derived from Exception.

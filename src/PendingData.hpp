@@ -21,7 +21,7 @@
 #ifndef PENDINGDATA_HPP_
 #  define PENDINGDATA_HPP_
 
-#  include "NonCppStd.hpp"
+#  include "private/NonCppStd.hpp"
 
 // **************************************************************
 //! \brief Define an interface class keeping track of the smallest

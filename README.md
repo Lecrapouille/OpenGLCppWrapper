@@ -360,7 +360,7 @@ sudo apt-get update && apt-get install crpcut crpcut-dev
 
 To compile the API:
 ```sh
-git clone https://github.com/Lecrapouille/OpenGLCppWrapper.git --depth=1
+git clone --recurse-submodules https://github.com/Lecrapouille/OpenGLCppWrapper.git --depth=1
 cd OpenGLCppWrapper
 make download-external-libs
 make compile-external-libs

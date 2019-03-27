@@ -27,7 +27,7 @@
 #ifndef IGLOBJECT_HPP
 #  define IGLOBJECT_HPP
 
-#  include "NonCppStd.hpp"
+#  include "private/NonCppStd.hpp"
 #  include "GLEnum.hpp"
 
 // *****************************************************************************
