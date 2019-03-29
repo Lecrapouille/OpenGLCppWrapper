@@ -26,7 +26,7 @@ P=.
 M=$(P)/.makefile
 include $(M)/Makefile.header
 
-CXXFLAGS = -W -Wall -Wextra -O3 -std=c++11
+CXXFLAGS = $(CXX_WHOLE_FLAGS) -O3 -std=c++11
 LDFLAGS  =
 
 DEFINES += -DCHECK_OPENGL -DERROR -UDEBUG

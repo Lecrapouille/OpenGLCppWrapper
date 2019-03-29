@@ -85,7 +85,7 @@ public:
   CubicRobot(VAOPtr cube, const char *name);
   ~CubicRobot()
   {
-    DEBUG("---------------- destroy CubicRobot -----------------");
+    DEBUG("%s", "---------------- destroy CubicRobot -----------------");
   }
 
   virtual void update(float const dt) override;

@@ -24,6 +24,7 @@
 #include <iostream>
 #include <sstream>
 
+__attribute__((__noreturn__))
 static void on_error(int /*errorCode*/, const char* msg)
 {
   throw std::runtime_error(msg);

@@ -110,7 +110,7 @@ public:
   //----------------------------------------------------------------------------
   GLProgram& attachShader(GLShader& shader)
   {
-    DEBUG("Prog::attachShader");
+    DEBUG("%s", "Prog::attachShader");
     m_shaders.push_back(&shader);
     return *this;
   }
@@ -131,7 +131,7 @@ public:
                            GLFragmentShader& fragment_shader,
                            GLGeometryShader& geometry_shader)
   {
-    DEBUG("Prog::attachShaders");
+    DEBUG("%s", "Prog::attachShaders");
     m_shaders.push_back(&vertex_shader);
     m_shaders.push_back(&fragment_shader);
     m_shaders.push_back(&geometry_shader);
@@ -152,7 +152,7 @@ public:
   GLProgram& attachShaders(GLVertexShader&   vertex_shader,
                            GLFragmentShader& fragment_shader)
   {
-    DEBUG("Prog::attachShaders");
+    DEBUG("%s", "Prog::attachShaders");
     m_shaders.push_back(&vertex_shader);
     m_shaders.push_back(&fragment_shader);
     return *this;
@@ -187,7 +187,7 @@ public:
       {
         if (!compile())
           {
-            ERROR("Tried binding VAO on a non compilable GLProgram");
+            ERROR("%s", "Tried binding VAO on a non compilable GLProgram");
             return false;
           }
       }
@@ -610,7 +610,7 @@ public:
   //----------------------------------------------------------------------------
   inline void draw(Primitive const /*mode*/)
   {
-    ERROR("Draw with implicit number of vertices is not yet implemented");
+    ERROR("%s", "Draw with implicit number of vertices is not yet implemented");
     //throw_if_not_compiled();
     //throw_if_inconsitency_attrib_sizes();
     //draw(static_cast<GLenum>(mode), 0, m_attributes.begin()->second->size());
@@ -973,7 +973,7 @@ private:
     GLenum type;
 
     // Create the list of uniforms
-    DEBUG("Prog::get all attrib and uniform");
+    DEBUG("%s", "Prog::get all attrib and uniform");
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
     i = static_cast<GLuint>(count);
     while (i--)
@@ -1131,7 +1131,7 @@ private:
   //----------------------------------------------------------------------------
   void detachAllShaders()
   {
-    DEBUG("Prog::detachAllshaders");
+    DEBUG("%s", "Prog::detachAllshaders");
     for (auto& it: m_shaders)
       {
         if (m_handle == it->attached())

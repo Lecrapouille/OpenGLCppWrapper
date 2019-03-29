@@ -192,7 +192,7 @@ public:
                               "' exists but has wrong template type");
       }
 
-    DEBUG("VAO::GetVBO '%s' %p", name, vbo);
+    DEBUG("VAO::GetVBO '%s'", name);
     return *vbo;
   }
 
@@ -270,7 +270,7 @@ public:
                               "' exists but has wrong template type");
       }
 
-    DEBUG("VAO::GetTexture '%s' %p", name, texture);
+    DEBUG("VAO::GetTexture '%s'", name);
     return *texture;
   }
 
@@ -349,7 +349,7 @@ private:
         return false;
       }
     m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
-    DEBUG("allocate new VBO '%s' %p", name, m_vbos[name].get());
+    DEBUG("allocate new VBO '%s'", name);
     return true;
   }
 
@@ -368,7 +368,7 @@ private:
         return false;
       }
     m_textures[name] = std::make_unique<T>(name);
-    DEBUG("allocate new Texture '%s' %p", name, m_textures[name].get());
+    DEBUG("allocate new Texture '%s'", name);
     return true;
   }
 

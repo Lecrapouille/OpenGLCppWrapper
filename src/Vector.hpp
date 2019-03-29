@@ -176,7 +176,7 @@ class Vector
 {
 public:
 
-  VECTOR_DIM(n);
+  VECTOR_DIM(n)
 
 protected:
 
@@ -197,15 +197,19 @@ public:
     y = scalar_y;
   }
 
-  VECTOR_DIM(2_z);
+  VECTOR_DIM(2_z)
 
 public:
 
   union
   {
     T m_data[2_z];
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     struct { T x; T y; };
     struct { T u; T v; };
+#pragma GCC diagnostic pop
   };
 
   const static Vector<T, 2_z> DUMMY;
@@ -250,15 +254,19 @@ public:
     z = scalar_z;
   }
 
-  VECTOR_DIM(3_z);
+  VECTOR_DIM(3_z)
 
 public:
 
   union
   {
     T m_data[3_z];
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     struct { T x; T y; T z; };
     struct { T r; T g; T b; };
+#pragma GCC diagnostic pop
   };
 
   const static Vector<T, 3_z> DUMMY;
@@ -308,15 +316,19 @@ public:
     w = scalar_w;
   }
 
-  VECTOR_DIM(4_z);
+  VECTOR_DIM(4_z)
 
 public:
 
   union
   {
     T m_data[4_z];
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     struct { T x; T y; T z; T w; };
     struct { T r; T g; T b; T a; };
+#pragma GCC diagnostic pop
   };
 
   const static Vector<T, 4_z> DUMMY;

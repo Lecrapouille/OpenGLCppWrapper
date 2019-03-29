@@ -70,8 +70,8 @@ namespace opengl
         // Do not use directly LOG macros because it will catch this
         // filename and its line instead of the faulty file/line which
         // produced the OpenGL error.
-        ERROR("Failed executing '%s'. Reason is '%s'",
-              filename, line, expression, error);
+        errout("GLERR", filename, line, "Failed executing '%s'. Reason is '%s'",
+               expression, error);
       }
   }
 } // namespace

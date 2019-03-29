@@ -160,7 +160,7 @@ class GLTexture2D: public IGLTexture
   {
     void operator()(unsigned char* buf)
     {
-      DEBUG("Texture deleter");
+      DEBUG("%s", "Texture deleter");
       if (buf != nullptr)
         SOIL_free_image_data(buf);
     }
@@ -337,7 +337,7 @@ class GLTexture1D: public IGLTexture
   {
     void operator()(unsigned char* buf)
     {
-      DEBUG("Texture deleter");
+      DEBUG("%s", "Texture deleter");
       if (buf != nullptr)
         SOIL_free_image_data(buf);
     }

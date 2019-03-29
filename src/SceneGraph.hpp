@@ -29,7 +29,7 @@
 #  include <memory>
 #  include <vector>
 
-template <typename R, typename T, uint32_t D>
+template <typename R, typename T, size_t D>
 class ISceneGraphRenderer
 {
 public:
@@ -54,7 +54,7 @@ public:
 //! R = renderable class( VAO, Mesh ...)
 //! T, D = transformation matrix of type T and D its dimension (ie a 4x4 matrix of floats).
 // *************************************************************************************************
-template <typename I, typename R, typename T, uint32_t D>
+template <typename I, typename R, typename T, size_t D>
 class SceneGraph_t
 {
   using ObjPtr = std::shared_ptr<R>;
@@ -81,6 +81,7 @@ public:
     {
       m_renderable = renderable;
       m_id = id;
+      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -91,6 +92,7 @@ public:
     Node(ObjPtr renderable = nullptr)
     {
       m_renderable = renderable;
+      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -100,6 +102,7 @@ public:
     Node(I const& id)
     {
       m_id = id;
+      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -287,7 +290,7 @@ public:
     //! List of Node as children. Pointers are never nullptr.
     std::vector<NodePtr>   m_children;
     //! Scale factors for the current 3D entity
-    Vector<T, D>           m_local_scaling = Vector<T, D>(1);
+    Vector<T, D>           m_local_scaling;
   };
 
 private:
@@ -432,7 +435,7 @@ private:
     // This case is suppose to never happen
     if (nullptr == res)
       {
-        ERROR("nullptr error");
+        ERROR("%s", "nullptr error");
         return nullptr;
       }
 

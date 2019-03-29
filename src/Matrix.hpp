@@ -32,7 +32,7 @@ namespace matrix
 {
   //! \brief Enum for constructing different kind of matrices.
   enum MatrixType { Identity };
-};
+}
 
 
 template <typename T, size_t rows, size_t cols>

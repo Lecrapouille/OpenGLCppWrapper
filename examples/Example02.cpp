@@ -10,7 +10,7 @@
 CubicRobot::CubicRobot(VAOPtr cube, const char *name)
   : SceneNode(nullptr, name)
 {
-  DEBUG("Cstr CubicRobot");
+  DEBUG("%s", "Cstr CubicRobot");
 
   // Body
   m_body = attach(cube, "Body");
@@ -48,7 +48,7 @@ CubicRobot::CubicRobot(VAOPtr cube, const char *name)
 //------------------------------------------------------------------
 void CubicRobot::update(float const dt)
 {
-  DEBUG("Robot::update");
+  DEBUG("%s", "Robot::update");
 
   const GLfloat degreesPerSecond = 1.0f;
   degreesRotated += dt * degreesPerSecond;
@@ -146,7 +146,7 @@ GLExample02::GLExample02()
 
 GLExample02::~GLExample02()
 {
-  DEBUG("---------------- quit -----------------");
+  DEBUG("%s", "---------------- quit -----------------");
   std::cout << "Bye" << std::endl;
 }
 
@@ -287,7 +287,7 @@ bool GLExample02::CreateCube()
 //------------------------------------------------------------------
 bool GLExample02::setup()
 {
-  DEBUG("GLExample02::setup()");
+  DEBUG("%s", "GLExample02::setup()");
 
   // Init the context of the DearIMgui library
   if (false == m_gui.setup(*this))
@@ -323,7 +323,7 @@ bool GLExample02::setup()
   m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
 
   // Attach 3 robots in the scene graph. Each robot is a scene node.
-  DEBUG("Create graph scene");
+  DEBUG("%s", "Create graph scene");
 
   // Init VAO and its VBOs.
   if (!CreateCube())
@@ -372,7 +372,7 @@ bool GLExample02::setup()
 //------------------------------------------------------------------
 bool GLExample02::draw()
 {
-  DEBUG("GLExample02::draw()");
+  DEBUG("%s", "GLExample02::draw()");
 
   // clear everything
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));

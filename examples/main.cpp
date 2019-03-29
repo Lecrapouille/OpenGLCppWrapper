@@ -6,6 +6,7 @@
 
 #define MAX_EXAMPLES 4
 
+__attribute__((__noreturn__))
 static void usage(char *argv[])
 {
   std::cout << "Usage: " << std::endl

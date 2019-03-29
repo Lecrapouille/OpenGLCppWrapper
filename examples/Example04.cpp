@@ -16,7 +16,7 @@ void GLExample04::onWindowSizeChanged(const float /*width*/, const float /*heigh
 //------------------------------------------------------------------
 bool GLExample04::setup()
 {
-  DEBUG("Setup");
+  DEBUG("%s", "Setup");
 
   // Enable some OpenGL states
   glCheck(glEnable(GL_DEPTH_TEST));
