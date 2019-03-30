@@ -24,9 +24,12 @@ PROJECT = OpenGLCppWrapper
 TARGET = $(PROJECT)-UnitTest
 
 ###################################################
+# Debug mode or Release mode
+PROJECT_MODE = debug
+
+###################################################
 # Location from the project root directory.
 P=..
-ABSP=$(abspath $(P))
 
 ###################################################
 # Sharable informations between all Makefiles
@@ -42,17 +45,22 @@ OBJ += UnitTests.o
 
 ###################################################
 # Compilation options.
-OPTIM_FLAGS = -O2 -g
-CXXFLAGS = -W -Wall -Wextra -std=c++11 
+CXXFLAGS = $(CXX_WHOLE_FLAGS) -std=c++11
 LDFLAGS =
 
 ###################################################
+# Code coverage. Comment these lines if coveraging
+# is not desired.
+CXXFLAGS += --coverage
+LDFLAGS += --coverage
+
+###################################################
 # Inform Makefile where to find header files
-INCLUDES += -I$(BUILD) -I.. -I../src -I../src/private
+INCLUDES += -I$(P)/src -I$(P)/src/private -I $(P)/external
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
-VPATH=$(BUILD):../src:../src/private
+VPATH += $(P)/src:$(P)/src/private:$(P)/external
 
 ###################################################
 # Project defines
@@ -62,73 +70,41 @@ DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-LIBS = $(abspath $(P)/external/SOIL/libSOIL.a) \
-       $(abspath $(P)/build/libOpenGLCppWrapper.a)
+#FIXME should be $(STATIC_LIB_TARGET) but referring to the main project ==> $(STATIC_LIB_MAIN_TARGET)
+#FIXME idem for $(BUILD) ==> $(MAIN_BUILD)
+EXTERNAL_LIBS = \
+	$(abspath $(P)/external/SOIL/libSOIL.a) \
+	$(abspath $(P)/$(BUILD)/libOpenGLCppWrapper.a)
+
+###################################################
+# But sure the main project have been compiled
+ifeq ("$(wildcard $(P)/$(BUILD)/libOpenGLCppWrapper.a)","")
+$(error Please compile the main project before compiling unit tests: cd $(P) && make)
+endif
 
 ###################################################
 # Set Libraries. For knowing which libraries
 # is needed please read the external/README.md file.
 
-## OS X
 ifeq ($(ARCHI),Darwin)
-LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
-
-## Linux
+EXTERNAL_LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
 else ifeq ($(ARCHI),Linux)
-LIBS += -lGLU -lGL -lGLEW `pkg-config glfw3 --static --libs` -lcrpcut -ldl
-
-## Windows
+EXTERNAL_LIBS += -lGLU -lGL -lGLEW `pkg-config glfw3 --static --libs` -lcrpcut -ldl
 else
-
-#$(error Unknown architecture)
+$(error Unknown architecture)
 endif
 
 ###################################################
-# Code coverage. Comment these lines if coveraging
-# is not desired.
-CXXFLAGS += --coverage
-LDFLAGS += --coverage
-
-###################################################
-# Address sanitizer. Comment these lines if asan is
-# not desired.
-
-# FIXME: clang on Travis-CI bugs during linking (infinite loop).
-# FIXME: g++ on Tracis-CI I have a segfault and trace are not human
-# readable. Temporary disable asan with Travis
-
-# ifeq ($(CXX),g++)
-#ifneq ($(CI),true)
-#OPTIM_FLAGS = -O1 -g
-#CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-#LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-#LIBS += -static-libstdc++ -static-libasan
-#SANITIZER := ASAN_OPTIONS=symbolize=1 ASAN_SYMBOLIZER_PATH=$(shell which llvm-symbolizer)
-#endif
-
-###################################################
-# Compile OpenGLCppWrapper unit tests
+# Compile OpenGLCppWrapper unit tests. Be sure libs
+# of the main project have been compiled.
 all: $(TARGET)
-
-###################################################
-# Link sources
-$(TARGET): $(OBJ)
-	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","$(VERSION)")
-	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
-
-###################################################
-# Compile unit tests
-%.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
-	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
-	@$(POSTCOMPILE)
 
 ###################################################
 # Run unit tests.
 .PHONY: unit-tests
 unit-tests: $(TARGET)
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
-	$(SANITIZER) ./build/$(TARGET) || (cat OpenGLCppWrapper.log; return 1)
+	@$(SANITIZER) ./$(BUILD)/$(TARGET) || (cat $(TARGET).log; return 1)
 
 ###################################################
 .PHONY: clean
@@ -138,4 +114,4 @@ clean:
 
 ###################################################
 # Sharable informations between all Makefiles
--include $(M)/Makefile.footer
+include $(M)/Makefile.footer

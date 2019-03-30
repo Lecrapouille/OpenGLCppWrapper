@@ -30,8 +30,11 @@ TESTSUITE(VAOs)
 {
   TEST(TestVBOs)
     {
+      // TODO
+      // GLVAO vao0(nullptr);
+
       // VAO with no name
-      GLVAO vao0;
+      GLVAO vao0("");
       ASSERT_EQ(true, vao0.name() == "");
       ASSERT_EQ(GL_ARRAY_BUFFER, vao0.target());
 

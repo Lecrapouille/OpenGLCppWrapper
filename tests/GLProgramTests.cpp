@@ -89,12 +89,13 @@ TESTSUITE(Programs)
       ASSERT_EQ(true, prog.hasUniform("u3"));
       ASSERT_EQ(true, prog.hasUniform("u4"));
 
-      try {
-        prog.getVBO<int>("");
-        ASSERT_TRUE("Exception should have occured");
-      } catch(OpenGLException) { }
+      //Old API
+      //try {
+      //  prog.getVBO<int>("");
+      //  ASSERT_TRUE("Exception should have occured");
+      //} catch(OpenGLException) { }
 
-      GLVAO vao;
+      GLVAO vao("VAO");
       ASSERT_EQ(0, vao.prog);
       prog.m_handle = 42;
       ASSERT_EQ(true, prog.bind(vao));
@@ -102,10 +103,11 @@ TESTSUITE(Programs)
       ASSERT_EQ(42, vao.prog);
       ASSERT_EQ(true, prog.m_vao == &vao);
 
-      try {
-        prog.getVBO<int>("");
-        ASSERT_TRUE("Exception should have occured");
-      } catch(OpenGLException) { }
+      //Old API
+      //try {
+      //  prog.getVBO<int>("");
+      //  ASSERT_TRUE("Exception should have occured");
+      //} catch(OpenGLException) { }
 
       // TODO: try add name conflict wit different types
       ASSERT_EQ(0_z, prog.attributeNames().size());
@@ -126,7 +128,7 @@ TESTSUITE(Programs)
       ASSERT_EQ(true, shaderNames.end() !=
                 std::find(shaderNames.begin(), shaderNames.end(), "foo"));
 
-      GLVAO vao2;
+      GLVAO vao2("VAO2");
       ASSERT_EQ(0, vao2.prog);
       prog.initVAO(vao2);
       ASSERT_EQ(42, vao2.prog);
@@ -150,8 +152,8 @@ TESTSUITE(Programs)
       GLProgram prog2("prog2");
       prog2.m_handle = 43;
       prog2.m_compiled = true;
-      GLVAO vao1;
-      GLVAO vao2;
+      GLVAO vao1("VAO1");
+      GLVAO vao2("VAO2");
 
       ASSERT_EQ(0, vao1.prog);
       ASSERT_EQ(0, vao2.prog);

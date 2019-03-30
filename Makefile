@@ -18,28 +18,59 @@
 ## along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
+###################################################
+# Executable name
 PROJECT = OpenGLCppWrapper
 TARGET = $(PROJECT)
+
+###################################################
+# Debug mode or Release mode
 PROJECT_MODE = debug
 
+###################################################
+# Location from the project root directory.
 P=.
+
+###################################################
+# Sharable informations between all Makefiles
 M=$(P)/.makefile
 include $(M)/Makefile.header
 
+###################################################
+# Do the list of compiled files
+OBJ += Exception.o PendingData.o
+OBJ += GLException.o OpenGL.o GLWindow.o
+OBJ += imgui_draw.o imgui_widgets.o imgui.o \
+       imgui_impl_glfw.o imgui_impl_opengl3.o
+
+###################################################
+# Compilation options.
 CXXFLAGS = $(CXX_WHOLE_FLAGS) -O3 -std=c++11
 LDFLAGS  =
 
+###################################################
+# Inform Makefile where to find header files
+INCLUDES += -Isrc -Iexternal -Iexternal/imgui
+
+###################################################
+# Inform Makefile where to find *.cpp and *.o files
+VPATH += src:src/private:external:external/imgui
+
+###################################################
+# Project defines
 DEFINES += -DCHECK_OPENGL -DERROR -UDEBUG
 DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 
-OBJ += Exception.o PendingData.o
-OBJ += GLException.o OpenGL.o GLWindow.o
-OBJ += imgui_draw.o imgui_widgets.o imgui.o imgui_impl_glfw.o imgui_impl_opengl3.o
-
-INCLUDES += -Isrc -Iexternal -Iexternal/imgui
-VPATH += src:src/private:external:external/imgui
-
+###################################################
+# Set Libraries compiled in the external/ directory.
+# For knowing which libraries is needed please read
+# the doc/Install.md file.
+EXTERNAL_LIBS =
 EXTERNAL_OBJ += $(abspath external)/SOIL/obj/*.o
+
+###################################################
+# Set Libraries. For knowing which libraries
+# is needed please read the external/README.md file.
 
 ifeq ($(ARCHI),Darwin)
 EXTERNAL_LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
@@ -52,6 +83,13 @@ endif
 ###################################################
 # Compile static and shared libraries
 all: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET)
+
+###################################################
+# Compile and launch unit tests and generate the code coverage html report.
+.PHONY: unit-tests
+unit-tests:
+	@$(call print-simple,"Compiling unit tests")
+	@make -C tests coverage
 
 ###################################################
 # Install project. You need to be root.
@@ -93,4 +131,6 @@ veryclean: clean
 	@$(call print-simple,"Cleaning","$(PWD)/doc/html")
 	@cd doc/ && rm -fr html
 
+###################################################
+# Sharable informations between all Makefiles
 include $(M)/Makefile.footer

@@ -20,7 +20,7 @@
 
 #define protected public
 #define private public
-#include "Matrix.tpp"
+#include "Matrix.hpp"
 #undef protected
 #undef private
 #include <crpcut.hpp>
