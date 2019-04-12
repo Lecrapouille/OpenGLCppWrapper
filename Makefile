@@ -35,50 +35,15 @@ P=.
 # Sharable informations between all Makefiles
 M=$(P)/.makefile
 include $(M)/Makefile.header
+include $(P)/Makefile.common
 
 ###################################################
-# Do the list of compiled files
-OBJ += Exception.o PendingData.o
-OBJ += GLException.o OpenGL.o GLWindow.o
-OBJ += imgui_draw.o imgui_widgets.o imgui.o \
-       imgui_impl_glfw.o imgui_impl_opengl3.o
-
-###################################################
-# Compilation options.
-CXXFLAGS = $(CXX_WHOLE_FLAGS) -O3 -std=c++11
-LDFLAGS  =
-
-###################################################
-# Inform Makefile where to find header files
-INCLUDES += -Isrc -Iexternal -Iexternal/imgui
-
-###################################################
-# Inform Makefile where to find *.cpp and *.o files
-VPATH += src:src/private:external:external/imgui
-
-###################################################
-# Project defines
-DEFINES += -DCHECK_OPENGL -DERROR -UDEBUG
-DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
-
-###################################################
-# Set Libraries compiled in the external/ directory.
-# For knowing which libraries is needed please read
-# the doc/Install.md file.
-EXTERNAL_LIBS =
-EXTERNAL_OBJ += $(abspath external)/SOIL/obj/*.o
-
-###################################################
-# Set Libraries. For knowing which libraries
-# is needed please read the external/README.md file.
-
-ifeq ($(ARCHI),Darwin)
-EXTERNAL_LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
-else ifeq ($(ARCHI),Linux)
-EXTERNAL_LIBS += -lGLU -lGL -lGLEW `pkg-config glfw3 --static --libs`
-else
-$(error Unknown architecture)
-endif
+# Make the list of compiled files
+OBJ_CORE = Exception.o PendingData.o GLException.o \
+           OpenGL.o GLWindow.o
+OBJ_IMGUI = imgui_draw.o imgui_widgets.o imgui.o \
+            imgui_impl_glfw.o imgui_impl_opengl3.o
+OBJ += $(OBJ_CORE) $(OBJ_IMGUI)
 
 ###################################################
 # Compile static and shared libraries
@@ -111,13 +76,6 @@ uninstall:
 	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
 	@rm $(PROJECT_EXE)
 	@rm -r $(PROJECT_DATA_ROOT)
-
-###################################################
-# Clean the build/ directory.
-.PHONY: clean
-clean:
-	@$(call print-simple,"Cleaning","$(PWD)")
-	@rm -fr $(BUILD) 2> /dev/null
 
 ###################################################
 # Clean the whole project.
