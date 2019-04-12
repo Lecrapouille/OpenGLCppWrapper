@@ -640,7 +640,7 @@ public:
   template<class T>
   void draw(Primitive const mode, GLIndexBuffer<T>& index)
   {
-    DEBUG("Prog::drawIndex %d elements", index.size());
+    DEBUG("Prog::drawIndex %zu elements", index.size());
 
     throw_if_not_compiled();
     throw_if_vao_not_binded();

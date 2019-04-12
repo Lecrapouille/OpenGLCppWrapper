@@ -118,7 +118,7 @@ private:
     size_t pos_start, pos_end;
     PendingContainer<T>::getPendingData(pos_start, pos_end);
     PendingContainer<T>::clearPending();
-    DEBUG("VBO '%s' update %u -> %u",
+    DEBUG("VBO '%s' update %zu -> %zu",
          name().c_str(), pos_start, pos_end);
 
     size_t offset = sizeof (T) * pos_start;
