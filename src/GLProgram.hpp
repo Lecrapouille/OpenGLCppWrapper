@@ -796,7 +796,7 @@ private:
             //case GL_SAMPLER_2D_DEPTH:
             //vao.createTexture<GLTextureDepth2D>(name);
             //break;
-          case GL_SAMPLER_3D:
+          case GL_SAMPLER_CUBE:
             vao.createTexture<GLTexture3D>(name);
             break;
           default:
@@ -1068,7 +1068,7 @@ private:
         m_uniforms[name] = std::make_unique<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, gpuID());
         break;
       case GL_SAMPLER_1D:
-        m_uniforms[name] = std::make_unique<GLSampler1D>(name, m_sampler_count, gpuID());
+        m_samplers[name] = std::make_unique<GLSampler1D>(name, m_sampler_count, gpuID());
         m_sampler_count += 1u;
         break;
       case GL_SAMPLER_2D:
@@ -1076,7 +1076,7 @@ private:
         m_sampler_count += 1u;
         break;
       case GL_SAMPLER_CUBE:
-        m_uniforms[name] = std::make_unique<GLSampler3D>(name, m_sampler_count, gpuID());
+        m_samplers[name] = std::make_unique<GLSampler3D>(name, m_sampler_count, gpuID());
         m_sampler_count += 1u;
         break;
       default:
