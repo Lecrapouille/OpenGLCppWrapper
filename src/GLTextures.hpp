@@ -55,6 +55,20 @@ class IGLTexture
   : public IGLObject<GLenum>,
     protected PendingData
 {
+protected:
+
+  struct SOILDeleter
+  {
+    void operator()(unsigned char* buf)
+    {
+      DEBUG("%s", "Texture deleter");
+      if (buf != nullptr)
+        SOIL_free_image_data(buf);
+    }
+  };
+
+  using TextBufPtr = std::unique_ptr<unsigned char, SOILDeleter>;
+
 public:
 
   IGLTexture(std::string const& name, const GLenum target)
@@ -156,20 +170,7 @@ class GLTexture2D: public IGLTexture
 {
   friend class GLTexture3D;
 
-  struct SOILDeleter
-  {
-    void operator()(unsigned char* buf)
-    {
-      DEBUG("%s", "Texture deleter");
-      if (buf != nullptr)
-        SOIL_free_image_data(buf);
-    }
-  };
-
-  using TextBufPtr = std::unique_ptr<unsigned char, SOILDeleter>;
-
 public:
-
 
   GLTexture2D(std::string const& name)
     : IGLTexture(name, GL_TEXTURE_2D)
@@ -208,12 +209,11 @@ public:
     DEBUG("Loading texture '%s'", filename);
 
     // FIXME: SOIL_LOAD_RGBA should adapt from moptions.cpuPixelFormat
-    TextBufPtr buf(SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGBA));
-    m_buffer = std::move(buf);
-
-    // Success
-    if (likely(nullptr != m_buffer.get()))
+    unsigned char* image = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGBA);
+    if (likely(nullptr != image))
       {
+        // Success
+        m_buffer = std::move(TextBufPtr(image));
         m_width = static_cast<uint32_t>(width);
         m_height = static_cast<uint32_t>(height);
         DEBUG("texture dimension %ux%u", m_width, m_height);
@@ -277,7 +277,6 @@ private:
       }
 
     applyTextureParam();
-    glBindTexture(m_target, m_handle);
     doGLTexImage2D();
     return false;
   }
@@ -333,18 +332,6 @@ public:
 // **************************************************************
 class GLTexture1D: public IGLTexture
 {
-  struct SOILDeleter
-  {
-    void operator()(unsigned char* buf)
-    {
-      DEBUG("%s", "Texture deleter");
-      if (buf != nullptr)
-        SOIL_free_image_data(buf);
-    }
-  };
-
-  using TextBufPtr = std::unique_ptr<unsigned char, SOILDeleter>;
-
 public:
 
   GLTexture1D(std::string const& name)
@@ -370,8 +357,6 @@ public:
         return true;
       }
 
-    applyTextureParam();
-    glBindTexture(m_target, m_handle);
     glCheck(glTexImage1D(m_target, 0,
                          static_cast<GLint>(m_options.gpuPixelFormat),
                          static_cast<GLsizei>(m_width),
@@ -379,6 +364,7 @@ public:
                          static_cast<GLenum>(m_options.cpuPixelFormat),
                          static_cast<GLenum>(m_options.pixelType),
                          nullptr));
+    applyTextureParam();
     return false;
   }
 
@@ -411,7 +397,7 @@ private:
 };
 
 // **************************************************************
-//!
+//! \brief FIXME Shall be name GLTextureCube and create its ancestor class GLTexture3D
 // **************************************************************
 class GLTexture3D: public IGLTexture
 {
@@ -436,7 +422,7 @@ public:
   {
     for (uint8_t i = 0; i < 6u; ++i)
       {
-        if (false == m_textures[i]->loaded())
+        if (unlikely(false == m_textures[i]->loaded()))
           return false;
       }
     return true;
@@ -444,7 +430,8 @@ public:
 
   bool load(CubeMap const target, const char *const filename)
   {
-    return m_textures[static_cast<int>(target)]->load(filename, false);
+    const int index = static_cast<int>(target) - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+    return m_textures[index]->load(filename, false);
   }
 
 private:
@@ -460,15 +447,14 @@ private:
         return true;
       }
 
-    applyTextureParam();
-    glBindTexture(m_target, m_handle);
     for (uint8_t i = 0; i < 6u; ++i)
       {
-        m_textures[i]->m_handle = targets(i);
+        m_textures[i]->m_target = targets(i);
         m_textures[i]->options(m_options);
         m_textures[i]->doGLTexImage2D();
       }
-    return true;
+    applyTextureParam();
+    return false;
   }
 
   virtual bool update() override
@@ -486,7 +472,7 @@ private:
     uint8_t depth = 0u;
     for (uint8_t i = 0; i < 6u; ++i)
       {
-        if (m_textures[i]->loaded())
+        if (likely(m_textures[i]->loaded()))
           ++depth;
       }
     return depth;
