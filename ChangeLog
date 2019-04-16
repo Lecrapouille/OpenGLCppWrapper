@@ -1,3 +1,11 @@
+version 0.4:
+
+    Add TexturesCube.
+    Update Makefiles (use git submodules).
+    Fix compilations warnings.
+    Classes are non copyable.
+    Replace file extension .tpp by .hpp
+
 version 0.3:
 
     GLProg can reserve number of elements when creating VBOs.
