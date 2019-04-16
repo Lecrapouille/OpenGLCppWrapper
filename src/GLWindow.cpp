@@ -30,6 +30,14 @@ static void on_error(int /*errorCode*/, const char* msg)
   throw std::runtime_error(msg);
 }
 
+static void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+  IGLWindow* obj = (IGLWindow*) glfwGetWindowUserPointer(window);
+
+  if (nullptr == obj) return ;
+  obj->onMouseMoved(xpos, ypos);
+}
+
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
   IGLWindow* obj = (IGLWindow*) glfwGetWindowUserPointer(window);
@@ -148,7 +156,7 @@ bool IGLWindow::start()
   // callback
   glfwSetWindowUserPointer(m_window, this);
   glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
-  //glfwSetCursorPosCallback(m_window, mouse_callback);
+  glfwSetCursorPosCallback(m_window, mouse_callback);
   //glfwSetScrollCallback(m_window, scroll_callback);
 
   // Ensure we can capture keyboard being pressed below

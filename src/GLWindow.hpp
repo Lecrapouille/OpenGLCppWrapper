@@ -78,6 +78,16 @@ public:
                         static_cast<float>(height));
   }
 
+  inline bool keyPressed(const int key) const
+  {
+     if (nullptr == m_window)
+       return false;
+     return key == glfwGetKey(m_window, key);
+  }
+
+  virtual void onMouseMoved(const double /*xpos*/, const double /*ypos*/)
+  {}
+
 private:
 
   //------------------------------------------------------------------
