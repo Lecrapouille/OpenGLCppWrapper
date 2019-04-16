@@ -30,6 +30,13 @@ TESTSUITE(Shaders)
 {
   TEST(TestCreators)
     {
+      GLVertexShader shaderNoName1;
+      ASSERT_EQ(true, shaderNoName1.name() == "VertexShader");
+      GLFragmentShader shaderNoName2;
+      ASSERT_EQ(true, shaderNoName2.name() == "FragmentShader");
+      GLGeometryShader shaderNoName3;
+      ASSERT_EQ(true, shaderNoName3.name() == "GeometryShader");
+
       GLVertexShader shader1("vert");
       ASSERT_EQ(true, shader1.name() == "vert");
       ASSERT_EQ(GL_VERTEX_SHADER, shader1.target());
@@ -39,7 +46,7 @@ TESTSUITE(Shaders)
       ASSERT_EQ(GL_FRAGMENT_SHADER, shader2.target());
 
       GLGeometryShader shader3;
-      ASSERT_EQ(true, shader3.name() == "");
+      ASSERT_EQ(true, shader3.name() == "GeometryShader");
       ASSERT_EQ(GL_GEOMETRY_SHADER, shader3.target());
 
       //--- Check initial state

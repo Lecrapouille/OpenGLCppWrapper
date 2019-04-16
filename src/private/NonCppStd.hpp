@@ -5,6 +5,21 @@
 #  include <memory>
 
 // **************************************************************
+//! \brief Inspired by
+//! http://www.boost.org/doc/libs/1_66_0/boost/core/noncopyable.hpp
+// **************************************************************
+class NonCopyable
+{
+protected:
+
+  constexpr NonCopyable() = default;
+  ~NonCopyable() = default;
+
+  NonCopyable(const NonCopyable&) = delete;
+  const NonCopyable& operator=(const NonCopyable&) = delete;
+};
+
+// **************************************************************
 //! \brief Allows to create literal values of type std::size_t
 //! In the same way than U, LL or UL macros. Indeed size_t can
 //! be uint32_t or uint64_t depending on the architecture.

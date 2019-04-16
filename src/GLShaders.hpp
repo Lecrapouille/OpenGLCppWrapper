@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -9,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -18,21 +18,21 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 //
-// This file is a derivated work of https://github.com/glumpy/glumpy
+// This file is a derived work of https://github.com/glumpy/glumpy
 //
 // Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLSHADER_HPP_
-#  define GLSHADER_HPP_
+#ifndef GLSHADER_HPP
+#  define GLSHADER_HPP
 
-#  include "IGLObject.tpp"
+#  include "IGLObject.hpp"
 #  include <vector>
 
 //------------------------------------------------------------------
 //! \param filename the file path to read.
-//! \param the buffer receiving the content of the file.
+//! \param buffer the buffer receiving the content of the file.
 //! \return true if success, else false.
 //------------------------------------------------------------------
 static bool readAllFile(std::string const& filename, std::string& buffer)
@@ -71,27 +71,19 @@ static bool readAllFile(std::string const& filename, std::string& buffer)
 }
 
 // **************************************************************
-//! \class GLShader GLShader.hpp this class allows to load a
-//! shader (vertex, fragment, geometry) and compile it. This class
-//! is managed by GLProgram.
+//! \class GLShader GLShaders.hpp
+//!
+//! \brief This class allows to load a shader (vertex, fragment,
+//! geometry) and compile it. This class is managed by GLProgram.
 // **************************************************************
 class GLShader: public IGLObject<GLuint>
 {
 public:
 
   //------------------------------------------------------------------
-  //! \brief Empty constructor. Do nothing.
-  //------------------------------------------------------------------
-  GLShader(const GLenum target) noexcept
-    : IGLObject()
-  {
-    m_target = target;
-  }
-
-  //------------------------------------------------------------------
   //! \brief Constructor. Do nothing.
   //------------------------------------------------------------------
-  GLShader(std::string const& name, const GLenum target) noexcept
+  GLShader(std::string const& name, const GLenum target)
     : IGLObject(name)
   {
     m_target = target;
@@ -120,7 +112,7 @@ public:
   //! \brief Read the whole shader code from the given ascii file.
   //! Note: the shader code compilation is delayed. The code is only
   //! store in the member variable.
-  //! \param the path of the shader code.
+  //! \param filename the path of the shader code.
   //! \return true if the whole file has been read, else return false.
   //! An error message is set and can be read through error().
   //------------------------------------------------------------------
@@ -322,12 +314,7 @@ class GLVertexShader: public GLShader
 {
 public:
 
-  GLVertexShader()
-    : GLShader(GL_VERTEX_SHADER)
-  {
-  }
-
-  GLVertexShader(std::string const& name)
+  GLVertexShader(std::string const& name = "VertexShader")
     : GLShader(name, GL_VERTEX_SHADER)
   {
   }
@@ -340,12 +327,7 @@ class GLFragmentShader: public GLShader
 {
 public:
 
-  GLFragmentShader()
-    : GLShader(GL_FRAGMENT_SHADER)
-  {
-  }
-
-  GLFragmentShader(std::string const& name)
+  GLFragmentShader(std::string const& name = "FragmentShader")
     : GLShader(name, GL_FRAGMENT_SHADER)
   {
   }
@@ -358,15 +340,10 @@ class GLGeometryShader: public GLShader
 {
 public:
 
-  GLGeometryShader()
-    : GLShader(GL_GEOMETRY_SHADER)
-  {
-  }
-
-  GLGeometryShader(std::string const& name)
+  GLGeometryShader(std::string const& name = "GeometryShader")
     : GLShader(name, GL_GEOMETRY_SHADER)
   {
   }
 };
 
-#endif /* GLSHADER_HPP_ */
+#endif /* GLSHADER_HPP */

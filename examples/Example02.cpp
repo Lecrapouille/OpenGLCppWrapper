@@ -10,7 +10,7 @@
 CubicRobot::CubicRobot(VAOPtr cube, const char *name)
   : SceneNode(nullptr, name)
 {
-  DEBUG("Cstr CubicRobot");
+  DEBUG("%s", "Cstr CubicRobot");
 
   // Body
   m_body = attach(cube, "Body");
@@ -48,7 +48,7 @@ CubicRobot::CubicRobot(VAOPtr cube, const char *name)
 //------------------------------------------------------------------
 void CubicRobot::update(float const dt)
 {
-  DEBUG("Robot::update");
+  DEBUG("%s", "Robot::update");
 
   const GLfloat degreesPerSecond = 1.0f;
   degreesRotated += dt * degreesPerSecond;
@@ -132,7 +132,7 @@ void GLExample02::onWindowSizeChanged(float const width, float const height)
   // Note: height is never zero !
   const float ratio = width / height;
 
-  m_prog.uniform<Matrix44f>("u_projection") =
+  m_prog.matrix44f("u_projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 }
 
@@ -146,7 +146,7 @@ GLExample02::GLExample02()
 
 GLExample02::~GLExample02()
 {
-  DEBUG("---------------- quit -----------------");
+  DEBUG("%s", "---------------- quit -----------------");
   std::cout << "Bye" << std::endl;
 }
 
@@ -159,7 +159,7 @@ bool GLExample02::CreateCube()
   m_prog.bind(*m_cube);
 
   // Fill the VBO for vertices
-  m_prog.attribute<Vector3f>("position") =
+  m_cube->VBO<Vector3f>("position") =
     {
       //  X     Y     Z
 
@@ -216,11 +216,11 @@ bool GLExample02::CreateCube()
   // first version of the SceneGraph example
   // the cube was not centered. So let see
   // how to translate it.
-  m_prog.attribute<Vector3f>("position")
+  m_cube->vector3f("position")
     += Vector3f(0.0f, 1.0f, 0.0f);
 
   // Fill the VBO for texture coordiantes
-  m_prog.attribute<Vector2f>("UV") =
+  m_cube->vector2f("UV") =
     {
       //  U     V
 
@@ -274,9 +274,9 @@ bool GLExample02::CreateCube()
     };
 
   // Create the texture
-  m_prog.texture<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.texture<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.texture<GLTexture2D>("texID").load("textures/wooden-crate.jpg"))
+  m_cube->texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_cube->texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_cube->texture2D("texID").load("textures/wooden-crate.jpg"))
     return false;
 
   return true;
@@ -287,7 +287,7 @@ bool GLExample02::CreateCube()
 //------------------------------------------------------------------
 bool GLExample02::setup()
 {
-  DEBUG("GLExample02::setup()");
+  DEBUG("%s", "GLExample02::setup()");
 
   // Init the context of the DearIMgui library
   if (false == m_gui.setup(*this))
@@ -313,17 +313,17 @@ bool GLExample02::setup()
 
   // Projection matrices
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
-  m_prog.uniform<Matrix44f>("projection") =
+  m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10000.0f);
-  m_prog.uniform<Matrix44f>("view") =
+  m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(0.0f, 10.0f, 100.0f), Vector3f(30), Vector3f(0,1,0));
 
   // Uniforms from the Example01
-  m_prog.uniform<float>("scale") = 1.0f;
-  m_prog.uniform<Vector4f>("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
+  m_prog.scalarf("scale") = 1.0f;
+  m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
 
   // Attach 3 robots in the scene graph. Each robot is a scene node.
-  DEBUG("Create graph scene");
+  DEBUG("%s", "Create graph scene");
 
   // Init VAO and its VBOs.
   if (!CreateCube())
@@ -372,7 +372,7 @@ bool GLExample02::setup()
 //------------------------------------------------------------------
 bool GLExample02::draw()
 {
-  DEBUG("GLExample02::draw()");
+  DEBUG("%s", "GLExample02::draw()");
 
   // clear everything
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
@@ -397,8 +397,8 @@ bool GLExample02::draw()
 //------------------------------------------------------------------
 void GLExample02::drawSceneNode(GLVAO& vao, Matrix44f const& transform)
 {
-  m_prog.uniform<Matrix44f>("model") = transform;
+  m_prog.matrix44f("model") = transform;
 
   // Draw the 3D model
-  m_prog.draw(vao, DrawPrimitive::TRIANGLES, 0, 36); // FIXME: use implicit vertices count
+  m_prog.draw(vao, Primitive::TRIANGLES, 0, 36); // FIXME: use implicit vertices count
 }

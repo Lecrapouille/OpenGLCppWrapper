@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -9,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -25,6 +25,7 @@
 //! GLTextures
 // **************************************************************
 
+//! \brief Textures MinFilter
 enum class TextureMinFilter : GLenum
   {
     /* 0x2600 */ NEAREST = GL_NEAREST,
@@ -35,12 +36,14 @@ enum class TextureMinFilter : GLenum
     /* 0x2703 */ LINEAR_MIPMAP_LINEAR = GL_LINEAR_MIPMAP_LINEAR,
   };
 
+//! \brief Textures MagFilter
 enum class TextureMagFilter : GLenum
   {
     /* 0x2600 */ NEAREST = GL_NEAREST,
     /* 0x2601 */ LINEAR = GL_LINEAR,
   };
 
+//! \brief Textures Wrap
 enum class TextureWrap : GLenum
   {
     /* 0x2901 */ REPEAT = GL_REPEAT,
@@ -49,6 +52,18 @@ enum class TextureWrap : GLenum
     /* 0x8370 */ MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
   };
 
+//! \brief Texture3D
+enum class CubeMap : GLenum
+  {
+    /* 0x8515 */ POSITIVE_X = GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+    /* 0x8516 */ NEGATIVE_X = GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+    /* 0x8517 */ POSITIVE_Y = GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+    /* 0x8518 */ NEGATIVE_Y = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+    /* 0x8519 */ POSITIVE_Z = GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+    /* 0x851A */ NEGATIVE_Z = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
+  };
+
+//! \brief Pixel format for textures
 enum class PixelFormat : GLenum
   {
     /* 0x1901 */ STENCIL_INDEX = GL_STENCIL_INDEX,
@@ -65,19 +80,10 @@ enum class PixelFormat : GLenum
     /* 0x84F9 */ DEPTH_STENCIL = GL_DEPTH_STENCIL,
   };
 
+//! \brief Pixel type for textures
 enum class PixelType : GLenum
   {
     /* 0x1401 */ UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
-  };
-
-enum class CubeMap : GLenum
-  {
-    /* 0x8515 */ POSITIVE_X = GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-    /* 0x8516 */ NEGATIVE_X = GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-    /* 0x8517 */ POSITIVE_Y = GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-    /* 0x8518 */ NEGATIVE_Y = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-    /* 0x8519 */ POSITIVE_Z = GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-    /* 0x851A */ NEGATIVE_Z = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
   };
 
 // **************************************************************
@@ -98,7 +104,7 @@ enum class FrameBuffer : GLenum
     /* 0x1802 */ STENCIL = GL_STENCIL_BUFFER_BIT,
   };
 
-enum class DrawPrimitive : GLenum
+enum class Primitive : GLenum
   {
     /* 0x0000 */ POINTS = GL_POINTS,
     /* 0x0001 */ LINES = GL_LINES,

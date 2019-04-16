@@ -30,7 +30,7 @@ class FakeObject : public IGLObject<GLint>
 {
 public:
 
-  FakeObject() : IGLObject<GLint>()
+  FakeObject() : IGLObject<GLint>("FakeObject")
   {
     reset();
   }

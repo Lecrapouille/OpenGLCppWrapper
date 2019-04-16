@@ -22,7 +22,8 @@ class Exception: public std::exception
 /// This is the base class for all exceptions defined
 /// in the Poco class library.
 {
- public:
+public:
+
   Exception(const std::string& msg, int code = 0);
   /// Creates an exception.
 
@@ -80,7 +81,8 @@ class Exception: public std::exception
   /// copy of an exception (see clone()), then
   /// throwing it again.
 
- protected:
+protected:
+
   Exception(int code = 0);
   /// Standard constructor.
 
@@ -188,7 +190,7 @@ inline int Exception::code() const
   {                                                                     \
     return new CLS(*this);                                              \
   }                                                                     \
-  void CLS::rethrow() const                                             \
+  __attribute__((__noreturn__)) void CLS::rethrow() const               \
   {                                                                     \
     throw *this;                                                        \
   }

@@ -112,6 +112,7 @@ Exception* Exception::clone() const
 }
 
 
+__attribute__((__noreturn__))
 void Exception::rethrow() const
 {
   throw *this;

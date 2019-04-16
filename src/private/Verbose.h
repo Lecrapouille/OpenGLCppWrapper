@@ -7,6 +7,7 @@
 
 #  define SHORT_FILENAME file_name(__FILE__).c_str()
 
+__attribute__ ((format (printf, 4, 5)))
 inline void errout(const char* type, const char* file, const int line, const char* format, ...)
 {
   va_list args;
@@ -19,18 +20,18 @@ inline void errout(const char* type, const char* file, const int line, const cha
   va_end(args);
 }
 
-#  define ERROUT(type, format, ...) errout(type, SHORT_FILENAME, __LINE__, format, ## __VA_ARGS__);
-
 #  ifdef DEBUG
 #    undef DEBUG
-#    define DEBUG(format, ...) ERROUT("DEBUG", format, ## __VA_ARGS__);
+#    define DEBUG_HELPER(format, ...) errout("DEBUG", SHORT_FILENAME, __LINE__, format "%s", __VA_ARGS__)
+#    define DEBUG(...) DEBUG_HELPER(__VA_ARGS__, "")
 #  else
 #    define DEBUG(format, ...)
 #  endif
 
 #  ifdef ERROR
 #    undef ERROR
-#    define ERROR(format, ...) ERROUT("ERROR", format, ## __VA_ARGS__);
+#    define ERROR_HELPER(format, ...) errout("ERROR", SHORT_FILENAME, __LINE__, format "%s", __VA_ARGS__)
+#    define ERROR(...) ERROR_HELPER(__VA_ARGS__, "")
 #  else
 #    define ERROR(format, ...)
 #  endif

@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -9,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -18,88 +18,166 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 //
-// This file is a derivated work of https://github.com/glumpy/glumpy
+// This file is a derived work of https://github.com/glumpy/glumpy
 //
 // Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLPROGRAM_HPP_
-#  define GLPROGRAM_HPP_
+#ifndef GLPROGRAM_HPP
+#  define GLPROGRAM_HPP
 
-//! \brief This file contains the class managing OpenGL shaders :
-//! read, compile, load into the GPU.
+// *****************************************************************************
+//! \file GLProgram.hpp manages a list of shaders and lists of OpenGL
+//! variables (Uniforms, Samplers and Attributes).
+// *****************************************************************************
 
 #  include "GLShaders.hpp"
-#  include "GLLocation.tpp"
+#  include "GLLocation.hpp"
 #  include <unordered_map>
 
 // TODO: verifier les GLVariables non init dans le GPU
 
-// **************************************************************
-//! \class GLShader GLShader.hpp
-//! \brief
-// **************************************************************
+// *****************************************************************************
+//! \class GLProgram GLProgram.hpp
+//!
+//! \brief GLProgram manages a list of shaders and lists of OpenGL
+//! variables (Uniforms, Samplers and Attributes). GLProgram can
+//! render \ref GLVAO.
+//!
+//! \ref GLShader are passed to a GLProgram which compile and link
+//! them. Then, lists of \ref GLUniform, \ref GLSampler and \ref
+//! GLAttribute are internaly populated which will allow to GLProgram
+//! to populate VBOs (\ref GLVertexBuffer) and textures when a VAO
+//! (\ref GLVAO) is binded to it. Finally a GLProgram can draw VAO binded to it.
+// *****************************************************************************
 class GLProgram: public IGLObject<GLenum>
 {
+  // Unordered map = hash table = O(1) access time.
   using GLLocationPtr = std::unique_ptr<GLLocation>;
+  using GLSamplerPtr = std::unique_ptr<GLSampler>;
   using mapGLLocation = std::unordered_map<std::string, GLLocationPtr>;
+  using mapGLSampler = std::unordered_map<std::string, GLSamplerPtr>;
 
 public:
 
-  //------------------------------------------------------------------
-  //! \brief Empty constructor. Do nothing.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Constructor.
+  //!
+  //! Give a name to the instance. This constructor makes no other
+  //! actions.
+  //!
+  //! \param name the name of this instance (used for debug and traces).
+  //----------------------------------------------------------------------------
   GLProgram(std::string const& name)
     : IGLObject(name)
-  {
-  }
+  {}
 
-  //------------------------------------------------------------------
-  //! \brief Empty constructor and set the number of elements to
-  //! reserve when allocating VBOs to binded VOA.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Constructor.
+  //!
+  //! Give a name to the instance. Save the preferred number of
+  //! elements to create when populating VBOs. This constructor makes
+  //! no other actions.
+  //!
+  //! \param name the name of this instance (used for debug and traces).
+  //! \param nb_vertices the preferred number of elements to create
+  //! when populating VBOs.
+  //----------------------------------------------------------------------------
   GLProgram(std::string const& name, size_t const nb_vertices)
     : IGLObject(name),
       m_vbo_init_size(nb_vertices)
-  {
-  }
+  {}
 
-  //------------------------------------------------------------------
-  //! \brief Destructor. Release GPU memory
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Destructor. Release elements in CPU and GPU memories.
+  //----------------------------------------------------------------------------
   virtual ~GLProgram() override
   {
     destroy();
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Attach a shader program (vertex or fragment or geometry) to this
+  //! class. No action is yet made concerning this instance.
+  //!
+  //! \param shader: an instance of the class holding a vertex or
+  //! fragment or geometry shader.
+  //!
+  //! \return the reference of this instance (*this).
+  //!
+  //! \note the number of shaders elements is not managed.
+  //----------------------------------------------------------------------------
   GLProgram& attachShader(GLShader& shader)
   {
-    DEBUG("Prog::attachShader");
-    m_shaders.push_back(shader);
+    DEBUG("%s", "Prog::attachShader");
+    m_shaders.push_back(&shader);
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Attach shader programs (vertex and fragment and geometry) to this
+  //! class. No action is yet made concerning this instance.
+  //!
+  //! \param vertex_shader: an instance of the class holding a vertex shader.
+  //! \param fragment_shader: an instance of the class holding a fragment shader.
+  //! \param geometry_shader: an instance of the class holding a geometry shader.
+  //!
+  //! \return the reference of this instance (*this).
+  //!
+  //! \note the number of shaders elements is not managed.
+  //----------------------------------------------------------------------------
   GLProgram& attachShaders(GLVertexShader&   vertex_shader,
                            GLFragmentShader& fragment_shader,
                            GLGeometryShader& geometry_shader)
   {
-    DEBUG("Prog::attachShaders");
-    m_shaders.push_back(vertex_shader);
-    m_shaders.push_back(fragment_shader);
-    m_shaders.push_back(geometry_shader);
+    DEBUG("%s", "Prog::attachShaders");
+    m_shaders.push_back(&vertex_shader);
+    m_shaders.push_back(&fragment_shader);
+    m_shaders.push_back(&geometry_shader);
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Attach shader programs (vertex and fragment) to this
+  //! class. No action is yet made concerning this instance.
+  //!
+  //! \param vertex_shader: an instance of the class holding a vertex shader.
+  //! \param fragment_shader: an instance of the class holding a fragment shader.
+  //!
+  //! \return the reference of this instance (*this).
+  //!
+  //! \note the number of shaders elements is not managed.
+  //----------------------------------------------------------------------------
   GLProgram& attachShaders(GLVertexShader&   vertex_shader,
                            GLFragmentShader& fragment_shader)
   {
-    DEBUG("Prog::attachShaders");
-    m_shaders.push_back(vertex_shader);
-    m_shaders.push_back(fragment_shader);
+    DEBUG("%s", "Prog::attachShaders");
+    m_shaders.push_back(&vertex_shader);
+    m_shaders.push_back(&fragment_shader);
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Couple a VAO instance to this instance of GLProgram.
+  //!
+  //! If its the first time that the VAO is binded to the GLProgram then
+  //! the VAO gets its list of VBOs and textures created. The memory
+  //! of VBOs are reserved by the parameter nb_vertices passed in
+  //! constructor or set by setInitVBOSize(size_t const). No data is
+  //! filled (this is the job of the developper to do it explicitly).
+  //!
+  //! If the VAO has be binded previously nothing is made. If the VAO
+  //! was binded by another GLProgram this is a detected error. This
+  //! case is refused because the developer may
+  //!
+  //! \param vao the VAO instance to be coupled with.
+  //!
+  //! \return false if the GLVAO cannot be binded. This case occurs for
+  //! one of the following reasons: the GLProgram cannot be compiled
+  //! (syntax errors in shader code) or if the VOA has been binded by
+  //! another GLProgram (incompatibility).
+  //----------------------------------------------------------------------------
   inline bool bind(GLVAO& vao)
   {
     DEBUG("Gonna bind Prog '%s' with VAO named '%s'", name().c_str(), vao.name().c_str());
@@ -109,7 +187,7 @@ public:
       {
         if (!compile())
           {
-            ERROR("Tried binding VAO on a non compilable GLProgram");
+            ERROR("%s", "Tried binding VAO on a non compilable GLProgram");
             return false;
           }
       }
@@ -123,9 +201,9 @@ public:
       }
     else if (unlikely(m_handle != vao.prog))
       {
-        // Check if VAO has been previously binded by this GLProgram. If not
+        // Check if VAO has been previously bind by this GLProgram. If not
         // This is probably an error of the developper.
-        ERROR("You tried to bind VAO %s which never been binded by GLProg %s",
+        ERROR("You tried to bind VAO %s which never been binded by GLProgram %s",
               vao.name().c_str(), name().c_str());
         return false;
       }
@@ -135,48 +213,59 @@ public:
     return true;
   }
 
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Check if a VAO is binded with this GLProgram.
+  //!
+  //! \return true if VAO and this GLProgram are coupled, else return false.
+  //----------------------------------------------------------------------------
   inline bool binded() const
   {
     return nullptr != m_vao;
   }
 
-  //------------------------------------------------------------------
-  //! \brief Check if the program has been linked with success.
-  //! Note: the method name is compiled() but should be linked() because
-  //! compile is reserved for shaders.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Check if attached shaders (passed to \a attachShaders
+  //! methods) have been compiled and linked with success.
+  //!
+  //! \return true if shaders have been linked, else return false.
+  //----------------------------------------------------------------------------
   inline bool compiled() const
   {
     return m_compiled;
   }
 
-  //------------------------------------------------------------------
-  //! \brief Compile the program (aka for begin() method but with a
-  //! more explicit name).
-  //! \return true if the progam has been succesfully compiled, else
+  //----------------------------------------------------------------------------
+  //! \brief Compile shaders if this was not already made.
+  //!
+  //! \note: this method is equivalent to the method \a begin but has a more
+  //! explicit name.
+  //!
+  //! \return true if the program has been successfully compiled, else
   //! return false.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   inline bool compile()
   {
     begin();
     return compiled();
   }
 
-  //------------------------------------------------------------------
-  //! \brief Return the shader error message
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Check if this instance contains an error message.
+  //!
+  //! \return true if an error message is present, else return false.
+  //----------------------------------------------------------------------------
   inline bool hasErrored() const
   {
     return !m_error_msg.empty();
   }
 
-  //------------------------------------------------------------------
-  //! \brief Return the shader error message. member variable is then
-  //! cleared.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Return the  error message of either shader compilation or other event.
+  //!
+  //! \note Once call the error message is automatically cleared.
+  //!
+  //! \return the error message (the message can be empty).
+  //----------------------------------------------------------------------------
   inline std::string error()
   {
     std::string tmp(m_error_msg);
@@ -184,209 +273,302 @@ public:
     return tmp;
   }
 
-  //------------------------------------------------------------------
-  //! \brief Return the list of shader names
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Return the list of shader names used. This is method is
+  //! mainly used for debug purpose.
+  //----------------------------------------------------------------------------
   std::vector<std::string> shaderNames()
   {
     std::vector<std::string> list;
 
     list.reserve(m_shaders.size());
-    for (auto &it: m_shaders)
+    for (auto const& it: m_shaders)
       {
-        list.push_back(it.name());
+        list.push_back(it->name());
       }
     return list;
   }
 
-  //------------------------------------------------------------------
-  //! \brief Return the list of failed shaders
-  //------------------------------------------------------------------
-  std::vector<std::string> failedShaders()
+  //----------------------------------------------------------------------------
+  //! \brief Return the list of shaders that failed to be
+  //! compiled. This is method is mainly used for debug purpose.
+  //----------------------------------------------------------------------------
+  std::vector<GLShader*> failedShaders()
   {
-    std::vector<std::string> list;
+    std::vector<GLShader*> list;
 
     list.reserve(4_z);
-    for (auto &it: m_shaders)
+    for (auto const& it: m_shaders)
       {
-        if (!it.compiled())
+        if (!it->compiled())
           {
-            list.push_back(it.name());
+            list.push_back(it);
           }
       }
     return list;
   }
 
-  //------------------------------------------------------------------
-  //! \brief Return the list of unifom names
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Return the list of uniform names. This is method is mainly
+  //! used for debug purpose.
+  //----------------------------------------------------------------------------
   std::vector<std::string> uniformNames()
   {
     std::vector<std::string> list;
 
     list.reserve(m_uniforms.size());
-    for (auto& it: m_uniforms)
+    for (auto const& it: m_uniforms)
       {
         list.push_back(it.first);
       }
     return list;
   }
 
-  //------------------------------------------------------------------
-  //! \brief Return the list of unifom names
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Return the list of attributes names. This is method is mainly
+  //! used for debug purpose.
+  //----------------------------------------------------------------------------
   std::vector<std::string> attributeNames()
   {
     std::vector<std::string> list;
 
     list.reserve(m_attributes.size());
-    for (auto& it: m_attributes)
+    for (auto const& it: m_attributes)
       {
         list.push_back(it.first);
       }
     return list;
   }
 
-  std::vector<std::string> texturesNames()
+  //----------------------------------------------------------------------------
+  //! \brief Return the list of texture names. This is method is mainly
+  //! used for debug purpose.
+  //!
+  //! \note Do not be confused with meaning of texture name. We do not refer to
+  //! the jpeg, png or bmp file name but to the shader uniform name (used in
+  //! shaders).
+  //----------------------------------------------------------------------------
+  std::vector<std::string> samplersNames()
   {
     std::vector<std::string> list;
 
-    list.reserve(m_textures.size());
-    for (auto& it: m_textures)
+    list.reserve(m_samplers.size());
+    for (auto const& it: m_samplers)
       {
         list.push_back(it.first);
       }
     return list;
   }
 
-  //------------------------------------------------------------------
-  //! \brief Check if the uniform variable exists in the shader code
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Check if the name passed as parameter matches the name of an uniform.
+  //!
+  //! \return true if the GLProgram contains it, else return false.
+  //----------------------------------------------------------------------------
   inline bool hasUniform(const char *name) const
   {
     if (unlikely(nullptr == name)) return false;
     return m_uniforms.end() != m_uniforms.find(name);
   }
 
-  //------------------------------------------------------------------
-  //! \brief Check program has uniforms.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Check if program has a non empty list of shader uniforms.
+  //!
+  //! \return true if the list is non empty.
+  //----------------------------------------------------------------------------
   inline bool hasUniforms() const
   {
     return 0_z != m_uniforms.size();
   }
 
-  //------------------------------------------------------------------
-  //! \brief Locate the uniform variable by its name and its type T.
-  //! Return the reference of the data.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Locate and get the uniform variable refered by the name
+  //! and its type T.
+  //!
+  //! \return the reference of the shader uniform if it exists.
+  //!
+  //! \throw OpenGLException if the uniform is not in the list
+  //! (probably due to a typo in the name) or if the type T does not match.
+  //----------------------------------------------------------------------------
   template<class T>
   inline T& uniform(const char *name)
   {
     return getUniform<T>(name).data();
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Locate and get the uniform variable refered by the name
+  //! and its type T.
+  //!
+  //! \return the reference of the shader uniform if it exists.
+  //!
+  //! \throw OpenGLException if the uniform is not in the list
+  //! (probably due to a wrong name) or if the type T does not match.
+  //----------------------------------------------------------------------------
   template<class T>
   inline const T& uniform(const char *name) const
   {
     return getUniform<T>(name).data();
   }
 
-  //------------------------------------------------------------------
-   //! \brief Check if the attribute variable exists in the shader code
-  // FIXME if begin() a reussi
-  // FIXME: peut on avoir un nom doublon attrib / unifo ??
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Get the shader uniform float 4x4 matrix.
+  //! This method wraps the \a uniform() method hidding the misery of
+  //! the template.
+  //----------------------------------------------------------------------------
+  inline Matrix44f& matrix44f(const char *name)
+  {
+    return uniform<Matrix44f>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the shader uniform float 3x3 matrix.
+  //! This method wraps the \a uniform() method hidding the misery of
+  //! the template.
+  //----------------------------------------------------------------------------
+  inline Matrix33f& matrix33f(const char *name)
+  {
+    return uniform<Matrix33f>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the shader uniform float 2x2 matrix.
+  //! This method wraps the \a uniform() method hidding the misery of
+  //! the template.
+  //----------------------------------------------------------------------------
+  inline Matrix22f& matrix22f(const char *name)
+  {
+    return uniform<Matrix22f>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the shader uniform float 4D vector.
+  //! This method wraps the \a uniform() method hidding the misery of
+  //! the template.
+  //----------------------------------------------------------------------------
+  inline Vector4f& vector4f(const char *name)
+  {
+    return uniform<Vector4f>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the shader uniform float 3D vector.
+  //! This method wraps the \a uniform() method hidding the misery of
+  //! the template.
+  //----------------------------------------------------------------------------
+  inline Vector3f& vector3f(const char *name)
+  {
+    return uniform<Vector3f>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the shader uniform float 2D vector.
+  //! This method wraps the \a uniform() method hidding the misery of
+  //! the template.
+  //----------------------------------------------------------------------------
+  inline Vector2f& vector2f(const char *name)
+  {
+    return uniform<Vector2f>(name);
+  }
+  //----------------------------------------------------------------------------
+  //! \brief Get the shader uniform float scalar.
+  //! This method wraps the \a uniform() method hidding the misery of
+  //! the template.
+  //----------------------------------------------------------------------------
+  inline float& scalarf(const char *name)
+  {
+    return uniform<float>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the shader uniform integer 4D vector.
+  //!  \a uniform() method hidding the misery of
+  //! the template.
+  //----------------------------------------------------------------------------
+  inline Vector4i& vector4i(const char *name)
+  {
+    return uniform<Vector4i>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the shader uniform integer 3D vector.
+  //! This method wraps the \a uniform() method hidding the misery of
+  //! the template.
+  //----------------------------------------------------------------------------
+  inline Vector3i& vector3i(const char *name)
+  {
+    return uniform<Vector3i>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the shader uniform integer 2D vector.
+  //! This method wraps the \a uniform() method hidding the misery of
+  //! the template.
+  //----------------------------------------------------------------------------
+  inline Vector2i& vector2i(const char *name)
+  {
+    return uniform<Vector2i>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the shader uniform integer scalar.
+  //! This method wraps the \a uniform() method hidding the misery of
+  //! the template.
+  //----------------------------------------------------------------------------
+  inline int& scalar(const char *name)
+  {
+    return uniform<int>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Check if the name passed as parameter matches the name of an attribute.
+  //! \return true if the GLProgram contains it, else return false.
+  //----------------------------------------------------------------------------
   inline bool hasAttribute(const char *name) const
   {
     if (unlikely(nullptr == name)) return false;
     return m_attributes.end() != m_attributes.find(name);
   }
 
-  //------------------------------------------------------------------
-  //! \brief Check if program has attributes.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Check if program has a non empty list of shader attributes.
+  //! \return true if the list is non empty.
+  //----------------------------------------------------------------------------
   inline bool hasAttributes() const
   {
     return 0_z != m_attributes.size();
   }
 
-  //------------------------------------------------------------------
-  //! \brief Locate the attribute variable by its name and its type T.
-  //! Return the reference of the VBO.
-  //------------------------------------------------------------------
-  template<class T>
-  inline PendingContainer<T>& attribute(const char *name)
-  {
-    return getVBO<T>(name);
-  }
-
-  template<class T>
-  inline const PendingContainer<T>& attribute(const char *name) const
-  {
-    return getVBO<T>(name);
-  }
-
-  inline bool hasTexture(const char *name) const
+  //----------------------------------------------------------------------------
+  //! \brief Check if the name passed as parameter matches the name of
+  //! uniform texture sampler.
+  //!
+  //! \return true if the GLProgram contains it, else return false.
+  //----------------------------------------------------------------------------
+  inline bool hasSampler(const char *name) const
   {
     if (unlikely(nullptr == name)) return false;
-    return m_textures.end() != m_textures.find(name);
+    return m_samplers.end() != m_samplers.find(name);
   }
 
-  inline bool hasTextures() const
+  //----------------------------------------------------------------------------
+  //! \brief Check if program has a non empty list of uniform texture sampler.
+  //! \return true if the list is non empty.
+  //----------------------------------------------------------------------------
+  inline bool hasSamplers() const
   {
-    return 0_z != m_textures.size();
+    return 0_z != m_samplers.size();
   }
 
-  template<class T>
-  inline T& texture(const char *name)
-  {
-    return getTexture<T>(name);
-  }
-
-  template<class T>
-  inline const T& texture(const char *name) const
-  {
-    return getTexture<T>(name);
-  }
-
-  //------------------------------------------------------------------
-  //! \brief Get the shader variable. If the name does not refer to a
-  //! valid variable an exception is triggered.
-  //! Example GLProgram prog; prog["position"] = { ... };
-  //------------------------------------------------------------------
-  /*inline GLLocation& operator[](std::string const& name)
-  {
-    auto it_uniform = m_uniforms.find(name);
-    auto it_attribute = m_attributes.find(name);
-
-    if ((it_uniform != m_uniforms.end()) &&
-        (it_attribute != m_attributes.end()))
-      {
-        throw std::out_of_range("OpenGL variable '" + name +
-                                "' can be either attribute or uniform");
-      }
-    else if (it_uniform != m_uniforms.end())
-      {
-        return *(it_uniform->second);
-      }
-    else if (it_attribute != m_attributes.end())
-      {
-        return *(it_attribute->second);
-      }
-    else // TODO if (!compiled()) { create() + m_unused = true } else
-      {
-        throw std::out_of_range("Name '" + name + "' is not an shader variable");
-      }
-      }*/
-
-  //------------------------------------------------------------------
-  //! \brief Render the binded VAO. Use as params the first and count
-  //! vertices (see glDrawArrays OpenGL official documentation).
-  //! \throw if the program has not been compiled or if the VAO has not
-  //! been binded or if VBOs have not all the same sizes.
-  //------------------------------------------------------------------
-  void draw(DrawPrimitive const mode, GLint first, GLsizei count)
+  //----------------------------------------------------------------------------
+  //! \brief Draw the currently binded VAO. Give the first vertex and
+  //! count vertices (see glDrawArrays OpenGL official documentation
+  //! for more info).
+  //!
+  //! \throw OpenGLException if the program has not been compiled or
+  //! if no VAO is binded or if VBOs have not all the same sizes.
+  //----------------------------------------------------------------------------
+  void draw(Primitive const mode, GLint const first, GLsizei const count)
   {
     DEBUG("Prog '%s' draw {", name().c_str());
     throw_if_not_compiled();
@@ -404,53 +586,61 @@ public:
     DEBUG("} Prog '%s' draw", name().c_str());
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Bind the VAO and render it. Use as params the first and
   //! count vertices (see glDrawArrays OpenGL official documentation).
-  //! \throw if the program has not been compiled or if the VAO has not
-  //! been binded or if VBOs have not all the same sizes.
-  //------------------------------------------------------------------
-  void draw(GLVAO& vao, DrawPrimitive const mode, GLint first, GLsizei count)
+  //!
+  //! \throw OpenGLException if the program has not been compiled or
+  //! if the VAO cannot be binded or if VBOs have not all the same
+  //! sizes.
+  //----------------------------------------------------------------------------
+  inline void draw(GLVAO& vao, Primitive const mode, GLint const first, GLsizei const count)
   {
     throw_if_vao_cannot_be_binded(vao);
     draw(mode, first, count);
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Render the binded VAO. Use implicit first and count vertices
   //! (see glDrawArrays OpenGL official documentation).
-  //! \throw if the program has not been compiled or if the VAO has not
-  //! been binded or if VBOs have not all the same sizes.
-  //------------------------------------------------------------------
-  inline void draw(DrawPrimitive const /*mode*/)
+  //!
+  //! \throw OpenGLException if the program has not been compiled or
+  //! if the VAO has not been binded or if VBOs have not all the same
+  //! sizes.
+  //----------------------------------------------------------------------------
+  inline void draw(Primitive const /*mode*/)
   {
-    ERROR("Draw with implicit number of vertices is not yet implemented");
+    ERROR("%s", "Draw with implicit number of vertices is not yet implemented");
     //throw_if_not_compiled();
     //throw_if_inconsitency_attrib_sizes();
     //draw(static_cast<GLenum>(mode), 0, m_attributes.begin()->second->size());
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Bind a VAO and render it with implicit first and count
   //! vertices (see glDrawArrays OpenGL official documentation).
-  //! \throw if the program has not been compiled or if the VAO has not
-  //! been binded or if VBOs have not all the same sizes.
-  //------------------------------------------------------------------
-  inline void draw(GLVAO& vao, DrawPrimitive const mode)
+  //!
+  //! \throw OpenGLException if the program has not been compiled or
+  //! if the VAO has not been binded or if VBOs have not all the same
+  //! sizes.
+  //----------------------------------------------------------------------------
+  inline void draw(GLVAO& vao, Primitive const mode)
   {
     throw_if_vao_cannot_be_binded(vao);
     draw(mode);
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Render a VAO with the help of an vertices index.
-  //! \throw if the program has not been compiled or if the VAO has not
-  //! been binded or if VBOs have not all the same sizes.
-  //------------------------------------------------------------------
+  //!
+  //! \throw OpenGLException if the program has not been compiled or
+  //! if the VAO has not been binded or if VBOs have not all the same
+  //! sizes.
+  //----------------------------------------------------------------------------
   template<class T>
-  void draw(DrawPrimitive const mode, GLIndexBuffer<T>& index)
+  void draw(Primitive const mode, GLIndexBuffer<T>& index)
   {
-    DEBUG("Prog::drawIndex %d elements", index.size());
+    DEBUG("Prog::drawIndex %zu elements", index.size());
 
     throw_if_not_compiled();
     throw_if_vao_not_binded();
@@ -466,32 +656,34 @@ public:
     //m_vao->end();
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief bind a VAO and render it with the help of an vertices index.
-  //! \throw if the program has not been compiled or if the VAO has not
-  //! been binded or if VBOs have not all the same sizes.
-  //------------------------------------------------------------------
+  //!
+  //! \throw OpenGLException if the program has not been compiled or
+  //! if the VAO has not been binded or if VBOs have not all the same
+  //! sizes.
+  //----------------------------------------------------------------------------
   template<class T>
-  void draw(GLVAO& vao, DrawPrimitive const mode, GLIndexBuffer<T>& index)
+  void draw(GLVAO& vao, Primitive const mode, GLIndexBuffer<T>& index)
   {
     throw_if_vao_cannot_be_binded(vao);
     draw(mode, index);
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Choose if the usage of coming VBO created will be
   //! GL_DYNAMIC_DRAW or GL_STATIC_DRAW or GL_STREAM_DRAW. If this
   //! method is not called default usage will be GL_DYNAMIC_DRAW
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   void setBufferUsage(BufferUsage const usage)
   {
     m_vbo_usage = usage;
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Change how many elements are pre-allocated when creating
-  //! VBOs.
-  //------------------------------------------------------------------
+  //! VBOs. If this method is not called default usage will be 0.
+  //----------------------------------------------------------------------------
   void setInitVBOSize(size_t const size)
   {
     m_vbo_init_size = size;
@@ -499,18 +691,19 @@ public:
 
 private:
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   /*inline virtual bool isValid() const override
   {
     DEBUG("Prog::isValid %d", compiled());
     return compiled();
     }*/
 
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Throw OpenGLException if GLProgram cannot be compiled (due to
+  //! errors in shaders code source).
+  //----------------------------------------------------------------------------
   void throw_if_not_compiled()
   {
     if (unlikely(!compiled()))
@@ -519,9 +712,11 @@ private:
       }
   }
 
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Throw OpenGLException if VAO cannot be binded to this GLProgram
+  //! (reasons are: errors in shaders code source or GLProgram already bind
+  //! to another VAO).
+  //----------------------------------------------------------------------------
   void throw_if_vao_cannot_be_binded(GLVAO& vao)
   {
     if (unlikely(!bind(vao)))
@@ -530,9 +725,10 @@ private:
       }
   }
 
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Throw OpenGLException if VAO is not bind to this GLProgram
+  //! (reason: the developer forget to call \a bind.
+  //----------------------------------------------------------------------------
   void throw_if_vao_not_binded()
   {
     if (unlikely(!binded()))
@@ -541,12 +737,12 @@ private:
       }
   }
 
-  //------------------------------------------------------------------
-  //! \brief check if the binded VAO has all its VBO with the
-  //! same size.
-  //! \note this function does not check if VAO is binded call before
-  //! throw_if_vao_not_binded().
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Throw OpenGLException if the binded VAO has not all its VBO
+  //! with the same size.
+  //! \note this function does not check if VAO is bind. Call
+  //! throw_if_vao_not_binded() before this method.
+  //----------------------------------------------------------------------------
   void throw_if_inconsitency_attrib_sizes()
   {
     if (!m_vao->checkVBOSizes())
@@ -555,15 +751,14 @@ private:
       }
   }
 
-  //------------------------------------------------------------------
-  //! \brief Create the VAO which will contain the list of VBOs. The
-  //! list of VBOs is created in accordance of the list of attributes.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Populate the VAO with a list of VBOs and textures. The
+  //! number depends on the number of shader attributes and uniform
+  //! texture samplers.
+  //----------------------------------------------------------------------------
   void initVAO(GLVAO& vao)
   {
-    throw_if_not_compiled();
-
-    // Create VBOs and attach them in the VAO.
+    // Create a list of VBOs
     for (auto& it: m_attributes)
       {
         const char *name = it.first.c_str();
@@ -584,8 +779,8 @@ private:
           }
       }
 
-    // Create all texture samplers
-    for (auto& it: m_textures)
+    // Create a list of textures
+    for (auto& it: m_samplers)
       {
         const char *name = it.first.c_str();
         const GLenum gltype = it.second->target();
@@ -601,7 +796,7 @@ private:
             //case GL_SAMPLER_2D_DEPTH:
             //vao.createTexture<GLTextureDepth2D>(name);
             //break;
-          case GL_SAMPLER_3D:
+          case GL_SAMPLER_CUBE:
             vao.createTexture<GLTexture3D>(name);
             break;
           default:
@@ -610,14 +805,16 @@ private:
           }
       }
 
+    // Make VAO and GLprogram be coupled.
     vao.prog = m_handle;
   }
 
-  //------------------------------------------------------------------
-  //! \brief
+  //----------------------------------------------------------------------------
+  //! \brief Create a new OpenGL program.
+  //!
   //! \note Contrary to VBO, GLProgram has to perform its setup() before
   //! calling activate()
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   virtual bool create() override
   {
     DEBUG("Prog '%s' create", name().c_str());
@@ -625,24 +822,31 @@ private:
     return false;
   }
 
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Compile and link shaders attached to this GLProgram.
+  //!
+  //! \return false is compilation succeeded (indicating setup has not to be
+  //! redone). Return true if an error occurred (errors in the code source of
+  //! shaders).
+  //!
+  //! \note Contrary to VBO, GLProgram has to perform its setup() before
+  //! calling activate()
+  //----------------------------------------------------------------------------
   virtual bool setup() override
   {
     bool failure = false;
 
     // Compile shaders if they have not yet compiled
     DEBUG("Prog '%s' setup: compile shaders", name().c_str());
-    for (auto &it: m_shaders)
+    for (auto& it: m_shaders)
       {
-        it.begin();
-        if (it.hasErrored())
+        it->begin();
+        if (it->hasErrored())
           {
             std::string msg =
-              "Shader '" + it.name() +
+              "Shader '" + it->name() +
               "' has not been compiled: reason was '" +
-              it.error() + "'";
+              it->error() + "'";
             ERROR("%s", msg.c_str());
             m_error_msg += '\n' + msg;
             failure = true;
@@ -653,13 +857,13 @@ private:
       {
         // Attach shaders to program
         DEBUG("Prog '%s' setup: attach shaders", name().c_str());
-        for (auto &it: m_shaders)
+        for (auto& it: m_shaders)
           {
-            glCheck(glAttachShader(m_handle, it.gpuID()));
-            it.attachProg(m_handle);
+            glCheck(glAttachShader(m_handle, it->gpuID()));
+            it->attachProg(m_handle);
           }
 
-        // Compile the program
+        // Link shaders to the program
         DEBUG("Prog '%s' setup: compile prog", name().c_str());
         glCheck(glLinkProgram(m_handle));
         m_compiled = checkLinkageStatus(m_handle);
@@ -676,9 +880,10 @@ private:
     return !m_compiled;
   }
 
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Activate in OpenGL the program, its attributes, its uniforms and
+  //! samplers. A VAO shall be binded else nothing is made.
+  //----------------------------------------------------------------------------
   virtual void activate() override
   {
     DEBUG("Prog '%s' activate", name().c_str());
@@ -699,27 +904,29 @@ private:
       {
         it.second->begin();
       }
-    for (auto& it: m_textures)
+    for (auto& it: m_samplers)
       {
         // Important: activate the texture unit first before binding
-        // texture
+        // texture.
         it.second->begin();
         m_vao->m_textures[it.first]->begin();
       }
   }
 
-  //------------------------------------------------------------------
-  //! \brief Dummy method.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Dummy method. Nothing is made.
+  //----------------------------------------------------------------------------
   virtual bool update() override
   {
     return false;
   }
 
-  //------------------------------------------------------------------
-  //! \brief A program can be desactivated if and only if shaders have
+  //----------------------------------------------------------------------------
+  //! \brief Deactivate the OpenGL program, its uniform, attributes, samplers.
+  //!
+  //! \note A program can be deactivated if and only if shaders have
   //! been loaded into a program (else nothing is done).
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   virtual void deactivate() override
   {
     DEBUG("Prog '%s' deactivate", name().c_str());
@@ -729,7 +936,7 @@ private:
       {
         it.second->end();
       }
-    for (auto& it: m_textures)
+    for (auto& it: m_samplers)
       {
         it.second->end();
       }
@@ -741,10 +948,10 @@ private:
     m_vao = nullptr;
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Once program is no longer used, release it from the GPU
   //! memory. Can be used to abort the shader.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   virtual void release() override
   {
     DEBUG("Prog '%s' release", name().c_str());
@@ -752,9 +959,9 @@ private:
     glCheck(glDeleteProgram(m_handle));
   }
 
-  //------------------------------------------------------------------
-  //! \brief Create Attribute and Uniform instances
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Create lists of instances holding Attribute and Uniform.
+  //----------------------------------------------------------------------------
   void createAllLists()
   {
     const GLsizei bufSize = 64;
@@ -766,7 +973,7 @@ private:
     GLenum type;
 
     // Create the list of uniforms
-    DEBUG("Prog::get all attrib and uniform");
+    DEBUG("%s", "Prog::get all attrib and uniform");
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
     i = static_cast<GLuint>(count);
     while (i--)
@@ -789,9 +996,9 @@ private:
       }
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Create Attribute instances
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   void addNewAttribute(GLenum type, const char *name)
   {
     assert(nullptr != name);
@@ -819,9 +1026,9 @@ private:
       }
   }
 
-  //------------------------------------------------------------------
-  //! \brief Create Uniform instances
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Create uniform instances or texture sampler instances.
+  //----------------------------------------------------------------------------
   void addNewUniform(GLenum type, const char *name)
   {
     assert(nullptr != name);
@@ -861,16 +1068,16 @@ private:
         m_uniforms[name] = std::make_unique<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, gpuID());
         break;
       case GL_SAMPLER_1D:
-        m_uniforms[name] = std::make_unique<GLSampler1D>(name, m_textures_count, gpuID());
-        m_textures_count += 1u;
+        m_samplers[name] = std::make_unique<GLSampler1D>(name, m_sampler_count, gpuID());
+        m_sampler_count += 1u;
         break;
       case GL_SAMPLER_2D:
-        m_textures[name] = std::make_unique<GLSampler2D>(name, m_textures_count, gpuID());
-        m_textures_count += 1u;
+        m_samplers[name] = std::make_unique<GLSampler2D>(name, m_sampler_count, gpuID());
+        m_sampler_count += 1u;
         break;
       case GL_SAMPLER_CUBE:
-        m_uniforms[name] = std::make_unique<GLSampler3D>(name, m_textures_count, gpuID());
-        m_textures_count += 1u;
+        m_samplers[name] = std::make_unique<GLSampler3D>(name, m_sampler_count, gpuID());
+        m_sampler_count += 1u;
         break;
       default:
         std::string msg = "Uniform '" + std::string(name) + "' type is not managed";
@@ -880,11 +1087,11 @@ private:
       }
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Locate the uniform variable by its name and its type T.
-  //! \return the uniform instance if found else throw the exception
-  //! std::out_of_range
-  //------------------------------------------------------------------
+  //! \return the uniform instance if found else throw an exception.
+  //! \throw OpenGLException if the uniform does not exist or bad T type param.
+  //----------------------------------------------------------------------------
   template<class T>
   IGLUniform<T>& getUniform(const char *name)
   {
@@ -919,49 +1126,27 @@ private:
 
 private:
 
-  //------------------------------------------------------------------
-  //! \brief Locate the attribute variable by its name and its type T.
-  //! \return the uniform instance if found else throw the exception
-  //! std::out_of_range
-  //------------------------------------------------------------------
-  template<class T>
-  GLVertexBuffer<T>& getVBO(const char *name)
-  {
-    if (unlikely(!compiled()))
-      {
-        begin();
-      }
-    throw_if_vao_not_binded();
-    return m_vao->VBO<T>(name);
-  }
-
-  template<class T>
-  T& getTexture(const char *name)
-  {
-    if (unlikely(!compiled()))
-      {
-        begin();
-      }
-    throw_if_vao_not_binded();
-    return m_vao->texture<T>(name);
-  }
-
+  //----------------------------------------------------------------------------
+  //! \brief Release the GPU memory by removing compiled shaders.
+  //----------------------------------------------------------------------------
   void detachAllShaders()
   {
-    DEBUG("Prog::detachAllshaders");
-    for (auto &it: m_shaders)
+    DEBUG("%s", "Prog::detachAllshaders");
+    for (auto& it: m_shaders)
       {
-        if (m_handle == it.attached())
+        if (m_handle == it->attached())
           {
-            glCheck(glDetachShader(m_handle, it.gpuID()));
-            it.attachProg(0);
+            glCheck(glDetachShader(m_handle, it->gpuID()));
+            it->attachProg(0);
           }
       }
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Check if the shaders have been successfully linked.
+  //!
   //! \return true if case of success, else return false.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   bool checkLinkageStatus(GLuint obj)
   {
     GLint status;
@@ -986,16 +1171,27 @@ private:
 
 private:
 
+  //! \brief Hold the localiation of shader attributes.
   mapGLLocation          m_attributes;
+  //! \brief Hold the localiation of shader uniforms.
   mapGLLocation          m_uniforms;
-  std::unordered_map<std::string, std::unique_ptr<GLSampler>> m_textures;
-  std::vector<GLShader>  m_shaders;
+  //! \brief Hold the localisation of uniform texture sampler.
+  mapGLSampler           m_samplers;
+  //! \brief Hold class holding shader code source.
+  //! \note pointer is to avoid copy because of deleted copy constructor.
+  std::vector<GLShader*> m_shaders;
+  //! \brief Bind VAO (when not null)
   GLVAO                 *m_vao = nullptr;
+  //! \brief Save error messages of shader compilations.
   std::string            m_error_msg;
-  uint32_t               m_textures_count = 0u;
+  //! \brief Count textures for giving them their GL_TEXTURE0 + id
+  uint32_t               m_sampler_count = 0u;
+  //! \brief Know if shaders have been compiled and linked.
   bool                   m_compiled = false;
+  //! \brief Preferred VBO storage inside GPU (fast, low).
   BufferUsage            m_vbo_usage = BufferUsage::DYNAMIC_DRAW;
+  //! \brief Reserve memory when creating VBOs.
   size_t                 m_vbo_init_size = 0_z;
 };
 
-#endif /* GLPROGRAM_HPP_ */
+#endif /* GLPROGRAM_HPP */

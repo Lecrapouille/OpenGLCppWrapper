@@ -14,7 +14,7 @@ void GLExample03::onWindowSizeChanged(const float width, const float height)
   // Note: height is never zero !
   float ratio = width / height;
 
-  m_prog.uniform<Matrix44f>("projection") =
+  m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 }
 
@@ -30,7 +30,7 @@ void GLExample03::createSphere()
   float latitude = -90.0f;
   float longitude = -180.0f;
 
-  auto& positions = m_prog.attribute<Vector3f>("position");
+  auto& positions = m_vao.vector3f("position");
   positions.reserve(NbPointsLon * NbPointsLat);
   m_indices.reserve(NbPointsLon * NbPointsLat);
 
@@ -65,7 +65,7 @@ void GLExample03::createSphere()
 //------------------------------------------------------------------
 bool GLExample03::setup()
 {
-  DEBUG("Setup");
+  DEBUG("%s", "Setup");
 
   // Enable some OpenGL states
   glCheck(glEnable(GL_DEPTH_TEST));
@@ -97,15 +97,15 @@ bool GLExample03::setup()
 
   // --- Init OpenGL shader uniforms
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
-  m_prog.uniform<Matrix44f>("projection") =
+  m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 
-  m_prog.uniform<Matrix44f>("model") = m_movable.transform();
-  m_prog.uniform<Matrix44f>("view") =
+  m_prog.matrix44f("model") = m_movable.transform();
+  m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(1,1,1), Vector3f(0,1,0));
 
   // -- Perform some debug
-  DEBUG("Instropection:");
+  DEBUG("%s", "Instropection:");
   std::vector<std::string> vbos = m_vao.VBONames();
   for (auto& it: vbos)
     {
@@ -115,7 +115,7 @@ bool GLExample03::setup()
   // TODO Check if everything is ok (attrib/uniform are set, prog compiled ...)
 
   // We have terminated creating our 3D scene, we can now paint it.
-  DEBUG("GLExample03::draw");
+  DEBUG("%s", "GLExample03::draw");
   return true;
 }
 
@@ -136,7 +136,7 @@ bool GLExample03::draw()
   m_prog.bind(m_vao);
 
   // Paint the 36 verties (aka nodes) constituing a cube
-  m_prog.draw(DrawPrimitive::POINTS, m_indices);
+  m_prog.draw(Primitive::POINTS, m_indices);
 
   return true;
 }

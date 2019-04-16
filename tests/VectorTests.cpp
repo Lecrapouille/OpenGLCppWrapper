@@ -20,7 +20,7 @@
 
 #define protected public
 #define private public
-#include "Vector.tpp"
+#include "Vector.hpp"
 #undef protected
 #undef private
 #include <crpcut.hpp>

@@ -28,4 +28,10 @@ https://github.com/invor/simplestGraphRendering
 Example 04:
 ===========
 
-Draw a multi-textured triangle.
+Draw a multi-textured triangle like shown in the [Youtube OpenGL 3D Game Tutorial 17: Multitexturing](https://www.youtube.com/watch?v=-kbal7aGUpk&list=PLRIWtICgwaX0u7Rf9zkZhLoLuZVfUksDP&index=17)
+made by ThinMatrix.
+
+Example 05:
+===========
+
+Cubemap texture inspired by https://learnopengl.com/Advanced-OpenGL/Cubemaps

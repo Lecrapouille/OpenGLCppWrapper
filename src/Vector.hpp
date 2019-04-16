@@ -1,7 +1,6 @@
-// -*- c++ -*- Coloration Syntaxique pour Emacs
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -10,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -19,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef VECTOR_TPP_
-#  define VECTOR_TPP_
+#ifndef VECTOR_HPP
+#  define VECTOR_HPP
 
 // *************************************************************************************************
 // Inspired from https://github.com/Reedbeta/reed-util
@@ -30,7 +29,7 @@
 
 #  include <initializer_list>
 #  include <algorithm>
-#  include "NonCppStd.hpp"
+#  include "private/NonCppStd.hpp"
 #  include <cstdint>
 #  include <cassert>
 #  include <cmath>
@@ -154,8 +153,8 @@ inline T clamp(T const value, T const lower, T const upper)
   inline size_t size() const { return N; }                              \
                                                                         \
   /* Accessors */                                                       \
-  T& operator[](size_t i)             { return m_data[i]; }             \
-  const T& operator[](size_t i) const { return m_data[i]; }             \
+  T& operator[](int i)             { return m_data[i]; }             \
+  const T& operator[](int i) const { return m_data[i]; }             \
                                                                         \
   /* C array conversions */                                             \
   typedef T(&array_t)[N];                                               \
@@ -177,7 +176,7 @@ class Vector
 {
 public:
 
-  VECTOR_DIM(n);
+  VECTOR_DIM(n)
 
 protected:
 
@@ -198,15 +197,19 @@ public:
     y = scalar_y;
   }
 
-  VECTOR_DIM(2_z);
+  VECTOR_DIM(2_z)
 
 public:
 
   union
   {
     T m_data[2_z];
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     struct { T x; T y; };
     struct { T u; T v; };
+#pragma GCC diagnostic pop
   };
 
   const static Vector<T, 2_z> DUMMY;
@@ -251,15 +254,19 @@ public:
     z = scalar_z;
   }
 
-  VECTOR_DIM(3_z);
+  VECTOR_DIM(3_z)
 
 public:
 
   union
   {
     T m_data[3_z];
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     struct { T x; T y; T z; };
     struct { T r; T g; T b; };
+#pragma GCC diagnostic pop
   };
 
   const static Vector<T, 3_z> DUMMY;
@@ -309,15 +316,19 @@ public:
     w = scalar_w;
   }
 
-  VECTOR_DIM(4_z);
+  VECTOR_DIM(4_z)
 
 public:
 
   union
   {
     T m_data[4_z];
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     struct { T x; T y; T z; T w; };
     struct { T r; T g; T b; T a; };
+#pragma GCC diagnostic pop
   };
 
   const static Vector<T, 4_z> DUMMY;

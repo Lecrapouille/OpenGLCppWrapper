@@ -1,6 +1,7 @@
+# -*- mode: makefile -*-
 ##=====================================================================
 ## OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-## Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+## Copyright 2019 Quentin Quadrat <lecrapouille@gmail.com>
 ##
 ## This file is part of OpenGLCppWrapper.
 ##
@@ -9,7 +10,7 @@
 ## the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
 ##
-## OpenGLCppWrapper is distributedin the hope that it will be useful, but
+## This program is distributed in the hope that it will be useful, but
 ## WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ## General Public License for more details.
@@ -19,38 +20,42 @@
 ##=====================================================================
 
 ###################################################
-# Executable name
-PROJECT = OpenGLExamples
-TARGET = $(PROJECT)
+# Modify this file will force compiling whole project
+MY_MAKEFILE_FILES += $(P)/Makefile.common
 
 ###################################################
-# Debug mode or Release mode
-PROJECT_MODE = debug
+# Compilation options.
+CXXFLAGS += $(CXX_WHOLE_FLAGS) -O3 -std=c++11
+LDFLAGS  +=
 
 ###################################################
-# Location from the project root directory.
-P=..
-
-###################################################
-# Sharable informations between all Makefiles
-M=$(P)/.makefile
-include $(M)/Makefile.header
-include $(P)/Makefile.common
-
-###################################################
-# List of files to compile.
-OBJ += Example01.o Example02.o Example03.o Example04.o Example05.o main.o
+# Project defines
+DEFINES += -DCHECK_OPENGL -DERROR -UDEBUG
+DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS += $(abspath $(P)/build/libOpenGLCppWrapper.a)
+EXTERNAL_LIBS +=
+EXTERNAL_OBJ += $(abspath external)/SOIL/obj/*.o
 
 ###################################################
-# Compile tutorials
-all: $(TARGET)
+# Set Libraries. For knowing which libraries
+# is needed please read the external/README.md file.
+
+ifeq ($(ARCHI),Darwin)
+LDFLAGS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
+else ifeq ($(ARCHI),Linux)
+LDFLAGS += -lGLU -lGL -lGLEW `pkg-config glfw3 --static --libs`
+else
+$(error Unknown architecture)
+endif
 
 ###################################################
-# Sharable informations between all Makefiles
-include $(M)/Makefile.footer
+# Inform Makefile where to find header files
+INCLUDES += -I$(P)/src -I$(P)/external -I$(P)/external/imgui
+
+###################################################
+# Inform Makefile where to find *.cpp and *.o files
+VPATH += $(P)/src:$(P)/src/private:$(P)/external:$(P)/external/imgui

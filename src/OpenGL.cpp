@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -9,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -22,16 +22,22 @@
 
 namespace opengl
 {
+  //-------------------------------------------------------------
   //! \return true if the OpenGL context has been created
   //! else return false (not yet created or failed during
   //! its creation).
+  //-------------------------------------------------------------
   bool& hasCreatedContext()
   {
     static bool s_context_started = false;
     return s_context_started;
   }
 
-  //! \param ....
+  //-------------------------------------------------------------
+  //! \param filename
+  //! \param line
+  //! \param expression
+  //-------------------------------------------------------------
   void checkError(const char *filename, uint32_t line, const char* expression)
   {
     GLenum id;
@@ -64,8 +70,8 @@ namespace opengl
         // Do not use directly LOG macros because it will catch this
         // filename and its line instead of the faulty file/line which
         // produced the OpenGL error.
-        ERROR("Failed executing '%s'. Reason is '%s'",
-              filename, line, expression, error);
+        errout("GLERR", filename, line, "Failed executing '%s'. Reason is '%s'",
+               expression, error);
       }
   }
 } // namespace

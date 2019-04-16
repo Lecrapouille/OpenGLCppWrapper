@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -9,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -24,9 +24,18 @@
 #include <iostream>
 #include <sstream>
 
+__attribute__((__noreturn__))
 static void on_error(int /*errorCode*/, const char* msg)
 {
   throw std::runtime_error(msg);
+}
+
+static void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+  IGLWindow* obj = (IGLWindow*) glfwGetWindowUserPointer(window);
+
+  if (nullptr == obj) return ;
+  obj->onMouseMoved(xpos, ypos);
 }
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -147,7 +156,7 @@ bool IGLWindow::start()
   // callback
   glfwSetWindowUserPointer(m_window, this);
   glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
-  //glfwSetCursorPosCallback(m_window, mouse_callback);
+  glfwSetCursorPosCallback(m_window, mouse_callback);
   //glfwSetScrollCallback(m_window, scroll_callback);
 
   // Ensure we can capture keyboard being pressed below

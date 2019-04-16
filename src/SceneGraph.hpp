@@ -1,7 +1,6 @@
-// -*- c++ -*- Coloration Syntaxique pour Emacs
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -10,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -19,18 +18,18 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SCENEGRAPH_TPP_
-#  define SCENEGRAPH_TPP_
+#ifndef SCENEGRAPH_HPP
+#  define SCENEGRAPH_HPP
 
 // The code source of this file has been inspired by the following document
 // New Castle University, Tutorial 6: Scene Graphs
 // https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/scenegraphs/Tutorial%206%20-%20Scene%20Graphs.pdf
 
-#  include "Movable.tpp"
+#  include "Movable.hpp"
 #  include <memory>
 #  include <vector>
 
-template <typename R, typename T, uint32_t D>
+template <typename R, typename T, size_t D>
 class ISceneGraphRenderer
 {
 public:
@@ -55,7 +54,7 @@ public:
 //! R = renderable class( VAO, Mesh ...)
 //! T, D = transformation matrix of type T and D its dimension (ie a 4x4 matrix of floats).
 // *************************************************************************************************
-template <typename I, typename R, typename T, uint32_t D>
+template <typename I, typename R, typename T, size_t D>
 class SceneGraph_t
 {
   using ObjPtr = std::shared_ptr<R>;
@@ -82,6 +81,7 @@ public:
     {
       m_renderable = renderable;
       m_id = id;
+      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -92,6 +92,7 @@ public:
     Node(ObjPtr renderable = nullptr)
     {
       m_renderable = renderable;
+      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -101,6 +102,7 @@ public:
     Node(I const& id)
     {
       m_id = id;
+      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -288,7 +290,7 @@ public:
     //! List of Node as children. Pointers are never nullptr.
     std::vector<NodePtr>   m_children;
     //! Scale factors for the current 3D entity
-    Vector<T, D>           m_local_scaling = Vector<T, D>(1);
+    Vector<T, D>           m_local_scaling;
   };
 
 private:
@@ -433,7 +435,7 @@ private:
     // This case is suppose to never happen
     if (nullptr == res)
       {
-        ERROR("nullptr error");
+        ERROR("%s", "nullptr error");
         return nullptr;
       }
 
@@ -458,4 +460,4 @@ private:
   NodePtr m_root = nullptr;
 };
 
-#endif /* SCENEGRAPH_TPP_ */
+#endif /* SCENEGRAPH_HPP */
