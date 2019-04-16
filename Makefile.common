@@ -25,8 +25,8 @@ MY_MAKEFILE_FILES += $(P)/Makefile.common
 
 ###################################################
 # Compilation options.
-CXXFLAGS = $(CXX_WHOLE_FLAGS) -O3 -std=c++11
-LDFLAGS  =
+CXXFLAGS += $(CXX_WHOLE_FLAGS) -O3 -std=c++11
+LDFLAGS  +=
 
 ###################################################
 # Project defines

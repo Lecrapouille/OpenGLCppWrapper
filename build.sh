@@ -18,7 +18,10 @@
 ## along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
+# Compil the lib
 make download-external-libs
 make compile-external-libs
 make -j8
-(cd examples && make -j8)
+
+# Compil Examples
+(make download-resources; cd examples && make -j8)

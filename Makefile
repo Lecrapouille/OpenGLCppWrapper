@@ -50,6 +50,12 @@ OBJ += $(OBJ_CORE) $(OBJ_IMGUI)
 all: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET)
 
 ###################################################
+# Download textures and other resources needed by examples
+.PHONY: download-resources
+download-resources:
+	@(cd external && ./download-resources.sh)
+
+###################################################
 # Compile and launch unit tests and generate the code coverage html report.
 .PHONY: unit-tests
 unit-tests:

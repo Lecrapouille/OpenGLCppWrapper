@@ -38,6 +38,8 @@ doc/coverage
 doc/html
 examples/build
 examples/imgui.ini
+examples/textures
 external/SOIL
 external/imgui
 external/backward-cpp
+external/OpenGLCppWrapper-data
