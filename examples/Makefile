@@ -45,7 +45,7 @@ OBJ += Example01.o Example02.o Example03.o Example04.o Example05.o main.o
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS += $(abspath $(P)/build/libOpenGLCppWrapper.a)
+EXTERNAL_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a)
 
 ###################################################
 # Compile tutorials
