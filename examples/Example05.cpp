@@ -27,6 +27,8 @@ bool GLExample05::setup()
 {
   DEBUG("%s", "Setup");
 
+  hideMouseCursor();
+
   // Enable some OpenGL states
   glCheck(glEnable(GL_DEPTH_TEST));
   glCheck(glDepthFunc(GL_LESS));
