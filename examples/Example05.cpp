@@ -11,6 +11,10 @@ void GLExample05::onWindowSizeChanged(const float width, const float height)
   // Note: height is never zero !
   float ratio = width / height;
 
+  // make sure the viewport matches the new window dimensions; note that width and
+  // height will be significantly larger than specified on retina displays.
+  glViewport(0, 0, width, height);
+
   m_progCube.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
   m_progSkyBox.matrix44f("projection") = m_progCube.matrix44f("projection");

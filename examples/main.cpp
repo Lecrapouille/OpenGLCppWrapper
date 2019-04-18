@@ -4,6 +4,7 @@
 #include "Example04.hpp"
 #include "Example05.hpp"
 #include <iostream>
+#include <cstdlib>
 
 #define MAX_EXAMPLES 5
 
@@ -25,7 +26,7 @@ int main(int argc, char *argv[])
 {
   if (argc <= 1)
     {
-      std::cout << "Missing example id !" << std::endl;
+      std::cerr << "Missing example id !" << std::endl;
       usage(argv);
     }
   long int example = strtol(argv[1], nullptr, 10);
@@ -40,29 +41,24 @@ int main(int argc, char *argv[])
     {
     case 1:
       win = std::make_unique<GLExample01>();
-      win->start();
       break;
     case 2:
       win = std::make_unique<GLExample02>();
-      win->start();
       break;
     case 3:
       win = std::make_unique<GLExample03>();
-      win->start();
       break;
     case 4:
       win = std::make_unique<GLExample04>();
-      win->start();
       break;
     case 5:
       win = std::make_unique<GLExample05>();
-      win->start();
       break;
     default:
-      std::cout << "Incorrect example id !" << std::endl;
+      std::cerr << "Incorrect example id !" << std::endl;
       usage(argv);
       return -1;
     }
 
-  return 0;
+  return win->start() ? EXIT_SUCCESS : EXIT_FAILURE;
 }
