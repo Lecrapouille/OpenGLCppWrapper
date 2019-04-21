@@ -11,7 +11,7 @@ void GLExample05::onWindowSizeChanged(const float width, const float height)
   // Note: height is never zero !
   float ratio = width / height;
 
-  // make sure the viewport matches the new window dimensions; note that width and
+  // Make sure the viewport matches the new window dimensions; note that width and
   // height will be significantly larger than specified on retina displays.
   glViewport(0, 0, width, height);
 
