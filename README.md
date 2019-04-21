@@ -1,5 +1,7 @@
 # OpenGLCppWrapper
 
+## What is OpenGLCppWrapper ?
+
 OpenGLCppWrapper is a C++11 wrapper API for writing OpenGL `Core
 Profile` applications in few lines of code. It hides for you the
 complexity of calling in the correct order OpenGL functions. In
@@ -18,28 +20,66 @@ object wrapper for OpenGL that can be used in a game engine. This API,
 contrary to others C++ OpenGL API really use object oriented and does
 not just content to give a C++ flavorish name to OpenGL routines.
 
-## API Documentation
+## Why another C++ wrapper for OpenGL ?
 
-* [Code Architecture](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Architecture.md)
-* [Examples and tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md)
+Short answer: I disliked others API I found on github ! Long answer:
 
-## Explained Hello-world example
+* C++ APIs I saw on github just give a C++ flavor'ish taste to OpenGL
+  functions. None of them have real class inheritance over OpenGL objects.
+
+* This API allows to write 3D scenes in really few lines of C++ code
+  with almost no knowledge about OpenGL. You just have to understand
+  the OpenGL shader language: GLSL.
+
+* Public interfaces of this API are reduced as much as possible.
+
+* As a beginner of OpenGL Core, I always get confused by the order of
+  creation/binding of OpenGL objects. With this API you do not have to
+  really know what are OpenGL VBOs, VAOs, attributes, ... and in what
+  order they have to be created or binded. This API is here to hide
+  all the boilerplate for you.
+
+* This API takes the opposite direction over OpenGL tutorials: it does
+  not start with a list of triangles, to push them in VBOs and finish
+  coding with shaders and depending on which OpenGL version VAO. This
+  API does the inverse: it starts from shaders and hide
+  for you the generation of VBOs, attributes, uniforms, texture
+  sampler. You have just to request from the shader to create for you
+  a new 3D object (aka VAO) that you will init with data you wanted
+  (aka VBO): vertices, color, texture position.
+
+* This API does not only content to init VBOs during the init phase,
+  it also allows you to manipulate your 3D scene data during the
+  run-time (meshes, color ...) from the CPU: the API will transmit
+  automatically to the GPU all modified elements for their display.
+
+* So there is something
+
+## How to use this API ? Explained Hello-world example
 
 Here is the pseudo C++ code of what you will have to write for many of
-your 3D scenes (All examples included in this library follow this
+your 3D scenes (All [Examples and tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md) included in this library follow this
 pseudo code). You can compare the length of this code with any "hello
-textured triangle" OpenGL tutorial. Explanations come after. In this
-document I consider that the reader knows basic OenGL code at least
-code found in basic tutorials.
+textured triangle" OpenGL tutorial. I explain the code just after
+showing it.
 
-Firstly let write a basic fragment shader (named
-`my_fragment_shader.glsl`) ike largely explained in OpenGL tutorials
-that you will find on internet. For the fun, we mix the texel color
-with an uniform color.
+In this document I consider that the reader knows basic
+OpenGL code at least what explained in basic tutorials.
+
+Before showing C++ code with this API, we have to write a basic
+fragment and vertex shader (named `my_fragment_shader.glsl` and
+my_vertex_shader.glsl`). As explained before this API has been
+conceived to develop OpenGL applications by starting with their
+shaders.
+
+##### my_fragment_shader.glsl
+
+Nothing particuraly difficult with this fragment shader because
+largely explained in OpenGL tutorials that you will find on
+internet. For the fun, we also mix the texel color with an uniform
+color.
 
 ```
-my_fragment_shader.glsl
-
 01: #version 330 core
 02:
 03: uniform sampler2D  texID;     // Texture sampler
@@ -53,16 +93,15 @@ my_fragment_shader.glsl
 11: }
 ```
 
-In the vertex shader named `my_vertex_shader.glsl` we pass to the
-fragment shader the texel and the color. We applied to vertices
-position a Model-View-Projection matrix. Again these kind of basic
-shaders are largely described on the web. For the fun we applied an
-additional scaling factor.
+##### my_vertex_shader.glsl
+
+In this vertex shader, we pass to the fragment shader the texel and
+the global color. We applied to vertices position a
+Model-View-Projection matrix (change of basis). Again these kind of
+basic shaders are largely described on the web. For the fun we applied
+an additional scaling factor.
 
 ```
-my_vertex_shader.glsl
-
-
 01: #version 330 core
 02:
 03: uniform float  scale;         // Global scaling
@@ -86,8 +125,10 @@ my_vertex_shader.glsl
 21: }
 ```
 
-Here the important part using this API. The code is written in pseudo
-C++ code to be less boring to read.
+##### main.cpp
+
+Here the most funny part of this document : using this API. The code
+is written in pseudo C++ code to be less boring to read.
 
 ```
 01: GLProgram prog;
@@ -95,7 +136,7 @@ C++ code to be less boring to read.
 03:
 04: // Init phase:
 05: {
-06:   // Load shaders
+06:   // Load shaders code
 07:   GLVertexShader   vertex_shader.loadFromFile("my_vertex_shader.glsl");
 08:   GLFragmentShader fragment_shader.loadFromFile("my_fragment_shader.glsl");
 09:
@@ -162,15 +203,17 @@ C++ code to be less boring to read.
 
 Init phase:
 
-* lines 01-02 and 07-08: GLxShader, GLProgram and GLVAO are some
-  OpenGL objects that the library is exposing to the developer.  A
-  GLxShader holds the GLSL code source and compile it. A GLProgram
-  holds at least two GLxShaders and link them. GLProgram also holds
-  locations of shader uniforms and shader attributes. GLVAO can be
-  considered as the OpenGL handler to your 3D model: it is an
-  interface between CPU data and GPU data by holding VBOs and
-  textures. You can modify data of textures and VBOs: the API will
-  transfer modified values to your graphical card.
+* lines 01-02 and 07-08: GL*x*Shader, GLProgram and GLVAO are some
+  OpenGL objects that the library is exposing to the developer (where
+  *x* is refering either to Fragment or Vertex or Geometry). A
+  GL*x*Shader holds the GLSL code source and compile it (and in future
+  will allow to add other macro processing features). A GLProgram
+  holds at least two GLxShaders (vertex and fragment) and link
+  them. Once compiled, a GLProgram holds locations of shader uniforms
+  and shader attributes. GLVAO can be considered as the OpenGL handler
+  to your 3D model: it is an interface between CPU data and GPU data
+  by holding VBOs and textures. You can modify data of textures and
+  VBOs: the API will transfer modified values to your graphical card.
 
 * lines 07-08: You have to load and compile your GLSL code given as
   vertex and fragment shader (and optionally geometry shader). You can
@@ -189,20 +232,22 @@ Init phase:
   scale, model, view, projection` ...
 
 * line 17-18: Uniforms can be initialized directly because they acts
-  like constant values in shaders. Attributes needs a VAO bind to the
-  GLProgram (which is made line 21).
+  like constant values inside shaders. Attributes needs a binded VAO
+  to the GLProgram (which is made line 21).
 
-* line 21: To initialize attributes you have to create a dummy VAO and
-  bind it to your GLProgram.  This last will allocate VBOs (and
-  textures, if present) inside the VAO instance. It can also reserve
-  some extra memory (to be passed to GLProgram constrcutor or with the
-  method `setInitVBOSize`). VBO creation is made automatically (and
-  only once) during the first binding (next binding will not create
-  VBOs). Shader attributes will give their name to VBOs. In our
-  example `vao1` and `vao2` will have a VBO named `position`, `UV` and
-  texture named `texID`. Once VAO has been bind to a GLProgram it
-  cannot be used by an other GLProgram (else an exception would be
-  thrown to prevent errors).
+* line 21: To initialize attributes you have to create a VAO and bind
+  it to your GLProgram. This last will allocate VBOs and textures
+  inside the VAO instance. Textures can be 1D, 2D, 3D. VBO are GPU
+  buffer for storing data of your 3d models (vertex position, Vertex
+  texture coordinates, normals ...)  GLProram can also reserve some
+  extra memory if this information is given either with the
+  constructor or with the method `setInitVBOSize`. VBO creation is
+  made automatically (and only once) during the first binding (next
+  binding will not create VBOs or textures). Shader attributes will
+  give their name to VBOs. In our example `vao1` and `vao2` will have
+  a VBO named `position`, `UV` and texture named `texID`. Once VAO has
+  been bind to a GLProgram it cannot be used by an other GLProgram
+  (else an exception would be thrown to prevent errors).
 
 * line 24-25: You have to initialize all VBOs with vertices, colors,
   texture position ... (which depends on your GLSL code). All VBOs
@@ -318,6 +363,11 @@ with wrapping OpenGL routines. It allows:
 * to wrap OpenGL window and offers to user the init, run-time phase
   and callbacks like keyboard and windows resizing.
 
+### API Documentation
+
+* [Code Architecture](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Architecture.md)
+* [Examples and tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md)
+
 ### Work in progress
 
 __Please help contributing !__
@@ -430,42 +480,7 @@ This API is largely inspired by projects such as:
 * [GLumpy](https://github.com/glumpy/glumpy) python project.
 * [opengl4csharp](https://github.com/giawa/opengl4csharp) C# project.
 
-### Why another C++ wrapper for OpenGL ?
-
-Short answer: I disliked others API I found on github ! Long answer:
-
-* C++ APIs I saw on github just give a C++ flavor'ish taste to OpenGL
-  functions. None of them have real class inheritance over OpenGL objects.
-
-* This API allows to write 3D scenes in really few lines of C++ code
-  with almost no knowledge about OpenGL. You just have to understand
-  the OpenGL shader language: GLSL.
-
-* Public interfaces of this API are reduced as much as possible.
-
-* As a beginner of OpenGL Core, I always get confused by the order of
-  creation/binding of OpenGL objects. With this API you do not have to
-  really know what are OpenGL VBOs, VAOs, attributes, ... and in what
-  order they have to be created or binded. This API is here to hide
-  all the boilerplate for you.
-
-* This API takes the opposite direction over OpenGL tutorials: it does
-  not start with a list of triangles, to push them in VBOs and finish
-  coding with shaders and depending on which OpenGL version VAO. This
-  API does the inverse: it starts from shaders and hide
-  for you the generation of VBOs, attributes, uniforms, texture
-  sampler. You have just to request from the shader to create for you
-  a new 3D object (aka VAO) that you will init with data you wanted
-  (aka VBO): vertices, color, texture position.
-
-* This API does not only content to init VBOs during the init phase,
-  it also allows you to manipulate your 3D scene data during the
-  run-time (meshes, color ...) from the CPU: the API will transmit
-  automatically to the GPU all modified elements for their display.
-
-* So there is something
-
-### How I decided to make it ?
+### Why I decided to make this API ?
 
 * The first need from this API is that contrary to legacy OpenGL,
   learning modern OpenGL (aka OpenGL core), is very difficult for

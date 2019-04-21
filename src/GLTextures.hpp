@@ -818,7 +818,7 @@ public:
           }
 
         // Pack Texture2D subsequently into a large 3D buffer
-        m_data3d.insert(m_data3d.end(), image, image + m_width * m_height * 4 * sizeof(unsigned char));
+        m_data3d.insert(m_data3d.end(), image, image + width * height * 4 * sizeof(unsigned char));
         SOIL_free_image_data(image);
         prevWidth = width;
         prevHeight = height;

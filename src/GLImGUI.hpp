@@ -21,6 +21,10 @@
 #ifndef GLIMGUI_HPP
 #  define GLIMGUI_HPP
 
+// *****************************************************************************
+//! \file GLImGUI.hpp wraps function calls of the ImGUI project.
+// *****************************************************************************
+
 #  include "GLWindow.hpp"
 #  include "imgui/imgui.h"
 #  include "imgui/imgui_impl_glfw.h"
@@ -51,6 +55,7 @@ public:
 
   //------------------------------------------------------------------
   //! \brief Start Dear imgui context. Use glfw routines.
+  //! \param window the OpenGL window
   //------------------------------------------------------------------
   bool setup(IGLWindow &window)
   {
@@ -84,7 +89,11 @@ protected:
 
   //------------------------------------------------------------------
   //! \brief Method for drawing the HMI. This has to be implemented by
-  //! the derived class.
+  //! the derived class. Derived class shall override this method for
+  //! drawing ImGUI objects.
+  //! \return false if the rendering encountered an problem. As effect
+  //! this will prevent IGLWindow calling draw() which can react to
+  //! this problem.
   //------------------------------------------------------------------
   virtual bool render() = 0;
 };

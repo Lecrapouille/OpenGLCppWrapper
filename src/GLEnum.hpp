@@ -22,10 +22,13 @@
 #  define GLENUM_HPP
 
 // **************************************************************
-//! GLTextures
+//! \file GLEnum.hpp defines OpenGL constants used in public API
+//! as C++ class enum. Indeed C++ clas enum are strongly typed
+//! and this will prevent the developper to pass the wrong enum
+//! in a method.
 // **************************************************************
 
-//! \brief Textures MinFilter
+//! \brief Textures Minification Filter.
 enum class TextureMinFilter : GLenum
   {
     /* 0x2600 */ NEAREST = GL_NEAREST,
@@ -36,14 +39,14 @@ enum class TextureMinFilter : GLenum
     /* 0x2703 */ LINEAR_MIPMAP_LINEAR = GL_LINEAR_MIPMAP_LINEAR,
   };
 
-//! \brief Textures MagFilter
+//! \brief Textures Magnification Filter.
 enum class TextureMagFilter : GLenum
   {
     /* 0x2600 */ NEAREST = GL_NEAREST,
     /* 0x2601 */ LINEAR = GL_LINEAR,
   };
 
-//! \brief Textures Wrap
+//! \brief Textures Wrap.
 enum class TextureWrap : GLenum
   {
     /* 0x2901 */ REPEAT = GL_REPEAT,
@@ -52,7 +55,7 @@ enum class TextureWrap : GLenum
     /* 0x8370 */ MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
   };
 
-//! \brief Texture3D
+//! \brief Cubic Texture.
 enum class CubeMap : GLenum
   {
     /* 0x8515 */ POSITIVE_X = GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -63,7 +66,7 @@ enum class CubeMap : GLenum
     /* 0x851A */ NEGATIVE_Z = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
   };
 
-//! \brief Pixel format for textures
+//! \brief Texture Pixel Format.
 enum class PixelFormat : GLenum
   {
     /* 0x1901 */ STENCIL_INDEX = GL_STENCIL_INDEX,
@@ -80,7 +83,7 @@ enum class PixelFormat : GLenum
     /* 0x84F9 */ DEPTH_STENCIL = GL_DEPTH_STENCIL,
   };
 
-//! \brief Pixel type for textures
+//! \brief Texture Pixel Type.
 enum class PixelType : GLenum
   {
     /* 0x1401 */ UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
