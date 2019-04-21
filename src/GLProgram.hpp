@@ -28,8 +28,8 @@
 #  define GLPROGRAM_HPP
 
 // *****************************************************************************
-//! \file GLProgram.hpp manages a list of shaders and lists of OpenGL
-//! variables (Uniforms, Samplers and Attributes).
+//! \file GLProgram.hpp manages a list of shaders and lists of shader
+//! variables (Uniforms, Samplers and Attributes) and paint VAO.
 // *****************************************************************************
 
 #  include "GLShaders.hpp"
@@ -39,17 +39,9 @@
 // TODO: verifier les GLVariables non init dans le GPU
 
 // *****************************************************************************
-//! \class GLProgram GLProgram.hpp
-//!
-//! \brief GLProgram manages a list of shaders and lists of OpenGL
-//! variables (Uniforms, Samplers and Attributes). GLProgram can
-//! render \ref GLVAO.
-//!
-//! \ref GLShader are passed to a GLProgram which compile and link
-//! them. Then, lists of \ref GLUniform, \ref GLSampler and \ref
-//! GLAttribute are internaly populated which will allow to GLProgram
-//! to populate VBOs (\ref GLVertexBuffer) and textures when a VAO
-//! (\ref GLVAO) is binded to it. Finally a GLProgram can draw VAO binded to it.
+//! \brief GLProgram manages a list of shaders and lists of shader
+//! variables (Uniforms, Samplers and Attributes). A GLProgram can
+//! render (draw) a Vertex Array Object (VAO) binded to it.
 // *****************************************************************************
 class GLProgram: public IGLObject<GLenum>
 {
@@ -64,33 +56,21 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Constructor.
   //!
-  //! Give a name to the instance. This constructor makes no other
-  //! actions.
-  //!
-  //! \param name the name of this instance (used for debug and traces).
-  //----------------------------------------------------------------------------
-  GLProgram(std::string const& name)
-    : IGLObject(name)
-  {}
-
-  //----------------------------------------------------------------------------
-  //! \brief Constructor.
-  //!
-  //! Give a name to the instance. Save the preferred number of
-  //! elements to create when populating VBOs. This constructor makes
-  //! no other actions.
+  //! Give a name to the instance. Give the preferred number of
+  //! elements to create when populating VBOs (0 by default). This
+  //! constructor makes no other actions.
   //!
   //! \param name the name of this instance (used for debug and traces).
   //! \param nb_vertices the preferred number of elements to create
   //! when populating VBOs.
   //----------------------------------------------------------------------------
-  GLProgram(std::string const& name, size_t const nb_vertices)
+  GLProgram(std::string const& name, size_t const nb_vertices = 0_z)
     : IGLObject(name),
       m_vbo_init_size(nb_vertices)
   {}
 
   //----------------------------------------------------------------------------
-  //! \brief Destructor. Release elements in CPU and GPU memories.
+  //! \brief Destructor. Release elements from CPU and GPU.
   //----------------------------------------------------------------------------
   virtual ~GLProgram() override
   {
@@ -99,7 +79,7 @@ public:
 
   //----------------------------------------------------------------------------
   //! \brief Attach a shader program (vertex or fragment or geometry) to this
-  //! class. No action is yet made concerning this instance.
+  //! class. No action is immediatly made (delegated).
   //!
   //! \param shader: an instance of the class holding a vertex or
   //! fragment or geometry shader.
@@ -117,7 +97,7 @@ public:
 
   //----------------------------------------------------------------------------
   //! \brief Attach shader programs (vertex and fragment and geometry) to this
-  //! class. No action is yet made concerning this instance.
+  //! class. No action is immediatly made (delegated).
   //!
   //! \param vertex_shader: an instance of the class holding a vertex shader.
   //! \param fragment_shader: an instance of the class holding a fragment shader.
@@ -140,7 +120,7 @@ public:
 
   //----------------------------------------------------------------------------
   //! \brief Attach shader programs (vertex and fragment) to this
-  //! class. No action is yet made concerning this instance.
+  //! class. No action is immediatly made (delegated).
   //!
   //! \param vertex_shader: an instance of the class holding a vertex shader.
   //! \param fragment_shader: an instance of the class holding a fragment shader.
@@ -159,19 +139,24 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Couple a VAO instance to this instance of GLProgram.
+  //! \brief Bind a VAO instance to this instance of GLProgram.
   //!
-  //! If its the first time that the VAO is binded to the GLProgram then
-  //! the VAO gets its list of VBOs and textures created. The memory
-  //! of VBOs are reserved by the parameter nb_vertices passed in
-  //! constructor or set by setInitVBOSize(size_t const). No data is
-  //! filled (this is the job of the developper to do it explicitly).
+
+  //! If its the first time that the VAO is binded to the GLProgram
+  //! then the VAO gets its list of VBOs and textures created. The
+  //! number of elements of VBOs are reserved through the parameter
+  //! \p nb_vertices passed in constructor GLProgram or set through
+  //! setInitVBOSize(size_t const). No data will be filled (this is
+  //! the job of the developper to do it explicitly).
   //!
-  //! If the VAO has be binded previously nothing is made. If the VAO
-  //! was binded by another GLProgram this is a detected error. This
-  //! case is refused because the developer may
+  //! Else (if the VAO was binded previously) nothing is made.
   //!
-  //! \param vao the VAO instance to be coupled with.
+  //! \note A VAO binded to a different GLProgram cannot be bind to
+  //! this GLProgram.  This will produce an error. This case is
+  //! refused to avoid to the developer to have a silent error with an
+  //! unexpected behavior.
+  //!
+  //! \param vao the VAO instance to be binded with.
   //!
   //! \return false if the GLVAO cannot be binded. This case occurs for
   //! one of the following reasons: the GLProgram cannot be compiled
@@ -250,7 +235,8 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Check if this instance contains an error message.
+  //! \brief Check if this instance contains an error message (produced during
+  //! the compilation or linkage of shaders).
   //!
   //! \return true if an error message is present, else return false.
   //----------------------------------------------------------------------------
@@ -260,9 +246,11 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the  error message of either shader compilation or other event.
+  //! \brief Return all error messages (concated by '\\n' char) produced
+  //! either during the shader compilation or by an other event.
   //!
-  //! \note Once call the error message is automatically cleared.
+  //! \note Once this method as been called the error message is
+  //! automatically cleared.
   //!
   //! \return the error message (the message can be empty).
   //----------------------------------------------------------------------------
@@ -791,13 +779,13 @@ private:
             break;
           case GL_SAMPLER_2D:
             vao.createTexture<GLTexture2D>(name);
+            //FIXME vao.createTexture<GLTextureDepth2D>(name);
             break;
-            //FIXME
-            //case GL_SAMPLER_2D_DEPTH:
-            //vao.createTexture<GLTextureDepth2D>(name);
-            //break;
-          case GL_SAMPLER_CUBE:
+          case GL_SAMPLER_3D:
             vao.createTexture<GLTexture3D>(name);
+            break;
+          case GL_SAMPLER_CUBE:
+            vao.createTexture<GLTextureCube>(name);
             break;
           default:
             ERROR("This kind of sampler is not yet managed: %u", gltype);
@@ -1075,8 +1063,12 @@ private:
         m_samplers[name] = std::make_unique<GLSampler2D>(name, m_sampler_count, gpuID());
         m_sampler_count += 1u;
         break;
-      case GL_SAMPLER_CUBE:
+      case GL_SAMPLER_3D:
         m_samplers[name] = std::make_unique<GLSampler3D>(name, m_sampler_count, gpuID());
+        m_sampler_count += 1u;
+        break;
+      case GL_SAMPLER_CUBE:
+        m_samplers[name] = std::make_unique<GLSamplerCube>(name, m_sampler_count, gpuID());
         m_sampler_count += 1u;
         break;
       default:
@@ -1093,7 +1085,7 @@ private:
   //! \throw OpenGLException if the uniform does not exist or bad T type param.
   //----------------------------------------------------------------------------
   template<class T>
-  IGLUniform<T>& getUniform(const char *name)
+  GLUniform<T>& getUniform(const char *name)
   {
     if (unlikely(!compiled()))
       {
@@ -1115,7 +1107,7 @@ private:
       }
 
     auto ptr = m_uniforms[name].get();
-    IGLUniform<T> *uniform_ptr = dynamic_cast<IGLUniform<T>*>(ptr);
+    GLUniform<T> *uniform_ptr = dynamic_cast<GLUniform<T>*>(ptr);
     if (unlikely(nullptr == uniform_ptr))
       {
         throw std::invalid_argument("GLUniform '" + std::string(name) +
@@ -1193,5 +1185,41 @@ private:
   //! \brief Reserve memory when creating VBOs.
   size_t                 m_vbo_init_size = 0_z;
 };
+
+//----------------------------------------------------------------------------
+//! \class GLProgram GLProgram.hpp
+//!
+//! A \ref GLProgram takes as input a set of GLShaders, compile and
+//! link them. As result a list of GLLocations (\ref GLUniform, \ref
+//! GLSampler and \ref GLAttribute) are internaly created in the
+//! GLProgram. GLLocations allow the GLProgram to populate in the
+//! binded VAO (\ref GLVAO) a list of VBOs (\ref GLVertexBuffer) and a
+//! list of textures (GLTexture). Finally a GLProgram can draw a VAO
+//! binded to it.
+//!
+//! Usage example:
+//! \code
+//! GLVertexShader     vs;
+//! GLFragmentShader   fs;
+//! GLProgram          prog("prog");
+//!
+//! if (!m_prog.attachShaders(vs, fs).compile()) {
+//!     std::cerr << "failed compiling OpenGL program. Reason was '"
+//!               << m_prog.error() << "'" << std::endl;
+//!     exit();
+//! }
+//!
+//! GLVAO              vao1("VAO1");
+//! GLVAO              vao2("VAO2");
+//!
+//! prog.bind(vao1);
+//! prog.draw(vao1, Primitive::TRIANGLES);
+//! prog.bind(vao2);
+//! prog.draw(Primitive::TRIANGLES); // vao2 is painted
+//! \endcode
+//!
+//! Beware: this example does not show shaders or VAO initialization.
+//! \see GLVertexShader, GLFragmentShader, GLVAO.
+//----------------------------------------------------------------------------
 
 #endif /* GLPROGRAM_HPP */

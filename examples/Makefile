@@ -39,13 +39,21 @@ include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
-OBJ += Example01.o Example02.o Example03.o Example04.o Example05.o main.o
+OBJ += Example01.o Example02.o Example03.o \
+       Example04.o Example05.o Example06.o \
+       main.o
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS += $(abspath $(P)/build/libOpenGLCppWrapper.a)
+EXTERNAL_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a)
+
+###################################################
+# But sure the main project have been compiled
+ifeq ("$(wildcard $(P)/$(BUILD)/libopenglcppwrapper.a)","")
+$(error Please compile the main project before compiling unit tests: cd $(P) && make)
+endif
 
 ###################################################
 # Compile tutorials

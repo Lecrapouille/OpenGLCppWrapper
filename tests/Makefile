@@ -35,6 +35,7 @@ P=..
 # Sharable informations between all Makefiles
 M=$(P)/.makefile
 include $(M)/Makefile.header
+include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
@@ -44,9 +45,8 @@ OBJ += GLShadersTests.o GLProgramTests.o
 OBJ += UnitTests.o
 
 ###################################################
-# Compilation options.
-CXXFLAGS = $(CXX_WHOLE_FLAGS) -std=c++11
-LDFLAGS =
+# Link against the unit test lib
+LDFLAGS += -lcrpcut -ldl
 
 ###################################################
 # Code coverage. Comment these lines if coveraging
@@ -55,48 +55,19 @@ CXXFLAGS += --coverage
 LDFLAGS += --coverage
 
 ###################################################
-# Inform Makefile where to find header files
-INCLUDES += -I$(P)/src -I$(P)/src/private -I $(P)/external
-
-###################################################
-# Inform Makefile where to find *.cpp and *.o files
-VPATH += $(P)/src:$(P)/src/private:$(P)/external
-
-###################################################
-# Project defines
-DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
-
-###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-#FIXME should be $(STATIC_LIB_TARGET) but referring to the main project ==> $(STATIC_LIB_MAIN_TARGET)
-#FIXME idem for $(BUILD) ==> $(MAIN_BUILD)
-EXTERNAL_LIBS = \
-	$(abspath $(P)/external/SOIL/libSOIL.a) \
-	$(abspath $(P)/$(BUILD)/libOpenGLCppWrapper.a)
+EXTERNAL_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a)
 
 ###################################################
 # But sure the main project have been compiled
-ifeq ("$(wildcard $(P)/$(BUILD)/libOpenGLCppWrapper.a)","")
+ifeq ("$(wildcard $(P)/$(BUILD)/libopenglcppwrapper.a)","")
 $(error Please compile the main project before compiling unit tests: cd $(P) && make)
 endif
 
 ###################################################
-# Set Libraries. For knowing which libraries
-# is needed please read the external/README.md file.
-
-ifeq ($(ARCHI),Darwin)
-EXTERNAL_LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
-else ifeq ($(ARCHI),Linux)
-EXTERNAL_LIBS += -lGLU -lGL -lGLEW `pkg-config glfw3 --static --libs` -lcrpcut -ldl
-else
-$(error Unknown architecture)
-endif
-
-###################################################
-# Compile OpenGLCppWrapper unit tests. Be sure libs
-# of the main project have been compiled.
+# Compile OpenGLCppWrapper unit tests.
 all: $(TARGET)
 
 ###################################################
@@ -105,12 +76,6 @@ all: $(TARGET)
 unit-tests: $(TARGET)
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
 	@$(SANITIZER) ./$(BUILD)/$(TARGET) || (cat $(TARGET).log; return 1)
-
-###################################################
-.PHONY: clean
-clean:
-	@$(call print-simple,"Cleaning","$(PWD)")
-	@rm -fr $(BUILD) $(DOC) 2> /dev/null
 
 ###################################################
 # Sharable informations between all Makefiles

@@ -18,16 +18,22 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef GLWINDOW_HPP_
-#  define GLWINDOW_HPP_
+#ifndef GLWINDOW_HPP
+#  define GLWINDOW_HPP
+
+// *****************************************************************************
+//! \file GLWindow.hpp manages a window and its i/o for drawing OpenGL scenes.
+// *****************************************************************************
 
 #  include <GL/glew.h>
 #  include <GLFW/glfw3.h>
 #  include "GLException.hpp"
 
-// **************************************************************
-//! \brief
-// **************************************************************
+// *****************************************************************************
+//! \class GLWindow GLWindow.hpp
+//!
+//! \brief GLWindow manages a window for OpenGL.
+// *****************************************************************************
 class IGLWindow
 {
 public:
@@ -40,8 +46,7 @@ public:
             const char *title = "");
 
   //------------------------------------------------------------------
-  //! \brief Destructor. Release the OpenGL context. Call the virtual
-  //! methode stop().
+  //! \brief Destructor. Release the OpenGL context.
   //------------------------------------------------------------------
   virtual ~IGLWindow();
 
@@ -49,6 +54,17 @@ public:
   //! \brief Start the OpenGL context and starts the rendering loop.
   //------------------------------------------------------------------
   bool start();
+
+  //------------------------------------------------------------------
+  //! \brief Hide mouse cursor.
+  //------------------------------------------------------------------
+  inline void hideMouseCursor() const
+  {
+    if (nullptr != m_window)
+    {
+      glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+  }
 
   //------------------------------------------------------------------
   //! \brief Return the delta time (in ms) with.
@@ -59,42 +75,60 @@ public:
   }
 
   //------------------------------------------------------------------
-  //! \brief
+  //! \brief Return the address of the GLFW window.
   //------------------------------------------------------------------
   inline GLFWwindow *obj()
   {
     return m_window;
   }
 
+  //------------------------------------------------------------------
+  //! \brief Return the current width of the window.
+  //------------------------------------------------------------------
   inline uint32_t width() const { return m_width; }
+
+  //------------------------------------------------------------------
+  //! \brief Return the current height of the window.
+  //------------------------------------------------------------------
   inline uint32_t height() const { return m_height; }
-  inline void setWindowSize(uint32_t const width, uint32_t const height)
-  {
-    m_width = width;
-    m_height = height;
 
-    // Calbback to be implemented by the derived class
-    onWindowSizeChanged(static_cast<float>(width),
-                        static_cast<float>(height));
-  }
+  //------------------------------------------------------------------
+  //! \brief Change the position of the window.
+  //------------------------------------------------------------------
+  void setWindowSize(uint32_t const width, uint32_t const height);
 
+  //------------------------------------------------------------------
+  //! \brief Check if the keyboard has been pressed.
+  //------------------------------------------------------------------
   inline bool keyPressed(const int key) const
   {
-     if (nullptr == m_window)
-       return false;
-     return key == glfwGetKey(m_window, key);
+    if (nullptr != m_window)
+      return GLFW_PRESS == glfwGetKey(m_window, key);
+    return false;
   }
 
+  //------------------------------------------------------------------
+  //! \brief Callback when the mouse has been moved. Default behavior
+  //! is to do nothing.
+  //------------------------------------------------------------------
   virtual void onMouseMoved(const double /*xpos*/, const double /*ypos*/)
+  {}
+
+  //------------------------------------------------------------------
+  //! \brief Callback when the mouse has been scrolled. Default behavior
+  //! is to do nothing.
+  //------------------------------------------------------------------
+  virtual void onMouseScrolled(const double /*xoffset*/, const double /*yoffset*/)
   {}
 
 private:
 
   //------------------------------------------------------------------
-  //! \brief Private function needed by dt(). Compute and display in
-  //! in the window title the number of frame per seconds (FPS).
+  //! \brief Compute and display in in the window title the number of
+  //! frame per seconds (FPS). Needed for knowing the delta time between
+  //! two draw cycles.
   //------------------------------------------------------------------
-  void FPS();
+  void computeFPS();
 
   //------------------------------------------------------------------
   //! \brief Callback when the window has its size changed
@@ -104,37 +138,38 @@ private:
   virtual void onWindowSizeChanged(const float width, const float height) = 0;
 
   //------------------------------------------------------------------
-  //! \brief Virtual method. Add here all stuffs concerning the init
-  //! of your 3D game.
+  //! \brief Add here all stuffs concerning the init of your 3D game.
   //! \return false for aborting start(), else true for continuing.
   //------------------------------------------------------------------
   virtual bool setup() = 0;
 
   //------------------------------------------------------------------
-  //! \brief Virtual method. Add here all stuffs painting your 3D
-  //! world to be displayed. This method is called by the udpdate()
-  //! method.
-  //! \return false for halting update(), else true for continuing.
+  //! \brief Add here all stuffs painting your 3D world to be
+  //! displayed. This method is called by the start() method.
+  //! \return false for halting start(), else return true for continuing.
   //------------------------------------------------------------------
   virtual bool draw() = 0;
 
   //------------------------------------------------------------------
   //! \brief Main loop for displaying the 3D world. Call draw().
   //------------------------------------------------------------------
-  void update();
+  virtual bool loop();
 
   //------------------------------------------------------------------
-  //! \brief Virtual method. Release your 3D models from memory.
-  //! Called by the destructor.
+  //! \brief Release your 3D models from memory created by setup().
+  //! This method is not called by the destructor because of it's virtual.
   //------------------------------------------------------------------
-  virtual void release();
+  virtual void release()
+  {
+    /* By default no 3D resources has to released */
+  }
 
 private:
 
   double m_lastTime;
   double m_lastFrameTime;
   int m_fps;
-  float m_deltaTime;
+  float m_deltaTime = 0.0f;
 
   uint32_t m_width;
   uint32_t m_height;

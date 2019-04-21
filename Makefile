@@ -22,6 +22,7 @@
 # Executable name
 PROJECT = OpenGLCppWrapper
 TARGET = $(PROJECT)
+DESCRIPTION = C++11 API wrapping Core Profile OpenGL routines and allowing to write applications in few lines of code
 
 ###################################################
 # Debug mode or Release mode
@@ -47,7 +48,7 @@ OBJ += $(OBJ_CORE) $(OBJ_IMGUI)
 
 ###################################################
 # Compile static and shared libraries
-all: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET)
+all: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
 
 ###################################################
 # Download textures and other resources needed by examples
@@ -66,17 +67,13 @@ unit-tests:
 # Install project. You need to be root.
 .PHONY: install
 install: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET)
-	@$(call print-to,"Installing","doc","$(PROJECT_DOC_PATH)","")
-	@mkdir -p $(PROJECT_DOC_PATH)
-	@cp -r doc/* $(PROJECT_DATA_ROOT)/doc
-	@cp AUTHORS LICENSE README.md ChangeLog $(PROJECT_DATA_ROOT)
-	@$(call print-to,"Installing","libs","$(STATIC_LIB_TARGET)","")
-	@cp $(BUILD)/$(STATIC_LIB_TARGET) $(LIBDIR)
-	@cp $(BUILD)/$(SHARED_LIB_TARGET) $(LIBDIR)
-	@ln -s $(LIBDIR)/$(SHARED_LIB_TARGET) $(LIBDIR)/$(SYMBOLIC_SHARED_TARGET)
+	@$(call RULE_INSTALL_DOC)
+	@$(call RULE_INSTALL_LIBRARIES)
+	@$(call RULE_INSTALL_HEADER_FILES)
+	@$(call RULE_INSTALL_PKG_CONFIG)
 
 ###################################################
-# Uninstall the project. You need to be root.
+# Uninstall the project. You need to be root. FIXME: to be updated
 .PHONY: uninstall
 uninstall:
 	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))

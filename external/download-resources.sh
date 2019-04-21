@@ -12,6 +12,6 @@ function print-clone
 ### 
 print-clone textures
 git clone https://github.com/Lecrapouille/OpenGLCppWrapper-data.git --depth=1 > /dev/null 2> /dev/null
-mv OpenGLCppWrapper-data examples/textures/ > /dev/null 2> /dev/null
+mv OpenGLCppWrapper-data ../examples/textures/ > /dev/null 2> /dev/null
 
 exit 0

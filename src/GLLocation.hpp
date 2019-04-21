@@ -27,36 +27,60 @@
 #ifndef GLLOCATION_HPP
 #define GLLOCATION_HPP
 
+// *****************************************************************************
+//! \file GLLocation.hpp manages shader variables (Uniforms, Samplers
+//! and Attributes).
+// *****************************************************************************
+
 #  include "IGLObject.hpp"
 #  include "Matrix.hpp"
 
-// **************************************************************
-//! \brief Class linking
-// **************************************************************
+// *****************************************************************************
+//! \brief GLLocation makes the interface between a shader variable and your
+//! c++ code. It allows to upload CPU data to the GPU.
+//!
+//! \note this class shall stay private and not be used directly by the
+//! developper. Indeed this class is only managed by GLProgram.
+// *****************************************************************************
 class GLLocation: public IGLObject<GLint>
 {
 public:
 
-  //! \brief
-  GLLocation(const char *name, GLint dim, GLenum gltype, GLuint prog)
-    : IGLObject(name)
+  //----------------------------------------------------------------------------
+  //! \brief Constructor. This constructor makes no other actions.
+  //!
+  //! \param name Give a name to the instance. GLProgram uses names in their hash table.
+  //! \param dim set the dimension of variable (1 for scalar else the dimension for vector)
+  //! \param gltype set the OpenGL type of data (GL_FLOAT ...)
+  //! \param prog set the GLProgram identifier (owner of this instance).
+  //----------------------------------------------------------------------------
+  GLLocation(const char *name, const GLint dim, const GLenum gltype, const GLuint prog)
+    : IGLObject(name),
+      m_dim(dim),
+      m_program(prog)
   {
-    m_dim = dim;
     m_target = gltype;
-    m_program = prog;
   }
 
-  //! \brief Alias for getID() but in a more explicit way
+  //----------------------------------------------------------------------------
+  //! \brief Alias for IGLObject::getID() but in a more explicit way.
+  //----------------------------------------------------------------------------
   inline GLint location() const
   {
     return m_handle;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the dimension of the shader variable.
+  //----------------------------------------------------------------------------
   inline GLint dim() const
   {
     return m_dim;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the type of the shader variable.
+  //----------------------------------------------------------------------------
   inline GLenum gltype() const
   {
     return m_target;
@@ -64,25 +88,32 @@ public:
 
 protected:
 
-  GLint  m_dim;
-  GLuint m_program;
+  const GLint  m_dim;
+  const GLuint m_program;
 };
 
-// **************************************************************
+// *****************************************************************************
+//! \brief Attribute represents a shader program attribute variable.
 //!
-// **************************************************************
+//! This class only stores information about the attribute (dimension, type).
+//! These info are used by the GLProgam to create VBOs when a VAO is bind to it.
+// *****************************************************************************
 class GLAttribute: public GLLocation
 {
 public:
 
-  GLAttribute(const char *name, GLint dim, GLenum gltype, GLuint prog)
+  //----------------------------------------------------------------------------
+  //! \brief See GLLocation constructor.
+  //----------------------------------------------------------------------------
+  GLAttribute(const char *name, const GLint dim, const GLenum gltype, const GLuint prog)
     : GLLocation(name, dim, gltype, prog)
   {
     assert((dim >= 1) && (dim <= 4));
-    m_stride = 0;
-    m_offset = 0;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Destructor. Release elements in CPU and GPU memories.
+  //----------------------------------------------------------------------------
   virtual ~GLAttribute() override
   {
     destroy();
@@ -90,6 +121,9 @@ public:
 
 private:
 
+  //----------------------------------------------------------------------------
+  //! \brief Create a new OpenGL Attribute.
+  //----------------------------------------------------------------------------
   virtual bool create() override
   {
     DEBUG("Attrib '%s' create", name().c_str());
@@ -98,10 +132,16 @@ private:
     return false;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Destroy the OpenGL Attribute. This is a dummy method. No
+  //! action is made.
+  //----------------------------------------------------------------------------
   virtual void release() override
-  {
-  }
+  {}
 
+  //----------------------------------------------------------------------------
+  //! \brief Bind the OpenGL Attribute.
+  //----------------------------------------------------------------------------
   virtual void activate() override
   {
     DEBUG("Attrib '%s' activate", name().c_str());
@@ -114,20 +154,27 @@ private:
                                   (const GLvoid*) m_offset));
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Unbind the OpenGL Attribute.
+  //----------------------------------------------------------------------------
   virtual void deactivate() override
   {
     DEBUG("Attrib '%s' deactivate", name().c_str());
-    if (likely(isValid()))
-      {
-        glCheck(glDisableVertexAttribArray(m_index));
-      }
+    glCheck(glDisableVertexAttribArray(m_index));
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Setup the behavior of the instance. This is a dummy
+  //! method. No action is made.
+  //----------------------------------------------------------------------------
   virtual bool setup() override
   {
     return false;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief This is a dummy method. No action is made.
+  //----------------------------------------------------------------------------
   virtual bool update() override
   {
     return false;
@@ -135,36 +182,132 @@ private:
 
 private:
 
-  GLuint m_index;
-  size_t m_stride;
-  size_t m_offset;
+  //! \brief Hack ! This is an alias for m_handle but of different
+  //! type.
+  GLuint m_index = 0;
+  //! \brief Specifies the byte offset between consecutive generic
+  //! vertex attributes.
+  size_t m_stride = 0;
+  //! \brief Specifies a offset of the first component of the first
+  //! generic vertex attribute in the array in the data store.
+  size_t m_offset = 0;
 };
 
-// **************************************************************
+// *****************************************************************************
+//! \brief IGLUniform represents a program uniform variable.
 //!
-// **************************************************************
-template<class T>
+//! See them like constants values in shaders of type T.
+// *****************************************************************************
 class IGLUniform: public GLLocation
 {
 public:
 
-  // Note T and gltype shall match. Not checks are made
-  IGLUniform(const char *name, GLint dim, GLenum gltype, GLuint prog)
+  //----------------------------------------------------------------------------
+  //! \brief See GLLocation constructor.
+  // \note T and gltype shall match. Not checks are made !
+  //----------------------------------------------------------------------------
+  IGLUniform(const char *name, const GLint dim, const GLenum gltype, const GLuint prog)
     : GLLocation(name, dim, gltype, prog)
-  {
-  }
+  {}
 
+  //----------------------------------------------------------------------------
+  //! \brief Destructor. Release elements from CPU and GPU.
+  //----------------------------------------------------------------------------
   virtual ~IGLUniform() override
   {
     destroy();
   }
 
+private:
+
+  //----------------------------------------------------------------------------
+  //! \brief Create a new OpenGL Uniform.
+  //----------------------------------------------------------------------------
+  virtual bool create() override
+  {
+    DEBUG("Uniform '%s' create", name().c_str());
+    m_handle = glCheck(glGetUniformLocation(m_program, name().c_str()));
+    return false;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Destroy the OpenGL Uniform. This is a dummy method. No
+  //! action is made.
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {}
+
+  //----------------------------------------------------------------------------
+  //! \brief Bind the OpenGL Uniform. This is a dummy method. No
+  //! action is made.
+  //----------------------------------------------------------------------------
+  virtual void activate() override
+  {}
+
+  //----------------------------------------------------------------------------
+  //! \brief Unbind the OpenGL Uniform. This is a dummy method. No
+  //! action is made.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() override
+  {
+    DEBUG("Uniform '%s' deactivate", name().c_str());
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Setup the behavior of the instance. This is a dummy
+  //! method. No action is made.
+  //----------------------------------------------------------------------------
+  virtual bool setup() override
+  {
+    return false;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief This is a dummy method. No action is made.
+  //----------------------------------------------------------------------------
+  virtual bool update() override
+  {
+    return false;
+  }
+};
+
+// *****************************************************************************
+//! \brief GLUniform represents a program uniform variable.
+// *****************************************************************************
+template<class T>
+class GLUniform: public IGLUniform
+{
+public:
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  GLUniform(const char *name, const GLint dim, const GLenum gltype, const GLuint prog)
+    : IGLUniform(name, dim, gltype, prog)
+  {}
+
+  //----------------------------------------------------------------------------
+  //! \brief Change the CPU data. It will be automatically transfered to the GPU.
+  //----------------------------------------------------------------------------
+  template<class U>
+  GLUniform<T>& operator=(const U& val)
+  {
+    GLUniform<T>::data() = T(val);
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the CPU data.
   //TODO a deplacer dans GLUniform car on distingue GLSampler::texture
+  //----------------------------------------------------------------------------
   inline T const& data() const
   {
     return m_data;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the CPU data.
+  //----------------------------------------------------------------------------
   inline T& data()
   {
     // FIXME always modified ?
@@ -175,72 +318,24 @@ public:
 
 private:
 
-  virtual bool create() override
-  {
-    DEBUG("Uniform '%s' create", name().c_str());
-    m_handle = glCheck(glGetUniformLocation(m_program, name().c_str()));
-    return false;
-  }
-
-  virtual void release() override
-  {
-  }
-
-  virtual void activate() override
-  {
-  }
-
-  virtual void deactivate() override
-  {
-    DEBUG("Uniform '%s' deactivate", name().c_str());
-  }
-
-  virtual bool setup() override
-  {
-    return false;
-  }
-
+  //----------------------------------------------------------------------------
+  //! \brief Transfer the CPU data to the GPU data.
+  //----------------------------------------------------------------------------
   virtual bool update() override
   {
+    DEBUG("Uniform '%s' update", name().c_str());
+    setValue(GLUniform<T>::m_data);
     return false;
   }
+
+  //----------------------------------------------------------------------------
+  //! \brief Transfer the CPU data to the GPU data.
+  //----------------------------------------------------------------------------
+  inline void setValue(const T& value) const;
 
 protected:
 
-  T m_data;
-};
-
-// **************************************************************
-//!
-// **************************************************************
-template<class T>
-class GLUniform: public IGLUniform<T>
-{
-public:
-
-  GLUniform(const char *name, GLint dim, GLenum gltype, GLuint prog)
-    : IGLUniform<T>(name, dim, gltype, prog)
-  {
-  }
-
-  // Manipule donnee depuis le CPU
-  template<class U>
-  GLUniform<T>& operator=(const U& val)
-  {
-    IGLUniform<T>::data() = T(val);
-    return *this;
-  }
-
-private:
-
-  virtual bool update() override
-  {
-    DEBUG("Uniform '%s' update", IGLUniform<T>::name().c_str());
-    setValue(IGLUniform<T>::m_data);
-    return false;
-  }
-
-  inline void setValue(const T& value) const;
+  T m_data {};
 };
 
 template<>
@@ -309,78 +404,117 @@ inline void GLUniform<Matrix44f>::setValue(const Matrix44f& value) const
   glCheck(glUniformMatrix4fv(m_handle, 1, GL_FALSE, &value[0][0]));
 }
 
-// **************************************************************
-//! \brief A GLSampler is an Opengl uniform for texture
-// **************************************************************
-class GLSampler: public IGLUniform<uint32_t>
+// *****************************************************************************
+//! \brief A GLSampler is an OpenGL uniform for texture.
+// *****************************************************************************
+class GLSampler: public IGLUniform
 {
 public:
 
-  GLSampler(const char *name, GLenum gltype, uint32_t texture_count, GLuint prog)
-    : IGLUniform<uint32_t>(name, 0, gltype, prog)
+  //----------------------------------------------------------------------------
+  //! \brief See GLLocation constructor.
+  //! \param texture_id count texture
+  //----------------------------------------------------------------------------
+  GLSampler(const char *name, const GLenum gltype, const GLenum texture_id,
+            const GLuint prog)
+    : IGLUniform(name, 0, gltype, prog),
+      m_texture_id(texture_id)
   {
-    m_data = texture_count;
     forceUpdate();
   }
 
-  inline uint32_t textureID() const
+  //----------------------------------------------------------------------------
+  //! \brief Return the texture identifier.
+  //----------------------------------------------------------------------------
+  inline const GLenum textureID() const
   {
-    return m_data;
+    return m_texture_id;
   }
 
 private:
 
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
   virtual void activate() override
   {
-    DEBUG("Sampler '%s' activate GL_TEXTURE0 + %u", IGLUniform<uint32_t>::name().c_str(), m_data);
-    glCheck(glActiveTexture(GL_TEXTURE0 + m_data));
+    DEBUG("Sampler '%s' activate GL_TEXTURE0 + %u", name().c_str(), m_texture_id);
+    glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_id));
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
   virtual bool update() override
   {
-    DEBUG("Sampler '%s' update", IGLUniform<uint32_t>::name().c_str());
-    glCheck(glUniform1i(IGLUniform<uint32_t>::m_handle, static_cast<GLint>(m_data)));
+    DEBUG("Sampler '%s' update", name().c_str());
+    glCheck(glUniform1i(m_handle, static_cast<GLint>(m_texture_id)));
     return false;
   }
+
+protected:
+
+  const GLenum m_texture_id;
 };
 
-// **************************************************************
-//!
-// **************************************************************
+// *****************************************************************************
+//! \brief Sampler for 1D texture.
+// *****************************************************************************
 class GLSampler1D: public GLSampler
 {
 public:
 
-  GLSampler1D(const char *name, uint32_t texture_count, GLuint prog)
-    : GLSampler(name, GL_SAMPLER_1D, texture_count, prog)
-  {
-  }
+  //----------------------------------------------------------------------------
+  //! \brief See GLLocation constructor.
+  //----------------------------------------------------------------------------
+  GLSampler1D(const char *name, const GLenum texture_id, const GLuint prog)
+    : GLSampler(name, GL_SAMPLER_1D, texture_id, prog)
+  {}
 };
 
-// **************************************************************
-//!
-// **************************************************************
+// *****************************************************************************
+//! \brief Sampler for 2D texture.
+// *****************************************************************************
 class GLSampler2D: public GLSampler
 {
 public:
 
-  GLSampler2D(const char *name, uint32_t texture_count, GLuint prog)
-    : GLSampler(name, GL_SAMPLER_2D, texture_count, prog)
-  {
-  }
+  //----------------------------------------------------------------------------
+  //! \brief See GLLocation constructor.
+  //----------------------------------------------------------------------------
+  GLSampler2D(const char *name, const GLenum texture_id, const GLuint prog)
+    : GLSampler(name, GL_SAMPLER_2D, texture_id, prog)
+  {}
 };
 
-// **************************************************************
-//!
-// **************************************************************
+// *****************************************************************************
+//! \brief Sampler for 3D texture.
+// *****************************************************************************
 class GLSampler3D: public GLSampler
 {
 public:
 
-  GLSampler3D(const char *name, uint32_t texture_count, GLuint prog)
-    : GLSampler(name, GL_SAMPLER_CUBE, texture_count, prog)
-  {
-  }
+  //----------------------------------------------------------------------------
+  //! \brief See GLLocation constructor.
+  //----------------------------------------------------------------------------
+  GLSampler3D(const char *name, const GLenum texture_id, const GLuint prog)
+    : GLSampler(name, GL_SAMPLER_3D, texture_id, prog)
+  {}
+};
+
+// *****************************************************************************
+//! \brief Sampler for Cubic texture.
+// *****************************************************************************
+class GLSamplerCube: public GLSampler
+{
+public:
+
+  //----------------------------------------------------------------------------
+  //! \brief See GLLocation constructor.
+  //----------------------------------------------------------------------------
+  GLSamplerCube(const char *name, const GLenum texture_id, const GLuint prog)
+    : GLSampler(name, GL_SAMPLER_CUBE, texture_id, prog)
+  {}
 };
 
 #endif
