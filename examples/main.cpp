@@ -3,10 +3,11 @@
 #include "Example03.hpp"
 #include "Example04.hpp"
 #include "Example05.hpp"
+#include "Example06.hpp"
 #include <iostream>
 #include <cstdlib>
 
-#define MAX_EXAMPLES 5
+#define MAX_EXAMPLES 6
 
 __attribute__((__noreturn__))
 static void usage(char *argv[])
@@ -19,6 +20,7 @@ static void usage(char *argv[])
   std::cout << "  3: Display a generated sphere" << std::endl;
   std::cout << "  4: Display a multi-textured plane" << std::endl;
   std::cout << "  5: Display a cubemap texture" << std::endl;
+  std::cout << "  6: Display a 3D texture" << std::endl;
   exit(1);
 }
 
@@ -53,6 +55,9 @@ int main(int argc, char *argv[])
       break;
     case 5:
       win = std::make_unique<GLExample05>();
+      break;
+    case 6:
+      win = std::make_unique<GLExample06>();
       break;
     default:
       std::cerr << "Incorrect example id !" << std::endl;

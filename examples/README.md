@@ -35,3 +35,13 @@ Example 05:
 ===========
 
 Cubemap texture inspired by https://learnopengl.com/Advanced-OpenGL/Cubemaps
+
+Example 06:
+===========
+
+This example paints a terrain made with a 3d texture. The goal of this
+example is to show how to use 3d textures.
+
+The code source of this example has been inspired by the following document:
+http://www.mathematik.uni-marburg.de/~thormae/lectures/graphics1/graphics_7_1_eng_web.html#1
+and https://www.uni-marburg.de/fb12/en/researchgroups/grafikmultimedia/lectures/graphics

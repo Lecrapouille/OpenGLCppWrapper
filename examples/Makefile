@@ -39,7 +39,9 @@ include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
-OBJ += Example01.o Example02.o Example03.o Example04.o Example05.o main.o
+OBJ += Example01.o Example02.o Example03.o \
+       Example04.o Example05.o Example06.o \
+       main.o
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
