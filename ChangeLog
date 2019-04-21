@@ -1,6 +1,13 @@
+version 0.5:
+
+    Add Texture3D and rename correctly class (TextureCube vs Texture3D)
+    Update comments in code.
+    Cleaning API (GLWindow, GLLocation and GLTexture inheritance).
+    Make install the pkg-config file.
+
 version 0.4:
 
-    Add TexturesCube.
+    Add TextureCube.
     Update Makefiles (use git submodules).
     Fix compilations warnings.
     Classes are non copyable.
