@@ -101,12 +101,12 @@ bool GLExample05::setup()
     };
 
   // Add 6 textures to the sky box
-  if (!m_skybox.texture3D("skybox").load(CubeMap::POSITIVE_X, "textures/right.jpg")) return false;
-  if (!m_skybox.texture3D("skybox").load(CubeMap::NEGATIVE_X, "textures/left.jpg")) return false;
-  if (!m_skybox.texture3D("skybox").load(CubeMap::POSITIVE_Y, "textures/top.jpg")) return false;
-  if (!m_skybox.texture3D("skybox").load(CubeMap::NEGATIVE_Y, "textures/bottom.jpg")) return false;
-  if (!m_skybox.texture3D("skybox").load(CubeMap::POSITIVE_Z, "textures/front.jpg")) return false;
-  if (!m_skybox.texture3D("skybox").load(CubeMap::NEGATIVE_Z, "textures/back.jpg")) return false;
+  if (!m_skybox.textureCube("skybox").load(CubeMap::POSITIVE_X, "textures/right.jpg")) return false;
+  if (!m_skybox.textureCube("skybox").load(CubeMap::NEGATIVE_X, "textures/left.jpg")) return false;
+  if (!m_skybox.textureCube("skybox").load(CubeMap::POSITIVE_Y, "textures/top.jpg")) return false;
+  if (!m_skybox.textureCube("skybox").load(CubeMap::NEGATIVE_Y, "textures/bottom.jpg")) return false;
+  if (!m_skybox.textureCube("skybox").load(CubeMap::POSITIVE_Z, "textures/front.jpg")) return false;
+  if (!m_skybox.textureCube("skybox").load(CubeMap::NEGATIVE_Z, "textures/back.jpg")) return false;
 
   // --- Create a cube
 

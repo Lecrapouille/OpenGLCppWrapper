@@ -344,43 +344,64 @@ private:
   }
 };
 
-// **************************************************************
-//!
-// **************************************************************
+// *****************************************************************************
+//! \brief Sampler for 1D texture.
+// *****************************************************************************
 class GLSampler1D: public GLSampler
 {
 public:
 
-  GLSampler1D(const char *name, uint32_t texture_count, GLuint prog)
-    : GLSampler(name, GL_SAMPLER_1D, texture_count, prog)
-  {
-  }
+  //----------------------------------------------------------------------------
+  //! \brief See GLLocation constructor.
+  //----------------------------------------------------------------------------
+  GLSampler1D(const char *name, const GLenum texture_id, const GLuint prog)
+    : GLSampler(name, GL_SAMPLER_1D, texture_id, prog)
+  {}
 };
 
-// **************************************************************
-//!
-// **************************************************************
+// *****************************************************************************
+//! \brief Sampler for 2D texture.
+// *****************************************************************************
 class GLSampler2D: public GLSampler
 {
 public:
 
-  GLSampler2D(const char *name, uint32_t texture_count, GLuint prog)
-    : GLSampler(name, GL_SAMPLER_2D, texture_count, prog)
-  {
-  }
+  //----------------------------------------------------------------------------
+  //! \brief See GLLocation constructor.
+  //----------------------------------------------------------------------------
+  GLSampler2D(const char *name, const GLenum texture_id, const GLuint prog)
+    : GLSampler(name, GL_SAMPLER_2D, texture_id, prog)
+  {}
 };
 
-// **************************************************************
-//!
-// **************************************************************
+// *****************************************************************************
+//! \brief Sampler for 3D texture.
+// *****************************************************************************
 class GLSampler3D: public GLSampler
 {
 public:
 
-  GLSampler3D(const char *name, uint32_t texture_count, GLuint prog)
-    : GLSampler(name, GL_SAMPLER_CUBE, texture_count, prog)
-  {
-  }
+  //----------------------------------------------------------------------------
+  //! \brief See GLLocation constructor.
+  //----------------------------------------------------------------------------
+  GLSampler3D(const char *name, const GLenum texture_id, const GLuint prog)
+    : GLSampler(name, GL_SAMPLER_3D, texture_id, prog)
+  {}
+};
+
+// *****************************************************************************
+//! \brief Sampler for Cubic texture.
+// *****************************************************************************
+class GLSamplerCube: public GLSampler
+{
+public:
+
+  //----------------------------------------------------------------------------
+  //! \brief See GLLocation constructor.
+  //----------------------------------------------------------------------------
+  GLSamplerCube(const char *name, const GLenum texture_id, const GLuint prog)
+    : GLSampler(name, GL_SAMPLER_CUBE, texture_id, prog)
+  {}
 };
 
 #endif

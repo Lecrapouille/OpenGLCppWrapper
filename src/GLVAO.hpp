@@ -307,6 +307,17 @@ public:
     return texture<GLTexture3D>(name);
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Get the cubic texture.
+  //!
+  //! This method wraps the \a texture() method hidding the misery of the
+  //! template.
+  //----------------------------------------------------------------------------
+  inline GLTextureCube& textureCube(const char *name)
+  {
+    return texture<GLTextureCube>(name);
+  }
+
   //------------------------------------------------------------------
   //! \brief Check if all VBOs have the same size.
   //! \return true if all VBO have the same size, else return false.

@@ -260,9 +260,11 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the  error message of either shader compilation or other event.
+  //! \brief Return all error messages (concated by '\\n' char) produced
+  //! either during the shader compilation or by an other event.
   //!
-  //! \note Once call the error message is automatically cleared.
+  //! \note Once this method as been called the error message is
+  //! automatically cleared.
   //!
   //! \return the error message (the message can be empty).
   //----------------------------------------------------------------------------
@@ -791,13 +793,13 @@ private:
             break;
           case GL_SAMPLER_2D:
             vao.createTexture<GLTexture2D>(name);
+            //FIXME vao.createTexture<GLTextureDepth2D>(name);
             break;
-            //FIXME
-            //case GL_SAMPLER_2D_DEPTH:
-            //vao.createTexture<GLTextureDepth2D>(name);
-            //break;
-          case GL_SAMPLER_CUBE:
+          case GL_SAMPLER_3D:
             vao.createTexture<GLTexture3D>(name);
+            break;
+          case GL_SAMPLER_CUBE:
+            vao.createTexture<GLTextureCube>(name);
             break;
           default:
             ERROR("This kind of sampler is not yet managed: %u", gltype);
@@ -1075,8 +1077,12 @@ private:
         m_samplers[name] = std::make_unique<GLSampler2D>(name, m_sampler_count, gpuID());
         m_sampler_count += 1u;
         break;
-      case GL_SAMPLER_CUBE:
+      case GL_SAMPLER_3D:
         m_samplers[name] = std::make_unique<GLSampler3D>(name, m_sampler_count, gpuID());
+        m_sampler_count += 1u;
+        break;
+      case GL_SAMPLER_CUBE:
+        m_samplers[name] = std::make_unique<GLSamplerCube>(name, m_sampler_count, gpuID());
         m_sampler_count += 1u;
         break;
       default:
