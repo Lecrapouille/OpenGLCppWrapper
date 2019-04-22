@@ -18,20 +18,11 @@ OpenGL version >= 3.0.
 **Warning:** This library is not a game engine but just an oriented
 object wrapper for OpenGL that can be used in a game engine. This API,
 contrary to others C++ OpenGL API really use object oriented and does
-not just content to give a C++ flavorish name to OpenGL routines.
+not just content to give a C++ flavor'ish name to OpenGL routines.
 
 ## Why another C++ wrapper for OpenGL ?
 
 Short answer: I disliked others API I found on github ! Long answer:
-
-* C++ APIs I saw on github just give a C++ flavor'ish taste to OpenGL
-  functions. None of them have real class inheritance over OpenGL objects.
-
-* This API allows to write 3D scenes in really few lines of C++ code
-  with almost no knowledge about OpenGL. You just have to understand
-  the OpenGL shader language: GLSL.
-
-* Public interfaces of this API are reduced as much as possible.
 
 * As a beginner of OpenGL Core, I always get confused by the order of
   creation/binding of OpenGL objects. With this API you do not have to
@@ -39,32 +30,44 @@ Short answer: I disliked others API I found on github ! Long answer:
   order they have to be created or binded. This API is here to hide
   all the boilerplate for you.
 
+* C++ APIs I saw on github just give a C++ flavor'ish taste to OpenGL
+  C functions. None of them have real class inheritance over OpenGL
+  objects and encapsulate routines. The only one demarking to other
+  was [Glumpy](https://github.com/glumpy/glumpy) but written in
+  Python.
+
+* This API allows to write 3D scenes in really few lines of C++ code
+  with almost no knowledge about OpenGL. You just have to understand
+  the OpenGL shader language: GLSL. From these shaders, the API will
+  instantiate for you all OpenGL objects (VBOs, textures ...).
+
+* Public interfaces of OpenGL Objects are reduced as much as possible.
+
 * This API takes the opposite direction over OpenGL tutorials: it does
   not start with a list of triangles, to push them in VBOs and finish
   coding with shaders and depending on which OpenGL version VAO. This
-  API does the inverse: it starts from shaders and hide
-  for you the generation of VBOs, attributes, uniforms, texture
-  sampler. You have just to request from the shader to create for you
-  a new 3D object (aka VAO) that you will init with data you wanted
-  (aka VBO): vertices, color, texture position.
+  API does the inverse: it starts from shaders and hide for you the
+  generation of VBOs, attributes, uniforms, texture sampler. You have
+  just to request from the shader to create for you a new 3D object
+  (aka VAO) that you will init with data you wanted (aka VBO):
+  vertices, color, texture position.
 
-* This API does not only content to init VBOs during the init phase,
-  it also allows you to manipulate your 3D scene data during the
-  run-time (meshes, color ...) from the CPU: the API will transmit
+* This API does not only content to initialize VBOs during the init
+  phase, it also allows you to manipulate your 3D scene data during
+  the run-time (meshes, color ...) from the CPU: the API will transmit
   automatically to the GPU all modified elements for their display.
-
-* So there is something
 
 ## How to use this API ? Explained Hello-world example
 
 Here is the pseudo C++ code of what you will have to write for many of
-your 3D scenes (All [Examples and tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md) included in this library follow this
-pseudo code). You can compare the length of this code with any "hello
-textured triangle" OpenGL tutorial. I explain the code just after
-showing it.
+your 3D scenes (All [Examples and
+tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md)
+included in this library follow this pseudo code). You can compare the
+length of this code with any "hello textured triangle" OpenGL
+tutorial. I explain the code just after showing it.
 
-In this document I consider that the reader knows basic
-OpenGL code at least what explained in basic tutorials.
+In this document I consider that the reader knows basic OpenGL code at
+least what explained in basic tutorials.
 
 Before showing C++ code with this API, we have to write a basic
 fragment and vertex shader (named `my_fragment_shader.glsl` and
@@ -74,10 +77,10 @@ shaders.
 
 ##### my_fragment_shader.glsl
 
-Nothing particuraly difficult with this fragment shader because
-largely explained in OpenGL tutorials that you will find on
-internet. For the fun, we also mix the texel color with an uniform
-color.
+In this vertex shader, we pick the color of the texture (texel) and
+mix it with an uniform (global) color. There is nothing particularly
+difficult with this fragment shader because it's largely explained in
+OpenGL tutorials findable on internet.
 
 ```
 01: #version 330 core
@@ -97,9 +100,10 @@ color.
 
 In this vertex shader, we pass to the fragment shader the texel and
 the global color. We applied to vertices position a
-Model-View-Projection matrix (change of basis). Again these kind of
-basic shaders are largely described on the web. For the fun we applied
-an additional scaling factor.
+[Model-View-Projection matrix](http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices)
+(change of basis). Again these kind of basic shaders are largely
+described on the web. For the fun we applied an additional scaling
+factor.
 
 ```
 01: #version 330 core
@@ -128,7 +132,8 @@ an additional scaling factor.
 ##### main.cpp
 
 Here the most funny part of this document : using this API. The code
-is written in pseudo C++ code to be less boring to read.
+is written in pseudo C++ code to be less boring to read. Explanations
+come here after.
 
 ```
 01: GLProgram prog;
@@ -150,18 +155,18 @@ is written in pseudo C++ code to be less boring to read.
 17:   prog.scalarf("scale") = 1.0f;
 18:   prog.vector4f("color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
 19:
-20:   // vao1 is now the active VAO
+20:   // vao1 is now the active VAO for prog
 21:   prog.bind(vao1);
 22:
 23:   // Define a 3D model (for example a cube)
 24:   vao1.vector3f("position") = { Vector3f(...) ... Vector3f(...) };
 25:   vao1.vector2f("UV") = { Vector2f(...) ... Vector2f(...) };
 26:
-27:   // Apply a texture to the 3D model
+27:   // Apply a 2D texture to the 3D model
 28:   if (!vao1.texture2D("texID").load("my_texture1.jpg"))
 29:     return false;
 30:
-31:   // vao2 is now the active VAO
+31:   // vao2 is now the active VAO for prog
 32:   prog.bind(vao2);
 33:
 34:   // Define an other 3D model (for example a plane) with different texture
@@ -186,7 +191,7 @@ is written in pseudo C++ code to be less boring to read.
 53:   // Draw model 2: (alternative way)
 54:   prog.draw(vao2, Primitive::TRIANGLES);
 55:
-56:   // Draw a model with vertices index (EBO)
+56:   // Example of drawing a model with vertices index (EBO)
 57:   GLIndexBuffer<uint32_t> indices = { ... };
 58:   prog.draw(vao3, Primitive::POINTS, indices);
 59: }
@@ -205,7 +210,7 @@ Init phase:
 
 * lines 01-02 and 07-08: GL*x*Shader, GLProgram and GLVAO are some
   OpenGL objects that the library is exposing to the developer (where
-  *x* is refering either to Fragment or Vertex or Geometry). A
+  *x* is referring either to Fragment or Vertex or Geometry). A
   GL*x*Shader holds the GLSL code source and compile it (and in future
   will allow to add other macro processing features). A GLProgram
   holds at least two GLxShaders (vertex and fragment) and link
@@ -239,7 +244,7 @@ Init phase:
   it to your GLProgram. This last will allocate VBOs and textures
   inside the VAO instance. Textures can be 1D, 2D, 3D. VBO are GPU
   buffer for storing data of your 3d models (vertex position, Vertex
-  texture coordinates, normals ...)  GLProram can also reserve some
+  texture coordinates, normals ...)  GLProgram can also reserve some
   extra memory if this information is given either with the
   constructor or with the method `setInitVBOSize`. VBO creation is
   made automatically (and only once) during the first binding (next
@@ -270,14 +275,15 @@ Run-time phase:
 
 * line 44-58: show different way to draw models (with/without number
   of vertices indicated, with/without index buffer, ...). You can draw
-  triangles, lines, points.
+  triangles, lines, points and more primitives.
 
 * line 63-65: In this example, we have to defined matrices for the
-  model view projection. The matrix projection is usually updated when
-  the user change the dimension of the GUI window. The view matrix is
-  updated when your camera is moved (see Legacy OpenGL lookAt
-  routine). Finally the model matrix is used for placing models over
-  the world.
+  model view projection. The matrix `"projection"` is usually updated
+  when the user change the dimension of the GUI window. The `"view"`
+  matrix is updated when your camera is moved (see Legacy OpenGL
+  lookAt routine). Finally the `"model"` matrix is used for placing
+  models over the world (so to be placed before any `GLProgram::draw`
+  methods.
 
 **Note:** `Primitive::TRIANGLES` is a strong type alias for
 GL_TRIANGLES. For all public methods needing an OpenGL GLint or GLenum
@@ -293,14 +299,14 @@ requirement, for the moment, is to use the same name both for uniform
 and attribute is not managed by the API (and I'm not sure GLSL can be
 compiled anyway).
 
-**Note:** Contrary to GLumpy where GLProgram can modify both textures,
+**Note:** Contrary to Glumpy where GLProgram can modify both textures,
 uniforms and attributes, in this API GLProgram only modifies uniforms
 and GLVAO only modifies attributes (named VBO) or textures.
 
 **Note:** C++ does not give the same flexibility than python for class
 typing. C++ is a strongly typing language (for classes).  An example
 is C++ does not allow container of template classes. Therefore in
-GLumpy you will write `prog['position'] =` for setting either an
+Glumpy you will write `prog['position'] =` for setting either an
 attribute or an uniform, while with my API you cannot reaches the
 same concise code. You'll have to explicit the template type and write
 `vao.VBO<Vector3f>("position") =` for attributes and
@@ -342,8 +348,8 @@ a cube.
 
 ### What else in this API ?
 
-Not shown in this tutorial but in future this API will manage
-FrameBuffer and different textures type such as 1D, 3D, Depth.
+Not shown in this tutorial but this API can manage cubic, 3D and 1D
+textures. Soon this API will manage FrameBuffer.
 
 This API also includes features which are not directly in relation
 with wrapping OpenGL routines. It allows:
@@ -372,8 +378,8 @@ with wrapping OpenGL routines. It allows:
 
 __Please help contributing !__
 
-Initialy this library was inside the SimTaDyn code source. I moved it
-to this repo[OpenGLCppWrapper](https://github.com/Lecrapouille/OpenGLCppWrapper)
+Initially this library was inside the SimTaDyn code source. I moved it
+to this repo [OpenGLCppWrapper](https://github.com/Lecrapouille/OpenGLCppWrapper)
 because I think people are more interested by an OpenGL API than a GIS application.
 
 This project is still in alpha version but allows to draw some basic 3D
@@ -467,17 +473,17 @@ cd tests
 make coverage -j4
 ```
 
-If all tests passed the coverage report is created in `doc/coverage/index.html` and is opened automaticaly.
+If all tests passed the coverage report is created in `doc/coverage/index.html` and is opened automatically.
 
 ### Verbose
 
-To activate console logs for debuging, see in `src/Makefile` and in `examples/Makefile` gcc flags `-DERROR -UDEBUG` and set to
-`-DERROR -DDEBUG`.
+To activate console logs for debugging, see in `src/Makefile` and in
+`examples/Makefile` gcc flags `-DERROR -UDEBUG` and set to `-DERROR -DDEBUG`.
 
 ## Credits
 
 This API is largely inspired by projects such as:
-* [GLumpy](https://github.com/glumpy/glumpy) python project.
+* [Glumpy](https://github.com/glumpy/glumpy) python project.
 * [opengl4csharp](https://github.com/giawa/opengl4csharp) C# project.
 
 ### Why I decided to make this API ?
@@ -486,7 +492,7 @@ This API is largely inspired by projects such as:
   learning modern OpenGL (aka OpenGL core), is very difficult for
   beginners.
 
-* When workign on my personal project
+* When working on my personal project
   [SimTaDyn](https://github.com/Lecrapouille/SimTaDyn) I was looking
   for an OpenGL wrapper in C++. The first need was to hide OpenGL
   boilerplate. I looked for a such kind of OpenGL library on github
@@ -498,7 +504,7 @@ This API is largely inspired by projects such as:
   rendering with almost the same number of vertices (if we except
   teslations with geometry shaders).
 
-* [GLumpy](https://github.com/glumpy/glumpy) was the OpenGL wrapper I
+* [Glumpy](https://github.com/glumpy/glumpy) was the OpenGL wrapper I
   was looking for but unfortunately it is written in Python so I had
   to make the portage into C++ and here the creation of this API !
   **Note: this is not a full-feature portage:**
@@ -506,20 +512,20 @@ This API is largely inspired by projects such as:
   language which does not offer the same flexibility than python. For
   examples: storing template classes in the same container like Numpy
   views is difficult.
-  * The second reason is that GLumpy does not use by default VAOs but
+  * The second reason is that Glumpy does not use by default VAOs but
   access to VBOs through OpenGL program attributes, which also
   perturbs me because in the case of you have several models
   (therefore several VAOs) in the scene to paint this library seems
   less well conceived to draw them but thanks to typage flexibility of
   Python, attributes of the shader can be bind to VAOs. In my API only
   VAOs have to be created and only them can be binded to GLProgram. The
-  result is equivalent to GLumpy the code is a little different.
+  result is equivalent to Glumpy the code is a little different.
   * There are also some minor changes: See this file
   [differences](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Differences.md)
   for more information. Mains changes are the begin() code which adds
   more checks. OpenGL handles type are not very consistent in the
   Core API this can makes compilation warnings. This is why IGLObject
   is a template class. I moved code from create() to setup() like for
-  VBOs this allows to remove some checks that GLumpy does. I create a
+  VBOs this allows to remove some checks that Glumpy does. I create a
   GLSampler class inheriting from GLUniform which does exist in
-  GLumpy.
+  Glumpy.
