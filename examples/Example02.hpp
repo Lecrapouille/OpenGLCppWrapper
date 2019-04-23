@@ -21,9 +21,7 @@
 #ifndef EXAMPLE02_HPP
 #  define EXAMPLE02_HPP
 
-#  include "GLImGUI.hpp"
-#  include "OpenGL.hpp"
-#  include "SceneGraph.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include "Maths.hpp"
 #  include <iostream>
 

@@ -18,45 +18,11 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_06_HPP
-#  define EXAMPLE_06_HPP
+#ifndef OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
+#  define OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Maths.hpp"
-#  include <iostream>
+#  include "GLProgram.hpp"
+#  include "GLImGUI.hpp"
+#  include "SceneGraph.hpp"
 
-using namespace glwrap;
-
-class GLExample06: public IGLWindow
-{
-public:
-
-  GLExample06()
-    : m_vao("VAO"),
-      m_prog("prog")
-  {
-  }
-
-  ~GLExample06()
-  {
-    std::cout << "Bye" << std::endl;
-  }
-
-private:
-
-  virtual void onWindowSizeChanged(const float width, const float height) override;
-  virtual bool setup() override;
-  virtual bool draw() override;
-  void buildTerrain();
-  void drawTerrain();
-
-private:
-
-  GLVertexShader      vs;
-  GLFragmentShader    fs;
-  GLVAO               m_vao;
-  GLProgram           m_prog;
-  std::vector <float> m_terrain;
-};
-
-#endif // EXAMPLE_06_HPP
+#endif // OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP

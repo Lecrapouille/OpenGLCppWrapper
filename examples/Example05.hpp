@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_05_HPP
 #  define EXAMPLE_05_HPP
 
-#  include "OpenGL.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include "Camera.hpp"
 #  include "Maths.hpp"
 #  include <iostream>

@@ -21,8 +21,7 @@
 #ifndef EXAMPLE_01_HPP
 #  define EXAMPLE_01_HPP
 
-#  include "OpenGL.hpp"
-#  include "Movable.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include "Maths.hpp"
 #  include <iostream>
 
