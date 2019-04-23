@@ -28,6 +28,9 @@
 //! in a method.
 // **************************************************************
 
+#  include <stddef.h>
+#  include <GL/glew.h>
+
 //! \brief Textures Minification Filter.
 enum class TextureMinFilter : GLenum
   {

@@ -35,6 +35,7 @@
 
 #  include "IGLObject.hpp"
 #  include <vector>
+#  include <fstream>
 
 namespace glwrap
 {

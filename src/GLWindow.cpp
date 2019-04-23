@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "GLWindow.hpp"
-#include "OpenGL.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>

@@ -429,7 +429,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Return the texture identifier.
   //----------------------------------------------------------------------------
-  inline const GLenum textureID() const
+  inline GLenum textureID() const
   {
     return m_texture_id;
   }

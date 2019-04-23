@@ -27,8 +27,7 @@
 #ifndef OPENGLCPPWRAPPER_IGLOBJECT_HPP
 #  define OPENGLCPPWRAPPER_IGLOBJECT_HPP
 
-#  include "private/NonCppStd.hpp"
-#  include "GLEnum.hpp"
+#  include "OpenGL.hpp"
 
 namespace glwrap
 {

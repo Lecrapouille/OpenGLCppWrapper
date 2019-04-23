@@ -21,26 +21,87 @@
 #ifndef OPENGLCPPWRAPPER_OPENGL_HPP
 #  define OPENGLCPPWRAPPER_OPENGL_HPP
 
-#  include <cstdint>
+// *****************************************************************************
+//! \file OpenGL routines.
+// *****************************************************************************
+
+#  include "GLEnum.hpp"
+#  include "private/NonCppStd.hpp"
+#  include "private/Exception.hpp"
+//#  include <cstdint>
 
 namespace glwrap
 {
-  //! \brief Create an OpenGL context. Call it before drawing
-  //! primitives.
 
-  //-------------------------------------------------------------
-  //! \brief Return if the OpenGL has been created or has not been
-  //! created or has failed creating.
-  //-------------------------------------------------------------
-  bool& hasCreatedContext();
+// ***********************************************************************************************
+//! \brief This macro will declare a class OpenGLException derived from Exception.
+// ***********************************************************************************************
+DECLARE_EXCEPTION(OpenGLException, Exception)
 
-  //-------------------------------------------------------------
-  //! \brief Allow to detect if the last OpenGL command succeeded or
-  //! not. In the case of failure an error is displayed and logged.
-  //-------------------------------------------------------------
-  void  checkError(const char* file, uint32_t line, const char* expression);
+//----------------------------------------------------------------------------
+//! \brief Return if the OpenGL has been created or has not been
+//! created or has failed creating.
+//!
+//! \return true if the OpenGL context has been created
+//! else return false (not yet created or failed during
+//! its creation).
+//----------------------------------------------------------------------------
+inline static bool& hasCreatedContext()
+{
+  static bool s_context_started = false;
+  return s_context_started;
+}
 
-  //! Macro encapsuling the OpenGL command and the fault checker.
+//----------------------------------------------------------------------------
+//! \brief Allow to detect if the last OpenGL command succeeded or failed.
+//! In the case of failure an error is displayed on console and/or logged.
+//!
+//! \not do not use this function directly but use the macro glCheck.
+//!
+//! \param filename the file path where the OpenGL routine was called.
+//! \param line the line where the OpenGL routine was called.
+//! \param expression the line content where the OpenGL routine was called.
+//----------------------------------------------------------------------------
+inline static void checkError(const char* filename, const uint32_t line, const char* expression)
+{
+  GLenum id;
+  const char* error;
+
+  while ((id = glGetError()) != GL_NO_ERROR)
+    {
+      switch (id)
+        {
+        case GL_INVALID_OPERATION:
+          error = "GL_INVALID_OPERATION";
+          break;
+        case GL_INVALID_ENUM:
+          error = "GL_INVALID_ENUM";
+          break;
+        case GL_INVALID_VALUE:
+          error = "GL_INVALID_VALUE";
+          break;
+        case GL_OUT_OF_MEMORY:
+          error = "GL_OUT_OF_MEMORY";
+          break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+          error = "GL_INVALID_FRAMEBUFFER_OPERATION";
+          break;
+        default:
+          error = "UNKNOWN";
+          break;
+        }
+
+      // Do not use directly LOG macros because it will catch this
+      // filename and its line instead of the faulty file/line which
+      // produced the OpenGL error.
+      errout("GLERR", filename, line, "Failed executing '%s'. Reason is '%s'",
+             expression, error);
+    }
+}
+
+//----------------------------------------------------------------------------
+//! Macro encapsuling the OpenGL command and the fault checker.
+//----------------------------------------------------------------------------
 #  ifdef CHECK_OPENGL
 #    define glCheck(expr) expr; glwrap::checkError(SHORT_FILENAME, __LINE__, #expr);
 #  else
@@ -48,21 +109,5 @@ namespace glwrap
 #  endif
 
 } // namespace glwrap
-
-#  include "GLImGUI.hpp"
-#  include "GLVAO.hpp"
-#  include "GLProgram.hpp"
-
-template<class T>
-inline void glBegin(T& obj)
-{
-  obj.begin();
-}
-
-template<class T>
-inline void glEnd(T& obj)
-{
-  obj.end();
-}
 
 #endif // OPENGLCPPWRAPPER_OPENGL_HPP

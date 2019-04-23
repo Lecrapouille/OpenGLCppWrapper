@@ -38,6 +38,12 @@ private:
 
   static constexpr size_t c_initial_position = static_cast<size_t>(-1);
 
+protected:
+
+  //! \brief Make this class abstract, but any inheriting classes will
+  //! not by default be abstract.
+  virtual ~PendingData() {};
+
 public:
 
   //! \brief Empty constructor: no pending data.
@@ -51,11 +57,6 @@ public:
   {
     clearPending(nb_elt);
   }
-
-  //! \brief Pure virtual destructor, but with a definition. The class
-  //! will be abstract, but any inheriting classes will not by default
-  //! be abstract.
-  virtual ~PendingData() = 0;
 
   //! \brief Return a boolean indicating if some elements of the block
   //! has chnaged.

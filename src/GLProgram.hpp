@@ -34,6 +34,7 @@
 
 #  include "GLShaders.hpp"
 #  include "GLLocation.hpp"
+#  include "GLVAO.hpp"
 #  include <unordered_map>
 
 namespace glwrap

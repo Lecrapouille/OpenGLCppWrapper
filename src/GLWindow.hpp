@@ -25,9 +25,8 @@
 //! \file GLWindow.hpp manages a window and its i/o for drawing OpenGL scenes.
 // *****************************************************************************
 
-#  include <GL/glew.h>
+#  include "OpenGL.hpp"
 #  include <GLFW/glfw3.h>
-#  include "GLException.hpp"
 
 namespace glwrap
 {

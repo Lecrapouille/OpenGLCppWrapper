@@ -22,6 +22,8 @@
 #  define OPENGLCPPWRAPPER_CONFIG_HPP
 
 #  include "version.h"
+#  include <string>
+#  include <cstdint>
 
 namespace glwrap
 {
