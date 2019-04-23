@@ -20,5 +20,10 @@
 
 #include "GLException.hpp"
 
+namespace glwrap
+{
+
 //! This macro will generate code for members.
 IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
+
+} // namespace glwrap

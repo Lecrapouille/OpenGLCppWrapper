@@ -18,14 +18,19 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef GL_EXCEPTION_HPP
-#define GL_EXCEPTION_HPP
+#ifndef OPENGLCPPWRAPPER_GLEXCEPTION_HPP
+#define OPENGLCPPWRAPPER_GLEXCEPTION_HPP
 
 #  include "private/Exception.hpp"
+
+namespace glwrap
+{
 
 // ***********************************************************************************************
 //! \brief This macro will declare a class OpenGLException derived from Exception.
 // ***********************************************************************************************
 DECLARE_EXCEPTION(OpenGLException, Exception)
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLEXCEPTION_HPP

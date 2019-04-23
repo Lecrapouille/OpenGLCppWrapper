@@ -18,13 +18,16 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef CONFIG_HPP_
-#  define CONFIG_HPP_
+#ifndef OPENGLCPPWRAPPER_CONFIG_HPP
+#  define OPENGLCPPWRAPPER_CONFIG_HPP
 
 #  include "version.h"
 
+namespace glwrap
+{
 namespace config
 {
+
   //! \brief
   enum Mode { Debug, Release };
 
@@ -43,6 +46,8 @@ namespace config
   //! \brief Pathes where default project resources have been installed
   //! (when called  by the shell command: sudo make install).
   static const std::string data_path(PROJECT_DATA_PATH);
-}
 
-#endif /* CONFIG_HPP_ */
+} // namespace config
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_CONFIG_HPP

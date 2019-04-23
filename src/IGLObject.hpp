@@ -24,11 +24,14 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef IGLOBJECT_HPP
-#  define IGLOBJECT_HPP
+#ifndef OPENGLCPPWRAPPER_IGLOBJECT_HPP
+#  define OPENGLCPPWRAPPER_IGLOBJECT_HPP
 
 #  include "private/NonCppStd.hpp"
 #  include "GLEnum.hpp"
+
+namespace glwrap
+{
 
 // *****************************************************************************
 //! \class IGLObject IGLObject.hpp
@@ -168,7 +171,7 @@ public:
   //----------------------------------------------------------------------------
   void begin()
   {
-    /* FIXME if (unlikely(!opengl::hasCreatedContext()))
+    /* FIXME if (unlikely(!hasCreatedContext()))
        {
        DEBUG("O::begin perdu");
        return ;
@@ -203,7 +206,7 @@ public:
   //----------------------------------------------------------------------------
   inline void end()
   {
-    /*if (unlikely(!opengl::hasCreatedContext()))
+    /*if (unlikely(!hasCreatedContext()))
       return ;*/
 
     deactivate();
@@ -217,7 +220,7 @@ public:
   //----------------------------------------------------------------------------
   virtual void destroy()
   {
-    if (opengl::hasCreatedContext())
+    if (hasCreatedContext())
       {
         if (isValid())
           {
@@ -350,4 +353,6 @@ inline GLenum IGLObject<GLenum>::initialHandleValue() const { return 0u; }
 template<>
 inline GLint IGLObject<GLint>::initialHandleValue() const { return -1; }
 
-#endif /* IGLOBJECT_HPP */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_IGLOBJECT_HPP

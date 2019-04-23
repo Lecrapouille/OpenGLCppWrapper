@@ -24,11 +24,14 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLVERTEX_BUFFER_HPP
-#  define GLVERTEX_BUFFER_HPP
+#ifndef OPENGLCPPWRAPPER_GLVERTEX_BUFFER_HPP
+#  define OPENGLCPPWRAPPER_GLVERTEX_BUFFER_HPP
 
 #  include "IGLObject.hpp"
 #  include "PendingContainer.hpp"
+
+namespace glwrap
+{
 
 // **************************************************************
 //! \brief Buffer objects are OpenGL objects that store an array of
@@ -222,4 +225,6 @@ inline GLenum GLIndexBuffer<uint16_t>::type() const { return GL_UNSIGNED_SHORT; 
 template<>
 inline GLenum GLIndexBuffer<uint8_t>::type() const { return GL_UNSIGNED_BYTE; }
 
-#endif /* GLVERTEX_BUFFER_HPP */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLVERTEX_BUFFER_HPP

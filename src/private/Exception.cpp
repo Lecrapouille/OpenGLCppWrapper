@@ -9,6 +9,9 @@
 
 #include "Exception.hpp"
 
+namespace glwrap
+{
+
 Exception::Exception(int code)
   : m_pNested(0), m_code(code)
 {
@@ -117,3 +120,5 @@ void Exception::rethrow() const
 {
   throw *this;
 }
+
+} // namespace glwrap

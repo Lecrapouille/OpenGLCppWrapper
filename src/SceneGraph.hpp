@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SCENEGRAPH_HPP
-#  define SCENEGRAPH_HPP
+#ifndef OPENGLCPPWRAPPER_SCENEGRAPH_HPP
+#  define OPENGLCPPWRAPPER_SCENEGRAPH_HPP
 
 // The code source of this file has been inspired by the following document
 // New Castle University, Tutorial 6: Scene Graphs
@@ -28,6 +28,9 @@
 #  include "Movable.hpp"
 #  include <memory>
 #  include <vector>
+
+namespace glwrap
+{
 
 template <typename R, typename T, size_t D>
 class ISceneGraphRenderer
@@ -460,4 +463,6 @@ private:
   NodePtr m_root = nullptr;
 };
 
-#endif /* SCENEGRAPH_HPP */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_SCENEGRAPH_HPP

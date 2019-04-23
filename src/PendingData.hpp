@@ -18,10 +18,13 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef PENDINGDATA_HPP_
-#  define PENDINGDATA_HPP_
+#ifndef OPENGLCPPWRAPPER_PENDINGDATA_HPP
+#  define OPENGLCPPWRAPPER_PENDINGDATA_HPP
 
 #  include "private/NonCppStd.hpp"
+
+namespace glwrap
+{
 
 // **************************************************************
 //! \brief Define an interface class keeping track of the smallest
@@ -141,4 +144,6 @@ protected:
   size_t m_pending_start, m_pending_end;
 };
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_PENDINGDATA_HPP

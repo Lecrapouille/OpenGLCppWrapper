@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef MATRIX_HPP
-#  define MATRIX_HPP
+#ifndef OPENGLCPPWRAPPER_MATRIX_HPP
+#  define OPENGLCPPWRAPPER_MATRIX_HPP
 
 // *************************************************************************************************
 // Inspired by https://github.com/Reedbeta/reed-util and its
@@ -28,11 +28,15 @@
 
 #  include "Vector.hpp"
 
+namespace glwrap
+{
 namespace matrix
 {
+
   //! \brief Enum for constructing different kind of matrices.
   enum MatrixType { Identity };
-}
+
+} // namespace matrix
 
 
 template <typename T, size_t rows, size_t cols>
@@ -660,4 +664,6 @@ inline std::ostream& operator<<(std::ostream& os, Matrix<T, rows, cols> const& m
 #  undef DEFINE_INPLACE_OPERATORS
 #  undef DEFINE_RELATIONAL_OPERATORS
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_MATRIX_HPP

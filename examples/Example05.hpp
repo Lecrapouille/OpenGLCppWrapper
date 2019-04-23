@@ -26,6 +26,8 @@
 #  include "Maths.hpp"
 #  include <iostream>
 
+using namespace glwrap;
+
 class GLExample05: public IGLWindow
 {
 public:

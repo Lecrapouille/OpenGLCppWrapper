@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef GLENUM_HPP
-#  define GLENUM_HPP
+#ifndef OPENGLCPPWRAPPER_GLENUM_HPP
+#  define OPENGLCPPWRAPPER_GLENUM_HPP
 
 // **************************************************************
 //! \file GLEnum.hpp defines OpenGL constants used in public API
@@ -123,4 +123,4 @@ enum class Primitive : GLenum
     /* 0x000E */ PATCHES = GL_PATCHES,
   };
 
-#endif
+#endif // OPENGLCPPWRAPPER_GLENUM_HPP

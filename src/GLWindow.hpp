@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef GLWINDOW_HPP
-#  define GLWINDOW_HPP
+#ifndef OPENGLCPPWRAPPER_GLWINDOW_HPP
+#  define OPENGLCPPWRAPPER_GLWINDOW_HPP
 
 // *****************************************************************************
 //! \file GLWindow.hpp manages a window and its i/o for drawing OpenGL scenes.
@@ -28,6 +28,9 @@
 #  include <GL/glew.h>
 #  include <GLFW/glfw3.h>
 #  include "GLException.hpp"
+
+namespace glwrap
+{
 
 // *****************************************************************************
 //! \class GLWindow GLWindow.hpp
@@ -177,4 +180,6 @@ private:
   GLFWwindow *m_window = nullptr;
 };
 
-#endif /* GLWINDOW_HPP_ */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLWINDOW_HPP

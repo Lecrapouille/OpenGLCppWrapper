@@ -18,12 +18,12 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGL_HPP
-#  define OPENGL_HPP
+#ifndef OPENGLCPPWRAPPER_OPENGL_HPP
+#  define OPENGLCPPWRAPPER_OPENGL_HPP
 
 #  include <cstdint>
 
-namespace opengl
+namespace glwrap
 {
   //! \brief Create an OpenGL context. Call it before drawing
   //! primitives.
@@ -42,12 +42,12 @@ namespace opengl
 
   //! Macro encapsuling the OpenGL command and the fault checker.
 #  ifdef CHECK_OPENGL
-#    define glCheck(expr) expr; opengl::checkError(SHORT_FILENAME, __LINE__, #expr);
+#    define glCheck(expr) expr; glwrap::checkError(SHORT_FILENAME, __LINE__, #expr);
 #  else
 #    define glCheck(expr) expr;
 #  endif
 
-} // namespace opengl
+} // namespace glwrap
 
 #  include "GLImGUI.hpp"
 #  include "GLVAO.hpp"
@@ -65,4 +65,4 @@ inline void glEnd(T& obj)
   obj.end();
 }
 
-#endif
+#endif // OPENGLCPPWRAPPER_OPENGL_HPP

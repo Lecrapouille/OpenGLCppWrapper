@@ -24,8 +24,8 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLLOCATION_HPP
-#define GLLOCATION_HPP
+#ifndef OPENGLCPPWRAPPER_GLLOCATION_HPP
+#define OPENGLCPPWRAPPER_GLLOCATION_HPP
 
 // *****************************************************************************
 //! \file GLLocation.hpp manages shader variables (Uniforms, Samplers
@@ -34,6 +34,9 @@
 
 #  include "IGLObject.hpp"
 #  include "Matrix.hpp"
+
+namespace glwrap
+{
 
 // *****************************************************************************
 //! \brief GLLocation makes the interface between a shader variable and your
@@ -517,4 +520,6 @@ public:
   {}
 };
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLLOCATION_HPP

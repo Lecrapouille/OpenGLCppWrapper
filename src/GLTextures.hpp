@@ -24,8 +24,8 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLTEXTURES_HPP
-#  define GLTEXTURES_HPP
+#ifndef OPENGLCPPWRAPPER_GLTEXTURES_HPP
+#  define OPENGLCPPWRAPPER_GLTEXTURES_HPP
 
 // *****************************************************************************
 //! \file GLTextures.hpp
@@ -36,6 +36,9 @@
 #  include "SOIL/SOIL.h"
 #  include <array>
 #  include <vector>
+
+namespace glwrap
+{
 
 // *****************************************************************************
 //! \brief Default options for textures when setup.
@@ -902,4 +905,6 @@ protected:
   std::vector<unsigned char> m_data3d;
 };
 
-#endif /* GLTEXTURES_HPP */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLTEXTURES_HPP

@@ -1,9 +1,12 @@
-#ifndef DEBUG_HPP
-#  define DEBUG_HPP
+#ifndef OPENGLCPPWRAPPER_DEBUG_HPP
+#  define OPENGLCPPWRAPPER_DEBUG_HPP
 
 #  include <stdio.h>
 #  include <stdarg.h>
 #  include <stdlib.h>
+
+namespace glwrap
+{
 
 #  define SHORT_FILENAME file_name(__FILE__).c_str()
 
@@ -36,4 +39,6 @@ inline void errout(const char* type, const char* file, const int line, const cha
 #    define ERROR(format, ...)
 #  endif
 
-#endif /* DEBUG_HPP */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_DEBUG_HPP

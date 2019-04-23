@@ -24,8 +24,8 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLSHADER_HPP
-#  define GLSHADER_HPP
+#ifndef OPENGLCPPWRAPPER_GLSHADER_HPP
+#  define OPENGLCPPWRAPPER_GLSHADER_HPP
 
 // *****************************************************************************
 //! \file GLShaders.hpp holds the GLSL shader code, offers some macros
@@ -35,6 +35,9 @@
 
 #  include "IGLObject.hpp"
 #  include <vector>
+
+namespace glwrap
+{
 
 // *****************************************************************************
 //! \class GLShader GLShaders.hpp
@@ -399,4 +402,6 @@ private:
   }
 };
 
-#endif /* GLSHADER_HPP */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLSHADER_HPP

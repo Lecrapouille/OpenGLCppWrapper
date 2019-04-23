@@ -20,8 +20,9 @@
 
 #include "OpenGL.hpp"
 
-namespace opengl
+namespace glwrap
 {
+
   //-------------------------------------------------------------
   //! \return true if the OpenGL context has been created
   //! else return false (not yet created or failed during
@@ -74,4 +75,5 @@ namespace opengl
                expression, error);
       }
   }
-} // namespace
+
+} // namespace glwrap

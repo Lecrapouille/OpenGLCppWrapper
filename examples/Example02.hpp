@@ -27,6 +27,8 @@
 #  include "Maths.hpp"
 #  include <iostream>
 
+using namespace glwrap;
+
 //------------------------------------------------------------------
 //! \brief Define a 3D SceneGraph node (matrix 4x4 of float + VAO)
 //------------------------------------------------------------------

@@ -1,5 +1,5 @@
-#ifndef NONCPPSTD_HPP
-#  define NONCPPSTD_HPP
+#ifndef OPENGLCPPWRAPPER_NONCPPSTD_HPP
+#  define OPENGLCPPWRAPPER_NONCPPSTD_HPP
 
 #  include <cstddef>
 #  include <memory>
@@ -59,6 +59,9 @@ namespace std
 #    define unlikely(x)     __builtin_expect(!!(x),0)
 # endif
 
+namespace glwrap
+{
+
 //------------------------------------------------------------------
 //! \brief give the file name with its extension from a given path
 //------------------------------------------------------------------
@@ -70,6 +73,8 @@ inline static std::string file_name(std::string const& path)
   return path;
 }
 
+} // namespace glwrap
+
 #  include "Verbose.h"
 
-#endif
+#endif // OPENGLCPPWRAPPER_NONCPPSTD_HPP

@@ -24,8 +24,8 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GL_VERTEX_ARRAY_HPP
-#  define GL_VERTEX_ARRAY_HPP
+#ifndef OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
+#  define OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
 
 // *****************************************************************************
 //! \file GLVAO.hpp handles the OpenGL representation of 3D models.
@@ -36,6 +36,9 @@
 #  include "GLTextures.hpp"
 #  include <unordered_map>
 #  include <vector>
+
+namespace glwrap
+{
 
 // *****************************************************************************
 //! \class GLVAO GLVAO.hpp
@@ -452,4 +455,6 @@ private:
   GLenum prog = 0;
 };
 
-#endif /* GL_VERTEX_ARRAY_HPP */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP

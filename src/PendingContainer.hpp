@@ -18,14 +18,17 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef PENDING_CONTAINER_HPP
-#  define PENDING_CONTAINER_HPP
+#ifndef OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP
+#  define OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP
 
 #  include "PendingData.hpp"
 #  include <vector>
 #  include <algorithm>
 #  include <cmath>
 #  include <fstream>
+
+namespace glwrap
+{
 
 // **************************************************************
 //! \brief PendingContainer is a std::valarray memorizing elements
@@ -282,4 +285,6 @@ protected:
   std::vector<T> m_container;
 };
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP

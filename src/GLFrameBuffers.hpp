@@ -24,10 +24,13 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLFRAMEBUFFERS_HPP
-#define GLFRAMEBUFFERS_HPP
+#ifndef OPENGLCPPWRAPPER_GLFRAMEBUFFERS_HPP
+#define OPENGLCPPWRAPPER_GLFRAMEBUFFERS_HPP
 
 #  include "IGLObject.hpp"
+
+namespace glwrap
+{
 
 // **************************************************************
 //
@@ -372,4 +375,6 @@ private:
   bool                         m_need_attach;
 };
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLFRAMEBUFFERS_HPP

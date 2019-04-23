@@ -20,4 +20,9 @@
 
 #include "PendingData.hpp"
 
+namespace glwrap
+{
+
 PendingData::~PendingData() { }
+
+} // namespace glwrap

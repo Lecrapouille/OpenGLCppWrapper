@@ -24,8 +24,8 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLPROGRAM_HPP
-#  define GLPROGRAM_HPP
+#ifndef OPENGLCPPWRAPPER_GLPROGRAM_HPP
+#  define OPENGLCPPWRAPPER_GLPROGRAM_HPP
 
 // *****************************************************************************
 //! \file GLProgram.hpp manages a list of shaders and lists of shader
@@ -35,6 +35,9 @@
 #  include "GLShaders.hpp"
 #  include "GLLocation.hpp"
 #  include <unordered_map>
+
+namespace glwrap
+{
 
 // TODO: verifier les GLVariables non init dans le GPU
 
@@ -1222,4 +1225,6 @@ private:
 //! \see GLVertexShader, GLFragmentShader, GLVAO.
 //----------------------------------------------------------------------------
 
-#endif /* GLPROGRAM_HPP */
+} // namespace glwrap
+
+#endif /* OPENGLCPPWRAPPER_GLPROGRAM_HPP */
