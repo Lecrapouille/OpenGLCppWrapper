@@ -136,13 +136,6 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Destroy the OpenGL Attribute. This is a dummy method. No
-  //! action is made.
-  //----------------------------------------------------------------------------
-  virtual void release() override
-  {}
-
-  //----------------------------------------------------------------------------
   //! \brief Bind the OpenGL Attribute.
   //----------------------------------------------------------------------------
   virtual void activate() override
@@ -155,15 +148,6 @@ private:
                                   GL_FALSE,
                                   m_stride,
                                   (const GLvoid*) m_offset));
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Unbind the OpenGL Attribute.
-  //----------------------------------------------------------------------------
-  virtual void deactivate() override
-  {
-    DEBUG("Attrib '%s' deactivate", cname());
-    glCheck(glDisableVertexAttribArray(m_index));
   }
 
   //----------------------------------------------------------------------------
@@ -182,6 +166,22 @@ private:
   {
     return false;
   }
+
+  //----------------------------------------------------------------------------
+  //! \brief Unbind the OpenGL Attribute.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() override
+  {
+    DEBUG("Attrib '%s' deactivate", cname());
+    glCheck(glDisableVertexAttribArray(m_index));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Destroy the OpenGL Attribute. This is a dummy method. No
+  //! action is made.
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {}
 
 private:
 
@@ -234,27 +234,11 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Destroy the OpenGL Uniform. This is a dummy method. No
-  //! action is made.
-  //----------------------------------------------------------------------------
-  virtual void release() override
-  {}
-
-  //----------------------------------------------------------------------------
   //! \brief Bind the OpenGL Uniform. This is a dummy method. No
   //! action is made.
   //----------------------------------------------------------------------------
   virtual void activate() override
   {}
-
-  //----------------------------------------------------------------------------
-  //! \brief Unbind the OpenGL Uniform. This is a dummy method. No
-  //! action is made.
-  //----------------------------------------------------------------------------
-  virtual void deactivate() override
-  {
-    DEBUG("Uniform '%s' deactivate", cname());
-  }
 
   //----------------------------------------------------------------------------
   //! \brief Setup the behavior of the instance. This is a dummy
@@ -272,6 +256,22 @@ private:
   {
     return false;
   }
+
+  //----------------------------------------------------------------------------
+  //! \brief Unbind the OpenGL Uniform. This is a dummy method. No
+  //! action is made.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() override
+  {
+    DEBUG("Uniform '%s' deactivate", cname());
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Destroy the OpenGL Uniform. This is a dummy method. No
+  //! action is made.
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {}
 };
 
 // *****************************************************************************

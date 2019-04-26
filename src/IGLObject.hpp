@@ -289,15 +289,6 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Pure virtual. Configure the object behvior on the GPU.
-  //!
-  //! \return false if the object has been setup by the GPU and does
-  //! not be setup again. Return true if the GPU failed to setup
-  //! the object and setup() needs to be called again.
-  //----------------------------------------------------------------------------
-  virtual bool setup() = 0;
-
-  //----------------------------------------------------------------------------
   //! \brief Pure virtual. Allocate resources on the GPU.
   //!
   //! \return false if the object has been created by the GPU and does
@@ -312,14 +303,13 @@ private:
   virtual void activate() = 0;
 
   //----------------------------------------------------------------------------
-  //! \brief Pure virtual. Deactivate the object on the GPU.
+  //! \brief Pure virtual. Configure the object behvior on the GPU.
+  //!
+  //! \return false if the object has been setup by the GPU and does
+  //! not be setup again. Return true if the GPU failed to setup
+  //! the object and setup() needs to be called again.
   //----------------------------------------------------------------------------
-  virtual void deactivate() = 0;
-
-  //----------------------------------------------------------------------------
-  //! \brief Pure virtual. Delete the object from GPU memory.
-  //----------------------------------------------------------------------------
-  virtual void release() = 0;
+  virtual bool setup() = 0;
 
   //----------------------------------------------------------------------------
   //! \brief Pure virtual. Update the object on the GPU.
@@ -329,6 +319,16 @@ private:
   //! to be transferred again.
   //----------------------------------------------------------------------------
   virtual bool update() = 0;
+
+  //----------------------------------------------------------------------------
+  //! \brief Pure virtual. Deactivate the object on the GPU.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() = 0;
+
+  //----------------------------------------------------------------------------
+  //! \brief Pure virtual. Delete the object from GPU memory.
+  //----------------------------------------------------------------------------
+  virtual void release() = 0;
 
 private:
 

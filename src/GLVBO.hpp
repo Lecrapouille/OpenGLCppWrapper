@@ -83,22 +83,10 @@ private:
     return false;
   }
 
-  virtual void release() override
-  {
-    DEBUG("VBO '%s' release", cname());
-    glCheck(glDeleteBuffers(1, &m_handle));
-  }
-
   virtual void activate() override
   {
     DEBUG("VBO '%s' activate", cname());
     glCheck(glBindBuffer(m_target, m_handle));
-  }
-
-  virtual void deactivate() override
-  {
-    DEBUG("VBO '%s' deactivate", cname());
-    glCheck(glBindBuffer(m_target, 0));
   }
 
   virtual bool setup() override
@@ -131,6 +119,18 @@ private:
                             static_cast<GLsizeiptr>(nbytes),
                             PendingContainer<T>::to_array()));
     return false;
+  }
+
+  virtual void deactivate() override
+  {
+    DEBUG("VBO '%s' deactivate", cname());
+    glCheck(glBindBuffer(m_target, 0));
+  }
+
+  virtual void release() override
+  {
+    DEBUG("VBO '%s' release", cname());
+    glCheck(glDeleteBuffers(1, &m_handle));
   }
 
 private:

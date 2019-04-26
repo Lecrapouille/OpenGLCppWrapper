@@ -257,14 +257,6 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Destroy the OpenGL Texture.
-  //----------------------------------------------------------------------------
-  virtual void release() override
-  {
-    glCheck(glDeleteTextures(1U, &m_handle));
-  }
-
-  //----------------------------------------------------------------------------
   //! \brief Bind the Texture to OpenGL.
   //----------------------------------------------------------------------------
   virtual void activate() override
@@ -278,6 +270,14 @@ private:
   virtual void deactivate() override
   {
     glCheck(glBindTexture(m_target, 0U));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Destroy the OpenGL Texture.
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {
+    glCheck(glDeleteTextures(1U, &m_handle));
   }
 
 protected:

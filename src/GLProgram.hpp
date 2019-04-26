@@ -817,14 +817,47 @@ private:
   }
 
   //----------------------------------------------------------------------------
+  //! \brief Activate in OpenGL the program, its attributes, its uniforms and
+  //! samplers. A VAO shall be binded else nothing is made.
+  //----------------------------------------------------------------------------
+  virtual void activate() override
+  {
+    DEBUG("Prog '%s' activate", cname());
+
+    if (unlikely(!compiled()))
+      return ;
+    if (unlikely(!binded()))
+      return ;
+
+    glCheck(glUseProgram(m_handle));
+    m_vao->begin();
+    for (auto& it: m_attributes)
+      {
+        m_vao->m_vbos[it.first]->begin();
+        it.second->begin();
+      }
+    for (auto& it: m_uniforms)
+      {
+        it.second->begin();
+      }
+    for (auto& it: m_samplers)
+      {
+        // Important: activate the texture unit first before binding
+        // texture.
+        it.second->begin();
+        m_vao->m_textures[it.first]->begin();
+      }
+  }
+
+  //----------------------------------------------------------------------------
   //! \brief Compile and link shaders attached to this GLProgram.
   //!
   //! \return false is compilation succeeded (indicating setup has not to be
   //! redone). Return true if an error occurred (errors in the code source of
   //! shaders).
   //!
-  //! \note Contrary to VBO, GLProgram has to perform its setup() before
-  //! calling activate()
+  //! \note Contrary to other IGLObject, GLProgram has to perform its
+  //! setup() before calling activate().
   //----------------------------------------------------------------------------
   virtual bool setup() override
   {
@@ -872,39 +905,6 @@ private:
       }
 
     return !m_compiled;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Activate in OpenGL the program, its attributes, its uniforms and
-  //! samplers. A VAO shall be binded else nothing is made.
-  //----------------------------------------------------------------------------
-  virtual void activate() override
-  {
-    DEBUG("Prog '%s' activate", cname());
-
-    if (unlikely(!compiled()))
-      return ;
-    if (unlikely(!binded()))
-      return ;
-
-    glCheck(glUseProgram(m_handle));
-    m_vao->begin();
-    for (auto& it: m_attributes)
-      {
-        m_vao->m_vbos[it.first]->begin();
-        it.second->begin();
-      }
-    for (auto& it: m_uniforms)
-      {
-        it.second->begin();
-      }
-    for (auto& it: m_samplers)
-      {
-        // Important: activate the texture unit first before binding
-        // texture.
-        it.second->begin();
-        m_vao->m_textures[it.first]->begin();
-      }
   }
 
   //----------------------------------------------------------------------------

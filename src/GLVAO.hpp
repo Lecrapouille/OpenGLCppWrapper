@@ -397,30 +397,12 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Destroy the OpenGL VAO.
-  //----------------------------------------------------------------------------
-  virtual void release() override
-  {
-    DEBUG("VAO '%s' release", cname());
-    glCheck(glDeleteVertexArrays(1, &m_handle));
-  }
-
-  //----------------------------------------------------------------------------
   //! \brief Bind the VAO to OpenGL.
   //----------------------------------------------------------------------------
   virtual void activate() override
   {
     DEBUG("VAO '%s' activate", cname());
     glCheck(glBindVertexArray(m_handle));
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Unbind the VAO from OpenGL.
-  //----------------------------------------------------------------------------
-  virtual void deactivate() override
-  {
-    DEBUG("VAO '%s' deactivate", cname());
-    glCheck(glBindVertexArray(0U));
   }
 
   //----------------------------------------------------------------------------
@@ -437,6 +419,24 @@ private:
   virtual bool update() override
   {
     return false;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Unbind the VAO from OpenGL.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() override
+  {
+    DEBUG("VAO '%s' deactivate", cname());
+    glCheck(glBindVertexArray(0U));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Destroy the OpenGL VAO.
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {
+    DEBUG("VAO '%s' release", cname());
+    glCheck(glDeleteVertexArrays(1, &m_handle));
   }
 
   //Callable by GLProgram

@@ -227,27 +227,10 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief The shader is released from the GPU.
-  //----------------------------------------------------------------------------
-  virtual void release() override
-  {
-    DEBUG("Shader '%s' release", cname());
-    glCheck(glDeleteShader(m_handle));
-  }
-
-  //----------------------------------------------------------------------------
   //! \brief Dummy method.
   //----------------------------------------------------------------------------
   virtual void activate() override
-  {
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Dummy method.
-  //----------------------------------------------------------------------------
-  virtual void deactivate() override
-  {
-  }
+  {}
 
   //----------------------------------------------------------------------------
   //! \brief Compile the shader code in the GPU.
@@ -282,6 +265,25 @@ private:
     return false;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Dummy method.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() override
+  {}
+
+  //----------------------------------------------------------------------------
+  //! \brief The shader is released from the GPU.
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {
+    DEBUG("Shader '%s' release", cname());
+    glCheck(glDeleteShader(m_handle));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Check if a shader script has been loaded.
+  //! \return false if no shader script is present.
+  //----------------------------------------------------------------------------
   inline bool loaded() const
   {
     return !m_shader_code.empty();
