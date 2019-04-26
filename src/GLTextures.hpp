@@ -49,6 +49,7 @@ struct TextureOptions
   TextureMagFilter magFilter = TextureMagFilter::LINEAR;
   TextureWrap wrapS = TextureWrap::REPEAT;
   TextureWrap wrapT = TextureWrap::REPEAT;
+  TextureWrap wrapR = TextureWrap::REPEAT;
   PixelFormat cpuPixelFormat = PixelFormat::RGBA;
   PixelFormat gpuPixelFormat = PixelFormat::RGBA;
   PixelType pixelType = PixelType::UNSIGNED_BYTE;
@@ -126,31 +127,51 @@ public:
 
   //----------------------------------------------------------------------------
   //! \brief Change minifier and magnifier options.
+  //! \return the reference of this instence.
   //----------------------------------------------------------------------------
-  void interpolation(TextureMinFilter const min_filter,
-                     TextureMagFilter const mag_filter)
+  IGLTexture& interpolation(TextureMinFilter const min_filter,
+                            TextureMagFilter const mag_filter)
   {
     m_options.minFilter = min_filter;
     m_options.magFilter = mag_filter;
     redoSetup();
+    return *this;
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Change wrapping options.
+  //! \brief Change wrapping options for S, T and R.
+  //! \return the reference of this instence.
   //----------------------------------------------------------------------------
-  void wrapping(TextureWrap const wrap)
+  IGLTexture& wrap(TextureWrap const wrap)
   {
     m_options.wrapS = wrap;
     m_options.wrapT = wrap;
+    m_options.wrapR = wrap;
     redoSetup();
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Change wrapping options for S, T and R.
+  //! \return the reference of this instence.
+  //----------------------------------------------------------------------------
+  IGLTexture& wrapSTR(TextureWrap const wrapS, TextureWrap const wrapT, TextureWrap const wrapR)
+  {
+    m_options.wrapS = wrapS;
+    m_options.wrapT = wrapT;
+    m_options.wrapR = wrapR;
+    redoSetup();
+    return *this;
   }
 
   //----------------------------------------------------------------------------
   //! \brief Replace current texture settings by a new one.
+  //! \return the reference of this instence.
   //----------------------------------------------------------------------------
-  void options(TextureOptions const& options)
+  IGLTexture& options(TextureOptions const& options)
   {
     m_options = options;
+    return *this;
   }
 
   //----------------------------------------------------------------------------
@@ -207,7 +228,12 @@ protected:
                             static_cast<GLint>(m_options.wrapS)));
     glCheck(glTexParameteri(m_target, GL_TEXTURE_WRAP_T,
                             static_cast<GLint>(m_options.wrapT)));
-    glCheck(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+    glCheck(glTexParameteri(m_target, GL_TEXTURE_WRAP_R,
+                            static_cast<GLint>(m_options.wrapR)));
+
+    //TODO
+    //GLfloat borderColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f};
+    //glCheck(glTexParameterfv(m_target, GL_TEXTURE_BORDER_COLOR, borderColor));
   }
 
 private:
@@ -327,9 +353,9 @@ public:
   //!
   //! \return true if texture data have been loaded.
   //----------------------------------------------------------------------------
-  inline bool load(std::string const& filename, const bool rename = false)
+  inline bool load(std::string const& filename)
   {
-    return load(filename.c_str(), rename);
+    return load(filename.c_str());
   }
 
   //----------------------------------------------------------------------------
@@ -342,7 +368,7 @@ public:
   //!
   //! \return true if texture data have been loaded.
   //----------------------------------------------------------------------------
-  bool load(const char *const filename, const bool rename = false)
+  bool load(const char *const filename)
   {
     int width, height;
 
@@ -365,13 +391,6 @@ public:
     // Set the whole texture data to "dirty" forcing its upload to the
     // GPU. Unit is pixel (not byte).
     PendingData::tagAsPending(0_z, m_width * m_height);
-
-    // Rename the instance ?
-    if (rename || name().empty())
-      {
-        name() = filename;
-        DEBUG("Renaming texture '%s'", filename);
-      }
 
     DEBUG("Successfuly load picture file '%s'", filename);
     return true;
@@ -421,12 +440,12 @@ private:
   //----------------------------------------------------------------------------
   virtual bool setup() override
   {
-    DEBUG("Texture '%s' setup", name().c_str());
+    DEBUG("Texture '%s' setup", cname());
 
     // Note: m_buffer can nullptr
     if (unlikely(!loaded()))
       {
-        ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", name().c_str());
+        ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", cname());
         return true;
       }
 
@@ -440,7 +459,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool update() override
   {
-    DEBUG("Texture '%s' update", name().c_str());
+    DEBUG("Texture '%s' update", cname());
     size_t pos_start;
     size_t pos_end;
     PendingData::getPendingData(pos_start, pos_end);
@@ -532,7 +551,7 @@ public:
   {
     if (unlikely(!loaded()))
       {
-        ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", name().c_str());
+        ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", cname());
         return true;
       }
 
@@ -552,7 +571,7 @@ public:
   //----------------------------------------------------------------------------
   virtual bool update() override
   {
-    DEBUG("Texture '%s' update", name().c_str());
+    DEBUG("Texture '%s' update", cname());
     size_t pos_start;
     size_t pos_end;
     PendingData::getPendingData(pos_start, pos_end);
@@ -653,7 +672,7 @@ public:
   bool load(CubeMap const target, const char *const filename)
   {
     const int index = static_cast<int>(target) - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-    return m_textures[index]->load(filename, false);
+    return m_textures[index]->load(filename);
   }
 
 private:
@@ -667,7 +686,7 @@ private:
     m_depth = computeDepth();
     if (6u != m_depth)
       {
-        ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", name().c_str());
+        ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", cname());
         return true;
       }
 
@@ -821,6 +840,7 @@ public:
           }
 
         // Pack Texture2D subsequently into a large 3D buffer
+        // FIXME: 4 because of SOIL_LOAD_RGBA
         m_data3d.insert(m_data3d.end(), image, image + width * height * 4 * sizeof(unsigned char));
         SOIL_free_image_data(image);
         prevWidth = width;
@@ -867,20 +887,17 @@ private:
   //----------------------------------------------------------------------------
   virtual bool setup() override
   {
-    DEBUG("Texture '%s' setup", name().c_str());
+    DEBUG("Texture '%s' setup", cname());
 
     // Note: m_buffer can nullptr
     if (unlikely(!loaded()))
       {
-        ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", name().c_str());
+        ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", cname());
         return true;
       }
 
     // Data is aligned in byte order
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    // Texture colors should replace the original color values
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); //GL_MODULATE
+    glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 
     applyTextureParam();
     specifyTexture3D();
@@ -894,7 +911,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool update() override
   {
-    DEBUG("Texture '%s' update", name().c_str());
+    DEBUG("Texture '%s' update", cname());
     return false;
   };
 

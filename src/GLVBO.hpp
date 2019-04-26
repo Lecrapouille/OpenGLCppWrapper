@@ -78,32 +78,32 @@ private:
 
   virtual bool create() override
   {
-    DEBUG("VBO '%s' create", name().c_str());
+    DEBUG("VBO '%s' create", cname());
     glCheck(glGenBuffers(1, &m_handle));
     return false;
   }
 
   virtual void release() override
   {
-    DEBUG("VBO '%s' release", name().c_str());
+    DEBUG("VBO '%s' release", cname());
     glCheck(glDeleteBuffers(1, &m_handle));
   }
 
   virtual void activate() override
   {
-    DEBUG("VBO '%s' activate", name().c_str());
+    DEBUG("VBO '%s' activate", cname());
     glCheck(glBindBuffer(m_target, m_handle));
   }
 
   virtual void deactivate() override
   {
-    DEBUG("VBO '%s' deactivate", name().c_str());
+    DEBUG("VBO '%s' deactivate", cname());
     glCheck(glBindBuffer(m_target, 0));
   }
 
   virtual bool setup() override
   {
-    DEBUG("VBO '%s' setup", name().c_str());
+    DEBUG("VBO '%s' setup", cname());
     const GLsizeiptr bytes = static_cast<GLsizeiptr>
       (PendingContainer<T>::capacity() * sizeof (T));
     glCheck(glBufferData(m_target, bytes, NULL, m_usage));
@@ -122,7 +122,7 @@ private:
     PendingContainer<T>::getPendingData(pos_start, pos_end);
     PendingContainer<T>::clearPending();
     DEBUG("VBO '%s' update %zu -> %zu",
-         name().c_str(), pos_start, pos_end);
+         cname(), pos_start, pos_end);
 
     size_t offset = sizeof (T) * pos_start;
     size_t nbytes = sizeof (T) * (pos_end - pos_start + 1_z);

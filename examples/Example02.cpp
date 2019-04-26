@@ -275,7 +275,7 @@ bool GLExample02::CreateCube()
 
   // Create the texture
   m_cube->texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_cube->texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  m_cube->texture2D("texID").wrap(TextureWrap::CLAMP_TO_EDGE);
   if (false == m_cube->texture2D("texID").load("textures/wooden-crate.jpg"))
     return false;
 

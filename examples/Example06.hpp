@@ -34,8 +34,7 @@ public:
   GLExample06()
     : m_vao("VAO"),
       m_prog("prog")
-  {
-  }
+  {}
 
   ~GLExample06()
   {
@@ -47,8 +46,8 @@ private:
   virtual void onWindowSizeChanged(const float width, const float height) override;
   virtual bool setup() override;
   virtual bool draw() override;
-  void buildTerrain();
-  void drawTerrain();
+  void buildTerrain(const int dim);
+  void drawTerrain(const int dim);
 
 private:
 
@@ -56,7 +55,8 @@ private:
   GLFragmentShader    fs;
   GLVAO               m_vao;
   GLProgram           m_prog;
-  std::vector <float> m_terrain;
+  std::vector<float>  m_terrain; // Store heights of the terrain
+  int                 m_nbVertices = 0;
 };
 
 #endif // EXAMPLE_06_HPP

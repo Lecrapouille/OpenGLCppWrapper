@@ -338,7 +338,7 @@ public:
         if (size != it.second->size())
           {
             ERROR("VAO %s does not have all of its VBOs with the same size",
-                  name().c_str());
+                  cname());
             return false;
           }
       }
@@ -391,7 +391,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool create() override
   {
-    DEBUG("VAO '%s' create", name().c_str());
+    DEBUG("VAO '%s' create", cname());
     glCheck(glGenVertexArrays(1, &m_handle));
     return false;
   }
@@ -401,7 +401,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void release() override
   {
-    DEBUG("VAO '%s' release", name().c_str());
+    DEBUG("VAO '%s' release", cname());
     glCheck(glDeleteVertexArrays(1, &m_handle));
   }
 
@@ -410,7 +410,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void activate() override
   {
-    DEBUG("VAO '%s' activate", name().c_str());
+    DEBUG("VAO '%s' activate", cname());
     glCheck(glBindVertexArray(m_handle));
   }
 
@@ -419,7 +419,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void deactivate() override
   {
-    DEBUG("VAO '%s' deactivate", name().c_str());
+    DEBUG("VAO '%s' deactivate", cname());
     glCheck(glBindVertexArray(0U));
   }
 

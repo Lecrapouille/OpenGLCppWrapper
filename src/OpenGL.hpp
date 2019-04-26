@@ -22,7 +22,7 @@
 #  define OPENGLCPPWRAPPER_OPENGL_HPP
 
 // *****************************************************************************
-//! \file OpenGL routines.
+//! \file OpenGL.hpp OpenGL routines.
 // *****************************************************************************
 
 #  include "GLEnum.hpp"
@@ -56,7 +56,7 @@ inline static bool& hasCreatedContext()
 //! \brief Allow to detect if the last OpenGL command succeeded or failed.
 //! In the case of failure an error is displayed on console and/or logged.
 //!
-//! \not do not use this function directly but use the macro glCheck.
+//! \note do not use this function directly but use the macro glCheck.
 //!
 //! \param filename the file path where the OpenGL routine was called.
 //! \param line the line where the OpenGL routine was called.

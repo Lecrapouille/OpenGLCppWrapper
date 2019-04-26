@@ -240,7 +240,7 @@ bool GLExample01::setup()
 
   // --- Init VAO texture named texID
   m_vao_quad.texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_vao_quad.texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  m_vao_quad.texture2D("texID").wrap(TextureWrap::CLAMP_TO_EDGE);
   if (false == m_vao_quad.texture2D("texID").load("textures/hazard.png"))
     return false;
 
@@ -271,10 +271,12 @@ bool GLExample01::setup()
   // --- Create a texture
 
   // --- Init VAO texture named texID
-  m_vao_floor.texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_vao_floor.texture2D("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
+  m_vao_floor.texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR)
+                                .wrap(TextureWrap::CLAMP_TO_EDGE);
   if (false == m_vao_floor.texture2D("texID").load("textures/wooden-crate.jpg"))
-    return false;
+    {
+      return false;
+    };
 
   // --- Init OpenGL shader uniforms
   m_prog.scalarf("scale") = 1.0f;

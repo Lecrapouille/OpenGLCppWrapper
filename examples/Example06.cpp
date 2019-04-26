@@ -30,7 +30,6 @@ bool GLExample06::setup()
 {
   // Enable some OpenGL states
   glCheck(glEnable(GL_DEPTH_TEST));
-  glCheck(glDepthFunc(GL_LESS));
   glCheck(glDisable(GL_BLEND));
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
@@ -59,6 +58,7 @@ bool GLExample06::setup()
     matrix::lookAt(Vector3f(0.75, -0.75, 0.75), Vector3f(0.0, 0.0, 0.0), Vector3f(0.0, 0.0, 1.0));
 
   // Create textures
+  m_vao.texture3D("tex3d").wrap(TextureWrap::CLAMP_TO_BORDER);
   if (!m_vao.texture3D("tex3d").load(
         {
           "textures/deep_water.png",
@@ -73,8 +73,9 @@ bool GLExample06::setup()
     }
 
   // Create the terrain
-  buildTerrain();
-  drawTerrain();
+  const int dim = 40;
+  buildTerrain(dim);
+  drawTerrain(dim);
   return true;
 }
 
@@ -87,7 +88,7 @@ bool GLExample06::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  m_prog.draw(m_vao, Primitive::TRIANGLE_STRIP, 0, 4 * m_terrain.size());
+  m_prog.draw(m_vao, Primitive::TRIANGLE_STRIP, 0, m_nbVertices);
 
   return true;
 }
@@ -95,10 +96,9 @@ bool GLExample06::draw()
 //------------------------------------------------------------------
 //! \brief Generate terrain altitude.
 //------------------------------------------------------------------
-void GLExample06::buildTerrain()
+void GLExample06::buildTerrain(const int dim)
 {
-  //create random values
-  int dim = 40;
+  // Create random values
   m_terrain.resize(dim * dim);
 
   for (int r = 0; r < dim * dim; ++r)
@@ -150,46 +150,52 @@ void GLExample06::buildTerrain()
 //------------------------------------------------------------------
 //! \brief Fill VBOs with mesh position and 3d texture position.
 //------------------------------------------------------------------
-void GLExample06::drawTerrain()
+void GLExample06::drawTerrain(const int dim)
 {
-  unsigned dim = unsigned(sqrt(double(m_terrain.size())));
   float maxHeight = 0.2f;
   float texHeight = 0.9f;
 
+  // Cache references to avoid calling the hash function during the loop
   auto& pos = m_vao.vector3f("position");
   auto& uv = m_vao.vector3f("UV");
+
+  // Reserve VBO sizes (optional but avoid to reallocate several times)
+  // FIXME: pass m_nbVertices when binding VAO ?
+  m_nbVertices = (dim - 1) * (dim - 1) * 4;
+  pos.reserve(m_nbVertices);
+  uv.reserve(m_nbVertices);
 
   for (unsigned x = 1; x < dim; ++x)
     {
       for (unsigned y = 1; y < dim; ++y)
         {
           // Texture3D
-          uv.append(Vector3f(float(x-1)/float(dim),
-                             float(y-1)/float(dim),
-                             m_terrain[(x-1)*dim+(y-1)]*texHeight));
-          uv.append(Vector3f(float(x)/float(dim),
-                             float(y-1)/float(dim),
-                             m_terrain[x*dim+(y-1)]*texHeight));
-          uv.append(Vector3f(float(x-1)/float(dim),
-                             float(y)/float(dim),
-                             m_terrain[(x-1)*dim+y]*texHeight));
-          uv.append(Vector3f(float(x)/float(dim),
-                             float(y)/float(dim),
-                             m_terrain[x*dim+y]*texHeight));
+          uv.append(Vector3f(float(x - 1) / float(dim),
+                             float(y - 1) / float(dim),
+                             m_terrain[(x - 1) * dim + (y - 1)] * texHeight));
+          uv.append(Vector3f(float(x) / float(dim),
+                             float(y - 1) / float(dim),
+                             m_terrain[x * dim + (y - 1)] * texHeight));
+          uv.append(Vector3f(float(x - 1) / float(dim),
+                             float(y) / float(dim),
+                             m_terrain[(x - 1) * dim + y] * texHeight));
+          uv.append(Vector3f(float(x) / float(dim),
+                             float(y) / float(dim),
+                             m_terrain[x * dim + y] * texHeight));
 
           // Meshes
-          pos.append(Vector3f(float(x-1)/float(dim)-0.5f,
-                              float(y-1)/float(dim)-0.5f,
-                              m_terrain[(x-1)*dim+(y-1)]*maxHeight));
-          pos.append(Vector3f(float(x)/float(dim)-0.5f,
-                              float(y-1)/float(dim)-0.5f,
-                              m_terrain[x*dim+(y-1)]*maxHeight));
-          pos.append(Vector3f(float(x-1)/float(dim)-0.5f,
-                              float(y)/float(dim)-0.5f,
-                              m_terrain[(x-1)*dim+y]*maxHeight));
-          pos.append(Vector3f(float(x)/float(dim)-0.5f,
-                              float(y)/float(dim)-0.5f,
-                              m_terrain[x*dim+y]*maxHeight));
+          pos.append(Vector3f(float(x - 1) / float(dim) -0.5f,
+                              float(y - 1) / float(dim) -0.5f,
+                              m_terrain[(x - 1) * dim + (y - 1)] * maxHeight));
+          pos.append(Vector3f(float(x) / float(dim) -0.5f,
+                              float(y - 1) / float(dim) -0.5f,
+                              m_terrain[x * dim + (y - 1)] * maxHeight));
+          pos.append(Vector3f(float(x - 1) / float(dim) -0.5f,
+                              float(y) / float(dim) -0.5f,
+                              m_terrain[(x - 1) * dim + y] * maxHeight));
+          pos.append(Vector3f(float(x) / float(dim) -0.5f,
+                              float(y) / float(dim) -0.5f,
+                              m_terrain[x * dim + y] * maxHeight));
 
         }
     }

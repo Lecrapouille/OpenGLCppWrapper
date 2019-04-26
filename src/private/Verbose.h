@@ -1,6 +1,7 @@
 #ifndef OPENGLCPPWRAPPER_DEBUG_HPP
 #  define OPENGLCPPWRAPPER_DEBUG_HPP
 
+#  include "NonCppStd.hpp"
 #  include <stdio.h>
 #  include <stdarg.h>
 #  include <stdlib.h>
@@ -11,7 +12,7 @@ namespace glwrap
 
 #  define SHORT_FILENAME file_name(__FILE__).c_str()
 
-__attribute__ ((format (printf, 4, 5)))
+PRINTFLIKE(4, 5)
 inline void errout(const char* type, const char* file, const int line, const char* format, ...)
 {
   va_list args;

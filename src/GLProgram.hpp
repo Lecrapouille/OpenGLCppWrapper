@@ -169,7 +169,7 @@ public:
   //----------------------------------------------------------------------------
   inline bool bind(GLVAO& vao)
   {
-    DEBUG("Gonna bind Prog '%s' with VAO named '%s'", name().c_str(), vao.name().c_str());
+    DEBUG("Gonna bind Prog '%s' with VAO named '%s'", cname(), vao.cname());
 
     // Try compile the GLProgram
     if (unlikely(!compiled()))
@@ -185,7 +185,7 @@ public:
       {
         // When binding the VAO to GLProgram for the first time:
         // create VBOs to the VAO.
-        DEBUG("Prog '%s' will init VAO named '%s'", name().c_str(), vao.name().c_str());
+        DEBUG("Prog '%s' will init VAO named '%s'", cname(), vao.cname());
         initVAO(vao);
       }
     else if (unlikely(m_handle != vao.prog))
@@ -193,7 +193,7 @@ public:
         // Check if VAO has been previously bind by this GLProgram. If not
         // This is probably an error of the developper.
         ERROR("You tried to bind VAO %s which never been binded by GLProgram %s",
-              vao.name().c_str(), name().c_str());
+              vao.cname(), cname());
         return false;
       }
 
@@ -462,6 +462,7 @@ public:
   {
     return uniform<Vector2f>(name);
   }
+
   //----------------------------------------------------------------------------
   //! \brief Get the shader uniform float scalar.
   //! This method wraps the \a uniform() method hidding the misery of
@@ -562,7 +563,7 @@ public:
   //----------------------------------------------------------------------------
   void draw(Primitive const mode, GLint const first, GLsizei const count)
   {
-    DEBUG("Prog '%s' draw {", name().c_str());
+    DEBUG("Prog '%s' draw {", cname());
     throw_if_not_compiled();
     throw_if_vao_not_binded();
     throw_if_inconsitency_attrib_sizes();
@@ -575,7 +576,7 @@ public:
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     //m_vao->end();
     end();
-    DEBUG("} Prog '%s' draw", name().c_str());
+    DEBUG("} Prog '%s' draw", cname());
   }
 
   //----------------------------------------------------------------------------
@@ -675,6 +676,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Change how many elements are pre-allocated when creating
   //! VBOs. If this method is not called default usage will be 0.
+  //! \fixme bind cannot replace this method ?
   //----------------------------------------------------------------------------
   void setInitVBOSize(size_t const size)
   {
@@ -809,7 +811,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool create() override
   {
-    DEBUG("Prog '%s' create", name().c_str());
+    DEBUG("Prog '%s' create", cname());
     m_handle = glCheck(glCreateProgram());
     return false;
   }
@@ -829,7 +831,7 @@ private:
     bool failure = false;
 
     // Compile shaders if they have not yet compiled
-    DEBUG("Prog '%s' setup: compile shaders", name().c_str());
+    DEBUG("Prog '%s' setup: compile shaders", cname());
     for (auto& it: m_shaders)
       {
         it->begin();
@@ -848,7 +850,7 @@ private:
     if (!failure)
       {
         // Attach shaders to program
-        DEBUG("Prog '%s' setup: attach shaders", name().c_str());
+        DEBUG("Prog '%s' setup: attach shaders", cname());
         for (auto& it: m_shaders)
           {
             glCheck(glAttachShader(m_handle, it->gpuID()));
@@ -856,7 +858,7 @@ private:
           }
 
         // Link shaders to the program
-        DEBUG("Prog '%s' setup: compile prog", name().c_str());
+        DEBUG("Prog '%s' setup: compile prog", cname());
         glCheck(glLinkProgram(m_handle));
         m_compiled = checkLinkageStatus(m_handle);
         if (m_compiled)
@@ -878,7 +880,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void activate() override
   {
-    DEBUG("Prog '%s' activate", name().c_str());
+    DEBUG("Prog '%s' activate", cname());
 
     if (unlikely(!compiled()))
       return ;
@@ -921,7 +923,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void deactivate() override
   {
-    DEBUG("Prog '%s' deactivate", name().c_str());
+    DEBUG("Prog '%s' deactivate", cname());
     glCheck(glUseProgram(0U));
 
     for (auto& it: m_uniforms)
@@ -946,7 +948,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void release() override
   {
-    DEBUG("Prog '%s' release", name().c_str());
+    DEBUG("Prog '%s' release", cname());
     detachAllShaders();
     glCheck(glDeleteProgram(m_handle));
   }
@@ -1228,4 +1230,4 @@ private:
 
 } // namespace glwrap
 
-#endif /* OPENGLCPPWRAPPER_GLPROGRAM_HPP */
+#endif // OPENGLCPPWRAPPER_GLPROGRAM_HPP

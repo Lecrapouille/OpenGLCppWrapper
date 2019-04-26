@@ -129,8 +129,8 @@ private:
   //----------------------------------------------------------------------------
   virtual bool create() override
   {
-    DEBUG("Attrib '%s' create", name().c_str());
-    m_handle = glCheck(glGetAttribLocation(m_program, name().c_str()));
+    DEBUG("Attrib '%s' create", cname());
+    m_handle = glCheck(glGetAttribLocation(m_program, cname()));
     m_index = static_cast<GLuint>(m_handle);
     return false;
   }
@@ -147,7 +147,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void activate() override
   {
-    DEBUG("Attrib '%s' activate", name().c_str());
+    DEBUG("Attrib '%s' activate", cname());
     glCheck(glEnableVertexAttribArray(m_index));
     glCheck(glVertexAttribPointer(m_index,
                                   m_dim,
@@ -162,7 +162,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void deactivate() override
   {
-    DEBUG("Attrib '%s' deactivate", name().c_str());
+    DEBUG("Attrib '%s' deactivate", cname());
     glCheck(glDisableVertexAttribArray(m_index));
   }
 
@@ -228,8 +228,8 @@ private:
   //----------------------------------------------------------------------------
   virtual bool create() override
   {
-    DEBUG("Uniform '%s' create", name().c_str());
-    m_handle = glCheck(glGetUniformLocation(m_program, name().c_str()));
+    DEBUG("Uniform '%s' create", cname());
+    m_handle = glCheck(glGetUniformLocation(m_program, cname()));
     return false;
   }
 
@@ -253,7 +253,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void deactivate() override
   {
-    DEBUG("Uniform '%s' deactivate", name().c_str());
+    DEBUG("Uniform '%s' deactivate", cname());
   }
 
   //----------------------------------------------------------------------------
@@ -326,7 +326,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool update() override
   {
-    DEBUG("Uniform '%s' update", name().c_str());
+    DEBUG("Uniform '%s' update", cname());
     setValue(GLUniform<T>::m_data);
     return false;
   }
@@ -416,7 +416,10 @@ public:
 
   //----------------------------------------------------------------------------
   //! \brief See GLLocation constructor.
-  //! \param texture_id count texture
+  //! \param name
+  //! \param gltype
+  //! \param texture_id count texture.
+  //! \param prog
   //----------------------------------------------------------------------------
   GLSampler(const char *name, const GLenum gltype, const GLenum texture_id,
             const GLuint prog)
@@ -441,7 +444,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void activate() override
   {
-    DEBUG("Sampler '%s' activate GL_TEXTURE0 + %u", name().c_str(), m_texture_id);
+    DEBUG("Sampler '%s' activate GL_TEXTURE0 + %u", cname(), m_texture_id);
     glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_id));
   }
 
@@ -450,7 +453,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool update() override
   {
-    DEBUG("Sampler '%s' update", name().c_str());
+    DEBUG("Sampler '%s' update", cname());
     glCheck(glUniform1i(m_handle, static_cast<GLint>(m_texture_id)));
     return false;
   }

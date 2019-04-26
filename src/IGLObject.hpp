@@ -78,11 +78,19 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the reference of the name of the object.
+  //! \brief Return the const reference of the name of the object.
   //----------------------------------------------------------------------------
-  inline std::string& name()
+  inline const std::string& name() const
   {
     return m_name;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the const char* of the name of the object.
+  //----------------------------------------------------------------------------
+  inline const char* cname() const
+  {
+    return m_name.c_str();
   }
 
   //----------------------------------------------------------------------------

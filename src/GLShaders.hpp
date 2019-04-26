@@ -75,8 +75,8 @@ public:
   bool fromString(std::string const& script)
   {
     throw_if_already_compiled();
-    name() = type();
     m_shader_code = script;
+    DEBUG("From script '%s' %s: '%s'", cname(), type(), m_shader_code.c_str());
     return true;
   }
 
@@ -91,11 +91,8 @@ public:
   bool fromFile(std::string const& filename)
   {
     throw_if_already_compiled();
-
-    name() = file_name(filename);
-
     bool loaded = load(filename, m_shader_code);
-    DEBUG("FromFile: Shader: '%s'", m_shader_code.c_str());
+    DEBUG("From file '%s' %s: '%s'", cname(), type(), m_shader_code.c_str());
     if (false == loaded)
       {
         std::string msg = "Failed loading shader code '"
@@ -224,7 +221,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool create() override
   {
-    DEBUG("Shader::create %s", name().c_str());
+    DEBUG("Shader::create %s", cname());
     m_handle = glCheck(glCreateShader(m_target));
     return false;
   }
@@ -234,7 +231,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void release() override
   {
-    DEBUG("Shader '%s' release", name().c_str());
+    DEBUG("Shader '%s' release", cname());
     glCheck(glDeleteShader(m_handle));
   }
 
@@ -259,7 +256,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool setup() override
   {
-    DEBUG("Shader::setup %s", name().c_str());
+    DEBUG("Shader::setup %s", cname());
     if (loaded() && !compiled())
       {
         char const *source = m_shader_code.c_str();

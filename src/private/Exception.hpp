@@ -17,6 +17,7 @@
 
 #  include <string>
 #  include <typeinfo>
+#  include "NonCppStd.hpp"
 
 namespace glwrap
 {
@@ -195,7 +196,7 @@ inline int Exception::code() const
   {                                                                     \
     return new CLS(*this);                                              \
   }                                                                     \
-  __attribute__((__noreturn__)) void CLS::rethrow() const               \
+  NORETURN void CLS::rethrow() const                                    \
   {                                                                     \
     throw *this;                                                        \
   }
