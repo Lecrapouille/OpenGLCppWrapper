@@ -63,7 +63,7 @@ public:
   bool setup(IGLWindow &window)
   {
     ImGui::CreateContext();
-    ImGui_ImplGlfw_InitForOpenGL(window.obj(), true);
+    ImGui_ImplGlfw_InitForOpenGL(window.window(), true);
     ImGui_ImplOpenGL3_Init(NULL);
     ImGui::StyleColorsDark();
 

@@ -79,7 +79,7 @@ public:
   //------------------------------------------------------------------
   //! \brief Return the address of the GLFW window.
   //------------------------------------------------------------------
-  inline GLFWwindow *obj()
+  inline GLFWwindow *window()
   {
     return m_window;
   }

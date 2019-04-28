@@ -233,7 +233,7 @@ l_runtime:
     }
   catch (const OpenGLException& e)
     {
-      std::cerr << e.message() << std::endl;
+      std::cerr << "Caught exception: " << e.message() << std::endl;
       res = false;
     }
 

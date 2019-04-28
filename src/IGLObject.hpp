@@ -201,7 +201,7 @@ public:
               return ;
           }
 
-        if (likely(needUpdate()))
+        if (unlikely(needUpdate()))
           {
             m_need_update = update();
           }
