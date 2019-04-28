@@ -48,9 +48,7 @@ public:
 
   //! \brief Empty constructor: no pending data.
   PendingData()
-  {
-    clearPending();
-  }
+  {}
 
   //! \brief Constructor: number of elements of the container.
   PendingData(size_t nb_elt)
@@ -70,7 +68,7 @@ public:
   //! -1. You can call hasPendingData() before this method.
   void getPendingData(size_t &pos_start, size_t &pos_end) const
   {
-    if (hasPendingData())
+    if (likely(hasPendingData()))
     {
       pos_start = m_pending_start;
       pos_end = m_pending_end;
@@ -87,7 +85,7 @@ public:
   //! -1. You can call hasPendingData() before this method.
   std::pair<size_t, size_t> getPendingData() const
   {
-    if (hasPendingData())
+    if (likely(hasPendingData()))
     {
       return std::make_pair(m_pending_start, m_pending_end);
     }
@@ -104,7 +102,7 @@ public:
     m_pending_end = c_initial_position;
   }
 
-  void clearPending(size_t nb_elt)
+  void clearPending(const size_t nb_elt)
   {
     if (0_z == nb_elt)
     {
@@ -121,28 +119,38 @@ public:
   //! \brief Update the range indexes of changed elements with a new range.
   void tagAsPending(const size_t pos_start, const size_t pos_end)
   {
-    if (!hasPendingData())
-      {
-        m_pending_start = pos_start;
-        m_pending_end = pos_end;
-      }
-    else
+    if (likely(hasPendingData()))
       {
         m_pending_start = std::min(m_pending_start, pos_start);
         m_pending_end = std::max(m_pending_end, pos_end);
       }
+    else
+      {
+        m_pending_start = pos_start;
+        m_pending_end = pos_end;
+      }
   }
 
   //! \brief Update the range indexes of changed elements with a new range.
-  inline void tagAsPending(const size_t pos_start)
+  inline void tagAsPending(const size_t pos)
   {
-    tagAsPending(pos_start, pos_start);
+    if (likely(hasPendingData()))
+      {
+        m_pending_start = std::min(m_pending_start, pos);
+        m_pending_end = std::max(m_pending_end, pos);
+      }
+    else
+      {
+        m_pending_start = 0_z;
+        m_pending_end = pos;
+      }
   }
 
 protected:
 
   //! Indicate which elements have been changed.
-  size_t m_pending_start, m_pending_end;
+  size_t m_pending_start = c_initial_position;
+  size_t m_pending_end = c_initial_position;
 };
 
 } // namespace glwrap

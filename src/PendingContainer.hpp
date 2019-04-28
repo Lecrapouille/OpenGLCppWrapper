@@ -56,8 +56,7 @@ public:
  PendingContainer(PendingContainer const& other)
    : PendingData(other.getPendingData()),
       m_container(other.m_container)
-  {
-  }
+  {}
 
   PendingContainer(std::vector<T> const& other)
     : PendingData(other.size()),
@@ -71,6 +70,14 @@ public:
 
   ~PendingContainer()
   {}
+
+  void debugDirty(const char* bla)
+  {
+    size_t pos_start, pos_end;
+    getPendingData(pos_start, pos_end);
+    DEBUG("%s Dirty %d %d", bla, (int) pos_start, (int) pos_end);
+    (void) bla;
+  }
 
   inline size_t capacity() const
   {
@@ -88,7 +95,7 @@ public:
     m_container.reserve(count);
   }
 
-  inline T& operator[](size_t nth)
+  inline T& operator[](int nth)
   {
     if (unlikely(nth > m_container.capacity()))
       {
@@ -99,7 +106,7 @@ public:
     return m_container.operator[](nth);
   }
 
-  inline T const& operator[](size_t nth) const
+  inline T const& operator[](int nth) const
   {
     return m_container.operator[](nth);
   }
@@ -114,21 +121,37 @@ public:
     return m_container.at(nth);
   }
 
+  void clear()
+  {
+    throw_if_cannot_expand();
+    m_container.clear();
+    clearPending(0_z);
+  }
+
   void append(std::initializer_list<T> il)
   {
     throw_if_cannot_expand();
-    //size_t s = std::max(1_z, m_container.size()) - 1_z;
     m_container.insert(m_container.end(), il);
-    tagAsPending(/*s*/0_z, m_container.size() - 1_z);
+    tagAsPending(m_container.size() - 1_z);
+  }
+
+  void append(const T* other, const size_t size)
+  {
+    throw_if_cannot_expand();
+    m_container.insert(m_container.end(),
+                       other,
+                       other + size);
+    tagAsPending(m_container.size() - 1_z);
   }
 
   void append(std::vector<T> const& other)
   {
     throw_if_cannot_expand();
+
     m_container.insert(m_container.end(),
                        other.begin(),
                        other.end());
-    tagAsPending(0_z, m_container.size() - 1_z);
+    tagAsPending(m_container.size() - 1_z);
   }
 
   void append(PendingContainer const& other)
@@ -148,8 +171,9 @@ public:
   {
     T sum_of_elems = 0;
 
-    for (auto& n : m_container)
+    for (auto& n : m_container) {
       sum_of_elems += n;
+    }
 
     return sum_of_elems;
   }
@@ -198,8 +222,9 @@ public:
     const size_t my_size = m_container.size();
     const size_t other_size = other.m_container.size();
 
-    if (other_size > my_size)
+    if (other_size > my_size) {
       throw_if_cannot_expand();
+    }
 
     m_container = other.m_container;
     tagAsPending(0_z, other_size - 1_z);
@@ -211,8 +236,9 @@ public:
     const size_t my_size = m_container.size();
     const size_t other_size = il.size();
 
-    if (other_size > my_size)
+    if (other_size > my_size) {
       throw_if_cannot_expand();
+    }
 
     m_container = il;
     tagAsPending(0_z, other_size - 1_z);
@@ -223,24 +249,30 @@ public:
   inline PendingContainer<T>& operator*=(T const& val)
   {
     //FIXME return apply([val](T& x){ x *= val; });
-    for (auto& x: m_container)
+    for (auto& x: m_container) {
       x *= val;
+    }
+    tagAsPending(0_z, m_container.size() - 1_z);
     return *this;
   }
 
   inline PendingContainer<T>& operator+=(T const& val)
   {
     //FIXME return apply([val](T& x){ x += val; });
-    for (auto& x: m_container)
+    for (auto& x: m_container) {
       x += val;
+    }
+    tagAsPending(0_z, m_container.size() - 1_z);
     return *this;
   }
 
   inline PendingContainer<T>& operator-=(T const& val)
   {
     //FIXME return apply([val](T& x){ x -= val; });
-    for (auto& x: m_container)
+    for (auto& x: m_container) {
       x -= val;
+    }
+    tagAsPending(0_z, m_container.size() - 1_z);
     return *this;
   }
 
@@ -256,8 +288,9 @@ public:
     if (cont.size())
       {
         stream << cont[0];
-        for (size_t i = 1_z; i < cont.size(); ++i)
+        for (size_t i = 1_z; i < cont.size(); ++i) {
           stream << ", " << cont[i];
+        }
       }
     return stream;
   };
@@ -272,8 +305,9 @@ protected:
 
   inline void throw_if_cannot_expand()
   {
-     if (likely(!m_can_expand))
-       throw std::out_of_range("Cannot change buffer size once loaded on GPU");
+    if (likely(!m_can_expand)) {
+      throw std::out_of_range("Cannot change buffer size once loaded on GPU");
+    }
   }
 
   inline void set_cannot_expand()
