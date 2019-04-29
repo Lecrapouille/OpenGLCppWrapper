@@ -32,13 +32,22 @@
 // *****************************************************************************
 
 #  include "IGLObject.hpp"
-#  include "PendingData.hpp"
+#  include "PendingContainer.hpp"
 #  include "SOIL/SOIL.h"
-#  include <array>
 #  include <vector>
 
 namespace glwrap
 {
+
+//! \brief Internal format storing texture data
+using TextureData = PendingContainer<unsigned char>;
+
+//! \brief Texture Pixel Format.
+enum class PixelLoadFormat : GLenum
+  {
+    /* 3 */ LOAD_RGB = SOIL_LOAD_RGB,
+    /* 4 */ LOAD_RGBA = SOIL_LOAD_RGBA,
+  };
 
 // *****************************************************************************
 //! \brief Default options for textures when setup.
@@ -50,11 +59,51 @@ struct TextureOptions
   TextureWrap wrapS = TextureWrap::REPEAT;
   TextureWrap wrapT = TextureWrap::REPEAT;
   TextureWrap wrapR = TextureWrap::REPEAT;
-  PixelFormat cpuPixelFormat = PixelFormat::RGBA;
+  PixelFormat cpuPixelFormat = PixelFormat::RGBA; // FIXME can be in conflict with SOIL_LOAD_xxx
   PixelFormat gpuPixelFormat = PixelFormat::RGBA;
   PixelType pixelType = PixelType::UNSIGNED_BYTE;
   bool generateMipmaps = false;
 };
+
+//----------------------------------------------------------------------------
+//! \brief Load picture file (jpg, png ...) with SOIL library into or internal
+//! format.
+//! \param[out] width Buffer width (pixels)
+//! \param[out] height Buffer height (pixel)
+//----------------------------------------------------------------------------
+static bool doload2D(const char *const filename, const PixelLoadFormat format,
+                     TextureData& data, uint32_t& width, uint32_t& height)
+{
+  if (unlikely(nullptr == filename)) return false;
+  DEBUG("Loading texture '%s'", filename);
+  data.debugDirty("doload");
+
+  // Load the image as a C array.
+  int w, h;
+  unsigned char* image = SOIL_load_image(filename, &w, &h, 0, static_cast<GLenum>(format));
+  if (likely(nullptr != image))
+    {
+      // Use the max because with framebuffer we can resize texture
+      width = std::max(width, static_cast<uint32_t>(w)); // FIXME
+      height = std::max(height, static_cast<uint32_t>(h));
+
+      // Convert it as std::vector
+      size_t size = w * h * sizeof(unsigned char)
+        * ((format == PixelLoadFormat::LOAD_RGBA) ? 4 : 3);
+      data.append(image, size); // FIXME: not working with preallocated size
+      //data.debugDirty();
+      SOIL_free_image_data(image);
+      DEBUG("Successfully loaded %ux%u texture '%s'", width, height, filename);
+      return true;
+    }
+  else
+    {
+      ERROR("Failed loading picture file '%s'", filename);
+      width = height = 0;
+      data.clear();
+      return false;
+    }
+}
 
 // *****************************************************************************
 //! \brief Generic Texture.
@@ -66,36 +115,13 @@ struct TextureOptions
 //! texture can be of dimension 1, 2 or 3.
 // *****************************************************************************
 class IGLTexture
-  : public IGLObject<GLenum>,
-    protected PendingData
+  : public IGLObject<GLenum>
 {
-protected:
-
-  //----------------------------------------------------------------------------
-  //! \brief Deleter for std::unique_ptr.
-  //!
-  //! Allow to automaticaly delete the CPU memory of the texture when
-  //! no longer used. For loading textures we use a C library and in C
-  //! deleting resources shall be made manually (that we do not want).
-  //----------------------------------------------------------------------------
-  struct SOILDeleter
-  {
-    void operator()(unsigned char* buf)
-    {
-      DEBUG("%s", "Texture deleter");
-      if (buf != nullptr)
-        SOIL_free_image_data(buf);
-    }
-  };
-
-  //! \brief Smart Pointer holding the CPU memory for storing the
-  //! texture.
-  using TextBufPtr = std::unique_ptr<unsigned char, SOILDeleter>;
-
 public:
 
   //----------------------------------------------------------------------------
-  //! \brief Constructor.
+  //! \brief Constructor. Should be used if you will load texture from
+  //! a picture file (jpg, png ...) with the load() method.
   //!
   //! Give a name to the instance. This constructor makes no other
   //! actions.
@@ -115,6 +141,14 @@ public:
   virtual ~IGLTexture()
   {
     destroy();
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the container holding texture data.
+  //----------------------------------------------------------------------------
+  inline TextureData& data()
+  {
+    return m_buffer;
   }
 
   //----------------------------------------------------------------------------
@@ -198,9 +232,9 @@ public:
   //!
   //! Only available for texture 2D and 3D.
   //----------------------------------------------------------------------------
-  inline virtual uint32_t height() const
+  inline uint32_t height() const
   {
-    return 0u;
+    return m_height;
   }
 
   //----------------------------------------------------------------------------
@@ -208,9 +242,9 @@ public:
   //!
   //! Only available for texture 3D.
   //----------------------------------------------------------------------------
-  inline virtual uint32_t depth() const
+  inline uint32_t depth() const
   {
-    return 0u;
+    return m_depth;
   }
 
 protected:
@@ -244,7 +278,7 @@ private:
   //----------------------------------------------------------------------------
   virtual inline bool needUpdate() const override
   {
-    return PendingData::hasPendingData();
+    return m_buffer.hasPendingData();
   }
 
   //----------------------------------------------------------------------------
@@ -278,12 +312,19 @@ private:
   virtual void release() override
   {
     glCheck(glDeleteTextures(1U, &m_handle));
+    m_buffer.clear();
+    m_width = 0;
   }
 
 protected:
 
   TextureOptions m_options;
-  uint32_t m_width = 0;
+  TextureData    m_buffer;
+  uint32_t       m_width = 0;
+  //! \brief For Texture2D, Texture3D, TextureCube
+  uint32_t       m_height = 0;
+  //! \brief For Texture3D, TextureCube
+  uint8_t        m_depth = 0u;
 };
 
 // *****************************************************************************
@@ -298,7 +339,8 @@ class GLTexture2D: public IGLTexture
 public:
 
   //----------------------------------------------------------------------------
-  //! \brief Constructor.
+  //! \brief Constructor. Should be used if you will load texture from
+  //! a picture file (jpg, png ...) with the load() method.
   //!
   //! Give a name to the instance. This constructor makes no other
   //! actions.
@@ -310,10 +352,40 @@ public:
   {}
 
   //----------------------------------------------------------------------------
+  //! \brief Constructor. Should be used if you will load texture from
+  //! a frame buffer.
+  //!
+  //! Give a name to the instance. Get the texture size. This
+  //! constructor makes no other actions.
+  //!
+  //! \param name the name of this instance used by GLProgram and GLVAO.
+  //! \param target the texture type (GL_TEXTURE_1D .. GL_TEXTURE_3D ...)
+  //! \param width Buffer width (pixels). Shall be > 0.
+  //! \param height Buffer height (pixel). Shall be > 0.
+  //----------------------------------------------------------------------------
+ GLTexture2D(std::string const& name, const uint32_t width, const uint32_t height)
+    : IGLTexture(name, GL_TEXTURE_2D)
+  {
+    // TODO Forbid texture with 0x0 dimension ?
+    m_width = width;
+    m_height = height;
+  }
+
+  //----------------------------------------------------------------------------
   //! \brief Destructor. Release elements in CPU and GPU memories.
   //----------------------------------------------------------------------------
   virtual ~GLTexture2D()
   {}
+
+  GLTexture2D& operator=(GLTexture2D const& other)
+  {
+    m_handle = other.m_handle;
+    m_target = other.m_target;
+    m_width = other.m_width;
+    m_height = other.m_height;
+    m_options = other.m_options;
+    m_buffer = other.m_buffer;
+  }
 
   //----------------------------------------------------------------------------
   //! \brief Return the texture dimension: 2D.
@@ -321,14 +393,6 @@ public:
   virtual uint8_t dimension() const override
   {
     return 2u;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the texture height (in pixel).
-  //----------------------------------------------------------------------------
-  inline virtual uint32_t height() const override
-  {
-    return m_height;
   }
 
   //----------------------------------------------------------------------------
@@ -340,7 +404,8 @@ public:
   //----------------------------------------------------------------------------
   virtual inline bool loaded() const override
   {
-    return (0u != m_width) && (0u != m_height) && (nullptr != m_buffer.get());
+    return (0 != m_buffer.size()) // Texture loaded from a file (jpeg ...)
+      || ((0 != m_width) && (0 != m_height)); // Or dummy texture for framebuffer
   }
 
   //----------------------------------------------------------------------------
@@ -368,63 +433,63 @@ public:
   //!
   //! \return true if texture data have been loaded.
   //----------------------------------------------------------------------------
-  bool load(const char *const filename)
+  inline bool load(const char *const filename)
   {
-    int width, height;
+    m_buffer.clear(); m_width = m_height = 0;
+    return doload2D(filename, PixelLoadFormat::LOAD_RGBA, m_buffer, m_width, m_height);
+  }
 
-    DEBUG("Loading texture '%s'", filename);
-
-    // FIXME: SOIL_LOAD_RGBA: should adapt from m_options.cpuPixelFormat
-    unsigned char* image = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGBA);
-    if (unlikely(nullptr == image))
-      {
-        ERROR("Failed loading picture file '%s'", filename);
-        return false;
-      }
-
-    // Success
-    m_buffer = std::move(TextBufPtr(image));
-    m_width = static_cast<uint32_t>(width);
-    m_height = static_cast<uint32_t>(height);
-    DEBUG("texture dimension %ux%u", m_width, m_height);
-
-    // Set the whole texture data to "dirty" forcing its upload to the
-    // GPU. Unit is pixel (not byte).
-    PendingData::tagAsPending(0_z, m_width * m_height);
-
-    DEBUG("Successfuly load picture file '%s'", filename);
-    return true;
+  inline bool save(const char *const filename)
+  {
+    //TODO 4 because RGBA
+    return !!SOIL_save_image(filename, SOIL_SAVE_TYPE_BMP, m_width, m_height, 4, m_buffer.to_array());
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Set to the nth byte of the texture.
+  //! \brief Set to the nth byte of the texture (write access).
   //----------------------------------------------------------------------------
-  inline unsigned char& operator[](size_t nth)
+  inline unsigned char& operator[](int nth)
   {
     //TBD ?
     //if (nth > m_width * m_height)
     //  {
     //    reserve(nth);
     //  }
-    PendingData::tagAsPending(nth);
-    return m_buffer.get()[nth];
+    return m_buffer[nth];
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Get to the nth byte of the texture.
+  //! \brief Get to the nth byte of the texture (read only access).
   //----------------------------------------------------------------------------
-  inline const unsigned char& operator[](size_t nth) const
+  inline const unsigned char& operator[](int nth) const
   {
-    return m_buffer.get()[nth];
+    return m_buffer[nth];
   }
 
-private:
+  //----------------------------------------------------------------------------
+  //! \brief Set to the nth byte of the texture (write access).
+  //----------------------------------------------------------------------------
+  inline unsigned char& at(const size_t u, const size_t v, const size_t off)
+  {
+    return GLTexture2D::operator[]((u * m_width + v) * 4 + off); //TODO 4 because RGBA
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get to the nth byte of the texture (read only access.
+  //----------------------------------------------------------------------------
+  inline const unsigned char& at(const size_t u, const size_t v, const size_t off) const
+  {
+    return GLTexture2D::operator[]((u * m_width + v) * 4 + off);
+  }
 
   //----------------------------------------------------------------------------
   //! \brief Specify to OpenGL a two-dimensional texture image.
   //----------------------------------------------------------------------------
   inline void specifyTexture2D() const
   {
+    // Note: is allowed this case:
+    // m_width != 0 and m_height != 0 and buffer == nullptr
+    // This will reserve the buffer size.
     glCheck(glTexImage2D(m_target, 0,
                          static_cast<GLint>(m_options.gpuPixelFormat),
                          static_cast<GLsizei>(m_width),
@@ -432,7 +497,7 @@ private:
                          0,
                          static_cast<GLenum>(m_options.cpuPixelFormat),
                          static_cast<GLenum>(m_options.pixelType),
-                         m_buffer.get()));
+                         m_buffer.to_array()));
   }
 
   //----------------------------------------------------------------------------
@@ -460,32 +525,29 @@ private:
   virtual bool update() override
   {
     DEBUG("Texture '%s' update", cname());
-    size_t pos_start;
-    size_t pos_end;
-    PendingData::getPendingData(pos_start, pos_end);
 
-    // FIXME: pour le moment on envoie toute la texture entiere
-    // au lieu du rectangle modifie.
-    // TODO pendingData --> x,y,width,height
-    const GLint x = 0U;
-    const GLint y = 0U;
-    const GLsizei width = static_cast<GLsizei>(m_width);
-    const GLsizei height = static_cast<GLsizei>(m_height);
+    size_t start, stop;
+    m_buffer.getPendingData(start, stop);
+
+    start = start / 4; //TODO 4 because RGBA
+    stop = stop / 4;
+    const GLint x = start / m_width;
+    const GLint y = start % m_width;
+    const GLsizei width = (stop / m_width) - x + 1;
+    const GLsizei height = (stop % m_width) - y + 1;
+
+    DEBUG("Texture '%s' update (%zu,%zu) --> ((%d,%d), (%d,%d))",
+          cname(), start, stop, x, y, width, height);
 
     glCheck(glBindTexture(m_target, m_handle));
     glCheck(glTexSubImage2D(m_target, 0, x, y, width, height,
                             static_cast<GLenum>(m_options.cpuPixelFormat),
                             static_cast<GLenum>(m_options.pixelType),
-                            m_buffer.get()));
+                            m_buffer.to_array()));
 
-    PendingData::clearPending();
+    m_buffer.clearPending();
     return false;
   };
-
-private:
-
-  uint32_t   m_height = 0;
-  TextBufPtr m_buffer;
 };
 
 // *****************************************************************************
@@ -541,7 +603,9 @@ public:
   //----------------------------------------------------------------------------
   virtual inline bool loaded() const override
   {
-    return (0 != m_width) && (nullptr != m_buffer.get());
+    // Note: return (0u != m_width) && (0u != m_height)
+    // is not a good condition because allowed.
+    return 0 != m_buffer.size();
   }
 
   //----------------------------------------------------------------------------
@@ -574,7 +638,7 @@ public:
     DEBUG("Texture '%s' update", cname());
     size_t pos_start;
     size_t pos_end;
-    PendingData::getPendingData(pos_start, pos_end);
+    m_buffer.getPendingData(pos_start, pos_end);
 
     // FIXME: pour le moment on envoie toute la texture entiere
     // au lieu de la portion modifiee.
@@ -586,15 +650,11 @@ public:
     glCheck(glTexSubImage1D(m_target, 0, x, width,
                             static_cast<GLenum>(m_options.cpuPixelFormat),
                             static_cast<GLenum>(m_options.pixelType),
-                            m_buffer.get()));
+                            m_buffer.to_array()));
 
-    PendingData::clearPending();
+    m_buffer.clearPending();
     return false;
   }
-
-private:
-
-  TextBufPtr m_buffer;
 };
 
 // *****************************************************************************
@@ -622,22 +682,6 @@ public:
   virtual uint8_t dimension() const override
   {
     return 3u;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the texture height (in pixel).
-  //----------------------------------------------------------------------------
-  inline virtual uint32_t height() const override
-  {
-    return m_height;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the texture depth (in number of textures 2D).
-  //----------------------------------------------------------------------------
-  inline virtual uint32_t depth() const override
-  {
-    return m_depth;
   }
 
   //----------------------------------------------------------------------------
@@ -744,11 +788,6 @@ private:
     return targets[index];
   }
 
-protected:
-
-  uint32_t m_height = 0u;
-  uint8_t m_depth = 0u;
-
 private:
 
   //----------------------------------------------------------------------------
@@ -793,56 +832,32 @@ public:
   //----------------------------------------------------------------------------
   //! \brief
   //----------------------------------------------------------------------------
-  inline uint32_t height() const
-  {
-    return m_height;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief
-  //----------------------------------------------------------------------------
-  inline uint32_t depth() const
-  {
-    return m_depth;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief
-  //----------------------------------------------------------------------------
   bool load(std::vector<std::string> const& filenames)
   {
-    int width = 0;
-    int height = 0;
-    int prevWidth = 0;
-    int prevHeight = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t prevWidth = 0;
+    uint32_t prevHeight = 0;
     size_t depth = filenames.size();
 
-    m_data3d.clear();
+    m_buffer.clear();
     for (size_t i = 0; i < depth; ++i)
       {
-        // Load a Texture2D
-        unsigned char* image = SOIL_load_image(filenames[i].c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
-        if (likely(nullptr == image))
+        // Load a Texture2D and pack it subsequently into a large 2D texture
+        width = height = 0;
+        if (unlikely(!doload2D(filenames[i].c_str(), PixelLoadFormat::LOAD_RGBA, m_buffer, width, height)))
           {
-            ERROR("Failed loading picture file '%s'", filenames[i].c_str());
-            m_data3d.clear();
             return false;
           }
 
         // Check consistency of Texture2D dimension
         if ((i != 0) && ((prevWidth != width) || (prevHeight != height)))
           {
-            SOIL_free_image_data(image);
             ERROR("Failed picture file '%s' has not correct dimension %ux%u",
                   filenames[i].c_str(), prevWidth, prevHeight);
-            m_data3d.clear();
             return false;
           }
 
-        // Pack Texture2D subsequently into a large 3D buffer
-        // FIXME: 4 because of SOIL_LOAD_RGBA
-        m_data3d.insert(m_data3d.end(), image, image + width * height * 4 * sizeof(unsigned char));
-        SOIL_free_image_data(image);
         prevWidth = width;
         prevHeight = height;
       }
@@ -860,8 +875,9 @@ public:
   //----------------------------------------------------------------------------
   virtual inline bool loaded() const override
   {
-    return (0u != m_width) && (0u != m_height) &&
-      (0u != m_depth) && (0_z != m_data3d.size());
+    // Note: return (0u != m_width) && (0u != m_height)
+    // is not a good condition because allowed.
+    return 0 != m_buffer.size();
   }
 
 private:
@@ -879,7 +895,7 @@ private:
                          0,
                          static_cast<GLenum>(m_options.cpuPixelFormat),
                          static_cast<GLenum>(m_options.pixelType),
-                         &m_data3d[0]));
+                         &m_buffer[0]));
   }
 
   //----------------------------------------------------------------------------
@@ -914,12 +930,6 @@ private:
     DEBUG("Texture '%s' update", cname());
     return false;
   };
-
-protected:
-
-  uint32_t m_height = 0u;
-  uint32_t m_depth = 0u;
-  std::vector<unsigned char> m_data3d;
 };
 
 } // namespace glwrap
