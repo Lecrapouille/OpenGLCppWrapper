@@ -198,7 +198,9 @@ public:
           {
             m_need_setup = setup();
             if (unlikely(m_need_setup))
-              return ;
+              {
+                return ;
+              }
           }
 
         if (unlikely(needUpdate()))
@@ -263,6 +265,14 @@ protected:
   inline void forceUpdate()
   {
     m_need_update = true;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Force redoing setup()
+  //----------------------------------------------------------------------------
+  inline void forceSetup()
+  {
+    m_need_setup = true;
   }
 
 private:

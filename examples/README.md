@@ -68,3 +68,17 @@ example is to show how to use 3d textures.
 The code source of this example has been inspired by the following document:
 http://www.mathematik.uni-marburg.de/~thormae/lectures/graphics1/graphics_7_1_eng_web.html#1
 and https://www.uni-marburg.de/fb12/en/researchgroups/grafikmultimedia/lectures/graphics
+
+Example 07:
+===========
+
+This example paints a 2d quad using framebuffer. The goal of this example is to show how to use minimalist framebuffer.
+
+The code source of this example has been inspired by the following code: Glumpy gloo-framebuffer.py
+
+Example 08:
+===========
+
+This example paints a 3d cube using framebuffer. The goal of this example is to show how to a simple framebuffer.
+
+The code source of this example has been inspired by the following document: https://learnopengl.com/Advanced-OpenGL/Framebuffers
