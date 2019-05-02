@@ -176,7 +176,8 @@ public:
       {
         if (!compile())
           {
-            ERROR("%s", "Tried binding VAO on a non compilable GLProgram");
+            ERROR("Tried to bind VAO '%s' on a non compilable GLProgram '%s'",
+                  vao.cname(), cname());
             return false;
           }
       }
@@ -185,14 +186,14 @@ public:
       {
         // When binding the VAO to GLProgram for the first time:
         // create VBOs to the VAO.
-        DEBUG("Prog '%s' will init VAO named '%s'", cname(), vao.cname());
+        DEBUG("Prog '%s' will initialize VAO named '%s'", cname(), vao.cname());
         initVAO(vao);
       }
     else if (unlikely(m_handle != vao.prog))
       {
         // Check if VAO has been previously bind by this GLProgram. If not
         // This is probably an error of the developper.
-        ERROR("You tried to bind VAO %s which never been binded by GLProgram %s",
+        ERROR("Tried to bind VAO '%s' which has never been binded by GLProgram %s",
               vao.cname(), cname());
         return false;
       }
@@ -875,7 +876,7 @@ private:
               "' has not been compiled: reason was '" +
               it->error() + "'";
             ERROR("%s", msg.c_str());
-            m_error_msg += '\n' + msg;
+            concatError(msg);
             failure = true;
           }
       }
@@ -1015,7 +1016,7 @@ private:
       default:
         std::string msg = "Attribute '" + std::string(name) + "' type is not managed";
         ERROR("%s", msg.c_str());
-        m_error_msg += '\n' + msg;
+        concatError(msg);
         break;
       }
   }
@@ -1080,7 +1081,7 @@ private:
       default:
         std::string msg = "Uniform '" + std::string(name) + "' type is not managed";
         ERROR("%s", msg.c_str());
-        m_error_msg += '\n' + msg;
+        concatError(msg);
         break;
       }
   }
@@ -1156,15 +1157,27 @@ private:
         glCheck(glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &length));
         std::vector<char> log(static_cast<size_t>(length));
         glCheck(glGetProgramInfoLog(obj, length, &length, &log[0U]));
-        m_error_msg += '\n';
-        m_error_msg += &log[0U];
-        ERROR("%s", m_error_msg.c_str());
+        concatError(&log[0U]);
+        m_error_msg.pop_back();
+        ERROR("Failed linking '%s'. Reason was '%s'", cname(), m_error_msg.c_str());
       }
     else
       {
         m_error_msg.clear();
       }
-    return status;
+    return !!status;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Concat the last error to the list of errors
+  //----------------------------------------------------------------------------
+  void concatError(std::string const& msg)
+  {
+    if (!m_error_msg.empty())
+      {
+        m_error_msg += '\n';
+      }
+    m_error_msg += msg;
   }
 
 private:
