@@ -22,7 +22,7 @@
 ### project can be compiled by itself.
 
 OUT=result.txt
-rm -fr $OUT 2> /dev/null
+echo "" > $OUT
 
 ## Search all .hpp files in src and create a dummy c++ file only
 ## including the hpp file. Compile this generated file. If everything
@@ -30,8 +30,12 @@ rm -fr $OUT 2> /dev/null
 for FILE in `find ../src -name "*.hpp" -type f`
 do
     # Generate the cpp file including the header file.
-    echo "#include \"$FILE\"" > checkheaders.cpp
-    echo "int main() { return 0; }" >> checkheaders.cpp
+    cat << EOF > checkheaders.cpp
+    #include "$FILE"
+    unsigned char* SOIL_load_image(const char *, int *, int *, int *, int) { return NULL; }
+    void SOIL_free_image_data (unsigned char *) {}
+    int main() { return 0; }
+EOF
 
     # Compile the generate file.
     g++ -W -Wall --std=c++11 -I../external -I../build -DPROJECT_DATA_PATH=\"FOO\" checkheaders.cpp -o prog > /dev/null 2> foo2
@@ -54,7 +58,7 @@ done
 rm -fr prog checkheaders.cpp 2> /dev/null
 
 ## Print the global result file
-RES=`cat $OUT`
+RES=`cat $OUT` 2> /dev/null
 if [ "$RES" = "" ];
 then
     exit 0

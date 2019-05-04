@@ -450,7 +450,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Set to the nth byte of the texture (write access).
   //----------------------------------------------------------------------------
-  inline unsigned char& operator[](int nth)
+  inline unsigned char& operator[](std::size_t nth)
   {
     //TBD ?
     //if (nth > m_width * m_height)
@@ -463,7 +463,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Get to the nth byte of the texture (read only access).
   //----------------------------------------------------------------------------
-  inline const unsigned char& operator[](int nth) const
+  inline const unsigned char& operator[](std::size_t nth) const
   {
     return m_buffer[nth];
   }

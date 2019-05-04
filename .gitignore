@@ -43,3 +43,7 @@ external/SOIL
 external/imgui
 external/backward-cpp
 external/OpenGLCppWrapper-data
+tests/result.txt
+
+# apitrace traces (opengl)
+*.trace

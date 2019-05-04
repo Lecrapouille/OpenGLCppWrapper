@@ -43,12 +43,12 @@ public:
     : PendingData()
   {}
 
-  PendingContainer(std::size_t count)
+  PendingContainer(size_t count)
     : PendingData(count),
       m_container(count)
   {}
 
-  PendingContainer(std::size_t count, T const& val)
+  PendingContainer(size_t count, T const& val)
     : PendingData(count),
       m_container(count, val)
   {}
@@ -89,13 +89,13 @@ public:
     return m_container.size();
   }
 
-  inline void reserve(std::size_t count)
+  inline void reserve(const size_t count)
   {
     throw_if_cannot_expand();
     m_container.reserve(count);
   }
 
-  inline T& operator[](int nth)
+  inline T& operator[](size_t nth)
   {
     if (unlikely(nth > m_container.capacity()))
       {
@@ -106,17 +106,17 @@ public:
     return m_container.operator[](nth);
   }
 
-  inline T const& operator[](int nth) const
+  inline T const& operator[](size_t nth) const
   {
     return m_container.operator[](nth);
   }
 
-  inline T& at(size_t nth)
+  inline T& at(const size_t nth)
   {
     return m_container.at(nth);
   }
 
-  inline T const& at(size_t nth) const
+  inline T const& at(const size_t nth) const
   {
     return m_container.at(nth);
   }
