@@ -85,9 +85,7 @@ uninstall:
 veryclean: clean
 	@rm -fr cov-int OpenGLCppWrapper.tgz *.log foo 2> /dev/null
 	@cd tests && make -s clean; cd - > /dev/null
-	@cd src/common/graphics/OpenGL/examples/ && make -s clean; cd - > /dev/null
-	@cd src/forth/standalone && make -s clean; cd - > /dev/null
-	@cd src/core/standalone/ClassicSpreadSheet && make -s clean; cd - > /dev/null
+	@cd examples/ && make -s clean; cd - > /dev/null
 	@$(call print-simple,"Cleaning","$(PWD)/doc/html")
 	@cd doc/ && rm -fr html
 
