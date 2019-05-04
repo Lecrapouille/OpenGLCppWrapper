@@ -385,6 +385,8 @@ public:
     m_height = other.m_height;
     m_options = other.m_options;
     m_buffer = other.m_buffer;
+
+    return *this;
   }
 
   //----------------------------------------------------------------------------
