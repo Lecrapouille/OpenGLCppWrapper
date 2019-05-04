@@ -295,9 +295,28 @@ public:
     return stream;
   };
 
+  inline T* to_array()
+  {
+    if (likely(0_z != m_container.size()))
+      {
+        return m_container.data();
+      }
+    else
+      {
+        return nullptr;
+      }
+  }
+
   inline const T* to_array() const
   {
-    return &m_container[0];
+    if (likely(0_z != m_container.size()))
+      {
+        return m_container.data();
+      }
+    else
+      {
+        return nullptr;
+      }
   }
 
   //private:

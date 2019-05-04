@@ -152,6 +152,14 @@ public:
   }
 
   //----------------------------------------------------------------------------
+  //! \brief Return the container holding texture data.
+  //----------------------------------------------------------------------------
+  inline const TextureData& data() const
+  {
+    return m_buffer;
+  }
+
+  //----------------------------------------------------------------------------
   //! \brief \brief Allow to know if data have been transfered into
   //! the CPU memory.
   //!
@@ -313,7 +321,7 @@ private:
   {
     glCheck(glDeleteTextures(1U, &m_handle));
     m_buffer.clear();
-    m_width = 0;
+    m_width = m_height = m_depth = 0;
   }
 
 protected:
@@ -377,6 +385,10 @@ public:
   virtual ~GLTexture2D()
   {}
 
+  //----------------------------------------------------------------------------
+  //! \brief Copy texture.
+  //! \note Use this method for framebuffer.
+  //----------------------------------------------------------------------------
   GLTexture2D& operator=(GLTexture2D const& other)
   {
     m_handle = other.m_handle;
@@ -443,8 +455,13 @@ public:
 
   inline bool save(const char *const filename)
   {
-    //TODO 4 because RGBA
-    return !!SOIL_save_image(filename, SOIL_SAVE_TYPE_BMP, m_width, m_height, 4, m_buffer.to_array());
+    unsigned char* p = m_buffer.to_array();
+    if (likely(nullptr != p))
+      {
+        //TODO 4 because RGBA
+        return !!SOIL_save_image(filename, SOIL_SAVE_TYPE_BMP, m_width, m_height, 4, p);
+      }
+    return false;
   }
 
   //----------------------------------------------------------------------------
