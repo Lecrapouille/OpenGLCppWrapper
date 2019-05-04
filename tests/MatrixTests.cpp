@@ -26,6 +26,8 @@
 #include <crpcut.hpp>
 #include <string>
 
+using namespace glwrap;
+
 // Expected results are computed by the ScicosLab tool
 static Matrix33f I3 =
   {

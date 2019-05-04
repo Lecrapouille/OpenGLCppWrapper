@@ -20,11 +20,13 @@
 
 #define protected public
 #define private public
-#include "OpenGL.hpp"
+#include "GLVAO.hpp"
 #undef protected
 #undef private
 #include <crpcut.hpp>
 #include <string>
+
+using namespace glwrap;
 
 TESTSUITE(VAOs)
 {
@@ -37,10 +39,6 @@ TESTSUITE(VAOs)
       GLVAO vao0("");
       ASSERT_EQ(true, vao0.name() == "");
       ASSERT_EQ(GL_ARRAY_BUFFER, vao0.target());
-
-      // Change the name
-      vao0.name() = "vao0";
-      ASSERT_EQ(true, vao0.name() == "vao0");
 
       // VAO with name
       GLVAO vao("vao");

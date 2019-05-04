@@ -26,6 +26,8 @@
 #include <crpcut.hpp>
 #include <string>
 
+using namespace glwrap;
+
 static Vector3f v1;
 static Vector3f v2(1.0f, 2.0f, 3.0f);
 static Vector3f v3(1.0f, 2.0f);
@@ -48,9 +50,9 @@ static inline void CHECK_VECTOR3B(Vector3b const& v, const bool x, const bool y,
 //--------------------------------------------------------------------------
 static inline void CHECK_VECTOR3F(Vector3f const& v, const float x, const float y, const float z)
 {
-  ASSERT_EQ(x, v.x);
-  ASSERT_EQ(y, v.y);
-  ASSERT_EQ(z, v.z);
+  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), x, v.x);
+  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), y, v.y);
+  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), z, v.z);
 }
 
 //--------------------------------------------------------------------------
@@ -208,20 +210,20 @@ TESTSUITE(Vectors)
 
     // Distance
     v1 = Vector3f::UNIT_SCALE * 2.0f;
-    ASSERT_EQ(std::sqrt(12.0f), vector::distance(v1, Vector3f::ZERO));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), std::sqrt(12.0f), vector::distance(v1, Vector3f::ZERO));
     v1 = Vector3f::ZERO;
     ASSERT_EQ(0.0f, vector::distance(v1, Vector3f::ZERO));
 
     // Norm
     ASSERT_EQ(5, vector::norm(Vector2i(-3, 4)));
     ASSERT_EQ(5, vector::length(Vector2i(-3, 4)));
-    ASSERT_EQ(5.0f, std::sqrt(vector::squaredLength(Vector2f(-3, 4))));
-    ASSERT_EQ(1.0f, vector::length(Vector3f::UNIT_X));
-    ASSERT_EQ(std::sqrt(3.0f), vector::length(Vector3f::UNIT_SCALE));
-    ASSERT_EQ(std::sqrt(3.0f), vector::length(-Vector3f::UNIT_SCALE));
-    ASSERT_EQ(3.0f, vector::squaredLength(Vector3f::UNIT_SCALE));
-    ASSERT_EQ(0.0f, vector::dot(Vector3f::UNIT_X, Vector3f::UNIT_Y));
-    ASSERT_EQ(3.0f, vector::dot(Vector3f::UNIT_SCALE, Vector3f::UNIT_SCALE));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),5.0f, std::sqrt(vector::squaredLength(Vector2f(-3, 4))));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),1.0f, vector::length(Vector3f::UNIT_X));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), std::sqrt(3.0f), vector::length(Vector3f::UNIT_SCALE));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), std::sqrt(3.0f), vector::length(-Vector3f::UNIT_SCALE));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),3.0f, vector::squaredLength(Vector3f::UNIT_SCALE));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),0.0f, vector::dot(Vector3f::UNIT_X, Vector3f::UNIT_Y));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),3.0f, vector::dot(Vector3f::UNIT_SCALE, Vector3f::UNIT_SCALE));
 
     // Normalize
     v1 = vector::normalize(Vector3f::UNIT_SCALE * 2.0f);
