@@ -18,42 +18,42 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_04_HPP
-#  define EXAMPLE_04_HPP
+#ifndef EXAMPLE_06_SPHERE_EBO_HPP
+#  define EXAMPLE_06_SPHERE_EBO_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Maths.hpp"
 #  include <iostream>
 
 using namespace glwrap;
 
-class GLExample04: public IGLWindow
+class GLExample06: public IGLWindow
 {
 public:
 
-  GLExample04()
-    : m_vao("VAO"),
-      m_prog("prog")
-  {
-  }
+  GLExample06()
+    : m_sphere("VAO_sphere"),
+      m_prog("prog"),
+      m_indices("indices")
+  {}
 
-  ~GLExample04()
-  {
-    std::cout << "Bye" << std::endl;
-  }
+  ~GLExample06()
+  {}
 
 private:
 
+  void createSphere();
   virtual void onWindowSizeChanged(const float width, const float height) override;
   virtual bool setup() override;
   virtual bool draw() override;
 
 private:
 
-  GLVertexShader     vs;
-  GLFragmentShader   fs;
-  GLVAO              m_vao;
+  GLVertexShader     m_vertex_shader;
+  GLFragmentShader   m_fragment_shader;
+  GLVAO              m_sphere;
   GLProgram          m_prog;
+  Movable<float, 3U> m_movable;
+  GLIndexBuffer<uint32_t> m_indices;
 };
 
-#endif // EXAMPLE_04_HPP
+#endif // EXAMPLE_06_SPHERE_EBO_HPP

@@ -1,31 +1,56 @@
-#include "Example03.hpp"
-#include <math.h>
+//=====================================================================
+// OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of OpenGLCppWrapper.
+//
+// OpenGLCppWrapper is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
 
-//! \file this example paints two cubes (same model) placed on a floor
-//! (second model). The fisrt cube is turning while the second is
-//! fixed. Models are textured and we applied different color on
-//! textures.
+#include "06_SphereEBO.hpp"
+#include "Maths.hpp"
+
+//------------------------------------------------------------------
+//! \file this example paints a sphere made of points. For drawing
+//! the VAO we pass an index of vertices.
+//!
+//! \note This example takes its inspiration from
+//! https://github.com/invor/simplestGraphRendering
+//------------------------------------------------------------------
 
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void GLExample03::onWindowSizeChanged(const float width, const float height)
+void GLExample06::onWindowSizeChanged(const float width, const float height)
 {
   // Note: height is never zero !
   float ratio = width / height;
 
-  // Make sure the viewport matches the new window dimensions; note that width and
-  // height will be significantly larger than specified on retina displays.
-  glViewport(0, 0, width, height);
+  // Make sure the viewport matches the new window dimensions.
+  glCheck(glViewport(0, 0, width, height));
 
   m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 }
 
-void GLExample03::createSphere()
+//------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------
+void GLExample06::createSphere()
 {
   constexpr float radius = 2.0f;
-  constexpr int NbPointsLon = 50;
+  constexpr int NbPointsLon = 100;
   constexpr int NbPointsLat = 100;
   constexpr float stepLon = 360.0f / static_cast<float>(NbPointsLon);
   constexpr float stepLat = 180.0f / static_cast<float>(NbPointsLat);
@@ -34,8 +59,10 @@ void GLExample03::createSphere()
   float latitude = -90.0f;
   float longitude = -180.0f;
 
-  auto& positions = m_vao.vector3f("position");
+  m_prog.bind(m_sphere);
+  auto& positions = m_sphere.vector3f("position");
   positions.reserve(NbPointsLon * NbPointsLat);
+  m_indices.clear();
   m_indices.reserve(NbPointsLon * NbPointsLat);
 
   for (int i = 0; i < NbPointsLon; ++i)
@@ -67,80 +94,48 @@ void GLExample03::createSphere()
 //------------------------------------------------------------------
 //! \brief Init your scene.
 //------------------------------------------------------------------
-bool GLExample03::setup()
+bool GLExample06::setup()
 {
-  DEBUG("%s", "Setup");
-
   // Enable some OpenGL states
   glCheck(glEnable(GL_DEPTH_TEST));
-  glCheck(glDepthFunc(GL_LESS));
-  glCheck(glDisable(GL_BLEND));
-  glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-  // Load from ASCII file the vertex sahder (vs) as well the fragment shader
-  vs.fromFile("shaders/Example03.vertex");
-  fs.fromFile("shaders/Example03.fragment");
+  // Load vertex and fragment shaders with GLSL code.
+  m_vertex_shader.fromFile("shaders/06_SphereEBO.vs");
+  m_fragment_shader.fromFile("shaders/06_SphereEBO.fs");
 
-  // Compile shader as OpenGL program. This one will instanciate all OpenGL objects for you.
-  if (!m_prog.attachShaders(vs, fs).compile())
+  // Compile the shader program
+  if (!m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
     {
       std::cerr << "failed compiling OpenGL program. Reason was '"
-                << m_prog.error() << "'" << std::endl;
+                << m_prog.getError() << "'" << std::endl;
       return false;
     }
 
-  // --- Create a sphere
-
-  // Binding empty VAO to OpenGL program will make it be populated
-  // with all VBOs needed.
-  m_prog.bind(m_vao);
-
-  // Now we have to fill VBOs with data: here vertices. Because in
-  // vertex shader position is vect3 we have to cast to Vector3f.
-  createSphere();
-
-  // --- Init OpenGL shader uniforms
+  // Init shader uniforms
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
   m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
-
   m_prog.matrix44f("model") = m_movable.transform();
   m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(1,1,1), Vector3f(0,1,0));
 
-  // -- Perform some debug
-  DEBUG("%s", "Instropection:");
-  std::vector<std::string> vbos = m_vao.VBONames();
-  for (auto& it: vbos)
-    {
-      std::cout << "VAO has VBO named '" << it << "'" << std::endl;
-    }
+  // Create the sphere
+  createSphere();
 
-  // TODO Check if everything is ok (attrib/uniform are set, prog compiled ...)
-
-  // We have terminated creating our 3D scene, we can now paint it.
-  DEBUG("%s", "GLExample03::draw");
   return true;
 }
 
 //------------------------------------------------------------------
 //! \brief Paint our scene.
 //------------------------------------------------------------------
-bool GLExample03::draw()
+bool GLExample06::draw()
 {
   // Clear OpenGL color and depth buffers.
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  // --- Draw the turning cube and apply to it a "pinkished" coloration.
-
-  // Important: bind the VAO to the OpenGL shader to let it know to
-  // OpenGL which one to paint. Contrary to bind() in setup(), his
-  // time, VBOs are not populated !
-  m_prog.bind(m_vao);
-
-  // Paint the 36 verties (aka nodes) constituing a cube
-  m_prog.draw(Primitive::POINTS, m_indices);
+  // Draw the sphere
+  m_prog.draw(m_sphere, Primitive::POINTS, m_indices);
 
   return true;
 }

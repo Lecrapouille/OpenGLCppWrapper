@@ -1,0 +1,2 @@
+      Vector3f(5, -1.5,  5), Vector3f(-5, -1.5,  5), Vector3f(-5, -1.5, -5),
+      Vector3f(5, -1.5,  5), Vector3f(-5, -1.5, -5), Vector3f(5, -1.5, -5)

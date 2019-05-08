@@ -18,20 +18,19 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_07_HPP
-#  define EXAMPLE_07_HPP
+#ifndef EXAMPLE_10_SIMPLE_FRAMEBUFFER_HPP
+#  define EXAMPLE_10_SIMPLE_FRAMEBUFFER_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Maths.hpp"
 #  include <iostream>
 
 using namespace glwrap;
 
-class GLExample07: public IGLWindow
+class GLExample10: public IGLWindow
 {
 public:
 
-  GLExample07()
+  GLExample10()
     : m_prog_plane("prog_plane"),
       m_plane("VAO_plane"),
       m_prog_screen("prog_screen"),
@@ -39,10 +38,8 @@ public:
       m_fbo("FBO")
   {}
 
-  ~GLExample07()
-  {
-    std::cout << "Bye" << std::endl;
-  }
+  ~GLExample10()
+  {}
 
 private:
 
@@ -65,4 +62,4 @@ private:
   GLFrameBuffer       m_fbo;
 };
 
-#endif // EXAMPLE_07_HPP
+#endif // EXAMPLE_10_SIMPLE_FRAMEBUFFER_HPP

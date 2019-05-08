@@ -18,49 +18,42 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_01_HPP
-#  define EXAMPLE_01_HPP
+#ifndef EXAMPLE_02_DYNAMIC_TRIANGLE_HPP
+#  define EXAMPLE_02_DYNAMIC_TRIANGLE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Maths.hpp"
 #  include <iostream>
 
 using namespace glwrap;
 
-class GLExample01: public IGLWindow
+// *****************************************************************
+//! \brief
+// *****************************************************************
+class GLExample02: public IGLWindow
 {
 public:
 
-  GLExample01()
-    : m_vao_quad("VAO_quad"),
-      m_vao_floor("VAO_floor"),
-      m_indices("indices"),
-      m_prog("prog")
-  {
-  }
+  GLExample02()
+    : m_triangle("VAO_triangle"),
+      m_prog("Prog")
+  {}
 
-  ~GLExample01()
-  {
-    std::cout << "Bye" << std::endl;
-  }
+  ~GLExample02()
+  {}
 
-private:
+protected:
 
+  void debug();
   virtual void onWindowSizeChanged(const float width, const float height) override;
   virtual bool setup() override;
   virtual bool draw() override;
 
 private:
 
-  GLVertexShader     vs;
-  GLFragmentShader   fs;
-  GLVAO              m_vao_quad;
-  GLVAO              m_vao_floor;
-  GLIndexBuffer<uint8_t> m_indices;
+  GLVertexShader     m_vertex_shader;
+  GLFragmentShader   m_fragment_shader;
+  GLVAO              m_triangle;
   GLProgram          m_prog;
-  Movable<float, 3U> m_movable1;
-  Movable<float, 3U> m_movable2;
-  Movable<float, 3U> m_movable3;
 };
 
-#endif // EXAMPLE_01_HPP
+#endif // EXAMPLE_02_DYNAMIC_TRIANGLE_HPP

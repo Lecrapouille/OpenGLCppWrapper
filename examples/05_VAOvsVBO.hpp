@@ -18,49 +18,46 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_05_HPP
-#  define EXAMPLE_05_HPP
+#ifndef EXAMPLE_05_VAOS_VERSUS_VBOS_HPP
+#  define EXAMPLE_05_VAOS_VERSUS_VBOS_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Camera.hpp"
-#  include "Maths.hpp"
 #  include <iostream>
 
 using namespace glwrap;
 
+// *****************************************************************
+//! \brief
+// *****************************************************************
 class GLExample05: public IGLWindow
 {
 public:
 
   GLExample05()
-    : m_cube("Cube"),
-      m_skybox("SkyBox"),
-      m_progCube("progCube"),
-      m_progSkyBox("progSkyBox"),
-      m_camera(Vector3f(0.0f, 0.0f, 3.0f))
-  {
-  }
+    : m_cube("VAO_cube"),
+      m_floor("VAO_floor"),
+      m_prog("Prog")
+  {}
 
   ~GLExample05()
-  {
-    std::cout << "Bye" << std::endl;
-  }
+  {}
 
-  virtual void onMouseMoved(const double xpos, const double ypos) override;
+protected:
 
-private:
-
+  bool cubeSetup();
+  bool floorSetup();
   virtual void onWindowSizeChanged(const float width, const float height) override;
   virtual bool setup() override;
   virtual bool draw() override;
 
 private:
 
-  GLVertexShader     vs1, vs2;
-  GLFragmentShader   fs1, fs2;
-  GLVAO              m_cube, m_skybox;
-  GLProgram          m_progCube, m_progSkyBox;
-  Camera             m_camera;
+  GLVertexShader     m_vertex_shader;
+  GLFragmentShader   m_fragment_shader;
+  GLVAO              m_cube;
+  GLVAO              m_floor;
+  GLProgram          m_prog;
+  Movable<float, 3U> m_movable;
 };
 
-#endif // EXAMPLE_05_HPP
+#endif // EXAMPLE_05_VAOS_VERSUS_VBOS_HPP

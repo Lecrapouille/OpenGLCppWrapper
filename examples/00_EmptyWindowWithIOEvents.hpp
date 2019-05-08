@@ -18,46 +18,34 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_03_HPP
-#  define EXAMPLE_03_HPP
+#ifndef EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
+#  define EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Maths.hpp"
 #  include <iostream>
 
 using namespace glwrap;
 
-class GLExample03: public IGLWindow
+class GLExample00: public IGLWindow
 {
 public:
 
-  GLExample03()
-    : m_vao("VAO"),
-      m_prog("prog"),
-      m_indices("indices")
+  GLExample00()
   {
+    std::cout << "Hello" << std::endl;
   }
 
-  ~GLExample03()
+  ~GLExample00()
   {
     std::cout << "Bye" << std::endl;
   }
 
-private:
+protected:
 
-  void createSphere();
   virtual void onWindowSizeChanged(const float width, const float height) override;
+  virtual void onMouseMoved(const double xpos, const double ypos) override;
   virtual bool setup() override;
   virtual bool draw() override;
-
-private:
-
-  GLVertexShader     vs;
-  GLFragmentShader   fs;
-  GLVAO              m_vao;
-  GLProgram          m_prog;
-  Movable<float, 3U> m_movable;
-  GLIndexBuffer<uint32_t> m_indices;
 };
 
-#endif // EXAMPLE_03_HPP
+#endif // EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP

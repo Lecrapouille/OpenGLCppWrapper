@@ -39,9 +39,19 @@ include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
-OBJ += Example01.o Example02.o Example03.o \
-       Example04.o Example05.o Example06.o \
-       Example07.o Example08.o main.o
+OBJ += \
+  00_EmptyWindowWithIOEvents.o \
+  01_EmptyWindowWithImgui.o \
+  02_DynamicTriangle.o \
+  03_MultiTexturedTriangle.o \
+  05_VAOvsVBO.o \
+  06_SphereEBO.o \
+  07_SkyBoxTextureCube.o \
+  08_TerrainTexture3D.o \
+  09_SceneGraph.o \
+  10_SimpleFrameBuffer.o \
+  11_PostProdFrameBuffer.o \
+  main.o
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
