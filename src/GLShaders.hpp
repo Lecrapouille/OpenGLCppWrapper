@@ -86,7 +86,7 @@ public:
   //! store in the member variable.
   //! \param filename the path of the shader code.
   //! \return true if the whole file has been read, else return false.
-  //! An error message is set and can be read through error().
+  //! An error message is set and can be read through getError().
   //----------------------------------------------------------------------------
   bool fromFile(std::string const& filename)
   {
@@ -107,7 +107,7 @@ public:
   //! \brief Check if the shader has been compiled with success by
   //! OpenGL.
   //----------------------------------------------------------------------------
-  inline bool compiled() const
+  inline bool isCompiled() const
   {
     return m_compiled;
   }
@@ -132,7 +132,7 @@ public:
   //! \brief Return the shader error message. member variable is then
   //! cleared.
   //----------------------------------------------------------------------------
-  inline std::string error()
+  inline std::string getError()
   {
     std::string tmp(m_error_msg);
     m_error_msg.clear();
@@ -235,12 +235,12 @@ private:
   //----------------------------------------------------------------------------
   //! \brief Compile the shader code in the GPU.
   //! \return true if the compilation succeeded. Else return false.
-  //! An error message is set and can be read through error().
+  //! An error message is set and can be read through getError().
   //----------------------------------------------------------------------------
   virtual bool setup() override
   {
     DEBUG("Shader::setup %s", cname());
-    if (loaded() && !compiled())
+    if (loaded() && !isCompiled())
       {
         char const *source = m_shader_code.c_str();
         GLint length = static_cast<GLint>(m_shader_code.size());
@@ -292,7 +292,7 @@ private:
   //----------------------------------------------------------------------------
   //! \param obj the identifer of the loaded shader.
   //! \return true if case of success, else return false.
-  //! An error message is set and can be read through error().
+  //! An error message is set and can be read through getError().
   //----------------------------------------------------------------------------
   bool checkCompilationStatus(GLuint obj)
   {

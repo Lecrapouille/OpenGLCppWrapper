@@ -6,13 +6,13 @@ class GLVertexShader
 class GLFragmentShader
 class GLGeometryShader
 class GLProgram {
--binded: VAO*
+-bound: VAO*
 -attribs: map<string, GLAttribute*>
 -uniforms: map<string, GLUniform*>
 +attach(GLShaders[])
 +bind(VAO&)
 +compile()
-+draw() /* binded VAO */
++draw() /* bound VAO */
 }
 class GLUniform
 class GLAttribute

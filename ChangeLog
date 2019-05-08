@@ -28,7 +28,7 @@ version 0.3:
 version 0.2:
 
     Fix possible segfault when OpenGL context is not created.
-    Fix segfault on GLProgram destructor when VAO is not binded.
+    Fix segfault on GLProgram destructor when VAO is not bound.
     SceneGraph: Smart pointers and cleaning class.
     Change in public interfaces glenum by strong c++ type. This will help the developper to detect typage errors.
     PendingData: Replacing std::valarray by std::vector because it's not faster even for math operations.

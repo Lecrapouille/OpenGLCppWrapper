@@ -206,10 +206,10 @@ bool IGLWindow::start()
 
 l_runtime:
 
-  // This is an awful hack but this is to be sure to flush OpenGL
-  // errors before using this function on real OpenGL routines else a
-  // fake error is returned on the first OpenGL routines while valid.
-  glGetError();
+  // Flush OpenGL errors before using this function on real OpenGL
+  // routines else a fake error is returned on the first OpenGL
+  // routines while valid.
+  glCheck();
 
   int res;
   try

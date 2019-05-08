@@ -177,17 +177,21 @@ public:
 
   inline GLVertexBuffer<T>& operator=(GLVertexBuffer<T> const& other)
   {
+    return this->operator=(other.m_container);
+  }
+
+  inline GLVertexBuffer<T>& operator=(std::vector<T> const& other)
+  {
     const size_t my_size = this->m_container.size();
-    const size_t other_size = other.m_container.size();
+    const size_t other_size = other.size();
 
     if (other_size > my_size)
       this->throw_if_cannot_expand();
 
-    this->m_container = other.m_container;
+    this->m_container = other;
     this->tagAsPending(0_z, other_size - 1_z);
     return *this;
   }
-
 };
 
 // **************************************************************

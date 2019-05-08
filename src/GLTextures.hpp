@@ -343,6 +343,7 @@ class GLTexture2D: public IGLTexture
   //! \brief GLTextureCube is made of GLTexture2D. Let it access to
   //! GLTexture2D private states.
   friend class GLTextureCube;
+  friend class GLTextureBuffer;
 
 public:
 

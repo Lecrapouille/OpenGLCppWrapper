@@ -28,8 +28,9 @@
 #  define OPENGLCPPWRAPPER_GLPROGRAM_HPP
 
 // *****************************************************************************
-//! \file GLProgram.hpp manages a list of shaders and lists of shader
-//! variables (Uniforms, Samplers and Attributes) and paint VAO.
+//! \file GLProgram.hpp manages a list of GLSL shader codes and lists of shader
+//! variables (uniforms, samplers and attributes), can initialize VAO and paint
+//! them.
 // *****************************************************************************
 
 #  include "GLShaders.hpp"
@@ -40,12 +41,10 @@
 namespace glwrap
 {
 
-// TODO: verifier les GLVariables non init dans le GPU
-
 // *****************************************************************************
 //! \brief GLProgram manages a list of shaders and lists of shader
 //! variables (Uniforms, Samplers and Attributes). A GLProgram can
-//! render (draw) a Vertex Array Object (VAO) binded to it.
+//! render (draw) a Vertex Array Object (VAO) bound to it.
 // *****************************************************************************
 class GLProgram: public IGLObject<GLenum>
 {
@@ -145,26 +144,25 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Bind a VAO instance to this instance of GLProgram.
   //!
-
-  //! If its the first time that the VAO is binded to the GLProgram
+  //! If its the first time that the VAO is bound to the GLProgram
   //! then the VAO gets its list of VBOs and textures created. The
   //! number of elements of VBOs are reserved through the parameter
   //! \p nb_vertices passed in constructor GLProgram or set through
   //! setInitVBOSize(size_t const). No data will be filled (this is
   //! the job of the developper to do it explicitly).
   //!
-  //! Else (if the VAO was binded previously) nothing is made.
+  //! Else (if the VAO was bound previously) nothing is made.
   //!
-  //! \note A VAO binded to a different GLProgram cannot be bind to
+  //! \note A VAO bound to a different GLProgram cannot be bind to
   //! this GLProgram.  This will produce an error. This case is
   //! refused to avoid to the developer to have a silent error with an
   //! unexpected behavior.
   //!
-  //! \param vao the VAO instance to be binded with.
+  //! \param vao the VAO instance to be bound with.
   //!
-  //! \return false if the GLVAO cannot be binded. This case occurs for
+  //! \return false if the GLVAO cannot be bound. This case occurs for
   //! one of the following reasons: the GLProgram cannot be compiled
-  //! (syntax errors in shader code) or if the VOA has been binded by
+  //! (syntax errors in shader code) or if the VOA has been bound by
   //! another GLProgram (incompatibility).
   //----------------------------------------------------------------------------
   inline bool bind(GLVAO& vao)
@@ -172,7 +170,7 @@ public:
     DEBUG("Gonna bind Prog '%s' with VAO named '%s'", cname(), vao.cname());
 
     // Try compile the GLProgram
-    if (unlikely(!compiled()))
+    if (unlikely(!isCompiled()))
       {
         if (!compile())
           {
@@ -193,7 +191,7 @@ public:
       {
         // Check if VAO has been previously bind by this GLProgram. If not
         // This is probably an error of the developper.
-        ERROR("Tried to bind VAO '%s' which has never been binded by GLProgram %s",
+        ERROR("Tried to bind VAO '%s' which has never been bound by GLProgram %s",
               vao.cname(), cname());
         return false;
       }
@@ -204,11 +202,11 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Check if a VAO is binded with this GLProgram.
+  //! \brief Check if a VAO is bound with this GLProgram.
   //!
   //! \return true if VAO and this GLProgram are coupled, else return false.
   //----------------------------------------------------------------------------
-  inline bool binded() const
+  inline bool isBound() const
   {
     return nullptr != m_vao;
   }
@@ -219,7 +217,7 @@ public:
   //!
   //! \return true if shaders have been linked, else return false.
   //----------------------------------------------------------------------------
-  inline bool compiled() const
+  inline bool isCompiled() const
   {
     return m_compiled;
   }
@@ -236,7 +234,7 @@ public:
   inline bool compile()
   {
     begin();
-    return compiled();
+    return isCompiled();
   }
 
   //----------------------------------------------------------------------------
@@ -259,7 +257,7 @@ public:
   //!
   //! \return the error message (the message can be empty).
   //----------------------------------------------------------------------------
-  inline std::string error()
+  inline std::string getError()
   {
     std::string tmp(m_error_msg);
     m_error_msg.clear();
@@ -270,7 +268,7 @@ public:
   //! \brief Return the list of shader names used. This is method is
   //! mainly used for debug purpose.
   //----------------------------------------------------------------------------
-  std::vector<std::string> shaderNames()
+  std::vector<std::string> getShaderNames()
   {
     std::vector<std::string> list;
 
@@ -286,14 +284,14 @@ public:
   //! \brief Return the list of shaders that failed to be
   //! compiled. This is method is mainly used for debug purpose.
   //----------------------------------------------------------------------------
-  std::vector<GLShader*> failedShaders()
+  std::vector<GLShader*> getFailedShaders()
   {
     std::vector<GLShader*> list;
 
     list.reserve(4_z);
     for (auto const& it: m_shaders)
       {
-        if (!it->compiled())
+        if (!it->isCompiled())
           {
             list.push_back(it);
           }
@@ -305,7 +303,7 @@ public:
   //! \brief Return the list of uniform names. This is method is mainly
   //! used for debug purpose.
   //----------------------------------------------------------------------------
-  std::vector<std::string> uniformNames()
+  std::vector<std::string> getUniformNames()
   {
     std::vector<std::string> list;
 
@@ -321,7 +319,7 @@ public:
   //! \brief Return the list of attributes names. This is method is mainly
   //! used for debug purpose.
   //----------------------------------------------------------------------------
-  std::vector<std::string> attributeNames()
+  std::vector<std::string> getAttributeNames()
   {
     std::vector<std::string> list;
 
@@ -341,7 +339,7 @@ public:
   //! the jpeg, png or bmp file name but to the shader uniform name (used in
   //! shaders).
   //----------------------------------------------------------------------------
-  std::vector<std::string> samplersNames()
+  std::vector<std::string> getSamplersNames()
   {
     std::vector<std::string> list;
 
@@ -555,18 +553,18 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Draw the currently binded VAO. Give the first vertex and
+  //! \brief Draw the currently bound VAO. Give the first vertex and
   //! count vertices (see glDrawArrays OpenGL official documentation
   //! for more info).
   //!
   //! \throw OpenGLException if the program has not been compiled or
-  //! if no VAO is binded or if VBOs have not all the same sizes.
+  //! if no VAO is bound or if VBOs have not all the same sizes.
   //----------------------------------------------------------------------------
   void draw(Primitive const mode, GLint const first, GLsizei const count)
   {
     DEBUG("Prog '%s' draw {", cname());
     throw_if_not_compiled();
-    throw_if_vao_not_binded();
+    throw_if_vao_not_bound();
     throw_if_inconsitency_attrib_sizes();
 
     // FIXME: A optimiser car ca prend 43 appels OpenGL alors qu'avant
@@ -585,21 +583,21 @@ public:
   //! count vertices (see glDrawArrays OpenGL official documentation).
   //!
   //! \throw OpenGLException if the program has not been compiled or
-  //! if the VAO cannot be binded or if VBOs have not all the same
+  //! if the VAO cannot be bound or if VBOs have not all the same
   //! sizes.
   //----------------------------------------------------------------------------
   inline void draw(GLVAO& vao, Primitive const mode, GLint const first, GLsizei const count)
   {
-    throw_if_vao_cannot_be_binded(vao);
+    throw_if_vao_cannot_be_bound(vao);
     draw(mode, first, count);
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Render the binded VAO. Use implicit first and count vertices
+  //! \brief Render the bound VAO. Use implicit first and count vertices
   //! (see glDrawArrays OpenGL official documentation).
   //!
   //! \throw OpenGLException if the program has not been compiled or
-  //! if the VAO has not been binded or if VBOs have not all the same
+  //! if the VAO has not been bound or if VBOs have not all the same
   //! sizes.
   //----------------------------------------------------------------------------
   inline void draw(Primitive const /*mode*/)
@@ -615,12 +613,12 @@ public:
   //! vertices (see glDrawArrays OpenGL official documentation).
   //!
   //! \throw OpenGLException if the program has not been compiled or
-  //! if the VAO has not been binded or if VBOs have not all the same
+  //! if the VAO has not been bound or if VBOs have not all the same
   //! sizes.
   //----------------------------------------------------------------------------
   inline void draw(GLVAO& vao, Primitive const mode)
   {
-    throw_if_vao_cannot_be_binded(vao);
+    throw_if_vao_cannot_be_bound(vao);
     draw(mode);
   }
 
@@ -628,7 +626,7 @@ public:
   //! \brief Render a VAO with the help of an vertices index.
   //!
   //! \throw OpenGLException if the program has not been compiled or
-  //! if the VAO has not been binded or if VBOs have not all the same
+  //! if the VAO has not been bound or if VBOs have not all the same
   //! sizes.
   //----------------------------------------------------------------------------
   template<class T>
@@ -637,7 +635,7 @@ public:
     DEBUG("Prog::drawIndex %zu elements", index.size());
 
     throw_if_not_compiled();
-    throw_if_vao_not_binded();
+    throw_if_vao_not_bound();
     throw_if_inconsitency_attrib_sizes();
 
     //m_vao->begin();
@@ -654,13 +652,13 @@ public:
   //! \brief bind a VAO and render it with the help of an vertices index.
   //!
   //! \throw OpenGLException if the program has not been compiled or
-  //! if the VAO has not been binded or if VBOs have not all the same
+  //! if the VAO has not been bound or if VBOs have not all the same
   //! sizes.
   //----------------------------------------------------------------------------
   template<class T>
   void draw(GLVAO& vao, Primitive const mode, GLIndexBuffer<T>& index)
   {
-    throw_if_vao_cannot_be_binded(vao);
+    throw_if_vao_cannot_be_bound(vao);
     draw(mode, index);
   }
 
@@ -691,8 +689,8 @@ private:
   //----------------------------------------------------------------------------
   /*inline virtual bool isValid() const override
   {
-    DEBUG("Prog::isValid %d", compiled());
-    return compiled();
+    DEBUG("Prog::isValid %d", isCompiled());
+    return isCompiled();
     }*/
 
   //----------------------------------------------------------------------------
@@ -701,18 +699,18 @@ private:
   //----------------------------------------------------------------------------
   void throw_if_not_compiled()
   {
-    if (unlikely(!compiled()))
+    if (unlikely(!isCompiled()))
       {
         throw OpenGLException("Failed OpenGL program has not been compiled");
       }
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Throw OpenGLException if VAO cannot be binded to this GLProgram
+  //! \brief Throw OpenGLException if VAO cannot be bound to this GLProgram
   //! (reasons are: errors in shaders code source or GLProgram already bind
   //! to another VAO).
   //----------------------------------------------------------------------------
-  void throw_if_vao_cannot_be_binded(GLVAO& vao)
+  void throw_if_vao_cannot_be_bound(GLVAO& vao)
   {
     if (unlikely(!bind(vao)))
       {
@@ -724,19 +722,19 @@ private:
   //! \brief Throw OpenGLException if VAO is not bind to this GLProgram
   //! (reason: the developer forget to call \a bind.
   //----------------------------------------------------------------------------
-  void throw_if_vao_not_binded()
+  void throw_if_vao_not_bound()
   {
-    if (unlikely(!binded()))
+    if (unlikely(!isBound()))
       {
-        throw OpenGLException("Failed OpenGL program has not been binded to a VAO");
+        throw OpenGLException("Failed OpenGL program has not been bound to a VAO");
       }
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Throw OpenGLException if the binded VAO has not all its VBO
+  //! \brief Throw OpenGLException if the bound VAO has not all its VBO
   //! with the same size.
   //! \note this function does not check if VAO is bind. Call
-  //! throw_if_vao_not_binded() before this method.
+  //! throw_if_vao_not_bound() before this method.
   //----------------------------------------------------------------------------
   void throw_if_inconsitency_attrib_sizes()
   {
@@ -819,15 +817,15 @@ private:
 
   //----------------------------------------------------------------------------
   //! \brief Activate in OpenGL the program, its attributes, its uniforms and
-  //! samplers. A VAO shall be binded else nothing is made.
+  //! samplers. A VAO shall be bound else nothing is made.
   //----------------------------------------------------------------------------
   virtual void activate() override
   {
     DEBUG("Prog '%s' activate", cname());
 
-    if (unlikely(!compiled()))
+    if (unlikely(!isCompiled()))
       return ;
-    if (unlikely(!binded()))
+    if (unlikely(!isBound()))
       return ;
 
     glCheck(glUseProgram(m_handle));
@@ -874,7 +872,7 @@ private:
             std::string msg =
               "Shader '" + it->name() +
               "' has not been compiled: reason was '" +
-              it->error() + "'";
+              it->getError() + "'";
             ERROR("%s", msg.c_str());
             concatError(msg);
             failure = true;
@@ -1094,10 +1092,10 @@ private:
   template<class T>
   GLUniform<T>& getUniform(const char *name)
   {
-    if (unlikely(!compiled()))
+    if (unlikely(!isCompiled()))
       {
         begin();
-        // TODO: check if now compiled() == true
+        // TODO: check if now isCompiled() == true
       }
 
     if (unlikely(nullptr == name))
@@ -1212,9 +1210,9 @@ private:
 //! link them. As result a list of GLLocations (\ref GLUniform, \ref
 //! GLSampler and \ref GLAttribute) are internaly created in the
 //! GLProgram. GLLocations allow the GLProgram to populate in the
-//! binded VAO (\ref GLVAO) a list of VBOs (\ref GLVertexBuffer) and a
+//! bound VAO (\ref GLVAO) a list of VBOs (\ref GLVertexBuffer) and a
 //! list of textures (GLTexture). Finally a GLProgram can draw a VAO
-//! binded to it.
+//! bound to it.
 //!
 //! Usage example:
 //! \code
@@ -1224,7 +1222,7 @@ private:
 //!
 //! if (!m_prog.attachShaders(vs, fs).compile()) {
 //!     std::cerr << "failed compiling OpenGL program. Reason was '"
-//!               << m_prog.error() << "'" << std::endl;
+//!               << m_prog.getError() << "'" << std::endl;
 //!     exit();
 //! }
 //!

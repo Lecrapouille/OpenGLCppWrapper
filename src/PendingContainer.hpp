@@ -219,19 +219,26 @@ public:
 #if 0
   inline PendingContainer<T>& operator=(PendingContainer<T> const& other)
   {
+    return this->operator=(other.m_container);
+  }
+
+  template<class U>
+  inline PendingContainer<T>& operator=(std::vector<U> const& other)
+  {
     const size_t my_size = m_container.size();
-    const size_t other_size = other.m_container.size();
+    const size_t other_size = other.size();
 
     if (other_size > my_size) {
       throw_if_cannot_expand();
     }
 
-    m_container = other.m_container;
+    m_container = other;
     tagAsPending(0_z, other_size - 1_z);
     return *this;
   }
 
-  inline PendingContainer<T>& operator=(std::initializer_list<T> il)
+  template<class U>
+  inline PendingContainer<T>& operator=(std::initializer_list<U> il)
   {
     const size_t my_size = m_container.size();
     const size_t other_size = il.size();
@@ -246,7 +253,8 @@ public:
   }
 #endif
 
-  inline PendingContainer<T>& operator*=(T const& val)
+  template<class U>
+  inline PendingContainer<T>& operator*=(U const& val)
   {
     //FIXME return apply([val](T& x){ x *= val; });
     for (auto& x: m_container) {
@@ -256,7 +264,8 @@ public:
     return *this;
   }
 
-  inline PendingContainer<T>& operator+=(T const& val)
+  template<class U>
+  inline PendingContainer<T>& operator+=(U const& val)
   {
     //FIXME return apply([val](T& x){ x += val; });
     for (auto& x: m_container) {
@@ -266,7 +275,8 @@ public:
     return *this;
   }
 
-  inline PendingContainer<T>& operator-=(T const& val)
+  template<class U>
+  inline PendingContainer<T>& operator-=(U const& val)
   {
     //FIXME return apply([val](T& x){ x -= val; });
     for (auto& x: m_container) {
@@ -276,10 +286,10 @@ public:
     return *this;
   }
 
-  inline PendingContainer<T>& operator/=(T const& val)
+  template<class U>
+  inline PendingContainer<T>& operator/=(U const& val)
   {
-    constexpr T inv = T(1) / val;
-    return PendingContainer<T>::operator*=(inv);
+    return PendingContainer<T>::operator*=(U(1) / val);
   }
 
   friend std::ostream& operator<<(std::ostream& stream, const PendingContainer& cont)

@@ -109,6 +109,7 @@ public:
   //----------------------------------------------------------------------------
   void resize(const uint32_t width, const uint32_t height)
   {
+    // FIXME: nothing is made because pending_attach is empty
     if ((m_width != width) || (m_height != height))
       {
         m_width = width;
@@ -191,14 +192,17 @@ class GLTextureBuffer
 {
 public:
 
-  GLTextureBuffer(std::string const& name,
+  GLTextureBuffer(GLTexture2D& texture,
                   const uint32_t width,
                   const uint32_t height,
                   const GLenum attachment,
                   const PixelFormat format = PixelFormat::RGBA)
-    : GLRenderBuffer(name, width, height, attachment, static_cast<GLenum>(format)),
-      m_texture(name, width, height)
-  {}
+    : GLRenderBuffer(texture.name(), width, height, attachment, static_cast<GLenum>(format)),
+      m_texture(texture)
+  {
+    m_texture.m_width = width;
+    m_texture.m_height = height;
+  }
 
   inline GLTexture2D& texture()
   {
@@ -226,11 +230,13 @@ private:
 
   virtual bool setup() override
   {
+    m_texture.begin();
     return false;
   }
 
   virtual bool update() override
   {
+    m_texture.begin();
     return false;
   }
 
@@ -244,7 +250,7 @@ private:
 
 private:
 
-  GLTexture2D m_texture;
+  GLTexture2D& m_texture;
 };
 
 // *****************************************************************************
@@ -426,16 +432,20 @@ public:
 
     for (auto& it: m_color_buffers) {
       it->resize(width, height);
+      m_pending_attachments.push_back(it);
     }
 
     if (nullptr != m_depth_buffer) {
       m_depth_buffer->resize(width, height);
+      m_pending_attachments.push_back(m_depth_buffer);
     }
 
     if (nullptr != m_stencil_buffer) {
       m_stencil_buffer->resize(width, height);
+      m_pending_attachments.push_back(m_stencil_buffer);
     }
 
+    redoSetup();
     return *this;
   }
 
@@ -458,6 +468,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief
   //----------------------------------------------------------------------------
+#if 0
   GLTexture2D& createColorTexture()
   {
     throw_if_reached_max_buffers();
@@ -468,8 +479,21 @@ public:
     GLTextureBuffer* buf = new GLTextureBuffer(name, m_width, m_height, attachment);
     m_color_buffers.push_back(buf);
     m_pending_attachments.push_back(buf);
-    forceSetup();
+    redoSetup();
     return buf->texture();
+  }
+#endif
+
+  void createColorTexture(GLTexture2D& texture)
+  {
+    throw_if_reached_max_buffers();
+    const GLenum id = static_cast<GLenum>(m_color_buffers.size());
+    const GLenum attachment = GL_COLOR_ATTACHMENT0 + id;
+
+    GLTextureBuffer* buf = new GLTextureBuffer(texture, m_width, m_height, attachment);
+    m_color_buffers.push_back(buf);
+    m_pending_attachments.push_back(buf);
+    redoSetup();
   }
 
   //----------------------------------------------------------------------------
@@ -485,7 +509,7 @@ public:
     GLColorBuffer* buf = new GLColorBuffer(name, m_width, m_height, attachment);
     m_color_buffers.push_back(buf); // TODO: max 16 elements
     m_pending_attachments.push_back(buf);
-    forceSetup();
+    redoSetup();
     return *buf;
   }
 
@@ -499,7 +523,7 @@ public:
       {
         m_depth_buffer = new GLDepthBuffer("DepthBuffer", m_width, m_height);
         m_pending_attachments.push_back(m_depth_buffer);
-        forceSetup();
+        redoSetup();
       }
     return *m_depth_buffer;
   }
@@ -513,7 +537,7 @@ public:
       {
         m_stencil_buffer = new GLStencilBuffer("StencilBuffer", m_width, m_height);
         m_pending_attachments.push_back(m_stencil_buffer);
-        forceSetup();
+        redoSetup();
       }
     return *m_stencil_buffer;
   }
@@ -576,8 +600,8 @@ private:
     else
       {
         ERROR("Framebuffer '%s' needs at least one image attached to it", cname());
+        return true;
       }
-    return true;
   }
 
   //----------------------------------------------------------------------------

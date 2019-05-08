@@ -59,9 +59,9 @@ TESTSUITE(Shaders)
 
       //--- Check initial state
       ASSERT_EQ(true, shader2.code() == "");
-      ASSERT_EQ(true, shader2.error() == "");
+      ASSERT_EQ(true, shader2.getError() == "");
       ASSERT_EQ(false, shader2.hasErrored());
-      ASSERT_EQ(false, shader2.compiled());
+      ASSERT_EQ(false, shader2.isCompiled());
       ASSERT_EQ(0, shader2.m_attached);
 
       //--- Load from string
@@ -69,7 +69,7 @@ TESTSUITE(Shaders)
       ASSERT_EQ(false, shader1.hasErrored());
       ASSERT_EQ(true, shader1.code() == "foobar");
       ASSERT_EQ(true, shader1.loaded());
-      ASSERT_EQ(false, shader1.compiled());
+      ASSERT_EQ(false, shader1.isCompiled());
       try {
         shader1.throw_if_not_loaded();
       } catch(...) { ASSERT_TRUE("Exception should have not occured"); }
@@ -83,16 +83,16 @@ TESTSUITE(Shaders)
       ASSERT_EQ(false, shader1.hasErrored());
       ASSERT_EQ(true, shader1.code() == "");
       ASSERT_EQ(false, shader1.loaded());
-      ASSERT_EQ(false, shader1.compiled());
+      ASSERT_EQ(false, shader1.isCompiled());
 
       //--- Load from wrong file
       ASSERT_EQ(true, shader3.code() == "");
       ASSERT_EQ(false, shader3.fromFile("this_file_does_not_exist"));
-      ASSERT_EQ(false, shader3.compiled());
+      ASSERT_EQ(false, shader3.isCompiled());
       ASSERT_EQ(true, shader3.hasErrored());
       ASSERT_EQ(true, shader3.code() == "");
-      ASSERT_EQ(false, shader3.compiled());
-      ASSERT_EQ(true, shader3.error() != "");
+      ASSERT_EQ(false, shader3.isCompiled());
+      ASSERT_EQ(true, shader3.getError() != "");
       ASSERT_EQ(false, shader3.hasErrored());
       try {
         shader3.throw_if_not_loaded();
@@ -118,7 +118,7 @@ TESTSUITE(Shaders)
       shader1.fromString(""); shader1.m_compiled = true;
       shader1.setup();
       ASSERT_EQ(true, shader1.hasErrored());
-      ASSERT_EQ(true, shader1.error() != "");
+      ASSERT_EQ(true, shader1.getError() != "");
       shader1.setup();
 
       //--- Try setup
@@ -126,7 +126,7 @@ TESTSUITE(Shaders)
       shader1.fromString("ff"); shader1.m_compiled = true;
       shader1.setup();
       ASSERT_EQ(true, shader1.hasErrored());
-      ASSERT_EQ(true, shader1.error() != "");
+      ASSERT_EQ(true, shader1.getError() != "");
       shader1.setup();
 
 

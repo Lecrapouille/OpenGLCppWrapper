@@ -28,7 +28,6 @@
 #  include "GLEnum.hpp"
 #  include "private/NonCppStd.hpp"
 #  include "private/Exception.hpp"
-//#  include <cstdint>
 
 namespace glwrap
 {

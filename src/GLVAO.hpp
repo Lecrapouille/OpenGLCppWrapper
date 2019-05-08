@@ -87,7 +87,7 @@ public:
   //! \brief Return the list of VBO names. This is method is mainly
   //! used for debug purpose.
   //!
-  //! \note if the VAO has never been binded to a GLProgram the return
+  //! \note if the VAO has never been bound to a GLProgram the return
   //! lit will be empty.
   //----------------------------------------------------------------------------
   std::vector<std::string> VBONames()
@@ -105,7 +105,7 @@ public:
   //! \brief Return the list of textures names. This is method is mainly
   //! used for debug purpose.
   //!
-  //! \note if the VAO has never been binded to a GLProgram the return
+  //! \note if the VAO has never been bound to a GLProgram the return
   //! lit will be empty.
   //!
   //! \note Do not be confused with meaning of texture name. We do not
@@ -451,7 +451,7 @@ private:
   mapIGLObject m_vbos;
   //! \brief Hold textures.
   mapGLTexture m_textures;
-  //! \brief Hold the ID of the binded GLProgam.
+  //! \brief Hold the ID of the bound GLProgam.
   GLenum prog = 0;
 };
 
