@@ -27,7 +27,7 @@ Short answer: I disliked others API I found on github ! Long answer:
 * As a beginner of OpenGL Core, I always get confused by the order of
   creation/binding of OpenGL objects. With this API you do not have to
   really know what are OpenGL VBOs, VAOs, attributes, ... and in what
-  order they have to be created or binded. This API is here to hide
+  order they have to be created or bound. This API is here to hide
   all the boilerplate for you.
 
 * C++ APIs I saw on github just give a C++ flavor'ish taste to OpenGL
@@ -237,7 +237,7 @@ Init phase:
   scale, model, view, projection` ...
 
 * line 17-18: Uniforms can be initialized directly because they acts
-  like constant values inside shaders. Attributes needs a binded VAO
+  like constant values inside shaders. Attributes needs a bound VAO
   to the GLProgram (which is made line 21).
 
 * line 21: To initialize attributes you have to create a VAO and bind
@@ -348,8 +348,8 @@ a cube.
 
 ### What else in this API ?
 
-Not shown in this tutorial but this API can manage cubic, 3D and 1D
-textures. Soon this API will manage FrameBuffer.
+Not shown in this readme but this API can manage framebuffer and cubic,
+3D and 1D textures. See examples for more informations.
 
 This API also includes features which are not directly in relation
 with wrapping OpenGL routines. It allows:
@@ -518,7 +518,7 @@ This API is largely inspired by projects such as:
   (therefore several VAOs) in the scene to paint this library seems
   less well conceived to draw them but thanks to typage flexibility of
   Python, attributes of the shader can be bind to VAOs. In my API only
-  VAOs have to be created and only them can be binded to GLProgram. The
+  VAOs have to be created and only them can be bound to GLProgram. The
   result is equivalent to Glumpy the code is a little different.
   * There are also some minor changes: See this file
   [differences](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Differences.md)

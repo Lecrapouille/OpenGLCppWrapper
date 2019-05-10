@@ -18,10 +18,13 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef MOVABLE_HPP
-#  define MOVABLE_HPP
+#ifndef OPENGLCPPWRAPPER_MOVABLE_HPP
+#  define OPENGLCPPWRAPPER_MOVABLE_HPP
 
 #  include "Transformation.hpp"
+
+namespace glwrap
+{
 
 // *************************************************************************************************
 //! \brief a Movable defines a 4x4 transformation matrix from a translation, a rotation and a scale.
@@ -187,4 +190,6 @@ protected:
   bool m_inv_to_update;
 };
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_MOVABLE_HPP

@@ -20,11 +20,13 @@
 
 #define protected public
 #define private public
-#include "OpenGL.hpp"
+#include "GLProgram.hpp"
 #undef protected
 #undef private
 #include <crpcut.hpp>
 #include <string>
+
+using namespace glwrap;
 
 TESTSUITE(Programs)
 {
@@ -32,24 +34,24 @@ TESTSUITE(Programs)
     {
       GLProgram prog("prog");
 
-      ASSERT_EQ(false, prog.compiled());
-      ASSERT_EQ(false, prog.binded());
+      ASSERT_EQ(false, prog.isCompiled());
+      ASSERT_EQ(false, prog.isBound());
       ASSERT_EQ(false, prog.hasErrored());
-      ASSERT_EQ(true,  prog.error() == "");
-      ASSERT_EQ(0_z, prog.shaderNames().size());
-      ASSERT_EQ(0_z, prog.failedShaders().size());
-      ASSERT_EQ(0_z, prog.attributeNames().size());
-      ASSERT_EQ(0_z, prog.uniformNames().size());
+      ASSERT_EQ(true,  prog.getError() == "");
+      ASSERT_EQ(0_z, prog.getShaderNames().size());
+      ASSERT_EQ(0_z, prog.getFailedShaders().size());
+      ASSERT_EQ(0_z, prog.getAttributeNames().size());
+      ASSERT_EQ(0_z, prog.getUniformNames().size());
 
-      ASSERT_EQ(0_z, prog.uniformNames().size());
+      ASSERT_EQ(0_z, prog.getUniformNames().size());
       ASSERT_EQ(false, prog.hasUniforms());
       ASSERT_EQ(false, prog.hasAttributes());
       ASSERT_EQ(false, prog.hasUniform(""));
-      ASSERT_EQ(0_z, prog.uniformNames().size());
+      ASSERT_EQ(0_z, prog.getUniformNames().size());
       ASSERT_EQ(false, prog.hasAttribute(""));
       ASSERT_EQ(false, prog.hasUniform(nullptr));
       ASSERT_EQ(false, prog.hasAttribute(nullptr));
-      ASSERT_EQ(0_z, prog.uniformNames().size());
+      ASSERT_EQ(0_z, prog.getUniformNames().size());
 
       //---
       try {
@@ -83,7 +85,7 @@ TESTSUITE(Programs)
       prog.addNewUniform(GL_FLOAT_VEC2, "u2");
       prog.addNewUniform(GL_FLOAT_VEC3, "u3");
       prog.addNewUniform(GL_FLOAT_VEC4, "u4");
-      ASSERT_EQ(4_z, prog.uniformNames().size());
+      ASSERT_EQ(4_z, prog.getUniformNames().size());
       ASSERT_EQ(true, prog.hasUniform("u1"));
       ASSERT_EQ(true, prog.hasUniform("u2"));
       ASSERT_EQ(true, prog.hasUniform("u3"));
@@ -99,7 +101,7 @@ TESTSUITE(Programs)
       ASSERT_EQ(0, vao.prog);
       prog.m_handle = 42;
       ASSERT_EQ(true, prog.bind(vao));
-      ASSERT_EQ(true, prog.binded());
+      ASSERT_EQ(true, prog.isBound());
       ASSERT_EQ(42, vao.prog);
       ASSERT_EQ(true, prog.m_vao == &vao);
 
@@ -110,12 +112,12 @@ TESTSUITE(Programs)
       //} catch(OpenGLException) { }
 
       // TODO: try add name conflict wit different types
-      ASSERT_EQ(0_z, prog.attributeNames().size());
+      ASSERT_EQ(0_z, prog.getAttributeNames().size());
       prog.addNewAttribute(GL_FLOAT, "a1");
       prog.addNewAttribute(GL_FLOAT_VEC2, "a2");
       prog.addNewAttribute(GL_FLOAT_VEC3, "a3");
       prog.addNewAttribute(GL_FLOAT_VEC4, "a4");
-      ASSERT_EQ(4_z, prog.attributeNames().size());
+      ASSERT_EQ(4_z, prog.getAttributeNames().size());
       ASSERT_EQ(true, prog.hasAttribute("a1"));
       ASSERT_EQ(true, prog.hasAttribute("a2"));
       ASSERT_EQ(true, prog.hasAttribute("a3"));
@@ -123,10 +125,10 @@ TESTSUITE(Programs)
 
       GLVertexShader shader("foo");
       prog.attachShader(shader);
-      auto shaderNames = prog.shaderNames();
-      ASSERT_EQ(1_z, shaderNames.size());
-      ASSERT_EQ(true, shaderNames.end() !=
-                std::find(shaderNames.begin(), shaderNames.end(), "foo"));
+      auto getShaderNames = prog.getShaderNames();
+      ASSERT_EQ(1_z, getShaderNames.size());
+      ASSERT_EQ(true, getShaderNames.end() !=
+                std::find(getShaderNames.begin(), getShaderNames.end(), "foo"));
 
       GLVAO vao2("VAO2");
       ASSERT_EQ(0, vao2.prog);

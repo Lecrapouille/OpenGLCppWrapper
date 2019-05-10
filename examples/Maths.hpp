@@ -1,6 +1,8 @@
 #ifndef MATHS_HPP
 #define MATHS_HPP
 
+namespace glwrap
+{
 namespace maths
 {
 
@@ -32,6 +34,7 @@ static inline T degrees(T const radians)
   return T(deg);
 }
 
-}
+} // namespace maths
+} // namespace glwrap
 
 #endif

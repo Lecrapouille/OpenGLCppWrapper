@@ -19,10 +19,12 @@
 //=====================================================================
 
 #include "GLWindow.hpp"
-#include "OpenGL.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+
+namespace glwrap
+{
 
 //------------------------------------------------------------------
 //! \brief Callback triggered when GLFW failed.
@@ -83,7 +85,7 @@ IGLWindow::IGLWindow(uint32_t const width, uint32_t const height, const char *ti
     m_height(height),
     m_title(title)
 {
-  opengl::hasCreatedContext() = false;
+  hasCreatedContext() = false;
 
   if (unlikely(nullptr == m_title)) { m_title = ""; }
   if (unlikely(0u == m_width)) { m_width = 1u; }
@@ -93,7 +95,7 @@ IGLWindow::IGLWindow(uint32_t const width, uint32_t const height, const char *ti
 //------------------------------------------------------------------
 IGLWindow::~IGLWindow()
 {
-  if (opengl::hasCreatedContext())
+  if (hasCreatedContext())
     {
       glfwTerminate();
     }
@@ -138,7 +140,7 @@ void IGLWindow::computeFPS()
 //------------------------------------------------------------------
 bool IGLWindow::start()
 {
-  if (opengl::hasCreatedContext())
+  if (hasCreatedContext())
     {
       std::cerr << "Warning you called twice start(). "
                 << "OpenGL context already created"
@@ -158,7 +160,7 @@ bool IGLWindow::start()
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  opengl::hasCreatedContext() = true;
+  hasCreatedContext() = true;
 
   // Open a window and create its OpenGL context
   m_window = glfwCreateWindow(m_width, m_height, m_title, nullptr, nullptr);
@@ -204,10 +206,10 @@ bool IGLWindow::start()
 
 l_runtime:
 
-  // This is an awful hack but this is to be sure to flush OpenGL
-  // errors before using this function on real OpenGL routines else a
-  // fake error is returned on the first OpenGL routines while valid.
-  glGetError();
+  // Flush OpenGL errors before using this function on real OpenGL
+  // routines else a fake error is returned on the first OpenGL
+  // routines while valid.
+  glCheck();
 
   int res;
   try
@@ -231,7 +233,7 @@ l_runtime:
     }
   catch (const OpenGLException& e)
     {
-      std::cerr << e.message() << std::endl;
+      std::cerr << "Caught exception: " << e.message() << std::endl;
       res = false;
     }
 
@@ -260,3 +262,5 @@ bool IGLWindow::loop()
   while (!keyPressed(GLFW_KEY_ESCAPE) && (0 == glfwWindowShouldClose(m_window)));
   return true;
 }
+
+} // namespace glwrap

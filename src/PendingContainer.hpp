@@ -18,14 +18,17 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef PENDING_CONTAINER_HPP
-#  define PENDING_CONTAINER_HPP
+#ifndef OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP
+#  define OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP
 
 #  include "PendingData.hpp"
 #  include <vector>
 #  include <algorithm>
 #  include <cmath>
 #  include <fstream>
+
+namespace glwrap
+{
 
 // **************************************************************
 //! \brief PendingContainer is a std::valarray memorizing elements
@@ -40,12 +43,12 @@ public:
     : PendingData()
   {}
 
-  PendingContainer(std::size_t count)
+  PendingContainer(size_t count)
     : PendingData(count),
       m_container(count)
   {}
 
-  PendingContainer(std::size_t count, T const& val)
+  PendingContainer(size_t count, T const& val)
     : PendingData(count),
       m_container(count, val)
   {}
@@ -53,8 +56,7 @@ public:
  PendingContainer(PendingContainer const& other)
    : PendingData(other.getPendingData()),
       m_container(other.m_container)
-  {
-  }
+  {}
 
   PendingContainer(std::vector<T> const& other)
     : PendingData(other.size()),
@@ -69,6 +71,14 @@ public:
   ~PendingContainer()
   {}
 
+  void debugDirty(const char* bla)
+  {
+    size_t pos_start, pos_end;
+    getPendingData(pos_start, pos_end);
+    DEBUG("%s Dirty %d %d", bla, (int) pos_start, (int) pos_end);
+    (void) bla;
+  }
+
   inline size_t capacity() const
   {
     return m_container.capacity();
@@ -79,7 +89,7 @@ public:
     return m_container.size();
   }
 
-  inline void reserve(std::size_t count)
+  inline void reserve(const size_t count)
   {
     throw_if_cannot_expand();
     m_container.reserve(count);
@@ -101,31 +111,47 @@ public:
     return m_container.operator[](nth);
   }
 
-  inline T& at(size_t nth)
+  inline T& at(const size_t nth)
   {
     return m_container.at(nth);
   }
 
-  inline T const& at(size_t nth) const
+  inline T const& at(const size_t nth) const
   {
     return m_container.at(nth);
+  }
+
+  void clear()
+  {
+    throw_if_cannot_expand();
+    m_container.clear();
+    clearPending(0_z);
   }
 
   void append(std::initializer_list<T> il)
   {
     throw_if_cannot_expand();
-    //size_t s = std::max(1_z, m_container.size()) - 1_z;
     m_container.insert(m_container.end(), il);
-    tagAsPending(/*s*/0_z, m_container.size() - 1_z);
+    tagAsPending(m_container.size() - 1_z);
+  }
+
+  void append(const T* other, const size_t size)
+  {
+    throw_if_cannot_expand();
+    m_container.insert(m_container.end(),
+                       other,
+                       other + size);
+    tagAsPending(m_container.size() - 1_z);
   }
 
   void append(std::vector<T> const& other)
   {
     throw_if_cannot_expand();
+
     m_container.insert(m_container.end(),
                        other.begin(),
                        other.end());
-    tagAsPending(0_z, m_container.size() - 1_z);
+    tagAsPending(m_container.size() - 1_z);
   }
 
   void append(PendingContainer const& other)
@@ -145,8 +171,9 @@ public:
   {
     T sum_of_elems = 0;
 
-    for (auto& n : m_container)
+    for (auto& n : m_container) {
       sum_of_elems += n;
+    }
 
     return sum_of_elems;
   }
@@ -192,24 +219,33 @@ public:
 #if 0
   inline PendingContainer<T>& operator=(PendingContainer<T> const& other)
   {
+    return this->operator=(other.m_container);
+  }
+
+  template<class U>
+  inline PendingContainer<T>& operator=(std::vector<U> const& other)
+  {
     const size_t my_size = m_container.size();
-    const size_t other_size = other.m_container.size();
+    const size_t other_size = other.size();
 
-    if (other_size > my_size)
+    if (other_size > my_size) {
       throw_if_cannot_expand();
+    }
 
-    m_container = other.m_container;
+    m_container = other;
     tagAsPending(0_z, other_size - 1_z);
     return *this;
   }
 
-  inline PendingContainer<T>& operator=(std::initializer_list<T> il)
+  template<class U>
+  inline PendingContainer<T>& operator=(std::initializer_list<U> il)
   {
     const size_t my_size = m_container.size();
     const size_t other_size = il.size();
 
-    if (other_size > my_size)
+    if (other_size > my_size) {
       throw_if_cannot_expand();
+    }
 
     m_container = il;
     tagAsPending(0_z, other_size - 1_z);
@@ -217,34 +253,43 @@ public:
   }
 #endif
 
-  inline PendingContainer<T>& operator*=(T const& val)
+  template<class U>
+  inline PendingContainer<T>& operator*=(U const& val)
   {
     //FIXME return apply([val](T& x){ x *= val; });
-    for (auto& x: m_container)
+    for (auto& x: m_container) {
       x *= val;
+    }
+    tagAsPending(0_z, m_container.size() - 1_z);
     return *this;
   }
 
-  inline PendingContainer<T>& operator+=(T const& val)
+  template<class U>
+  inline PendingContainer<T>& operator+=(U const& val)
   {
     //FIXME return apply([val](T& x){ x += val; });
-    for (auto& x: m_container)
+    for (auto& x: m_container) {
       x += val;
+    }
+    tagAsPending(0_z, m_container.size() - 1_z);
     return *this;
   }
 
-  inline PendingContainer<T>& operator-=(T const& val)
+  template<class U>
+  inline PendingContainer<T>& operator-=(U const& val)
   {
     //FIXME return apply([val](T& x){ x -= val; });
-    for (auto& x: m_container)
+    for (auto& x: m_container) {
       x -= val;
+    }
+    tagAsPending(0_z, m_container.size() - 1_z);
     return *this;
   }
 
-  inline PendingContainer<T>& operator/=(T const& val)
+  template<class U>
+  inline PendingContainer<T>& operator/=(U const& val)
   {
-    constexpr T inv = T(1) / val;
-    return PendingContainer<T>::operator*=(inv);
+    return PendingContainer<T>::operator*=(U(1) / val);
   }
 
   friend std::ostream& operator<<(std::ostream& stream, const PendingContainer& cont)
@@ -253,15 +298,35 @@ public:
     if (cont.size())
       {
         stream << cont[0];
-        for (size_t i = 1_z; i < cont.size(); ++i)
+        for (size_t i = 1_z; i < cont.size(); ++i) {
           stream << ", " << cont[i];
+        }
       }
     return stream;
   };
 
+  inline T* to_array()
+  {
+    if (likely(0_z != m_container.size()))
+      {
+        return m_container.data();
+      }
+    else
+      {
+        return nullptr;
+      }
+  }
+
   inline const T* to_array() const
   {
-    return &m_container[0];
+    if (likely(0_z != m_container.size()))
+      {
+        return m_container.data();
+      }
+    else
+      {
+        return nullptr;
+      }
   }
 
   //private:
@@ -269,8 +334,9 @@ protected:
 
   inline void throw_if_cannot_expand()
   {
-     if (likely(!m_can_expand))
-       throw std::out_of_range("Cannot change buffer size once loaded on GPU");
+    if (likely(!m_can_expand)) {
+      throw std::out_of_range("Cannot change buffer size once loaded on GPU");
+    }
   }
 
   inline void set_cannot_expand()
@@ -282,4 +348,6 @@ protected:
   std::vector<T> m_container;
 };
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP

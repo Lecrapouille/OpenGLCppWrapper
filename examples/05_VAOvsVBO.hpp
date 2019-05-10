@@ -18,44 +18,46 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_06_HPP
-#  define EXAMPLE_06_HPP
+#ifndef EXAMPLE_05_VAOS_VERSUS_VBOS_HPP
+#  define EXAMPLE_05_VAOS_VERSUS_VBOS_HPP
 
-#  include "OpenGL.hpp"
-#  include "Movable.hpp"
-#  include "Maths.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include <iostream>
 
-class GLExample06: public IGLWindow
+using namespace glwrap;
+
+// *****************************************************************
+//! \brief
+// *****************************************************************
+class GLExample05: public IGLWindow
 {
 public:
 
-  GLExample06()
-    : m_vao("VAO"),
-      m_prog("prog")
-  {
-  }
+  GLExample05()
+    : m_cube("VAO_cube"),
+      m_floor("VAO_floor"),
+      m_prog("Prog")
+  {}
 
-  ~GLExample06()
-  {
-    std::cout << "Bye" << std::endl;
-  }
+  ~GLExample05()
+  {}
 
-private:
+protected:
 
+  bool cubeSetup();
+  bool floorSetup();
   virtual void onWindowSizeChanged(const float width, const float height) override;
   virtual bool setup() override;
   virtual bool draw() override;
-  void buildTerrain();
-  void drawTerrain();
 
 private:
 
-  GLVertexShader      vs;
-  GLFragmentShader    fs;
-  GLVAO               m_vao;
-  GLProgram           m_prog;
-  std::vector <float> m_terrain;
+  GLVertexShader     m_vertex_shader;
+  GLFragmentShader   m_fragment_shader;
+  GLVAO              m_cube;
+  GLVAO              m_floor;
+  GLProgram          m_prog;
+  Movable<float, 3U> m_movable;
 };
 
-#endif // EXAMPLE_06_HPP
+#endif // EXAMPLE_05_VAOS_VERSUS_VBOS_HPP

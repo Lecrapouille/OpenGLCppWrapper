@@ -18,14 +18,12 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef GL_EXCEPTION_HPP
-#define GL_EXCEPTION_HPP
+#ifndef OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
+#  define OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
 
-#  include "private/Exception.hpp"
+#  include "GLProgram.hpp"
+#  include "GLFrameBuffers.hpp"
+#  include "GLImGUI.hpp"
+#  include "SceneGraph.hpp"
 
-// ***********************************************************************************************
-//! \brief This macro will declare a class OpenGLException derived from Exception.
-// ***********************************************************************************************
-DECLARE_EXCEPTION(OpenGLException, Exception)
-
-#endif
+#endif // OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP

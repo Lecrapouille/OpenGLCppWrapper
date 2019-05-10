@@ -18,33 +18,28 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_05_HPP
-#  define EXAMPLE_05_HPP
+#ifndef EXAMPLE_10_SIMPLE_FRAMEBUFFER_HPP
+#  define EXAMPLE_10_SIMPLE_FRAMEBUFFER_HPP
 
-#  include "OpenGL.hpp"
-#  include "Camera.hpp"
-#  include "Maths.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include <iostream>
 
-class GLExample05: public IGLWindow
+using namespace glwrap;
+
+class GLExample10: public IGLWindow
 {
 public:
 
-  GLExample05()
-    : m_cube("Cube"),
-      m_skybox("SkyBox"),
-      m_progCube("progCube"),
-      m_progSkyBox("progSkyBox"),
-      m_camera(Vector3f(0.0f, 0.0f, 3.0f))
-  {
-  }
+  GLExample10()
+    : m_prog_plane("prog_plane"),
+      m_plane("VAO_plane"),
+      m_prog_screen("prog_screen"),
+      m_screen("VAO_screen"),
+      m_fbo("FBO")
+  {}
 
-  ~GLExample05()
-  {
-    std::cout << "Bye" << std::endl;
-  }
-
-  virtual void onMouseMoved(const double xpos, const double ypos) override;
+  ~GLExample10()
+  {}
 
 private:
 
@@ -54,11 +49,17 @@ private:
 
 private:
 
-  GLVertexShader     vs1, vs2;
-  GLFragmentShader   fs1, fs2;
-  GLVAO              m_cube, m_skybox;
-  GLProgram          m_progCube, m_progSkyBox;
-  Camera             m_camera;
+  GLVertexShader      m_vs_plane;
+  GLFragmentShader    m_fs_plane;
+  GLProgram           m_prog_plane;
+  GLVAO               m_plane;
+
+  GLVertexShader      m_vs_screen;
+  GLFragmentShader    m_fs_screen;
+  GLProgram           m_prog_screen;
+  GLVAO               m_screen;
+
+  GLFrameBuffer       m_fbo;
 };
 
-#endif // EXAMPLE_05_HPP
+#endif // EXAMPLE_10_SIMPLE_FRAMEBUFFER_HPP

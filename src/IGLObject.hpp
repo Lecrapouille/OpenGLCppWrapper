@@ -24,11 +24,13 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef IGLOBJECT_HPP
-#  define IGLOBJECT_HPP
+#ifndef OPENGLCPPWRAPPER_IGLOBJECT_HPP
+#  define OPENGLCPPWRAPPER_IGLOBJECT_HPP
 
-#  include "private/NonCppStd.hpp"
-#  include "GLEnum.hpp"
+#  include "OpenGL.hpp"
+
+namespace glwrap
+{
 
 // *****************************************************************************
 //! \class IGLObject IGLObject.hpp
@@ -76,11 +78,19 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the reference of the name of the object.
+  //! \brief Return the const reference of the name of the object.
   //----------------------------------------------------------------------------
-  inline std::string& name()
+  inline const std::string& name() const
   {
     return m_name;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the const char* of the name of the object.
+  //----------------------------------------------------------------------------
+  inline const char* cname() const
+  {
+    return m_name.c_str();
   }
 
   //----------------------------------------------------------------------------
@@ -168,7 +178,7 @@ public:
   //----------------------------------------------------------------------------
   void begin()
   {
-    /* FIXME if (unlikely(!opengl::hasCreatedContext()))
+    /* FIXME if (unlikely(!hasCreatedContext()))
        {
        DEBUG("O::begin perdu");
        return ;
@@ -188,10 +198,12 @@ public:
           {
             m_need_setup = setup();
             if (unlikely(m_need_setup))
-              return ;
+              {
+                return ;
+              }
           }
 
-        if (likely(needUpdate()))
+        if (unlikely(needUpdate()))
           {
             m_need_update = update();
           }
@@ -203,7 +215,7 @@ public:
   //----------------------------------------------------------------------------
   inline void end()
   {
-    /*if (unlikely(!opengl::hasCreatedContext()))
+    /*if (unlikely(!hasCreatedContext()))
       return ;*/
 
     deactivate();
@@ -217,7 +229,7 @@ public:
   //----------------------------------------------------------------------------
   virtual void destroy()
   {
-    if (opengl::hasCreatedContext())
+    if (hasCreatedContext())
       {
         if (isValid())
           {
@@ -279,15 +291,6 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Pure virtual. Configure the object behvior on the GPU.
-  //!
-  //! \return false if the object has been setup by the GPU and does
-  //! not be setup again. Return true if the GPU failed to setup
-  //! the object and setup() needs to be called again.
-  //----------------------------------------------------------------------------
-  virtual bool setup() = 0;
-
-  //----------------------------------------------------------------------------
   //! \brief Pure virtual. Allocate resources on the GPU.
   //!
   //! \return false if the object has been created by the GPU and does
@@ -302,14 +305,13 @@ private:
   virtual void activate() = 0;
 
   //----------------------------------------------------------------------------
-  //! \brief Pure virtual. Deactivate the object on the GPU.
+  //! \brief Pure virtual. Configure the object behvior on the GPU.
+  //!
+  //! \return false if the object has been setup by the GPU and does
+  //! not be setup again. Return true if the GPU failed to setup
+  //! the object and setup() needs to be called again.
   //----------------------------------------------------------------------------
-  virtual void deactivate() = 0;
-
-  //----------------------------------------------------------------------------
-  //! \brief Pure virtual. Delete the object from GPU memory.
-  //----------------------------------------------------------------------------
-  virtual void release() = 0;
+  virtual bool setup() = 0;
 
   //----------------------------------------------------------------------------
   //! \brief Pure virtual. Update the object on the GPU.
@@ -319,6 +321,16 @@ private:
   //! to be transferred again.
   //----------------------------------------------------------------------------
   virtual bool update() = 0;
+
+  //----------------------------------------------------------------------------
+  //! \brief Pure virtual. Deactivate the object on the GPU.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() = 0;
+
+  //----------------------------------------------------------------------------
+  //! \brief Pure virtual. Delete the object from GPU memory.
+  //----------------------------------------------------------------------------
+  virtual void release() = 0;
 
 private:
 
@@ -350,4 +362,6 @@ inline GLenum IGLObject<GLenum>::initialHandleValue() const { return 0u; }
 template<>
 inline GLint IGLObject<GLint>::initialHandleValue() const { return -1; }
 
-#endif /* IGLOBJECT_HPP */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_IGLOBJECT_HPP

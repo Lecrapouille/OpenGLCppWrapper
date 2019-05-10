@@ -9,6 +9,9 @@
 
 #include "Exception.hpp"
 
+namespace glwrap
+{
+
 Exception::Exception(int code)
   : m_pNested(0), m_code(code)
 {
@@ -112,8 +115,9 @@ Exception* Exception::clone() const
 }
 
 
-__attribute__((__noreturn__))
-void Exception::rethrow() const
+NORETURN void Exception::rethrow() const
 {
   throw *this;
 }
+
+} // namespace glwrap

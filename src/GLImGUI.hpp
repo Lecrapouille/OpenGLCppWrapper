@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef GLIMGUI_HPP
-#  define GLIMGUI_HPP
+#ifndef OPENGLCPPWRAPPER_GLIMGUI_HPP
+#  define OPENGLCPPWRAPPER_GLIMGUI_HPP
 
 // *****************************************************************************
 //! \file GLImGUI.hpp wraps function calls of the ImGUI project.
@@ -29,6 +29,9 @@
 #  include "imgui/imgui.h"
 #  include "imgui/imgui_impl_glfw.h"
 #  include "imgui/imgui_impl_opengl3.h"
+
+namespace glwrap
+{
 
 // **************************************************************
 //! \brief Class wrapper for the dear imgui library: an imediate
@@ -60,7 +63,7 @@ public:
   bool setup(IGLWindow &window)
   {
     ImGui::CreateContext();
-    ImGui_ImplGlfw_InitForOpenGL(window.obj(), true);
+    ImGui_ImplGlfw_InitForOpenGL(window.window(), true);
     ImGui_ImplOpenGL3_Init(NULL);
     ImGui::StyleColorsDark();
 
@@ -98,4 +101,6 @@ protected:
   virtual bool render() = 0;
 };
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLIMGUI_HPP

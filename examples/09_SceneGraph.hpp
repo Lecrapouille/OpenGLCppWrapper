@@ -18,14 +18,13 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE02_HPP
-#  define EXAMPLE02_HPP
+#ifndef EXAMPLE_09_SCENEGRAPH_HPP
+#  define EXAMPLE_09_SCENEGRAPH_HPP
 
-#  include "GLImGUI.hpp"
-#  include "OpenGL.hpp"
-#  include "SceneGraph.hpp"
-#  include "Maths.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include <iostream>
+
+using namespace glwrap;
 
 //------------------------------------------------------------------
 //! \brief Define a 3D SceneGraph node (matrix 4x4 of float + VAO)
@@ -106,14 +105,18 @@ private:
 //! are nodes of the scere graph. Each element of robots is also a
 //! part of the scene graph.
 // *****************************************************************
-class GLExample02
+class GLExample09
   : public IGLWindow,
     public ISceneGraphRenderer<GLVAO, float, 3u>
 {
 public:
 
-  GLExample02();
-  ~GLExample02();
+  GLExample09()
+    : m_prog("GLProgram")
+  {}
+
+  ~GLExample09()
+  {}
 
 private:
 
@@ -126,12 +129,12 @@ private:
 
 private:
 
-  GLVertexShader    vs;
-  GLFragmentShader  fs;
+  GLVertexShader    m_vertex_shader;
+  GLFragmentShader  m_fragment_shader;
   VAOPtr            m_cube;
   GLProgram         m_prog;
   SceneGraph        m_scenegraph;
-  GLImGUI           m_gui;
+  GLImGUI           m_imgui;
 };
 
-#endif // EXAMPLE_02_HPP
+#endif // EXAMPLE_09_SCENEGRAPH_HPP

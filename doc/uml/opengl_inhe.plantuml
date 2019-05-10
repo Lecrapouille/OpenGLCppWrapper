@@ -57,44 +57,69 @@ class PendingContainer<C> {
 PendingData <|-- PendingContainer
 
 class IGLTexture<GLenum> {
+-std::container<byte> data
 +IGLTexture(target: GLenum)
++width(): uint32
++height(): uint32
++depth(): uint32
++{abstract} loaded(): bool = 0
 -{abstract} create(): bool
--{abstract} setup(): bool
 -{abstract} activate()
--{abstract} update(): bool
 -{abstract} deactivate()
 -{abstract} release(): bool
+-width: uint32
+-height: uint32
+-depth: uint32
 }
 
 class GLTexture2D {
--image[]: byte
 +IGLTexture(GL_TEXTURE_2D)
 +load(filename: string): bool
-+operator[](uint32_t): uint8_t&
-+operator[](uint32_t) const: uint8_t& const
-+width(): uint32_t
-+height(): uint32_t
++operator[](uint32): byte&
++{abstract} loaded(): bool
+-{abstract} setup(): bool
+-{abstract} update(): bool
 -gpu_format = GL_RGBA
 -cpu_format = GL_RGBA
 }
 
-class GLTextureDepth2D {
+class GLTexture2DDepth {
 -gpu_format = GL_DEPTH_COMPONENT
 -cpu_format = GL_DEPTH_COMPONENT
 }
 
 class GLTexture3D {
++IGLTexture(GL_TEXTURE_CUBE_3D)
++load(filenames[]: string): bool
++{abstract} loaded(): bool
+-{abstract} setup(): bool
+-{abstract} update(): bool
+}
+
+class GLTextureCube {
 +IGLTexture(GL_TEXTURE_CUBE_MAP)
++load(filenames[6]: string): bool
++{abstract} loaded(): bool
+-{abstract} setup(): bool
+-{abstract} update(): bool
+-textures[6]: GLTexture2D
 }
 
 class GLTexture1D {
 +IGLTexture(GL_TEXTURE_1D)
++operator[](uint32): byte&
++{abstract} loaded(): bool
+-{abstract} setup(): bool
+-{abstract} update(): bool
 }
 
 IGLTexture <|-- GLTexture1D
 IGLTexture <|-- GLTexture2D
-GLTexture2D <|-- GLTextureDepth2D
+GLTexture2D <|-- GLTexture2DDepth
+GLTexture2D <|-- GLTexture2DFloat
+GLTextureCube *-> "6" GLTexture2D
 IGLTexture <|-- GLTexture3D
+IGLTexture <|-- GLTextureCube
 
 class GLShaders<GLuint> {
 +GLShaders(target: GLenum)
@@ -145,6 +170,22 @@ class GLVAO<GLenum> {
 -{abstract} release(): bool
 }
 
+class GLFrameBuffer<GLenum> {
+-GLRenderBuffer[] buffers
++resize(w: uint32, h: uint32)
++render(f: Functor)
++getColorTexture(texture: GLTexture2D&)
++createColorBuffer()
++createDepthBuffer()
++createStencilBuffer()
+-{abstract} create(): bool
+-{abstract} setup(): bool
+-{abstract} activate()
+-{abstract} update(): bool
+-{abstract} deactivate()
+-{abstract} release(): bool
+}
+
 class GLRenderBuffer<GLenum> {
 + GLRenderBuffer(target : GLenum)
 -{abstract} create(): bool
@@ -153,6 +194,12 @@ class GLRenderBuffer<GLenum> {
 -{abstract} update(): bool
 -{abstract} deactivate()
 -{abstract} release(): bool
+}
+
+class GLTextureBuffer {
+-texture: GLTexture2D
++GLTextureBuffer(GLTexture2D)
+-format=GL_RGBA
 }
 
 class GLColorBuffer {
@@ -181,36 +228,7 @@ class GLLocation<GLint> {
 +GLLocation(name: string, location: GLint, dim: GLint)
 +location(): GLint
 +dim(): GLint
-}
-
-class GLUniform<T> {
-+operator=(val: T&)
--{abstract} create(): bool
--{abstract} setup(): bool
--{abstract} activate()
--{abstract} update(): bool
--{abstract} deactivate()
--{abstract} release(): bool
--data: T
-}
-
-class GLSampler<T> {
-+operator=(val: T&)
--{abstract} activate()
--update(): bool
--data: T
-}
-
-class GLSampler1D<T=GLTexture1D> {
--data: GLTexture1D
-}
-
-class GLSampler2D<T=GLTexture2D> {
--data: GLTexture2D
-}
-
-class GLSampler3D<T=GLTexture3D> {
--data: GLTexture3D
++type(): GLenum
 }
 
 class GLAttribute {
@@ -222,25 +240,90 @@ class GLAttribute {
 -{abstract} release(): bool
 }
 
+class GLIUniform {
++operator=(val: T&)
+-{abstract} create(): bool
+-{abstract} setup(): bool
+-{abstract} activate()
+-{abstract} update(): bool
+-{abstract} deactivate()
+-{abstract} release(): bool
+}
+
+class GLUniform<T> {
++operator=(val: T&)
++data(): T&
+-{abstract} update(): bool
+-data: T
+}
+
+class GLUniform<float> {
+}
+class "GLUniform<float>" as GLUniformFloat
+
+class GLUniform<Vectorxf> {
+}
+class "GLUniform<Vectorxf>" as GLUniformVectorxf
+
+class GLUniform<Matrixyyf> {
+}
+class "GLUniform<Matrixyyf>" as GLUniformMatrixyyf
+
+
+class GLSampler {
++textureId(): GLenum
+-{abstract} activate()
+-{abstract} update(): bool
+-texture_id: GLenum
+}
+
+class GLSampler1D {
+}
+
+class GLSampler2D {
+}
+
+class GLSampler3D {
+}
+
+class GLSamplerCube {
+}
+
+class GLSampler1D {
+}
+
 GLLocation <|-- GLAttribute
-GLLocation <|-- GLUniform
-GLUniform <|-- GLSampler
+GLLocation <|-- GLIUniform
+GLIUniform <|-- GLUniform
+GLUniform <|-- GLUniformFloat
+GLUniform <|-- GLUniformVectorxf
+GLUniform <|-- GLUniformMatrixyyf
+GLIUniform <|-- GLSampler
 GLSampler  <|-- GLSampler1D
 GLSampler  <|-- GLSampler2D
 GLSampler  <|-- GLSampler3D
+GLSampler  <|-- GLSamplerCube
 
-PendingData <|-- IGLTexture
+PendingContainer "1" <--* IGLTexture
 IGLObject <|-- IGLTexture
 IGLObject <|-- GLVBO
 PendingContainer <|-- GLVBO
 IGLObject <|-- GLVAO
+GLVAO o-> "*" GLVBO
+IGLTexture "*" <-o GLVAO
 IGLObject <|-- GLShaders
+GLProgram -> "*" GLShaders
 IGLObject <|-- GLProgram
-GLLocation -|> IGLObject
+GLLocation "*" <-o GLProgram
+IGLObject <|-- GLLocation
 
+IGLObject <|-- GLFrameBuffer
 IGLObject <|-- GLRenderBuffer
+GLRenderBuffer "*" <- GLFrameBuffer
 GLRenderBuffer <|-- GLColorBuffer
 GLRenderBuffer <|-- GLDepthBuffer
 GLRenderBuffer <|-- GLStencilBuffer
+GLRenderBuffer <|-- GLTextureBuffer
+GLTexture2D "1" <-* GLTextureBuffer
 
 @enduml

@@ -110,8 +110,8 @@ below).
   Program ...). You can see that like a global variable inside the
   OpenGL state machine that you change with bind functions. The main
   advantage is that do not have to pass this object identifier in all
-  OpenGL functions. They all refer to binded objects (this would also
-  avoid to OpenGL to get more than one binded objects). The drawback
+  OpenGL functions. They all refer to bound objects (this would also
+  avoid to OpenGL to get more than one bound objects). The drawback
   with this method, is that you can easily forget to bind/unbind
   identifiers.
 
@@ -237,7 +237,7 @@ Init phase:
   and is optional.
 
 * You have to create a GLVAO which will manages a set of GLVBOs. VBOs
-  are created in the VAO when this one is binded to a GLProgram. Call
+  are created in the VAO when this one is bound to a GLProgram. Call
   the method GLProgram::createVAO(VAO&) to init has much as VAO as
   needed. Technically, VBOs and VAOs are not necessary yet created in
   the GPU: they will soon or later.

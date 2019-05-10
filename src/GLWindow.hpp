@@ -18,16 +18,18 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef GLWINDOW_HPP
-#  define GLWINDOW_HPP
+#ifndef OPENGLCPPWRAPPER_GLWINDOW_HPP
+#  define OPENGLCPPWRAPPER_GLWINDOW_HPP
 
 // *****************************************************************************
 //! \file GLWindow.hpp manages a window and its i/o for drawing OpenGL scenes.
 // *****************************************************************************
 
-#  include <GL/glew.h>
+#  include "OpenGL.hpp"
 #  include <GLFW/glfw3.h>
-#  include "GLException.hpp"
+
+namespace glwrap
+{
 
 // *****************************************************************************
 //! \class GLWindow GLWindow.hpp
@@ -75,9 +77,17 @@ public:
   }
 
   //------------------------------------------------------------------
+  //! \brief Return the number of frame per seconds.
+  //------------------------------------------------------------------
+  inline uint32_t fps() const
+  {
+    return m_fps;
+  }
+
+  //------------------------------------------------------------------
   //! \brief Return the address of the GLFW window.
   //------------------------------------------------------------------
-  inline GLFWwindow *obj()
+  inline GLFWwindow *window()
   {
     return m_window;
   }
@@ -166,9 +176,9 @@ private:
 
 private:
 
-  double m_lastTime;
-  double m_lastFrameTime;
-  int m_fps;
+  double m_lastTime = 0.0;
+  double m_lastFrameTime = 0.0;
+  int m_fps = 0;
   float m_deltaTime = 0.0f;
 
   uint32_t m_width;
@@ -177,4 +187,6 @@ private:
   GLFWwindow *m_window = nullptr;
 };
 
-#endif /* GLWINDOW_HPP_ */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLWINDOW_HPP

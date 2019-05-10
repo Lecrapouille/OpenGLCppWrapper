@@ -24,352 +24,677 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLFRAMEBUFFERS_HPP
-#define GLFRAMEBUFFERS_HPP
+#ifndef OPENGLCPPWRAPPER_GLFRAMEBUFFER_HPP
+#define OPENGLCPPWRAPPER_GLFRAMEBUFFER_HPP
 
-#  include "IGLObject.hpp"
+#  include "GLTextures.hpp"
+#  include <vector>
 
-// **************************************************************
-//
-// **************************************************************
+namespace glwrap
+{
+
+// *****************************************************************************
+//! \brief Base class for render buffer object.
+// *****************************************************************************
 class GLRenderBuffer
   : public IGLObject<GLenum>
 {
 public:
 
-  GLRenderBuffer(const uint32_t width,
+  //----------------------------------------------------------------------------
+  //! \brief Constructor. This constructor does no actions.
+  //!
+  //! \param name Name of the buffer needed for hash table.
+  //! \param width Buffer width (pixels)
+  //! \param height Buffer height (pixel)
+  //! \param format Buffer format
+  //----------------------------------------------------------------------------
+  GLRenderBuffer(std::string const& name,
+                 const uint32_t width,
                  const uint32_t height,
+                 const GLenum attachment,
                  const GLenum format)
-    : IGLObject()
+    : IGLObject(name)
   {
     m_width = width;
     m_height = height;
+    m_attachment = attachment;
     m_format = format;
     m_target = GL_RENDERBUFFER;
-    m_need_resize = true;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  virtual void attach() = 0;
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  virtual void draw() const
+  {}
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  virtual ~GLRenderBuffer()
+  {
+    destroy();
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the Buffer width (pixels).
+  //----------------------------------------------------------------------------
   inline uint32_t width() const
   {
     return m_width;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the Buffer height (pixels).
+  //----------------------------------------------------------------------------
   inline uint32_t height() const
   {
     return m_height;
   }
 
-  void resize(const uint32_t width,
-              const uint32_t height)
+  //----------------------------------------------------------------------------
+  //! \brief Resize the buffer.
+  //!
+  //! This operation is deferred (applied at next cycle).
+  //!
+  //! \fixme Width/height should be checked against maximum size
+  //! \param width New buffer width (pixels)
+  //! \param height New buffer height (pixel)
+  //----------------------------------------------------------------------------
+  void resize(const uint32_t width, const uint32_t height)
   {
+    // FIXME: nothing is made because pending_attach is empty
     if ((m_width != width) || (m_height != height))
       {
         m_width = width;
         m_height = height;
-        m_need_resize = true;
+        redoSetup();
       }
+  }
+
+private:
+
+  //----------------------------------------------------------------------------
+  //! \brief Create buffer on GPU.
+  //!
+  //! \return false to avoid calling again this method.
+  //----------------------------------------------------------------------------
+  virtual bool create() override
+  {
+    glCheck(glGenRenderbuffers(1, &m_handle));
+    return false;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Set the buffer as active buffer.
+  //----------------------------------------------------------------------------
+  virtual void activate() override
+  {
+    glCheck(glBindRenderbuffer(m_target, m_handle));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Apply new size.
+  //!
+  //! \return false to avoid calling again this method.
+  //----------------------------------------------------------------------------
+  virtual bool setup() override
+  {
+    glCheck(glRenderbufferStorage(m_target, m_format, m_width, m_height));
+    return false;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief No action is made (dummy function).
+  //!
+  //! \return false to avoid calling again this method.
+  //----------------------------------------------------------------------------
+  virtual bool update() override
+  {
+    return false;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Unbind the buffer.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() override
+  {
+    glCheck(glBindRenderbuffer(m_target, 0));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Release GPU memory.
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {
+    glCheck(glDeleteRenderbuffers(1, &m_handle));
+  }
+
+protected:
+
+  uint32_t m_width;
+  uint32_t m_height;
+  GLenum   m_attachment;
+  GLenum   m_format;
+};
+
+// *****************************************************************************
+//! \brief GLRenderBuffer holding a texture.
+// *****************************************************************************
+class GLTextureBuffer
+  : public GLRenderBuffer
+{
+public:
+
+  GLTextureBuffer(GLTexture2D& texture,
+                  const uint32_t width,
+                  const uint32_t height,
+                  const GLenum attachment,
+                  const PixelFormat format = PixelFormat::RGBA)
+    : GLRenderBuffer(texture.name(), width, height, attachment, static_cast<GLenum>(format)),
+      m_texture(texture)
+  {
+    m_texture.m_width = width;
+    m_texture.m_height = height;
+  }
+
+  inline GLTexture2D& texture()
+  {
+    return m_texture;
+  }
+
+  virtual void attach() override
+  {
+    glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, m_attachment,
+                                   m_texture.target(), m_texture.gpuID(), 0));
   }
 
 private:
 
   virtual bool create() override
   {
-    m_handle = glGenRenderbuffers(1);
-    return false;
-  }
-
-  virtual void release() override
-  {
-    glDeleteRenderbuffer(m_handle);
-  }
-
-  virtual bool setup() override
-  {
+    m_texture.begin();
     return false;
   }
 
   virtual void activate() override
   {
-    glBindRenderbuffer(m_target, m_handle);
-    if (m_need_resize)
-      {
-        glRenderbufferStorage(m_target, m_format,
-                              m_width, m_height);
-        m_need_resize = false;
-      }
+    m_texture.begin();
+  }
+
+  virtual bool setup() override
+  {
+    m_texture.begin();
+    return false;
   }
 
   virtual bool update() override
   {
+    m_texture.begin();
     return false;
   }
 
   virtual void deactivate() override
   {
-    glBindRenderbuffer(m_target, 0);
+    m_texture.end();
   }
+
+  virtual void release() override
+  {}
 
 private:
 
-  uint32_t m_width;
-  uint32_t m_height;
-  GLenum   m_format;
-  bool     m_need_resize;
+  GLTexture2D& m_texture;
 };
 
-// **************************************************************
-//
-// **************************************************************
+// *****************************************************************************
+//! \brief Color buffer object.
+// *****************************************************************************
 class GLColorBuffer
   : public GLRenderBuffer
 {
 public:
 
-  GLColorBuffer(const uint32_t width,
+  GLColorBuffer(std::string const& name,
+                const uint32_t width,
                 const uint32_t height,
-                const GLenum format = GL_RGBA)
-    : GLRenderBuffer(width, height, format)
+                const GLenum attachment,
+                const PixelFormat format = PixelFormat::RGBA)
+    : GLRenderBuffer(name, width, height, attachment, static_cast<GLenum>(format))
+  {}
+
+  virtual void attach() override
   {
+    glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, m_attachment, m_target, m_handle));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  virtual void draw() const override
+  {
+    glCheck(glDrawBuffers(1, &m_attachment));
   }
 };
 
-// **************************************************************
-//
-// **************************************************************
+// *****************************************************************************
+//! \brief Depth buffer object.
+// *****************************************************************************
 class GLDepthBuffer
   : public GLRenderBuffer
 {
 public:
 
-  GLDepthBuffer(const uint32_t width,
+  GLDepthBuffer(std::string const& name,
+                const uint32_t width,
                 const uint32_t height,
-                const GLenum format = GL_DEPTH_COMPONENT)
-    : GLRenderBuffer(width, height, format)
+                const PixelFormat format = PixelFormat::DEPTH_COMPONENT)
+    : GLRenderBuffer(name, width, height, GL_DEPTH_ATTACHMENT, static_cast<GLenum>(format))
+  {}
+
+  virtual void attach() override
   {
+    glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, m_attachment, m_target, m_handle));
   }
 };
 
-// **************************************************************
-//
-// **************************************************************
+// *****************************************************************************
+//! \brief Stencil buffer object.
+// *****************************************************************************
 class GLStencilBuffer
   : public GLRenderBuffer
 {
 public:
 
-  GLStencilBuffer(const uint32_t width,
+  GLStencilBuffer(std::string const& name,
+                  const uint32_t width,
                   const uint32_t height,
-                  const GLenum format = GL_STENCIL_INDEX8)
-    : GLRenderBuffer(width, height, format)
+                  const PixelFormat format = PixelFormat::STENCIL_INDEX)
+    : GLRenderBuffer(name, width, height, GL_STENCIL_ATTACHMENT, static_cast<GLenum>(format))
+  {}
+
+  virtual void attach() override
   {
+    glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, m_attachment, m_target, m_handle));
   }
 };
 
-// **************************************************************
-//
-// **************************************************************
+// *****************************************************************************
+//! \class GLFrameBuffer GLFrameBuffers.hpp
+//!
+//! \brief A framebuffer is a collection of buffers that can be used
+//! as the destination for rendering.
+//!
+//! A framebuffer has at least one buffer (color, depth or stencil buffer).
+//! It has one or several color buffers, zero or one depth buffer and zero
+//! or one stencil buffer.
+// *****************************************************************************
 class GLFrameBuffer
   : public IGLObject<GLenum>
 {
 public:
 
-  GLFrameBuffer()
-    : IGLObject()
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  GLFrameBuffer(std::string const& name)
+    : IGLObject(name)
   {
+    m_target = GL_FRAMEBUFFER;
   }
 
-  void addColorTexture(GLTexture2D const& texture)
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  GLFrameBuffer(std::string const& name,
+                const uint32_t width, const uint32_t height,
+                const uint8_t nb_colors = 1u, // FIXME: use enum to detect error at compile-time
+                const bool with_depth = true, const bool with_stencil = false)
+    : IGLObject(name)
   {
+    m_target = GL_FRAMEBUFFER;
+    m_width = width;
+    m_height = height;
+
+    if (likely(nb_colors <= 16))
+      {
+        uint8_t i = nb_colors;
+        while (i--)
+          {
+            createColorBuffer();
+          }
+
+        if (with_depth)
+          {
+            createDepthBuffer();
+          }
+
+        if (with_stencil)
+          {
+            createStencilBuffer();
+          }
+      }
+    else
+      {
+        throw OpenGLException("FrameBuffer cannot hold more than 16 color buffers");
+      }
   }
 
-  void addDepthTexture(GLTexture2D const& texture)
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  virtual ~GLFrameBuffer()
   {
+    destroy();
   }
 
-  void addStencilTexture(GLTexture2D const& texture)
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  template<typename Functor>
+  void render(Functor functor)
   {
+    begin();
+    functor();
+    end();
   }
 
-  void addColorBuffer(GLColorBuffer const& color_buf)
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  template<typename Functor>
+  void render(const uint32_t x, const uint32_t y,
+              const uint32_t width, const uint32_t height,
+              Functor functor)
   {
-    throw_if_bad_dim(color_buf);
-    m_color_buffers.push_back(color_buf);
-    target = GL_COLOR_ATTACHMENT0 + m_color_buffers.size() - 1;
-    m_pending_attachments.push_back(std::make_pair(target, &(m_color_buffers.back())));
-    m_need_attach = true;
+    begin();
+    glCheck(glViewport(static_cast<GLint>(x), static_cast<GLint>(y),
+                       static_cast<GLsizei>(width), static_cast<GLsizei>(height)));
+    functor();
+    end();
   }
 
-  void addDepthBuffer(GLDepthBuffer const& depth_buf)
+  //----------------------------------------------------------------------------
+  //! \brief Resize all buffer sizes.
+  //! \param width New buffer width (pixels)
+  //! \param height New buffer height (pixel)
+  //----------------------------------------------------------------------------
+  GLFrameBuffer& resize(const uint32_t width, const uint32_t height)
   {
-    throw_if_bad_dim(depth_buf);
-    m_depth_buffer = depth_buf;
-    target = GL_DEPTH_ATTACHMENT;
-    m_pending_attachments.push_back(std::make_pair(target, &m_depth_buffer));
-    m_need_attach = true;
+    m_width = width;
+    m_height = height;
+
+    for (auto& it: m_color_buffers) {
+      it->resize(width, height);
+      m_pending_attachments.push_back(it);
+    }
+
+    if (nullptr != m_depth_buffer) {
+      m_depth_buffer->resize(width, height);
+      m_pending_attachments.push_back(m_depth_buffer);
+    }
+
+    if (nullptr != m_stencil_buffer) {
+      m_stencil_buffer->resize(width, height);
+      m_pending_attachments.push_back(m_stencil_buffer);
+    }
+
+    redoSetup();
+    return *this;
   }
 
-  void addStencilBuffer(GLStencilBuffer const& stencil_buf)
-  {
-    throw_if_bad_dim(stencil_buf);
-    m_stencil_buffer = stencil_buf;
-    target = GL_STENCIL_ATTACHMENT;
-    m_pending_attachments.push_back(std::make_pair(target, &m_stencil_buffer));
-    m_need_attach = true;
-  }
-
+  //----------------------------------------------------------------------------
+  //! \brief Return the Buffer width (pixels).
+  //----------------------------------------------------------------------------
   inline uint32_t width() const
   {
     return m_width;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the Buffer height (pixels).
+  //----------------------------------------------------------------------------
   inline uint32_t height() const
   {
     return m_height;
   }
 
-  void resize(const uint32_t width, const uint32_t height)
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+#if 0
+  GLTexture2D& createColorTexture()
   {
-    m_width = width;
-    m_height = height;
-    for (auto& it: m_color_buffers)
+    throw_if_reached_max_buffers();
+    const GLenum id = static_cast<GLenum>(m_color_buffers.size());
+    const GLenum attachment = GL_COLOR_ATTACHMENT0 + id;
+    const std::string name("ColorTexture" + std::to_string(id));
+
+    GLTextureBuffer* buf = new GLTextureBuffer(name, m_width, m_height, attachment);
+    m_color_buffers.push_back(buf);
+    m_pending_attachments.push_back(buf);
+    redoSetup();
+    return buf->texture();
+  }
+#endif
+
+  void createColorTexture(GLTexture2D& texture)
+  {
+    throw_if_reached_max_buffers();
+    const GLenum id = static_cast<GLenum>(m_color_buffers.size());
+    const GLenum attachment = GL_COLOR_ATTACHMENT0 + id;
+
+    GLTextureBuffer* buf = new GLTextureBuffer(texture, m_width, m_height, attachment);
+    m_color_buffers.push_back(buf);
+    m_pending_attachments.push_back(buf);
+    redoSetup();
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  GLColorBuffer& createColorBuffer()
+  {
+    throw_if_reached_max_buffers();
+    const GLenum id = static_cast<GLenum>(m_color_buffers.size());
+    const GLenum attachment = GL_COLOR_ATTACHMENT0 + id;
+    const std::string name("ColorBuffer" + std::to_string(id));
+
+    GLColorBuffer* buf = new GLColorBuffer(name, m_width, m_height, attachment);
+    m_color_buffers.push_back(buf); // TODO: max 16 elements
+    m_pending_attachments.push_back(buf);
+    redoSetup();
+    return *buf;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //! \fixme use smart pointers
+  //----------------------------------------------------------------------------
+  GLDepthBuffer& getDepthBuffer()
+  {
+    if (unlikely(nullptr == m_depth_buffer))
       {
-        it.resize(width, height);
+        m_depth_buffer = new GLDepthBuffer("DepthBuffer", m_width, m_height);
+        m_pending_attachments.push_back(m_depth_buffer);
+        redoSetup();
       }
-    if (m_has_depth)
+    return *m_depth_buffer;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  GLStencilBuffer& getStencilBuffer()
+  {
+    if (unlikely(nullptr == m_stencil_buffer))
       {
-        m_depth_buffer.resize(width, height);
+        m_stencil_buffer = new GLStencilBuffer("StencilBuffer", m_width, m_height);
+        m_pending_attachments.push_back(m_stencil_buffer);
+        redoSetup();
       }
-    if (m_has_stencil)
-      {
-        m_stencil_buffer.resize(width, height);
-      }
-    //TODO for (auto& it: m_color_textures)
-    //  {
-    //    it.resize(width, height);
-    //  }
-    //TODO for (auto& it: m_depth_textures)
-    //  {
-    //    it.resize(width, height);
-    //  }
+    return *m_stencil_buffer;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Alias method for getDepthBuffer()
+  //----------------------------------------------------------------------------
+  inline GLDepthBuffer& createDepthBuffer()
+  {
+    return getDepthBuffer();
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Alias method for getStencilBuffer()
+  //----------------------------------------------------------------------------
+  inline GLStencilBuffer& createStencilBuffer()
+  {
+    return getStencilBuffer();
   }
 
 private:
 
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
   virtual bool create() override
   {
-    glGenFramebuffers(1, &m_handle);
+    glCheck(glGenFramebuffers(1, &m_handle));
     return false;
   }
 
-  virtual void release() override
-  {
-    glDeleteFramebuffer(m_handle);
-  }
-
-  virtual bool setup() override
-  {
-    return false;
-  }
-
-  virtual bool update() override
-  {
-    return false;
-  }
-
-  virtual void deactivate() override
-  {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  }
-
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
   virtual void activate() override
   {
-    glBindFramebuffer(GL_FRAMEBUFFER, m_handle);
-    if (m_need_attach)
+    glCheck(glBindFramebuffer(m_target, m_handle));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  virtual bool setup() override
+  {
+    if (likely(checkNumberOfBuffers()))
       {
-        do_attach();
-        m_need_attach = false;
+        for (auto& it: m_pending_attachments)
+          {
+            glCheck(glClearColor(1.0f, 0.0f, 0.4f, 0.0f));
+            DEBUG("Framebuffer '%s' is attaching '%s'", cname(), it->cname());
+            it->begin();
+            it->attach();
+            it->draw();
+            it->end();
+          }
+        m_pending_attachments.clear();
+        forceUpdate();
+        return false;
+      }
+    else
+      {
+        ERROR("Framebuffer '%s' needs at least one image attached to it", cname());
+        return true;
       }
   }
 
-  void do_attach()
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  virtual bool update() override
   {
-    for (auto &it: m_pending_data)
-      {
-        auto pair = m_pending_data.pop_back();
-        if ()
-          {
-            it.begin();
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment,
-                                      GL_RENDERBUFFER, it.gpuID());
-            it.end();
-          }
-        else if ()
-          {
-            it.begin();
-            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment,
-                                   it.target(), it.gpuID(), 0);
-            it.end();
-          }
-        else
-          {
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment,
-                                      GL_RENDERBUFFER, 0);
-          }
-      }
-    throw_if_frame_buffer_failed();
-  }
-
-  void throw_if_bad_dim(GLRenderBuffer const& buf)
-  {
-    if ((m_width != 0) && (m_width != color_buf.width))
-      {
-        throw exception("Buffer width does not match");
-      }
-    if ((m_height != 0) && (m_height != color_buf.height))
-      {
-        throw exception("Buffer height does not match");
-      }
-  }
-
-  void throw_if_frame_buffer_failed()
-  {
-    GLenum res = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    GLenum res = glCheck(glCheckFramebufferStatus(m_target));
     switch (res)
       {
       case GL_FRAMEBUFFER_COMPLETE:
         /* success */
         break;
+      case GL_FRAMEBUFFER_UNDEFINED:
+        throw OpenGLException("Framebuffer '" + name() + "' is undefined");
       case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-        throw exception("FrameBuffer attachments are incomplete");
-        break;
+        throw OpenGLException("FrameBuffer '" + name() + "' has incomplete attachments");
       case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-        throw exception("No valid attachments in the FrameBuffer");
-        break;
-      case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-        throw exception("attachments do not have the same width and height");
-        break;
-      case GL_FRAMEBUFFER_INCOMPLETE_FORMATS:
-        throw exception(")Internal format of attachment is not renderable");
-        break;
+        throw OpenGLException("Framebuffer '" + name() + "' does not have at least one image attached to it");
+      case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+        throw OpenGLException("FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
+      case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+        throw OpenGLException("FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
       case GL_FRAMEBUFFER_UNSUPPORTED:
-        throw exception("Combination of internal formats used by attachments is not supported");
-        break;
+        throw OpenGLException("Framebuffer '" + name() + "' has a combination of internal formats used by attachments is not supported");
       case 0:
       default:
-        throw exception("Target not equal to GL_FRAMEBUFFER");
-        break;
+        throw OpenGLException("Framebuffer '" + name() + "' has its target not equal to GL_FRAMEBUFFER");
       }
+    return false;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  virtual void deactivate() override
+  {
+    glCheck(glBindFramebuffer(m_target, 0));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {
+    glCheck(glDeleteFramebuffers(1, &m_handle));
+
+    m_pending_attachments.clear();
+    m_color_buffers.clear();
+    m_depth_buffer = nullptr;
+    m_stencil_buffer = nullptr;
+    m_width = 0;
+    m_height = 0;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Check if the framebuffer has at least one render buffer.
+  //! \throw OpenGLException if the framebuffer has not at least one render buffer.
+  //----------------------------------------------------------------------------
+  bool checkNumberOfBuffers() const
+  {
+    const size_t count = m_color_buffers.size() +
+      ((nullptr == m_depth_buffer) ? 0_z : 1_z) +
+      ((nullptr == m_stencil_buffer) ? 0_z : 1_z);
+
+    return (count >= 1_z);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Check if the max number of render buffers is not reached.
+  //!
+  //! Frame buffers can hold up to 16 render buffers.
+  //!
+  //! \throw OpenGLException is 16 render buffers is reached.
+  //----------------------------------------------------------------------------
+  void throw_if_reached_max_buffers()
+  {
+    if (m_color_buffers.size() >= 16_z) {
+      throw OpenGLException("Reached the maximum number of render buffers");
+    }
   }
 
 private:
 
-  std::vector<GLColorBuffer>   m_color_buffers;
-  std::vector<GLRenderBuffer*> m_pending_data;
-  GLDepthBuffer                m_depth_buffer;
-  GLStencilBuffer              m_stencil_buffer;
-  uint32_t                     m_width;
-  uint32_t                     m_height;
-  bool                         m_need_attach;
+  //! \brief GLColorBuffer or GLTexture2D
+  std::vector<GLRenderBuffer*> m_color_buffers;  // at least one buffer
+  GLDepthBuffer*               m_depth_buffer = nullptr;   // 0 or 1 buffer
+  GLStencilBuffer*             m_stencil_buffer = nullptr; // 0 or 1 buffer
+  std::vector<GLRenderBuffer*> m_pending_attachments;
+  uint32_t                     m_width = 0;
+  uint32_t                     m_height = 0;
 };
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLFRAMEBUFFER_HPP

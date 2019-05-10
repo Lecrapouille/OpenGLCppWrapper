@@ -40,8 +40,7 @@ include $(P)/Makefile.common
 
 ###################################################
 # Make the list of compiled files
-OBJ_CORE = Exception.o PendingData.o GLException.o \
-           OpenGL.o GLWindow.o
+OBJ_CORE = Exception.o OpenGL.o GLWindow.o
 OBJ_IMGUI = imgui_draw.o imgui_widgets.o imgui.o \
             imgui_impl_glfw.o imgui_impl_opengl3.o
 OBJ += $(OBJ_CORE) $(OBJ_IMGUI)
@@ -86,9 +85,7 @@ uninstall:
 veryclean: clean
 	@rm -fr cov-int OpenGLCppWrapper.tgz *.log foo 2> /dev/null
 	@cd tests && make -s clean; cd - > /dev/null
-	@cd src/common/graphics/OpenGL/examples/ && make -s clean; cd - > /dev/null
-	@cd src/forth/standalone && make -s clean; cd - > /dev/null
-	@cd src/core/standalone/ClassicSpreadSheet && make -s clean; cd - > /dev/null
+	@cd examples/ && make -s clean; cd - > /dev/null
 	@$(call print-simple,"Cleaning","$(PWD)/doc/html")
 	@cd doc/ && rm -fr html
 

@@ -18,48 +18,34 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_01_HPP
-#  define EXAMPLE_01_HPP
+#ifndef EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
+#  define EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
 
-#  include "OpenGL.hpp"
-#  include "Movable.hpp"
-#  include "Maths.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include <iostream>
 
-class GLExample01: public IGLWindow
+using namespace glwrap;
+
+class GLExample00: public IGLWindow
 {
 public:
 
-  GLExample01()
-    : m_vao_quad("VAO_quad"),
-      m_vao_floor("VAO_floor"),
-      m_indices("indices"),
-      m_prog("prog")
+  GLExample00()
   {
+    std::cout << "Hello" << std::endl;
   }
 
-  ~GLExample01()
+  ~GLExample00()
   {
     std::cout << "Bye" << std::endl;
   }
 
-private:
+protected:
 
   virtual void onWindowSizeChanged(const float width, const float height) override;
+  virtual void onMouseMoved(const double xpos, const double ypos) override;
   virtual bool setup() override;
   virtual bool draw() override;
-
-private:
-
-  GLVertexShader     vs;
-  GLFragmentShader   fs;
-  GLVAO              m_vao_quad;
-  GLVAO              m_vao_floor;
-  GLIndexBuffer<uint8_t> m_indices;
-  GLProgram          m_prog;
-  Movable<float, 3U> m_movable1;
-  Movable<float, 3U> m_movable2;
-  Movable<float, 3U> m_movable3;
 };
 
-#endif // EXAMPLE_01_HPP
+#endif // EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP

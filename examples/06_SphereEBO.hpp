@@ -18,7 +18,42 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "GLException.hpp"
+#ifndef EXAMPLE_06_SPHERE_EBO_HPP
+#  define EXAMPLE_06_SPHERE_EBO_HPP
 
-//! This macro will generate code for members.
-IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include <iostream>
+
+using namespace glwrap;
+
+class GLExample06: public IGLWindow
+{
+public:
+
+  GLExample06()
+    : m_sphere("VAO_sphere"),
+      m_prog("prog"),
+      m_indices("indices")
+  {}
+
+  ~GLExample06()
+  {}
+
+private:
+
+  void createSphere();
+  virtual void onWindowSizeChanged(const float width, const float height) override;
+  virtual bool setup() override;
+  virtual bool draw() override;
+
+private:
+
+  GLVertexShader     m_vertex_shader;
+  GLFragmentShader   m_fragment_shader;
+  GLVAO              m_sphere;
+  GLProgram          m_prog;
+  Movable<float, 3U> m_movable;
+  GLIndexBuffer<uint32_t> m_indices;
+};
+
+#endif // EXAMPLE_06_SPHERE_EBO_HPP

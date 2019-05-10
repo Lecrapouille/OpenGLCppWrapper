@@ -47,14 +47,14 @@ EXTERNAL_OBJ += $(abspath external)/SOIL/obj/*.o
 ifeq ($(ARCHI),Darwin)
 LDFLAGS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
 else ifeq ($(ARCHI),Linux)
-LDFLAGS += -lGLU -lGL -lGLEW `pkg-config glfw3 --static --libs`
+LDFLAGS += `pkg-config glew glfw3 --static --libs`
 else
 $(error Unknown architecture)
 endif
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES += -I$(P)/src -I$(P)/external -I$(P)/external/imgui
+INCLUDES += -I$(P)/include -I$(P)/src -I$(P)/external -I$(P)/external/imgui
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files

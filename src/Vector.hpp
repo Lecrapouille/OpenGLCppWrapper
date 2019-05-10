@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef VECTOR_HPP
-#  define VECTOR_HPP
+#ifndef OPENGLCPPWRAPPER_VECTOR_HPP
+#  define OPENGLCPPWRAPPER_VECTOR_HPP
 
 // *************************************************************************************************
 // Inspired from https://github.com/Reedbeta/reed-util
@@ -35,8 +35,11 @@
 #  include <cmath>
 #  include <fstream>
 
+namespace glwrap
+{
 namespace maths
 {
+
 //! \brief
 static uint32_t maxUlps = 4U;
 
@@ -91,7 +94,8 @@ inline T clamp(T const value, T const lower, T const upper)
 
   return value;
 }
-} // namespace
+
+} // namespace maths
 
 // *************************************************************************************************
 //! \brief Macro for building constructors
@@ -831,4 +835,6 @@ typedef Vector<double, 4_z> Vector4g;
 #  undef DEFINE_FUN2_OPERATOR
 #  undef DEFINE_BOOL_OPERATOR
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_VECTOR_HPP

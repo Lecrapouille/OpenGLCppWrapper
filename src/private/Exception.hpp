@@ -12,11 +12,15 @@
 //   https://pocoproject.org/index.html
 //=====================================================================
 
-#ifndef EXCEPTION_HPP_
-#  define EXCEPTION_HPP_
+#ifndef OPENGLCPPWRAPPER_EXCEPTION_HPP
+#  define OPENGLCPPWRAPPER_EXCEPTION_HPP
 
 #  include <string>
 #  include <typeinfo>
+#  include "NonCppStd.hpp"
+
+namespace glwrap
+{
 
 class Exception: public std::exception
 /// This is the base class for all exceptions defined
@@ -125,6 +129,8 @@ inline int Exception::code() const
   return m_code;
 }
 
+} // namespace glwrap
+
 //
 // Macros for quickly declaring and implementing exception classes.
 // Unfortunately, we cannot use a template here because character
@@ -190,9 +196,9 @@ inline int Exception::code() const
   {                                                                     \
     return new CLS(*this);                                              \
   }                                                                     \
-  __attribute__((__noreturn__)) void CLS::rethrow() const               \
+  NORETURN void CLS::rethrow() const                                    \
   {                                                                     \
     throw *this;                                                        \
   }
 
-#endif // EXCEPTION_HPP_
+#endif // OPENGLCPPWRAPPER_EXCEPTION_HPP

@@ -61,14 +61,15 @@ LDFLAGS += --coverage
 EXTERNAL_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a)
 
 ###################################################
-# But sure the main project have been compiled
-ifeq ("$(wildcard $(P)/$(BUILD)/libopenglcppwrapper.a)","")
-$(error Please compile the main project before compiling unit tests: cd $(P) && make)
-endif
+# Compile OpenGLCppWrapper unit tests.
+all: $(EXTERNAL_LIBS) $(TARGET)
 
 ###################################################
-# Compile OpenGLCppWrapper unit tests.
-all: $(TARGET)
+# Be sure the main project have been compiled
+$(OBJ): | $(EXTERNAL_LIBS)
+$(EXTERNAL_LIBS):
+	@$(call print-to,"Compiling","$(EXTERNAL_LIBS)","$@","$(VERSION)")
+	@cd $(P) && $(MAKE)
 
 ###################################################
 # Run unit tests.

@@ -18,6 +18,42 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "PendingData.hpp"
+#ifndef EXAMPLE_02_DYNAMIC_TRIANGLE_HPP
+#  define EXAMPLE_02_DYNAMIC_TRIANGLE_HPP
 
-PendingData::~PendingData() { }
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include <iostream>
+
+using namespace glwrap;
+
+// *****************************************************************
+//! \brief
+// *****************************************************************
+class GLExample02: public IGLWindow
+{
+public:
+
+  GLExample02()
+    : m_triangle("VAO_triangle"),
+      m_prog("Prog")
+  {}
+
+  ~GLExample02()
+  {}
+
+protected:
+
+  void debug();
+  virtual void onWindowSizeChanged(const float width, const float height) override;
+  virtual bool setup() override;
+  virtual bool draw() override;
+
+private:
+
+  GLVertexShader     m_vertex_shader;
+  GLFragmentShader   m_fragment_shader;
+  GLVAO              m_triangle;
+  GLProgram          m_prog;
+};
+
+#endif // EXAMPLE_02_DYNAMIC_TRIANGLE_HPP

@@ -24,8 +24,8 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLLOCATION_HPP
-#define GLLOCATION_HPP
+#ifndef OPENGLCPPWRAPPER_GLLOCATION_HPP
+#define OPENGLCPPWRAPPER_GLLOCATION_HPP
 
 // *****************************************************************************
 //! \file GLLocation.hpp manages shader variables (Uniforms, Samplers
@@ -34,6 +34,9 @@
 
 #  include "IGLObject.hpp"
 #  include "Matrix.hpp"
+
+namespace glwrap
+{
 
 // *****************************************************************************
 //! \brief GLLocation makes the interface between a shader variable and your
@@ -126,25 +129,18 @@ private:
   //----------------------------------------------------------------------------
   virtual bool create() override
   {
-    DEBUG("Attrib '%s' create", name().c_str());
-    m_handle = glCheck(glGetAttribLocation(m_program, name().c_str()));
+    DEBUG("Attrib '%s' create", cname());
+    m_handle = glCheck(glGetAttribLocation(m_program, cname()));
     m_index = static_cast<GLuint>(m_handle);
     return false;
   }
-
-  //----------------------------------------------------------------------------
-  //! \brief Destroy the OpenGL Attribute. This is a dummy method. No
-  //! action is made.
-  //----------------------------------------------------------------------------
-  virtual void release() override
-  {}
 
   //----------------------------------------------------------------------------
   //! \brief Bind the OpenGL Attribute.
   //----------------------------------------------------------------------------
   virtual void activate() override
   {
-    DEBUG("Attrib '%s' activate", name().c_str());
+    DEBUG("Attrib '%s' activate", cname());
     glCheck(glEnableVertexAttribArray(m_index));
     glCheck(glVertexAttribPointer(m_index,
                                   m_dim,
@@ -152,15 +148,6 @@ private:
                                   GL_FALSE,
                                   m_stride,
                                   (const GLvoid*) m_offset));
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Unbind the OpenGL Attribute.
-  //----------------------------------------------------------------------------
-  virtual void deactivate() override
-  {
-    DEBUG("Attrib '%s' deactivate", name().c_str());
-    glCheck(glDisableVertexAttribArray(m_index));
   }
 
   //----------------------------------------------------------------------------
@@ -179,6 +166,22 @@ private:
   {
     return false;
   }
+
+  //----------------------------------------------------------------------------
+  //! \brief Unbind the OpenGL Attribute.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() override
+  {
+    DEBUG("Attrib '%s' deactivate", cname());
+    glCheck(glDisableVertexAttribArray(m_index));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Destroy the OpenGL Attribute. This is a dummy method. No
+  //! action is made.
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {}
 
 private:
 
@@ -225,17 +228,10 @@ private:
   //----------------------------------------------------------------------------
   virtual bool create() override
   {
-    DEBUG("Uniform '%s' create", name().c_str());
-    m_handle = glCheck(glGetUniformLocation(m_program, name().c_str()));
+    DEBUG("Uniform '%s' create", cname());
+    m_handle = glCheck(glGetUniformLocation(m_program, cname()));
     return false;
   }
-
-  //----------------------------------------------------------------------------
-  //! \brief Destroy the OpenGL Uniform. This is a dummy method. No
-  //! action is made.
-  //----------------------------------------------------------------------------
-  virtual void release() override
-  {}
 
   //----------------------------------------------------------------------------
   //! \brief Bind the OpenGL Uniform. This is a dummy method. No
@@ -243,15 +239,6 @@ private:
   //----------------------------------------------------------------------------
   virtual void activate() override
   {}
-
-  //----------------------------------------------------------------------------
-  //! \brief Unbind the OpenGL Uniform. This is a dummy method. No
-  //! action is made.
-  //----------------------------------------------------------------------------
-  virtual void deactivate() override
-  {
-    DEBUG("Uniform '%s' deactivate", name().c_str());
-  }
 
   //----------------------------------------------------------------------------
   //! \brief Setup the behavior of the instance. This is a dummy
@@ -269,6 +256,22 @@ private:
   {
     return false;
   }
+
+  //----------------------------------------------------------------------------
+  //! \brief Unbind the OpenGL Uniform. This is a dummy method. No
+  //! action is made.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() override
+  {
+    DEBUG("Uniform '%s' deactivate", cname());
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Destroy the OpenGL Uniform. This is a dummy method. No
+  //! action is made.
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {}
 };
 
 // *****************************************************************************
@@ -323,7 +326,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool update() override
   {
-    DEBUG("Uniform '%s' update", name().c_str());
+    DEBUG("Uniform '%s' update", cname());
     setValue(GLUniform<T>::m_data);
     return false;
   }
@@ -413,7 +416,10 @@ public:
 
   //----------------------------------------------------------------------------
   //! \brief See GLLocation constructor.
-  //! \param texture_id count texture
+  //! \param name
+  //! \param gltype
+  //! \param texture_id count texture.
+  //! \param prog
   //----------------------------------------------------------------------------
   GLSampler(const char *name, const GLenum gltype, const GLenum texture_id,
             const GLuint prog)
@@ -426,7 +432,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Return the texture identifier.
   //----------------------------------------------------------------------------
-  inline const GLenum textureID() const
+  inline GLenum textureID() const
   {
     return m_texture_id;
   }
@@ -438,7 +444,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void activate() override
   {
-    DEBUG("Sampler '%s' activate GL_TEXTURE0 + %u", name().c_str(), m_texture_id);
+    DEBUG("Sampler '%s' activate GL_TEXTURE0 + %u", cname(), m_texture_id);
     glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_id));
   }
 
@@ -447,7 +453,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool update() override
   {
-    DEBUG("Sampler '%s' update", name().c_str());
+    DEBUG("Sampler '%s' update", cname());
     glCheck(glUniform1i(m_handle, static_cast<GLint>(m_texture_id)));
     return false;
   }
@@ -517,4 +523,6 @@ public:
   {}
 };
 
-#endif
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLLOCATION_HPP

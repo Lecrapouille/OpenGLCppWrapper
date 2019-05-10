@@ -20,11 +20,13 @@
 
 #define protected public
 #define private public
-#include "OpenGL.hpp"
+#include "GLVBO.hpp"
 #undef protected
 #undef private
 #include <crpcut.hpp>
 #include <string>
+
+using namespace glwrap;
 
 TESTSUITE(VBOs)
 {

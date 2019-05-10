@@ -24,11 +24,14 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLVERTEX_BUFFER_HPP
-#  define GLVERTEX_BUFFER_HPP
+#ifndef OPENGLCPPWRAPPER_GLVERTEX_BUFFER_HPP
+#  define OPENGLCPPWRAPPER_GLVERTEX_BUFFER_HPP
 
 #  include "IGLObject.hpp"
 #  include "PendingContainer.hpp"
+
+namespace glwrap
+{
 
 // **************************************************************
 //! \brief Buffer objects are OpenGL objects that store an array of
@@ -75,32 +78,20 @@ private:
 
   virtual bool create() override
   {
-    DEBUG("VBO '%s' create", name().c_str());
+    DEBUG("VBO '%s' create", cname());
     glCheck(glGenBuffers(1, &m_handle));
     return false;
   }
 
-  virtual void release() override
-  {
-    DEBUG("VBO '%s' release", name().c_str());
-    glCheck(glDeleteBuffers(1, &m_handle));
-  }
-
   virtual void activate() override
   {
-    DEBUG("VBO '%s' activate", name().c_str());
+    DEBUG("VBO '%s' activate", cname());
     glCheck(glBindBuffer(m_target, m_handle));
-  }
-
-  virtual void deactivate() override
-  {
-    DEBUG("VBO '%s' deactivate", name().c_str());
-    glCheck(glBindBuffer(m_target, 0));
   }
 
   virtual bool setup() override
   {
-    DEBUG("VBO '%s' setup", name().c_str());
+    DEBUG("VBO '%s' setup", cname());
     const GLsizeiptr bytes = static_cast<GLsizeiptr>
       (PendingContainer<T>::capacity() * sizeof (T));
     glCheck(glBufferData(m_target, bytes, NULL, m_usage));
@@ -119,7 +110,7 @@ private:
     PendingContainer<T>::getPendingData(pos_start, pos_end);
     PendingContainer<T>::clearPending();
     DEBUG("VBO '%s' update %zu -> %zu",
-         name().c_str(), pos_start, pos_end);
+         cname(), pos_start, pos_end);
 
     size_t offset = sizeof (T) * pos_start;
     size_t nbytes = sizeof (T) * (pos_end - pos_start + 1_z);
@@ -128,6 +119,18 @@ private:
                             static_cast<GLsizeiptr>(nbytes),
                             PendingContainer<T>::to_array()));
     return false;
+  }
+
+  virtual void deactivate() override
+  {
+    DEBUG("VBO '%s' deactivate", cname());
+    glCheck(glBindBuffer(m_target, 0));
+  }
+
+  virtual void release() override
+  {
+    DEBUG("VBO '%s' release", cname());
+    glCheck(glDeleteBuffers(1, &m_handle));
   }
 
 private:
@@ -174,17 +177,21 @@ public:
 
   inline GLVertexBuffer<T>& operator=(GLVertexBuffer<T> const& other)
   {
+    return this->operator=(other.m_container);
+  }
+
+  inline GLVertexBuffer<T>& operator=(std::vector<T> const& other)
+  {
     const size_t my_size = this->m_container.size();
-    const size_t other_size = other.m_container.size();
+    const size_t other_size = other.size();
 
     if (other_size > my_size)
       this->throw_if_cannot_expand();
 
-    this->m_container = other.m_container;
+    this->m_container = other;
     this->tagAsPending(0_z, other_size - 1_z);
     return *this;
   }
-
 };
 
 // **************************************************************
@@ -222,4 +229,6 @@ inline GLenum GLIndexBuffer<uint16_t>::type() const { return GL_UNSIGNED_SHORT; 
 template<>
 inline GLenum GLIndexBuffer<uint8_t>::type() const { return GL_UNSIGNED_BYTE; }
 
-#endif /* GLVERTEX_BUFFER_HPP */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLVERTEX_BUFFER_HPP

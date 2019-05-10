@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef TRANSFORMATION_HPP
-#  define TRANSFORMATION_HPP
+#ifndef OPENGLCPPWRAPPER_TRANSFORMATION_HPP
+#  define OPENGLCPPWRAPPER_TRANSFORMATION_HPP
 
 // Modifed from the OpenGL Mathematic library (GLM).
 // Original code: https://github.com/g-truc/glm/blob/master/glm/gtc/matrix_transform.inl
@@ -27,8 +27,11 @@
 #  include "Matrix.hpp"
 #  include <cassert>
 
+namespace glwrap
+{
 namespace matrix
 {
+
   template<typename T>
   Matrix<T, 4_z, 4_z> translate(Matrix<T, 4_z, 4_z> const &m, Vector<T, 3_z> const &v)
   {
@@ -147,6 +150,7 @@ namespace matrix
 
     return M;
   }
-}
+} // namespace matrix
+} // namespace glwrap
 
-#endif /* TRANSFORMATION_HPP */
+#endif // OPENGLCPPWRAPPER_TRANSFORMATION_HPP

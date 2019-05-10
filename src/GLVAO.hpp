@@ -24,8 +24,8 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GL_VERTEX_ARRAY_HPP
-#  define GL_VERTEX_ARRAY_HPP
+#ifndef OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
+#  define OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
 
 // *****************************************************************************
 //! \file GLVAO.hpp handles the OpenGL representation of 3D models.
@@ -36,6 +36,9 @@
 #  include "GLTextures.hpp"
 #  include <unordered_map>
 #  include <vector>
+
+namespace glwrap
+{
 
 // *****************************************************************************
 //! \class GLVAO GLVAO.hpp
@@ -84,7 +87,7 @@ public:
   //! \brief Return the list of VBO names. This is method is mainly
   //! used for debug purpose.
   //!
-  //! \note if the VAO has never been binded to a GLProgram the return
+  //! \note if the VAO has never been bound to a GLProgram the return
   //! lit will be empty.
   //----------------------------------------------------------------------------
   std::vector<std::string> VBONames()
@@ -102,7 +105,7 @@ public:
   //! \brief Return the list of textures names. This is method is mainly
   //! used for debug purpose.
   //!
-  //! \note if the VAO has never been binded to a GLProgram the return
+  //! \note if the VAO has never been bound to a GLProgram the return
   //! lit will be empty.
   //!
   //! \note Do not be confused with meaning of texture name. We do not
@@ -335,7 +338,7 @@ public:
         if (size != it.second->size())
           {
             ERROR("VAO %s does not have all of its VBOs with the same size",
-                  name().c_str());
+                  cname());
             return false;
           }
       }
@@ -388,18 +391,9 @@ private:
   //----------------------------------------------------------------------------
   virtual bool create() override
   {
-    DEBUG("VAO '%s' create", name().c_str());
+    DEBUG("VAO '%s' create", cname());
     glCheck(glGenVertexArrays(1, &m_handle));
     return false;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Destroy the OpenGL VAO.
-  //----------------------------------------------------------------------------
-  virtual void release() override
-  {
-    DEBUG("VAO '%s' release", name().c_str());
-    glCheck(glDeleteVertexArrays(1, &m_handle));
   }
 
   //----------------------------------------------------------------------------
@@ -407,17 +401,8 @@ private:
   //----------------------------------------------------------------------------
   virtual void activate() override
   {
-    DEBUG("VAO '%s' activate", name().c_str());
+    DEBUG("VAO '%s' activate", cname());
     glCheck(glBindVertexArray(m_handle));
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Unbind the VAO from OpenGL.
-  //----------------------------------------------------------------------------
-  virtual void deactivate() override
-  {
-    DEBUG("VAO '%s' deactivate", name().c_str());
-    glCheck(glBindVertexArray(0U));
   }
 
   //----------------------------------------------------------------------------
@@ -436,6 +421,24 @@ private:
     return false;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Unbind the VAO from OpenGL.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() override
+  {
+    DEBUG("VAO '%s' deactivate", cname());
+    glCheck(glBindVertexArray(0U));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Destroy the OpenGL VAO.
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {
+    DEBUG("VAO '%s' release", cname());
+    glCheck(glDeleteVertexArrays(1, &m_handle));
+  }
+
   //Callable by GLProgram
   //static void unbind()
   //{
@@ -448,8 +451,10 @@ private:
   mapIGLObject m_vbos;
   //! \brief Hold textures.
   mapGLTexture m_textures;
-  //! \brief Hold the ID of the binded GLProgam.
+  //! \brief Hold the ID of the bound GLProgam.
   GLenum prog = 0;
 };
 
-#endif /* GL_VERTEX_ARRAY_HPP */
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP

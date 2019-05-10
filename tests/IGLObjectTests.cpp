@@ -20,17 +20,20 @@
 
 #define protected public
 #define private public
-#include "OpenGL.hpp"
+#include "IGLObject.hpp"
 #undef protected
 #undef private
 #include <crpcut.hpp>
 #include <string>
 
+using namespace glwrap;
+
 class FakeObject : public IGLObject<GLint>
 {
 public:
 
-  FakeObject() : IGLObject<GLint>("FakeObject")
+  FakeObject()
+    : IGLObject<GLint>("FakeObject")
   {
     reset();
   }

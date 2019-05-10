@@ -20,58 +20,10 @@
 
 #include "OpenGL.hpp"
 
-namespace opengl
+namespace glwrap
 {
-  //-------------------------------------------------------------
-  //! \return true if the OpenGL context has been created
-  //! else return false (not yet created or failed during
-  //! its creation).
-  //-------------------------------------------------------------
-  bool& hasCreatedContext()
-  {
-    static bool s_context_started = false;
-    return s_context_started;
-  }
 
-  //-------------------------------------------------------------
-  //! \param filename
-  //! \param line
-  //! \param expression
-  //-------------------------------------------------------------
-  void checkError(const char *filename, uint32_t line, const char* expression)
-  {
-    GLenum id;
-    const char* error;
+//! This macro will generate code for members.
+IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
 
-    while ((id = glGetError()) != GL_NO_ERROR)
-      {
-        switch (id)
-          {
-          case GL_INVALID_OPERATION:
-            error = "GL_INVALID_OPERATION";
-            break;
-          case GL_INVALID_ENUM:
-            error = "GL_INVALID_ENUM";
-            break;
-          case GL_INVALID_VALUE:
-            error = "GL_INVALID_VALUE";
-            break;
-          case GL_OUT_OF_MEMORY:
-            error = "GL_OUT_OF_MEMORY";
-            break;
-          case GL_INVALID_FRAMEBUFFER_OPERATION:
-            error = "GL_INVALID_FRAMEBUFFER_OPERATION";
-            break;
-          default:
-            error = "UNKNOWN";
-            break;
-          }
-
-        // Do not use directly LOG macros because it will catch this
-        // filename and its line instead of the faulty file/line which
-        // produced the OpenGL error.
-        errout("GLERR", filename, line, "Failed executing '%s'. Reason is '%s'",
-               expression, error);
-      }
-  }
-} // namespace
+} // namespace glwrap
