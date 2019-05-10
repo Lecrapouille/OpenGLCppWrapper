@@ -387,22 +387,6 @@ public:
   {}
 
   //----------------------------------------------------------------------------
-  //! \brief Copy texture.
-  //! \note Use this method for framebuffer.
-  //----------------------------------------------------------------------------
-  GLTexture2D& operator=(GLTexture2D const& other)
-  {
-    m_handle = other.m_handle;
-    m_target = other.m_target;
-    m_width = other.m_width;
-    m_height = other.m_height;
-    m_options = other.m_options;
-    m_buffer = other.m_buffer;
-
-    return *this;
-  }
-
-  //----------------------------------------------------------------------------
   //! \brief Return the texture dimension: 2D.
   //----------------------------------------------------------------------------
   virtual uint8_t dimension() const override
