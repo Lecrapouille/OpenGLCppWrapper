@@ -1,3 +1,12 @@
+version 0.6:
+
+    Add first version of Framebuffer.
+    Refactor examples.
+    Make each header file be compilable by itself.
+    Minor fixes.
+    Update makefiles, install a pkg-config file.
+    Add namespaces.
+
 version 0.5:
 
     Add Texture3D and rename correctly class (TextureCube vs Texture3D)

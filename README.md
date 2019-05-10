@@ -348,8 +348,8 @@ a cube.
 
 ### What else in this API ?
 
-Not shown in this tutorial but this API can manage cubic, 3D and 1D
-textures. Soon this API will manage FrameBuffer.
+Not shown in this readme but this API can manage framebuffer and cubic,
+3D and 1D textures. See examples for more informations.
 
 This API also includes features which are not directly in relation
 with wrapping OpenGL routines. It allows:
