@@ -96,6 +96,6 @@ inline static std::string file_name(std::string const& path)
 
 } // namespace glwrap
 
-#  include "Verbose.h"
+#  include "Verbose.hpp"
 
 #endif // OPENGLCPPWRAPPER_NONCPPSTD_HPP

@@ -352,7 +352,10 @@ Compile using the pkg-config tool to add compilation flags to GCC or clang:
 * CFLAGS=pkg-config openglcppwrapper-0.6 --cflags
 * LDFLAGS=pkg-config openglcppwrapper-0.6 --libs
 
-Note: adapt 0.6 to the current version.
+Note: adapt 0.6 to the current version. For example with a simple file main.cpp:
+```
+g++ -W -Wall -std=c++11 main.cpp -o prog `pkg-config openglcppwrapper-0.6 --cflags --libs`
+```
 
 ## Credits
 

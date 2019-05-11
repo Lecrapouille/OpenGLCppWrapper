@@ -57,7 +57,8 @@ OBJ += \
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a)
+#FIXME: the static lib name shall be extracted from root makefile
+EXTERNAL_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.0.6)
 
 ###################################################
 # Compile tutorials

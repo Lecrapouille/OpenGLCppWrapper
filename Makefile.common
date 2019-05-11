@@ -37,6 +37,7 @@ DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
+# TODO -Wl,--whole-archive https://stackoverflow.com/questions/7253801/how-to-force-symbols-from-a-static-library-to-be-included-in-a-shared-library-bu
 EXTERNAL_LIBS +=
 EXTERNAL_OBJ += $(abspath external)/SOIL/obj/*.o
 
@@ -47,7 +48,7 @@ EXTERNAL_OBJ += $(abspath external)/SOIL/obj/*.o
 ifeq ($(ARCHI),Darwin)
 LDFLAGS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
 else ifeq ($(ARCHI),Linux)
-LDFLAGS += `pkg-config glew glfw3 --static --libs`
+PKG_LIBS += `pkg-config glew glfw3 --static --libs`
 else
 $(error Unknown architecture)
 endif
