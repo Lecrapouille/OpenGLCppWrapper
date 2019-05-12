@@ -39,7 +39,8 @@ static std::vector<Vector2f> initial_position =
 //------------------------------------------------------------------
 void GLExample03::onWindowSizeChanged(const float width, const float height)
 {
-  glCheck(glViewport(0, 0, width, height));
+  // Make sure the viewport matches the new window dimensions.
+  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 }
 
 //------------------------------------------------------------------

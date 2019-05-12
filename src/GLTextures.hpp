@@ -80,7 +80,7 @@ static bool doload2D(const char *const filename, const PixelLoadFormat format,
 
   // Load the image as a C array.
   int w, h;
-  unsigned char* image = SOIL_load_image(filename, &w, &h, 0, static_cast<GLenum>(format));
+  unsigned char* image = SOIL_load_image(filename, &w, &h, 0, static_cast<int>(format));
   if (likely(nullptr != image))
     {
       // Use the max because with framebuffer we can resize texture
@@ -88,7 +88,7 @@ static bool doload2D(const char *const filename, const PixelLoadFormat format,
       height = std::max(height, static_cast<uint32_t>(h));
 
       // Convert it as std::vector
-      size_t size = w * h * sizeof(unsigned char)
+      size_t size = static_cast<size_t>(w * h) * sizeof(unsigned char)
         * ((format == PixelLoadFormat::LOAD_RGBA) ? 4 : 3);
       data.append(image, size); // FIXME: not working with preallocated size
       //data.debugDirty();
@@ -444,7 +444,10 @@ public:
     if (likely(nullptr != p))
       {
         //TODO 4 because RGBA
-        return !!SOIL_save_image(filename, SOIL_SAVE_TYPE_BMP, m_width, m_height, 4, p);
+        return !!SOIL_save_image(filename, SOIL_SAVE_TYPE_BMP,
+                                 static_cast<int>(m_width),
+                                 static_cast<int>(m_height),
+                                 4, p);
       }
     return false;
   }
@@ -528,6 +531,10 @@ public:
   //----------------------------------------------------------------------------
   virtual bool update() override
   {
+    //TODO
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic ignored "-Wconversion"
     DEBUG("Texture '%s' update", cname());
 
     size_t start, stop;
@@ -543,6 +550,7 @@ public:
     DEBUG("Texture '%s' update (%zu,%zu) --> ((%d,%d), (%d,%d))",
           cname(), start, stop, x, y, width, height);
 
+    // FIXME: not working if width and height are not the txture size
     glCheck(glBindTexture(m_target, m_handle));
     glCheck(glTexSubImage2D(m_target, 0, x, y, width, height,
                             static_cast<GLenum>(m_options.cpuPixelFormat),
@@ -551,6 +559,7 @@ public:
 
     m_buffer.clearPending();
     return false;
+#  pragma GCC diagnostic pop
   };
 };
 
@@ -719,7 +728,8 @@ public:
   //----------------------------------------------------------------------------
   bool load(CubeMap const target, const char *const filename)
   {
-    const int index = static_cast<int>(target) - GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+    const size_t index = static_cast<size_t>(target) -
+      static_cast<size_t>(GL_TEXTURE_CUBE_MAP_POSITIVE_X);
     return m_textures[index]->load(filename);
   }
 
@@ -869,7 +879,7 @@ public:
     // Success
     m_width = static_cast<uint32_t>(width);
     m_height = static_cast<uint32_t>(height);
-    m_depth = static_cast<uint32_t>(depth);
+    m_depth = static_cast<uint8_t>(depth);
     return true;
   }
 

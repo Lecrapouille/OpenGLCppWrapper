@@ -40,11 +40,10 @@ include $(P)/Makefile.common
 
 ###################################################
 # Make the list of compiled files
-OBJ_CORE = Exception.o OpenGL.o GLWindow.o
-OBJ_IMGUI = imgui_draw.o imgui_widgets.o imgui.o \
-            imgui_impl_glfw.o imgui_impl_opengl3.o
-THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/obj/*.o)
+OBJ_CORE = Verbose.o Exception.o OpenGL.o GLWindow.o
+OBJ_IMGUI = GLImGUI.o
 OBJS += $(OBJ_CORE) $(OBJ_IMGUI)
+THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/obj/*.o)
 
 ###################################################
 # Compile static and shared libraries

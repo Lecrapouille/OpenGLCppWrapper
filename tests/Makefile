@@ -56,6 +56,11 @@ CXXFLAGS += --coverage
 LDFLAGS += --coverage
 
 ###################################################
+#
+CXXFLAGS += \
+  -Wno-inline -Wno-suggest-attribute=noreturn -Wno-stack-protector
+
+###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.

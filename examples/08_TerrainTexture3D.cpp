@@ -39,7 +39,7 @@ void GLExample08::onWindowSizeChanged(const float width, const float height)
   float ratio = width / height;
 
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, width, height));
+  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 
   m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
@@ -80,7 +80,7 @@ bool GLExample08::setup()
 }
 
 //------------------------------------------------------------------
-//! \brief Paint our scene.
+//! \brief Pasize_t our scene.
 //------------------------------------------------------------------
 bool GLExample08::draw()
 {
@@ -98,7 +98,7 @@ bool GLExample08::draw()
 //------------------------------------------------------------------
 bool GLExample08::createTerrain()
 {
-  const int dim = 40;
+  const uint32_t dim = 40;
 
   m_prog.bind(m_vao);
 
@@ -126,15 +126,14 @@ bool GLExample08::createTerrain()
 //------------------------------------------------------------------
 //! \brief Generate terrain altitude.
 //------------------------------------------------------------------
-void GLExample08::generateAltitudes(const int dim)
+void GLExample08::generateAltitudes(const uint32_t dim)
 {
   // Create random values
   m_altitudes.resize(dim * dim);
 
-  for (int r = 0; r < dim * dim; ++r)
+  for (uint32_t r = 0; r < dim * dim; ++r)
     {
-      int rval = rand();
-      m_altitudes[r] = fabs(float(rval)) / float(RAND_MAX);
+      m_altitudes[r] = fabsf(float(rand())) / float(RAND_MAX);
     }
 
   // Generate smooth m_altitudes values
@@ -143,9 +142,9 @@ void GLExample08::generateAltitudes(const int dim)
     {
       float maxVal = 0.0f;
       float minVal = 1.0f;
-      for (int x = 0; x < dim; ++x)
+      for (uint32_t x = 0; x < dim; ++x)
         {
-          for (int y = 0; y < dim; ++y)
+          for (uint32_t y = 0; y < dim; ++y)
             {
               if (x == 0 || x == dim - 1)
                 m_altitudes[x * dim + y] = 0.0f;
@@ -154,12 +153,12 @@ void GLExample08::generateAltitudes(const int dim)
               else
                 {
                   float a = 0.0f;
-                  int counter = 0;
-                  for (int s = -1; s <= 1; ++s)
+                  uint32_t counter = 0;
+                  for (uint32_t s = 0; s <= 2; ++s)
                     {
-                      for(int r = -1; r <= 1; ++r)
+                      for(uint32_t r = 0; r <= 2; ++r)
                         {
-                          a += m_altitudes[(x + s) * dim + (y + r)];
+                          a += m_altitudes[(x + s - 1) * dim + (y + r - 1)];
                           ++counter;
                         }
                     }
@@ -170,7 +169,7 @@ void GLExample08::generateAltitudes(const int dim)
                 }
             }
         }
-      for (int r = 0; r < dim * dim; ++r)
+      for (uint32_t r = 0; r < dim * dim; ++r)
         {
           m_altitudes[r] = (smoothTerrain[r] - minVal) / (maxVal-minVal);
         }
@@ -180,7 +179,7 @@ void GLExample08::generateAltitudes(const int dim)
 //------------------------------------------------------------------
 //! \brief Fill VBOs with mesh position and 3d texture position.
 //------------------------------------------------------------------
-void GLExample08::loadTerrain(const int dim)
+void GLExample08::loadTerrain(const uint32_t dim)
 {
   float maxHeight = 0.2f;
   float texHeight = 0.9f;

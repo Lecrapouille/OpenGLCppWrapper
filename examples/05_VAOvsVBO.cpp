@@ -36,7 +36,7 @@ void GLExample05::onWindowSizeChanged(const float width, const float height)
   float ratio = width / height;
 
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, width, height));
+  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 
   m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(60.0f), ratio, 0.1f, 10.0f);

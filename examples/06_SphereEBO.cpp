@@ -38,7 +38,7 @@ void GLExample06::onWindowSizeChanged(const float width, const float height)
   float ratio = width / height;
 
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, width, height));
+  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 
   m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
@@ -50,8 +50,8 @@ void GLExample06::onWindowSizeChanged(const float width, const float height)
 void GLExample06::createSphere()
 {
   constexpr float radius = 2.0f;
-  constexpr int NbPointsLon = 100;
-  constexpr int NbPointsLat = 100;
+  constexpr uint32_t NbPointsLon = 100u;
+  constexpr uint32_t NbPointsLat = 100u;
   constexpr float stepLon = 360.0f / static_cast<float>(NbPointsLon);
   constexpr float stepLat = 180.0f / static_cast<float>(NbPointsLat);
   constexpr float PI = 3.141592653589793238462643383279502884197169399375105820f;
@@ -65,16 +65,16 @@ void GLExample06::createSphere()
   m_indices.clear();
   m_indices.reserve(NbPointsLon * NbPointsLat);
 
-  for (int i = 0; i < NbPointsLon; ++i)
+  for (uint32_t i = 0; i < NbPointsLon; ++i)
     {
-      for (int j = 0; j < NbPointsLat; ++j)
+      for (uint32_t j = 0; j < NbPointsLat; ++j)
         {
           float lat = (PI / 180.0f) * latitude;
           float lon = (PI / 180.0f) * longitude;
-          float lat_sin = sin(lat);
-          float lon_sin = sin(lon);
-          float lat_cos = cos(lat);
-          float lon_cos = cos(lon);
+          float lat_sin = sinf(lat);
+          float lon_sin = sinf(lon);
+          float lat_cos = cosf(lat);
+          float lon_cos = cosf(lon);
 
           positions.append(Vector3f(lon_sin * lat_cos * radius,
                                     lat_sin * radius,
@@ -85,7 +85,7 @@ void GLExample06::createSphere()
       latitude += stepLat;
     }
 
- for (int i = 0; i < NbPointsLon * NbPointsLat; ++i)
+ for (uint32_t i = 0; i < NbPointsLon * NbPointsLat; ++i)
     {
       m_indices.append(i);
     }

@@ -20,7 +20,10 @@
 
 #define protected public
 #define private public
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wfloat-equal"
 #include "Vector.hpp"
+# pragma GCC diagnostic pop
 #undef protected
 #undef private
 #include <crpcut.hpp>
@@ -40,7 +43,7 @@ static Vector3f v7(Vector2f(1, 2));
 #define ASSERT_DOUBLES_EQUAL(a,b,c) ASSERT_EQ(true, std::abs(a-b) < c)
 
 //--------------------------------------------------------------------------
-static inline void CHECK_VECTOR3B(Vector3b const& v, const bool x, const bool y, const bool z)
+static void CHECK_VECTOR3B(Vector3b const& v, const bool x, const bool y, const bool z)
 {
   ASSERT_EQ(x, v.x);
   ASSERT_EQ(y, v.y);
@@ -48,7 +51,7 @@ static inline void CHECK_VECTOR3B(Vector3b const& v, const bool x, const bool y,
 }
 
 //--------------------------------------------------------------------------
-static inline void CHECK_VECTOR3F(Vector3f const& v, const float x, const float y, const float z)
+static void CHECK_VECTOR3F(Vector3f const& v, const float x, const float y, const float z)
 {
   ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), x, v.x);
   ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), y, v.y);
@@ -56,7 +59,7 @@ static inline void CHECK_VECTOR3F(Vector3f const& v, const float x, const float 
 }
 
 //--------------------------------------------------------------------------
-static inline void CHECK_NAN_VECTOR3F(Vector3f const& v)
+static void CHECK_NAN_VECTOR3F(Vector3f const& v)
 {
   ASSERT_EQ(true, std::isnan(v.x));
   ASSERT_EQ(true, std::isnan(v.y));

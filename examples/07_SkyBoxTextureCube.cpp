@@ -38,7 +38,7 @@ void GLExample07::onWindowSizeChanged(const float width, const float height)
   float ratio = width / height;
 
   // Make sure the viewport matches the new window dimensions.
-  glViewport(0, 0, width, height);
+  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 
   m_progCube.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
@@ -213,8 +213,8 @@ bool GLExample07::draw()
 // --------------------------------------------------------------
 void GLExample07::onMouseMoved(const double xpos, const double ypos)
 {
-  static float lastX = 0.0f;
-  static float lastY = 0.0f;
+  static double lastX = 0.0f;
+  static double lastY = 0.0f;
   static bool firstMouse = true;
 
   if (firstMouse)
@@ -224,10 +224,11 @@ void GLExample07::onMouseMoved(const double xpos, const double ypos)
       firstMouse = false;
     }
 
-  float xoffset = xpos - lastX;
-  float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+  double xoffset = xpos - lastX;
+  double yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
 
   lastX = xpos;
   lastY = ypos;
-  m_camera.ProcessMouseMovement(xoffset, yoffset);
+  m_camera.ProcessMouseMovement(static_cast<float>(xoffset),
+                                static_cast<float>(yoffset));
 }

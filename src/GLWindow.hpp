@@ -178,7 +178,7 @@ private:
 
   double m_lastTime = 0.0;
   double m_lastFrameTime = 0.0;
-  int m_fps = 0;
+  uint32_t m_fps = 0;
   float m_deltaTime = 0.0f;
 
   uint32_t m_width;

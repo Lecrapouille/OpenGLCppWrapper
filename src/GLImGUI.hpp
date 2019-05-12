@@ -26,9 +26,20 @@
 // *****************************************************************************
 
 #  include "GLWindow.hpp"
-#  include "imgui/imgui.h"
-#  include "imgui/imgui_impl_glfw.h"
-#  include "imgui/imgui_impl_opengl3.h"
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wold-style-cast"
+#  pragma GCC diagnostic ignored "-Wstrict-overflow"
+#  pragma GCC diagnostic ignored "-Wswitch-default"
+#  pragma GCC diagnostic ignored "-Wcast-qual"
+#  pragma GCC diagnostic ignored "-Waggregate-return"
+#  pragma GCC diagnostic ignored "-Wsign-promo"
+#  pragma GCC diagnostic ignored "-Wfloat-equal"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic ignored "-Wconversion"
+#    include "imgui/imgui.h"
+#    include "imgui/imgui_impl_glfw.h"
+#    include "imgui/imgui_impl_opengl3.h"
+# pragma GCC diagnostic pop
 
 namespace glwrap
 {
@@ -50,7 +61,7 @@ public:
   //------------------------------------------------------------------
   //! \brief Release Dear imgui allocated resources.
   //------------------------------------------------------------------
-  ~IGLImGUI()
+  virtual ~IGLImGUI()
   {
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

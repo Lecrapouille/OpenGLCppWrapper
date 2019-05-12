@@ -560,7 +560,7 @@ public:
   //! \throw OpenGLException if the program has not been compiled or
   //! if no VAO is bound or if VBOs have not all the same sizes.
   //----------------------------------------------------------------------------
-  void draw(Primitive const mode, GLint const first, GLsizei const count)
+  void draw(Primitive const mode, GLint const first, uint32_t const count)
   {
     DEBUG("Prog '%s' draw {", cname());
     throw_if_not_compiled();
@@ -571,7 +571,7 @@ public:
     // il suffisait entre 16 et 35
     begin();
     //m_vao->begin();
-    glCheck(glDrawArrays(static_cast<GLenum>(mode), first, count));
+    glCheck(glDrawArrays(static_cast<GLenum>(mode), first, static_cast<GLsizei>(count)));
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     //m_vao->end();
     end();
@@ -586,7 +586,7 @@ public:
   //! if the VAO cannot be bound or if VBOs have not all the same
   //! sizes.
   //----------------------------------------------------------------------------
-  inline void draw(GLVAO& vao, Primitive const mode, GLint const first, GLsizei const count)
+  inline void draw(GLVAO& vao, Primitive const mode, GLint const first, uint32_t const count)
   {
     throw_if_vao_cannot_be_bound(vao);
     draw(mode, first, count);
@@ -641,7 +641,8 @@ public:
     //m_vao->begin();
     begin();
     index.begin();
-    glCheck(glDrawElements(static_cast<GLenum>(mode), index.size(), index.type(), 0));
+    glCheck(glDrawElements(static_cast<GLenum>(mode), static_cast<GLsizei>(index.size()),
+                           index.type(), 0));
     index.end();
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
@@ -768,6 +769,9 @@ private:
             break;
           case 4:
             vao.createVBO<Vector4f>(name, m_vbo_init_size, m_vbo_usage);
+            break;
+          default:
+            throw OpenGLException("Attribute with dimension > 4 is not managed");
             break;
           }
       }
@@ -995,21 +999,20 @@ private:
   void addNewAttribute(GLenum type, const char *name)
   {
     assert(nullptr != name);
-    GLenum EGL_FLOAT = static_cast<GLenum>(GL_FLOAT);
 
     switch (type)
       {
       case GL_FLOAT:
-        m_attributes[name] = std::make_unique<GLAttribute>(name, 1, EGL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute>(name, 1, GL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC2:
-        m_attributes[name] = std::make_unique<GLAttribute>(name, 2, EGL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute>(name, 2, GL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC3:
-        m_attributes[name] = std::make_unique<GLAttribute>(name, 3, EGL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute>(name, 3, GL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC4:
-        m_attributes[name] = std::make_unique<GLAttribute>(name, 4, EGL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute>(name, 4, GL_FLOAT, gpuID());
         break;
       default:
         std::string msg = "Attribute '" + std::string(name) + "' type is not managed";
