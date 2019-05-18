@@ -26,7 +26,7 @@ DESCRIPTION = C++11 API wrapping Core Profile OpenGL routines and allowing to wr
 
 ###################################################
 # Debug mode or Release mode
-PROJECT_MODE = debug
+BUILD_TYPE = debug
 
 ###################################################
 # Location from the project root directory.
@@ -43,7 +43,8 @@ include $(P)/Makefile.common
 OBJ_CORE = Exception.o OpenGL.o GLWindow.o
 OBJ_IMGUI = imgui_draw.o imgui_widgets.o imgui.o \
             imgui_impl_glfw.o imgui_impl_opengl3.o
-OBJ += $(OBJ_CORE) $(OBJ_IMGUI)
+THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/obj/*.o)
+OBJS += $(OBJ_CORE) $(OBJ_IMGUI)
 
 ###################################################
 # Compile static and shared libraries

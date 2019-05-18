@@ -26,8 +26,7 @@ print-compile SOIL
 if [ -e SOIL ];
 then
     cd SOIL
-    (make -j4) > /dev/null 2> /dev/null
-
+    (make -j4 CXXFLAGS="-fPIC -O2 -s") > /dev/null 2> /dev/null
     if [ "$ARCHI" == "Linux" ];
     then
         # Move header and static lib in the same location to be indentical than SOIL for Darwin
