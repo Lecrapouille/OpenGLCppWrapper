@@ -20,7 +20,10 @@
 
 #define protected public
 #define private public
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wfloat-equal"
 #include "Matrix.hpp"
+# pragma GCC diagnostic pop
 #undef protected
 #undef private
 #include <crpcut.hpp>
@@ -92,9 +95,9 @@ static Matrix33f Btrunc =
     4.0f, 8.0f, 12.0f
   };
 static Matrix33f O = { 0.0f };
-static Matrix33f one(1);
-static Matrix33f two(2.0f);
-static Matrix33f four(4);
+static Matrix33i one(1);
+static Matrix33i two(2);
+static Matrix33i four(4);
 static Matrix33f A_times_B =
   {
     14,    32,     50,
@@ -135,7 +138,7 @@ static Matrix44f M =
   };
 static Matrix33b Mfalse(false);
 static Matrix33b Mtrue(true);
-static Vector3f v(5.0f, 4.0f, 3.0f);
+static Vector3f V(5.0f, 4.0f, 3.0f);
 static Vector3f A_times_v(22, 58, 94);
 static Vector3f v_times_A(42, 54, 66);
 
@@ -155,13 +158,13 @@ static void compareMatricesUlps(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
 {
   for (size_t i = 0_z; i < r * c; ++i)
     {
-      ASSERT_EQ(true, maths::almostEqual(a.m_data[i], b.m_data[i]));
+      ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), a.m_data[i], b.m_data[i]);
     }
 }
 
 //--------------------------------------------------------------------------
 template <typename T, size_t r, size_t c>
-static inline void compareMatrix_(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b, const bool expected)
+static void compareMatrix_(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b, const bool expected)
 {
   std::cout << "Comparing: " << std::endl << a
             << "With: " << std::endl << b
@@ -181,20 +184,20 @@ static inline void compareMatrix_(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b
 
 //--------------------------------------------------------------------------
 template <typename T, size_t r, size_t c>
-static inline void isTrueMatrix(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b)
+static void isTrueMatrix(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b)
 {
   compareMatrix_(a, b, true);
 }
 
 //--------------------------------------------------------------------------
 template <typename T, size_t r, size_t c>
-static inline void isFalseMatrix(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b)
+static void isFalseMatrix(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b)
 {
   compareMatrix_(a, b, false);
 }
 
 //--------------------------------------------------------------------------
-static inline void checkVector3f(Vector3f const& v, const float x, const float y, const float z)
+static void checkVector3f(Vector3f const& v, const float x, const float y, const float z)
 {
   ASSERT_EQ(x, v.x);
   ASSERT_EQ(y, v.y);
@@ -202,19 +205,11 @@ static inline void checkVector3f(Vector3f const& v, const float x, const float y
 }
 
 //--------------------------------------------------------------------------
-static inline void checkAlmostVectorEps(Vector3g const& v, const double x, const double y, const double z)
+static void checkAlmostVectorUlps(Vector3g const& v, const double x, const double y, const double z)
 {
-  ASSERT_EQ(true, std::abs(x - v.x) < 0.000001);
-  ASSERT_EQ(true, std::abs(y - v.y) < 0.000001);
-  ASSERT_EQ(true, std::abs(z - v.z) < 0.000001);
-}
-
-//--------------------------------------------------------------------------
-static inline void checkAlmostVectorUlps(Vector3g const& v, const double x, const double y, const double z)
-{
-  ASSERT_EQ(true, maths::almostEqual(x, v.x));
-  ASSERT_EQ(true, maths::almostEqual(y, v.y));
-  ASSERT_EQ(true, maths::almostEqual(z, v.z));
+  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), x, v.x);
+  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), y, v.y);
+  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), z, v.z);
 }
 
 //--------------------------------------------------------------------------
@@ -308,27 +303,28 @@ TESTSUITE(Matrices)
     isTrueMatrix(A_minus_B, A - B);
     isTrueMatrix(B_minus_A, B - A);
 
-    one += 1.0f;
+    one += 1;
     isTrueMatrix(two, one);
-    one -= 1.0f;
-    isTrueMatrix(one, one);
-    one *= 4.0f;
+    one -= 1;
+    one *= 4;
     isTrueMatrix(four, one);
-    one /= 4.0f;
-    isTrueMatrix(one, one);
+    one /= 4;
+    one += 1;
+    isTrueMatrix(two, one);
+    one -= 1;
 
     isTrueMatrix(minusA, A * -1.0f);
     isTrueMatrix(minusA, -1.0f * A);
     isTrueMatrix(minusA, -A);
-    isTrueMatrix(four, 4.0f * one);
-    isTrueMatrix(four, one * 4.0f);
-    isTrueMatrix(one, 4.0f / four);
-    isTrueMatrix(one, four / 4.0f);
+    isTrueMatrix(four, 4 * one);
+    isTrueMatrix(four, one * 4);
+    isTrueMatrix(one, 4 / four);
+    isTrueMatrix(one, four / 4);
 
-    checkVector3f(A * v, A_times_v.x, A_times_v.y, A_times_v.z);
-    checkVector3f(v * A, v_times_A.x, v_times_A.y, v_times_A.z);
+    checkVector3f(A * V, A_times_v.x, A_times_v.y, A_times_v.z);
+    checkVector3f(V * A, v_times_A.x, v_times_A.y, v_times_A.z);
 
-    Vector3f v1(v);
+    Vector3f v1(V);
     v1 *= A;
     checkVector3f(v1, v_times_A.x, v_times_A.y, v_times_A.z);
     Matrix33f C(A);
@@ -431,7 +427,7 @@ TESTSUITE(Matrices)
     Vector3g x(matrix::LUsolve(B, a));
     Vector3g Z(x * B - a);
 
-    checkAlmostVectorEps(x, 1.0, 1.0, 1.0); // Close to 1
-    checkAlmostVectorEps(Z, 0.0, 0.0, 0.0); // Close to 0
+    checkAlmostVectorUlps(x, 1.0, 1.0, 1.0); // Close to 1
+    checkAlmostVectorUlps(Z, 0.0, 0.0, 0.0); // Close to 0
   }
 }

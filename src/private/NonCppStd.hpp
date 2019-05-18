@@ -25,7 +25,10 @@ protected:
 //! be uint32_t or uint64_t depending on the architecture.
 //! Example: size_t i = 42_z;
 // **************************************************************
-constexpr std::size_t operator "" _z (unsigned long long n) { return n; }
+constexpr std::size_t operator "" _z (unsigned long long const n)
+{
+  return static_cast<std::size_t>(n);
+}
 
 // **************************************************************
 // Enable for C++11 and Visual Studio
@@ -80,22 +83,6 @@ inline int ARRAY_SIZE(T (&)[S])
 #    endif
 #  endif
 
-namespace glwrap
-{
-
-//------------------------------------------------------------------
-//! \brief give the file name with its extension from a given path
-//------------------------------------------------------------------
-inline static std::string file_name(std::string const& path)
-{
-  std::string::size_type pos = path.find_last_of("\\/");
-  if (pos != std::string::npos)
-    return path.substr(pos + 1, std::string::npos);
-  return path;
-}
-
-} // namespace glwrap
-
-#  include "Verbose.h"
+#  include "Verbose.hpp"
 
 #endif // OPENGLCPPWRAPPER_NONCPPSTD_HPP

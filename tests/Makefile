@@ -1,6 +1,6 @@
 ##=====================================================================
 ## OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+## Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 ##
 ## This file is part of OpenGLCppWrapper.
 ##
@@ -9,7 +9,7 @@
 ## the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
 ##
-## This program is distributed in the hope that it will be useful, but
+## OpenGLCppWrapper is distributedin the hope that it will be useful, but
 ## WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ## General Public License for more details.
@@ -25,7 +25,7 @@ TARGET = $(PROJECT)-UnitTest
 
 ###################################################
 # Debug mode or Release mode
-PROJECT_MODE = debug
+BUILD_TYPE = debug
 
 ###################################################
 # Location from the project root directory.
@@ -39,13 +39,14 @@ include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
-OBJ  = VectorTests.o MatrixTests.o
-OBJ += IGLObjectTests.o GLVAOTests.o GLVBOTests.o
-OBJ += GLShadersTests.o GLProgramTests.o
-OBJ += UnitTests.o
+OBJS  = VectorTests.o MatrixTests.o
+OBJS += IGLObjectTests.o GLVAOTests.o GLVBOTests.o
+OBJS += GLShadersTests.o GLProgramTests.o
+OBJS += UnitTests.o
 
 ###################################################
-# Link against the unit test lib
+# Link against the crpcut unit test lib.
+# Note: that crpcut does not provide pkg-config file.
 LDFLAGS += -lcrpcut -ldl
 
 ###################################################
@@ -55,20 +56,26 @@ CXXFLAGS += --coverage
 LDFLAGS += --coverage
 
 ###################################################
+#
+CXXFLAGS += \
+  -Wno-inline -Wno-suggest-attribute=noreturn -Wno-stack-protector
+
+###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a)
+#FIXME: the static lib name shall be extracted from root makefile
+THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.0.6)
 
 ###################################################
 # Compile OpenGLCppWrapper unit tests.
-all: $(EXTERNAL_LIBS) $(TARGET)
+all: $(THIRDPART_LIBS) $(TARGET)
 
 ###################################################
 # Be sure the main project have been compiled
-$(OBJ): | $(EXTERNAL_LIBS)
-$(EXTERNAL_LIBS):
-	@$(call print-to,"Compiling","$(EXTERNAL_LIBS)","$@","$(VERSION)")
+$(OBJS): | $(THIRDPART_LIBS)
+$(THIRDPART_LIBS):
+	@$(call print-to,"Compiling","$(THIRDPART_LIBS)","$@","$(VERSION)")
 	@cd $(P) && $(MAKE)
 
 ###################################################

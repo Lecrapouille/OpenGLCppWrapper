@@ -34,7 +34,7 @@ void GLExample11::onWindowSizeChanged(const float width, const float height)
   float ratio = width / height;
 
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, width, height));
+  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 
   //m_fbo.resize(width, height);
   m_prog_scene.matrix44f("projection") =

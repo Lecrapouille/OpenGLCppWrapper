@@ -41,8 +41,8 @@ public:
 private:
 
   bool createTerrain();
-  void generateAltitudes(const int dim);
-  void loadTerrain(const int dim);
+  void generateAltitudes(const uint32_t dim);
+  void loadTerrain(const uint32_t dim);
   virtual void onWindowSizeChanged(const float width, const float height) override;
   virtual bool setup() override;
   virtual bool draw() override;
@@ -54,7 +54,7 @@ private:
   GLVAO               m_vao;
   GLProgram           m_prog;
   std::vector<float>  m_altitudes;
-  int                 m_nbVertices = 0;
+  uint32_t            m_nbVertices = 0;
 };
 
 #endif // EXAMPLE_08_TERRAIN_TEXTURE3D_HPP

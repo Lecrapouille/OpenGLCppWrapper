@@ -26,7 +26,7 @@ DESCRIPTION = C++11 API wrapping Core Profile OpenGL routines and allowing to wr
 
 ###################################################
 # Debug mode or Release mode
-PROJECT_MODE = debug
+BUILD_TYPE = debug
 
 ###################################################
 # Location from the project root directory.
@@ -40,10 +40,10 @@ include $(P)/Makefile.common
 
 ###################################################
 # Make the list of compiled files
-OBJ_CORE = Exception.o OpenGL.o GLWindow.o
-OBJ_IMGUI = imgui_draw.o imgui_widgets.o imgui.o \
-            imgui_impl_glfw.o imgui_impl_opengl3.o
-OBJ += $(OBJ_CORE) $(OBJ_IMGUI)
+OBJ_CORE = Verbose.o Exception.o OpenGL.o GLWindow.o
+OBJ_IMGUI = GLImGUI.o
+OBJS += $(OBJ_CORE) $(OBJ_IMGUI)
+THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/obj/*.o)
 
 ###################################################
 # Compile static and shared libraries
@@ -65,10 +65,18 @@ unit-tests:
 ###################################################
 # Install project. You need to be root.
 .PHONY: install
-install: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET)
+install: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
 	@$(call RULE_INSTALL_DOC)
+	@cd examples && for d in `find . -type d`; do install -d --mode 755 "$$d" "$(PROJECT_DATA_ROOT)/examples/$$d"; done
+	@cd examples && for f in `find . -type f`; do install -D --mode 644 "$$f" "$(PROJECT_DATA_ROOT)/examples/$$f"; done
 	@$(call RULE_INSTALL_LIBRARIES)
 	@$(call RULE_INSTALL_HEADER_FILES)
+	@cd src && for d in `find . -type d`; do install -d --mode 755 "$$d" "$(INCLDIR)/$(PROJECT)/$$d"; done
+	@cd src && for f in `find . -type f -name "*.hpp"`; do install -D --mode 644 "$$f" "$(INCLDIR)/$(PROJECT)/$$f"; done
+	@install -d --mode 755 "$(INCLDIR)/$(PROJECT)/SOIL"
+	@cd $(THIRDPART)/SOIL/src && for f in `find . -type f -name "*.h"`; do install -D --mode 644 "$$f" "$(INCLDIR)/$(PROJECT)/SOIL/$$f"; done
+	@install -d --mode 755 "$(INCLDIR)/$(PROJECT)/imgui"
+	@cd $(THIRDPART)/imgui && for f in `find . -maxdepth 1 -mindepth 1 -type f -name "*.h"`; do install -D --mode 644 "$$f" "$(INCLDIR)/$(PROJECT)/imgui/$$f"; done
 	@$(call RULE_INSTALL_PKG_CONFIG)
 
 ###################################################

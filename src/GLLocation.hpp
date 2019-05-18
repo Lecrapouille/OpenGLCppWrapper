@@ -108,8 +108,8 @@ public:
   //----------------------------------------------------------------------------
   //! \brief See GLLocation constructor.
   //----------------------------------------------------------------------------
-  GLAttribute(const char *name, const GLint dim, const GLenum gltype, const GLuint prog)
-    : GLLocation(name, dim, gltype, prog)
+  GLAttribute(const char *name, const GLint dim, const GLint gltype, const GLuint prog)
+    : GLLocation(name, dim, static_cast<GLenum>(gltype), prog)
   {
     assert((dim >= 1) && (dim <= 4));
   }
@@ -140,14 +140,14 @@ private:
   //----------------------------------------------------------------------------
   virtual void activate() override
   {
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wold-style-cast"
     DEBUG("Attrib '%s' activate", cname());
     glCheck(glEnableVertexAttribArray(m_index));
-    glCheck(glVertexAttribPointer(m_index,
-                                  m_dim,
-                                  m_target,
-                                  GL_FALSE,
-                                  m_stride,
-                                  (const GLvoid*) m_offset));
+    glCheck(glVertexAttribPointer(m_index, m_dim, m_target, GL_FALSE,
+                                  static_cast<GLsizei>(m_stride),
+                                  (void*) m_offset));
+#  pragma GCC diagnostic pop
   }
 
   //----------------------------------------------------------------------------
@@ -209,8 +209,8 @@ public:
   //! \brief See GLLocation constructor.
   // \note T and gltype shall match. Not checks are made !
   //----------------------------------------------------------------------------
-  IGLUniform(const char *name, const GLint dim, const GLenum gltype, const GLuint prog)
-    : GLLocation(name, dim, gltype, prog)
+  IGLUniform(const char *name, const GLint dim, const GLint gltype, const GLuint prog)
+    : GLLocation(name, dim, static_cast<GLenum>(gltype), prog)
   {}
 
   //----------------------------------------------------------------------------
@@ -285,7 +285,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief
   //----------------------------------------------------------------------------
-  GLUniform(const char *name, const GLint dim, const GLenum gltype, const GLuint prog)
+  GLUniform(const char *name, const GLint dim, const GLint gltype, const GLuint prog)
     : IGLUniform(name, dim, gltype, prog)
   {}
 
@@ -421,7 +421,7 @@ public:
   //! \param texture_id count texture.
   //! \param prog
   //----------------------------------------------------------------------------
-  GLSampler(const char *name, const GLenum gltype, const GLenum texture_id,
+  GLSampler(const char *name, const GLint gltype, const GLenum texture_id,
             const GLuint prog)
     : IGLUniform(name, 0, gltype, prog),
       m_texture_id(texture_id)

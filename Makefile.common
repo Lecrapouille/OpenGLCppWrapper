@@ -21,11 +21,11 @@
 
 ###################################################
 # Modify this file will force compiling whole project
-MY_MAKEFILE_FILES += $(P)/Makefile.common
+MYMAKEFILES += $(P)/Makefile.common
 
 ###################################################
 # Compilation options.
-CXXFLAGS += $(CXX_WHOLE_FLAGS) -O3 -std=c++11
+CXXFLAGS += $(CXX_WHOLE_FLAGS)
 LDFLAGS  +=
 
 ###################################################
@@ -37,8 +37,7 @@ DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS +=
-EXTERNAL_OBJ += $(abspath external)/SOIL/obj/*.o
+THIRDPART_LIBS +=
 
 ###################################################
 # Set Libraries. For knowing which libraries
@@ -47,15 +46,15 @@ EXTERNAL_OBJ += $(abspath external)/SOIL/obj/*.o
 ifeq ($(ARCHI),Darwin)
 LDFLAGS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
 else ifeq ($(ARCHI),Linux)
-LDFLAGS += `pkg-config glew glfw3 --static --libs`
+PKG_LIBS += glew glfw3
 else
 $(error Unknown architecture)
 endif
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES += -I$(P)/include -I$(P)/src -I$(P)/external -I$(P)/external/imgui
+INCLUDES += -I$(P)/include -I$(P)/src -I$(P)/$(THIRDPART) -I$(P)/$(THIRDPART)/imgui
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
-VPATH += $(P)/src:$(P)/src/private:$(P)/external:$(P)/external/imgui
+VPATH += $(P)/src:$(P)/src/private:$(P)/$(THIRDPART):$(P)/$(THIRDPART)/imgui:$(P)/$(THIRDPART)/SOIL/obj

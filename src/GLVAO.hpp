@@ -266,15 +266,15 @@ public:
                               "' does not exist");
       }
 
-    T* texture = dynamic_cast<T*>(ptr);
-    if (unlikely(nullptr == texture))
+    T* tex = dynamic_cast<T*>(ptr);
+    if (unlikely(nullptr == tex))
       {
         throw OpenGLException("GLTexture '" + std::string(name) +
                               "' exists but has wrong template type");
       }
 
     DEBUG("VAO::GetTexture '%s'", name);
-    return *texture;
+    return *tex;
   }
 
   //----------------------------------------------------------------------------

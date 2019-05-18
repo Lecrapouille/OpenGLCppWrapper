@@ -146,7 +146,9 @@ private:
   //----------------------------------------------------------------------------
   virtual bool setup() override
   {
-    glCheck(glRenderbufferStorage(m_target, m_format, m_width, m_height));
+    glCheck(glRenderbufferStorage(m_target, m_format,
+                                  static_cast<GLsizei>(m_width),
+                                  static_cast<GLsizei>(m_height)));
     return false;
   }
 

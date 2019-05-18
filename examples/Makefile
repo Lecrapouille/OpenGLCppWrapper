@@ -25,7 +25,7 @@ TARGET = $(PROJECT)
 
 ###################################################
 # Debug mode or Release mode
-PROJECT_MODE = debug
+BUILD_TYPE = debug
 
 ###################################################
 # Location from the project root directory.
@@ -39,7 +39,7 @@ include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
-OBJ += \
+OBJS += \
   00_EmptyWindowWithIOEvents.o \
   01_EmptyWindowWithImgui.o \
   02_DynamicTriangle.o \
@@ -57,17 +57,18 @@ OBJ += \
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a)
+#FIXME: the static lib name shall be extracted from root makefile
+THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.0.6)
 
 ###################################################
 # Compile tutorials
-all: $(EXTERNAL_LIBS) $(TARGET)
+all: $(THIRDPART_LIBS) $(TARGET)
 
 ###################################################
 # Be sure the main project have been compiled
-$(OBJ): | $(EXTERNAL_LIBS)
-$(EXTERNAL_LIBS):
-	@$(call print-to,"Compiling","$(EXTERNAL_LIBS)","$@","$(VERSION)")
+$(OBJS): | $(THIRDPART_LIBS)
+$(THIRDPART_LIBS):
+	@$(call print-to,"Compiling","$(THIRDPART_LIBS)","$@","$(VERSION)")
 	@cd $(P) && $(MAKE)
 
 ###################################################

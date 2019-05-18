@@ -61,48 +61,13 @@ inline static bool& hasCreatedContext()
 //! \param line the line where the OpenGL routine was called.
 //! \param expression the line content where the OpenGL routine was called.
 //----------------------------------------------------------------------------
-inline static void checkError(const char* filename, const uint32_t line, const char* expression)
-{
-  GLenum id;
-  const char* error;
-
-  while ((id = glGetError()) != GL_NO_ERROR)
-    {
-      switch (id)
-        {
-        case GL_INVALID_OPERATION:
-          error = "GL_INVALID_OPERATION";
-          break;
-        case GL_INVALID_ENUM:
-          error = "GL_INVALID_ENUM";
-          break;
-        case GL_INVALID_VALUE:
-          error = "GL_INVALID_VALUE";
-          break;
-        case GL_OUT_OF_MEMORY:
-          error = "GL_OUT_OF_MEMORY";
-          break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION:
-          error = "GL_INVALID_FRAMEBUFFER_OPERATION";
-          break;
-        default:
-          error = "UNKNOWN";
-          break;
-        }
-
-      // Do not use directly LOG macros because it will catch this
-      // filename and its line instead of the faulty file/line which
-      // produced the OpenGL error.
-      errout("GLERR", filename, line, "Failed executing '%s'. Reason is '%s'",
-             expression, error);
-    }
-}
+void checkError(const char* filename, const uint32_t line, const char* expression);
 
 //----------------------------------------------------------------------------
 //! Macro encapsuling the OpenGL command and the fault checker.
 //----------------------------------------------------------------------------
 #  ifdef CHECK_OPENGL
-#    define glCheck(expr) expr; glwrap::checkError(SHORT_FILENAME, __LINE__, #expr);
+#    define glCheck(expr) expr; glwrap::checkError(__FILE__, __LINE__, #expr);
 #  else
 #    define glCheck(expr) expr;
 #  endif

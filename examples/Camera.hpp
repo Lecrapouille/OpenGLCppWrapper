@@ -123,9 +123,9 @@ private:
     {
         // Calculate the new Front vector
         Vector3f f;
-        f.x = cos(radians(Yaw)) * cos(radians(Pitch));
-        f.y = sin(radians(Pitch));
-        f.z = sin(radians(Yaw)) * cos(radians(Pitch));
+        f.x = cosf(radians(Yaw)) * cosf(radians(Pitch));
+        f.y = sinf(radians(Pitch));
+        f.z = sinf(radians(Yaw)) * cosf(radians(Pitch));
         Front = vector::normalize(f);
         // Also re-calculate the Right and Up vector
         Right = vector::normalize(vector::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.

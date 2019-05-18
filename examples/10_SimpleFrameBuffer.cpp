@@ -33,7 +33,7 @@
 void GLExample10::onWindowSizeChanged(const float width, const float height)
 {
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, width, height));
+  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 }
 
 //------------------------------------------------------------------
