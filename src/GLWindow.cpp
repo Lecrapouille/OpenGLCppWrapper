@@ -22,64 +22,59 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <cassert>
 
 namespace glwrap
 {
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //! \brief Callback triggered when GLFW failed.
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 __attribute__((__noreturn__))
-static void on_error(int /*errorCode*/, const char* msg)
+static void on_GLFW_error(int /*errorCode*/, const char* msg)
 {
   throw OpenGLException(msg);
 }
 
-//------------------------------------------------------------------
-//! \brief Static function allowing to "cast" a pointer to function to
-//! pointer method. This function is triggered when the mouse moved.
-//------------------------------------------------------------------
-static void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+//------------------------------------------------------------------------------
+//! \brief Static function allowing to "cast" a function pointer to a
+//! method pointer. This function is triggered when the mouse is
+//! moved.
+//------------------------------------------------------------------------------
+static void on_mouse_moved(GLFWwindow* window, double xpos, double ypos)
 {
-  IGLWindow* obj = (IGLWindow*) glfwGetWindowUserPointer(window);
-  if (likely(nullptr != obj))
-    {
-      obj->onMouseMoved(xpos, ypos);
-    }
+  assert(nullptr != window);
+  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
+  obj->onMouseMoved(xpos, ypos);
 }
 
-//------------------------------------------------------------------
-//! \brief Static function allowing to "cast" a pointer to function to
-//! pointer method. This function is triggered when the mouse button
+//------------------------------------------------------------------------------
+//! \brief Static function allowing to "cast" a function pointer to a
+//! method pointer. This function is triggered when the mouse button
 //! is scrolled.
-//------------------------------------------------------------------
-static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+//------------------------------------------------------------------------------
+static void on_mouse_scrolled(GLFWwindow* window, double xoffset, double yoffset)
 {
-  IGLWindow* obj = (IGLWindow*) glfwGetWindowUserPointer(window);
-  if (likely(nullptr != obj))
-    {
-      obj->onMouseScrolled(xoffset, yoffset);
-    }
+  assert(nullptr != window);
+  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
+  obj->onMouseScrolled(xoffset, yoffset);
 }
 
-//------------------------------------------------------------------
-//! \brief Static function allowing to "cast" a pointer to function
-//! to pointer method. This function is triggered when the window
+//------------------------------------------------------------------------------
+//! \brief Static function allowing to "cast" a function pointer to
+//! a method pointer. This function is triggered when the window
 //! has been resized.
-//------------------------------------------------------------------
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+//------------------------------------------------------------------------------
+static void on_window_resized(GLFWwindow* window, int width, int height)
 {
-  IGLWindow* obj = (IGLWindow*) glfwGetWindowUserPointer(window);
-  if (likely(nullptr != obj))
-    {
-      if (unlikely(0u >= width)) { width = 1u; }
-      if (unlikely(0u >= height)) { height = 1u; }
-      obj->setWindowSize(static_cast<uint32_t>(width),
-                         static_cast<uint32_t>(height));
-    }
+  assert(nullptr != window);
+  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
+  if (unlikely(0 >= width)) { width = 1; }
+  if (unlikely(0 >= height)) { height = 1; }
+  obj->setWindowSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 IGLWindow::IGLWindow(uint32_t const width, uint32_t const height, const char *title)
   : m_width(width),
     m_height(height),
@@ -92,16 +87,17 @@ IGLWindow::IGLWindow(uint32_t const width, uint32_t const height, const char *ti
   if (unlikely(0u == m_height)) { m_height = 1u; }
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 IGLWindow::~IGLWindow()
 {
-  if (hasCreatedContext())
+  if (nullptr != m_main_window)
     {
-      glfwTerminate();
+      glfwDestroyWindow(m_main_window);
     }
+  glfwTerminate();
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void IGLWindow::setWindowSize(uint32_t const width, uint32_t const height)
 {
   m_width = width;
@@ -115,10 +111,10 @@ void IGLWindow::setWindowSize(uint32_t const width, uint32_t const height)
                       static_cast<float>(height));
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void IGLWindow::computeFPS()
 {
-  static int nbFrames = 0;
+  static uint32_t nbFrames = 0u;
   double currentTime = glfwGetTime();
   m_deltaTime = static_cast<float>(currentTime - m_lastFrameTime);
   m_lastFrameTime = currentTime;
@@ -131,13 +127,13 @@ void IGLWindow::computeFPS()
       m_fps = nbFrames;
       int ms_by_frame = static_cast<int>(1000.0 / static_cast<double>(m_fps));
       oss << '[' << m_fps << " FPS, " << ms_by_frame << " ms] " << m_title;
-      glfwSetWindowTitle(m_window, oss.str().c_str());
-      nbFrames = 0;
+      glfwSetWindowTitle(m_main_window, oss.str().c_str());
+      nbFrames = 0u;
       m_lastTime += 1.0;
     }
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool IGLWindow::start()
 {
   if (hasCreatedContext())
@@ -149,7 +145,7 @@ bool IGLWindow::start()
     }
 
   // Initialise GLFW
-  glfwSetErrorCallback(on_error);
+  glfwSetErrorCallback(on_GLFW_error);
   if (!glfwInit())
     {
       std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -163,13 +159,15 @@ bool IGLWindow::start()
   hasCreatedContext() = true;
 
   // Open a window and create its OpenGL context
-  m_window = glfwCreateWindow(m_width, m_height, m_title, nullptr, nullptr);
-  if (nullptr == m_window)
+  m_main_window = glfwCreateWindow(static_cast<int>(m_width),
+                                   static_cast<int>(m_height),
+                                   m_title, nullptr, nullptr);
+  if (nullptr == m_main_window)
     {
       std::cerr << "Failed to open GLFW window" << std::endl;
       return false;
     }
-  glfwMakeContextCurrent(m_window);
+  glfwMakeContextCurrent(m_main_window);
   glfwSwapInterval(1); // Enable vsync
 
   // Initialize GLEW
@@ -195,14 +193,14 @@ bool IGLWindow::start()
 
   // Save the class address to "cast" function callback into a method
   // callback
-  glfwSetWindowUserPointer(m_window, this);
+  glfwSetWindowUserPointer(m_main_window, this);
 
   // I/O callbacks
-  glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
-  glfwSetCursorPosCallback(m_window, mouse_callback);
-  glfwSetScrollCallback(m_window, scroll_callback);
+  glfwSetFramebufferSizeCallback(m_main_window, on_window_resized);
+  glfwSetCursorPosCallback(m_main_window, on_mouse_moved);
+  glfwSetScrollCallback(m_main_window, on_mouse_scrolled);
   // Ensure we can capture keyboard being pressed below
-  glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
+  glfwSetInputMode(m_main_window, GLFW_STICKY_KEYS, GL_TRUE);
 
 l_runtime:
 
@@ -243,7 +241,7 @@ l_runtime:
   return res;
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool IGLWindow::loop()
 {
   do
@@ -255,11 +253,11 @@ bool IGLWindow::loop()
           return false;
         }
       // Swap buffers
-      glfwSwapBuffers(m_window);
+      glfwSwapBuffers(m_main_window);
       glfwPollEvents();
     }
   // Check if the ESC key was pressed or the window was closed
-  while (!keyPressed(GLFW_KEY_ESCAPE) && (0 == glfwWindowShouldClose(m_window)));
+  while (!keyPressed(GLFW_KEY_ESCAPE) && (0 == glfwWindowShouldClose(m_main_window)));
   return true;
 }
 
