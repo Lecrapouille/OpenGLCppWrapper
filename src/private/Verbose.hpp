@@ -1,14 +1,22 @@
 #ifndef OPENGLCPPWRAPPER_DEBUG_HPP
 #  define OPENGLCPPWRAPPER_DEBUG_HPP
 
-#  include "NonCppStd.hpp"
 #  include <stdio.h>
 #  include <stdarg.h>
 #  include <stdlib.h>
 #  include <cstring>
+#  include <string>
 
 namespace glwrap
 {
+
+#  ifndef PRINTFLIKE
+#    if __GNUC__ > 2 || defined(__INTEL_COMPILER)
+#      define PRINTFLIKE(a, b) __attribute__((format(printf, a, b)))
+#    else
+#      define PRINTFLIKE(a, b)
+#    endif
+#  endif
 
 //------------------------------------------------------------------------------
 //! \brief give the file name with its extension from a given path
