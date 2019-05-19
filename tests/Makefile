@@ -47,7 +47,7 @@ OBJS += UnitTests.o
 ###################################################
 # Link against the crpcut unit test lib.
 # Note: that crpcut does not provide pkg-config file.
-LDFLAGS += -lcrpcut -ldl
+NOT_PKG_LIBS += -lcrpcut -ldl
 
 ###################################################
 # Code coverage. Comment these lines if coveraging

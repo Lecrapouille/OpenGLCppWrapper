@@ -29,9 +29,12 @@ CXXFLAGS += $(CXX_WHOLE_FLAGS)
 LDFLAGS  +=
 
 ###################################################
-# Project defines
-DEFINES += -DCHECK_OPENGL -DERROR -UDEBUG
-DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
+# Project defines.
+# CHECK_OPENGL allows to check if bad parameters are
+#   passed to OpenGL routines. Produce an error message
+#   in the console but does not abort the program.
+# ENABLE_DEBUG activate logs on the console.
+DEFINES += -DCHECK_OPENGL -UENABLE_DEBUG
 
 ###################################################
 # Set Libraries compiled in the external/ directory.

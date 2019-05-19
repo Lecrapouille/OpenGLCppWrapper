@@ -340,21 +340,23 @@ make coverage -j4
 
 If all tests passed the coverage report is created in `doc/coverage/index.html` and is opened automatically.
 
-### Verbose
-
-To activate console logs for debugging, see in `src/Makefile` and in `examples/Makefile` GCC flags `-DERROR -UDEBUG` and set to `-DERROR -DDEBUG`.
-
 ## How to use OpenGLCppWrapper in your project?
 
 Add the include in your cpp file: `# include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>`
 
-Compile using the pkg-config tool to add compilation flags to GCC or clang:
-* CFLAGS=pkg-config openglcppwrapper-0.6 --cflags
-* LDFLAGS=pkg-config openglcppwrapper-0.6 --libs
+In debug mode, you can use the following macros:
+* `-DCHECK_OPENGL` for checking bad parameters passed to OpenGL routines.
+* `-DENABLE_DEBUG` for activating console logs for debugging.
 
-Note: adapt 0.6 to the current version. For example with a simple file main.cpp:
+Compile using the pkg-config tool to add compilation flags to GCC or clang:
+* CFLAGS=\`pkg-config openglcppwrapper --cflags\`
+* LDFLAGS=\`pkg-config openglcppwrapper --libs\`
+* Note: in pkg-config instead of openglcppwrapper which refers to the last installed version,
+you can specify your desired version (for example: openglcppwrapper-0.6).
+
+Example with a simple file main.cpp:
 ```
-g++ -W -Wall -std=c++11 main.cpp -o prog `pkg-config openglcppwrapper-0.6 --cflags --libs`
+g++ -W -Wall --std=c++11 main.cpp -o prog `pkg-config openglcppwrapper --cflags --libs`
 ```
 
 ## Credits

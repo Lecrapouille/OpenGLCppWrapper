@@ -25,6 +25,8 @@
 //! \file GLImGUI.hpp wraps function calls of the ImGUI project.
 // *****************************************************************************
 
+#  define IMGUI_IMPL_OPENGL_LOADER_GLEW
+
 #  include "GLWindow.hpp"
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wold-style-cast"

@@ -21,20 +21,16 @@ std::string file_name(std::string const& path);
 PRINTFLIKE(4, 5)
 void errout(const char* type, const char* file, const uint32_t line, const char* format, ...);
 
-#  ifdef DEBUG
-#    undef DEBUG
+#  ifdef ENABLE_DEBUG
 #    define DEBUG_HELPER(format, ...) errout("DEBUG", __FILE__, __LINE__, format "%s", __VA_ARGS__)
 #    define DEBUG(...) DEBUG_HELPER(__VA_ARGS__, "")
 #  else
 #    define DEBUG(format, ...)
 #  endif
 
-#  ifdef ERROR
-#    undef ERROR
+#  ifndef ERROR
 #    define ERROR_HELPER(format, ...) errout("ERROR", __FILE__, __LINE__, format "%s", __VA_ARGS__)
 #    define ERROR(...) ERROR_HELPER(__VA_ARGS__, "")
-#  else
-#    define ERROR(format, ...)
 #  endif
 
 } // namespace glwrap
