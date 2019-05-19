@@ -58,7 +58,7 @@ OBJS += \
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
 #FIXME: the static lib name shall be extracted from root makefile
-THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.0.6)
+THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.$(shell cat $(P)/VERSION))
 
 ###################################################
 # Compile tutorials
