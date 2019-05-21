@@ -46,9 +46,9 @@ void GLExample07::onWindowSizeChanged(const float width, const float height)
 }
 
 //------------------------------------------------------------------
-//! \brief Create a cube.
+//! \brief Create a skybox.
 //------------------------------------------------------------------
-bool GLExample07::createCube()
+bool GLExample07::createSkyBox()
 {
   // Load from ASCII file the vertex sahder (vs) as well the fragment shader
   vs1.fromFile("shaders/07_SkyBoxTextureCube_skybox.vs");
@@ -90,9 +90,9 @@ bool GLExample07::createCube()
 }
 
 //------------------------------------------------------------------
-//! \brief Create a skybox.
+//! \brief Create a cube.
 //------------------------------------------------------------------
-bool GLExample07::createSkyBox()
+bool GLExample07::createCube()
 {
   // Load from ASCII file the vertex sahder (vs) as well the fragment shader
   vs2.fromFile("shaders/07_SkyBoxTextureCube_cubemap.vs");
