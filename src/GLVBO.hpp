@@ -217,6 +217,38 @@ public:
   {
   }
 
+  // FIXME: why cannot be placed inside PendingContainer ????
+  inline GLIndexBuffer<T>& operator=(std::initializer_list<T> il)
+  {
+    const size_t my_size = this->m_container.size();
+    const size_t other_size = il.size();
+
+    if (other_size > my_size)
+      this->throw_if_cannot_expand();
+
+    this->m_container = il;
+    this->tagAsPending(0_z, other_size - 1_z);
+    return *this;
+  }
+
+  inline GLIndexBuffer<T>& operator=(GLIndexBuffer<T> const& other)
+  {
+    return this->operator=(other.m_container);
+  }
+
+  inline GLIndexBuffer<T>& operator=(std::vector<T> const& other)
+  {
+    const size_t my_size = this->m_container.size();
+    const size_t other_size = other.size();
+
+    if (other_size > my_size)
+      this->throw_if_cannot_expand();
+
+    this->m_container = other;
+    this->tagAsPending(0_z, other_size - 1_z);
+    return *this;
+  }
+
   inline GLenum type() const;
 };
 
