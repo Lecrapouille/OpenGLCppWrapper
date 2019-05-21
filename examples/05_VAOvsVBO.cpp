@@ -154,7 +154,7 @@ bool GLExample05::draw()
   m_movable.rotate(4.0f * ct, Vector3f(0, 1, 0)); // Apply a rotation around Y-axis
   m_movable.position(Vector3f(-1.0f, 0.0f, -1.0f)); // Apply a translation
   m_prog.matrix44f("model") = m_movable.transform(); // Rotate and translate the cube
-  m_prog.draw(Primitive::TRIANGLES, 0, 36);
+  m_prog.draw(Mode::TRIANGLES, 0, 36);
 
   // Draw a second cube (same model = same VAO) with a "darkished"
   // coloration. Make this cube static.
@@ -163,7 +163,7 @@ bool GLExample05::draw()
   m_movable.reset();
   m_movable.position(Vector3f(3.0f, 0.0f, 0.0f)); // Apply a translation
   m_prog.matrix44f("model") = m_movable.transform();
-  m_prog.draw(Primitive::TRIANGLES, 0, 36); // FIXME 0, 36 a cacher
+  m_prog.draw(Mode::TRIANGLES, 0, 36); // FIXME 0, 36 a cacher
 
   // Draw the floor (second model = second VAO).
   m_prog.vector4f("color") = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -171,7 +171,7 @@ bool GLExample05::draw()
   m_movable.reset();
   m_movable.position(Vector3f(0.0f, 0.0f, 0.0f)); // Apply a translation
   m_prog.matrix44f("model") = m_movable.transform();
-  m_prog.draw(Primitive::TRIANGLES, 0, 6);
+  m_prog.draw(Mode::TRIANGLES, 0, 6);
 
   return true;
 }

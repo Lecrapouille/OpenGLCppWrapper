@@ -88,7 +88,7 @@ bool GLExample08::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  m_prog.draw(m_vao, Primitive::TRIANGLE_STRIP, 0, m_nbVertices);
+  m_prog.draw(m_vao, Mode::TRIANGLE_STRIP, 0, m_nbVertices);
 
   return true;
 }

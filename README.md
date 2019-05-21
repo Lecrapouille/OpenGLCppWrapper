@@ -126,22 +126,22 @@ Here the funniest part of this document: using OpenGLCppWrapper API. The code is
 43:     // Draw model 1 with implicit first and count vertices
 44:     prog.matrix44f("model") = { ... };
 45:     prog.bind(vao1);
-46:     prog.draw(Primitive::TRIANGLES);
+46:     prog.draw(Mode::TRIANGLES);
 47:
 48:     // Draw model 2 with explicit first and count vertices
 49:     prog.matrix44f("model") = { ... };
 50:     prog.bind(vao2);
-51:     prog.draw(Primitive::TRIANGLES, 0, 36);
+51:     prog.draw(Mode::TRIANGLES, 0, 36);
 52:
 53:     // Draw model 1 (alternative way)
-54:     prog.draw(vao1, Primitive::TRIANGLES, 0, 36);
+54:     prog.draw(vao1, Mode::TRIANGLES, 0, 36);
 55:
 56:     // Draw model 2: (alternative way)
-57:     prog.draw(vao2, Primitive::TRIANGLES);
+57:     prog.draw(vao2, Mode::TRIANGLES);
 58:
 59:     // Example of drawing a model with vertices index (EBO)
 60:     GLIndexBuffer<uint32_t> indices = { ... };
-61:     prog.draw(vao3, Primitive::POINTS, indices);
+61:     prog.draw(vao3, Mode::POINTS, indices);
 62: }
 63:
 64: // Camera management
@@ -195,7 +195,7 @@ Depending on your GLSL code, if you use [Model View Projection matrices](http://
 * lines 64-68:
 In this example, we defined matrices for the model view projection. The matrix `"projection"` is usually updated when the user changes the dimension of the GUI window (`onWindowSizeChanged(uint32 const width, uint32 const height)` of GLWindow and in `setup()`). The `"view"` matrix is updated when your camera is moved (see Legacy OpenGL `glLookAt` routine). Finally, the `"model"` matrix is used for placing models over the world (so to be placed before any `GLProgram::draw` methods).
 
-**Note:** `Primitive::TRIANGLES` is a strong type alias for GL_TRIANGLES. For all public methods needing an OpenGL GLint or GLenum types I replaced them by a C++ `enum class` (see GLEnum.hpp file for other types). This allows detecting bugs with the wrong type like trying to pass GL_DYNAMIC_DRAW instead of GL_TRIANGLES. Note that internally in classes, I keep using GL_XXX names because they cannot be accessed outside the API.
+**Note:** `Mode::TRIANGLES` is a strong type alias for GL_TRIANGLES. For all public methods needing an OpenGL GLint or GLenum types I replaced them by a C++ `enum class` (see GLEnum.hpp file for other types). This allows detecting bugs with the wrong type like trying to pass GL_DYNAMIC_DRAW instead of GL_TRIANGLES. Note that internally in classes, I keep using GL_XXX names because they cannot be accessed outside the API.
 
 **Note:** a GLSL coding rule suggests to prefix uniform names bu "u_" and attribute names "a_". This is not mandatory for this API. The only requirement, for the moment, is to use the same name both for uniform and attribute is not managed by the API (and I'm not sure GLSL can be compiled anyway).
 

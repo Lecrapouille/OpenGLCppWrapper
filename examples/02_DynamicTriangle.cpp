@@ -132,7 +132,7 @@ bool GLExample02::draw()
 
   // Draw the VAO bound to the shader program. Dirty data are
   // transfered to GPU.
-  m_prog.draw(m_triangle, Primitive::TRIANGLES, 0, 3);
+  m_prog.draw(m_triangle, Mode::TRIANGLES, 0, 3);
 
   return true;
 }

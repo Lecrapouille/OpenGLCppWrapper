@@ -135,7 +135,7 @@ bool GLExample06::draw()
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
   // Draw the sphere
-  m_prog.draw(m_sphere, Primitive::POINTS, m_indices);
+  m_prog.draw(m_sphere, Mode::POINTS, m_indices);
 
   return true;
 }

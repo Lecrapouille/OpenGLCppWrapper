@@ -312,5 +312,5 @@ void GLExample09::drawSceneNode(GLVAO& vao, Matrix44f const& transform)
   m_prog.matrix44f("model") = transform;
 
   // Draw the 3D model
-  m_prog.draw(vao, Primitive::TRIANGLES, 0, 36);
+  m_prog.draw(vao, Mode::TRIANGLES, 0, 36);
 }

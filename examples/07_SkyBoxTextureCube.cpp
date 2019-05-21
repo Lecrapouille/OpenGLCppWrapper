@@ -162,7 +162,7 @@ void GLExample07::drawCube()
   m_progCube.matrix44f("view") = m_camera.GetViewMatrix();
 
   glCheck(glDepthFunc(GL_LESS));
-  m_progCube.draw(m_cube, Primitive::TRIANGLES, 0, 36);
+  m_progCube.draw(m_cube, Mode::TRIANGLES, m_indices);
 }
 
 // --------------------------------------------------------------
@@ -177,7 +177,7 @@ void GLExample07::drawSkyBox()
   // Note: change depth function so depth test passes when values are
   // equal to depth buffer's content
   glCheck(glDepthFunc(GL_LEQUAL));
-  m_progSkyBox.draw(m_skybox, Primitive::TRIANGLES, 0, 36);
+  m_progSkyBox.draw(m_skybox, Mode::TRIANGLES, 0, 36);
 }
 
 //------------------------------------------------------------------

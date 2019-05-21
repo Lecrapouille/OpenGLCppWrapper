@@ -136,8 +136,8 @@ bool GLExample11::draw()
       glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
       glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
       glEnable(GL_DEPTH_TEST);
-      m_prog_scene.draw(m_floor, Primitive::TRIANGLES, 0, 6);
-      m_prog_scene.draw(m_cube, Primitive::TRIANGLES, 0, 36);
+      m_prog_scene.draw(m_floor, Mode::TRIANGLES, 0, 6);
+      m_prog_scene.draw(m_cube, Mode::TRIANGLES, 0, 36);
     });
 
   // Second pass: draw to the screen
@@ -145,7 +145,7 @@ bool GLExample11::draw()
   glClear(GL_COLOR_BUFFER_BIT);
   glDisable(GL_DEPTH_TEST);
   m_prog_screen.scalarf("time") = dt();
-  m_prog_screen.draw(m_screen, Primitive::TRIANGLES, 0, 6);
+  m_prog_screen.draw(m_screen, Mode::TRIANGLES, 0, 6);
 
   return true;
 }

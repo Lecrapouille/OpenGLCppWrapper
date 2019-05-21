@@ -560,7 +560,7 @@ public:
   //! \throw OpenGLException if the program has not been compiled or
   //! if no VAO is bound or if VBOs have not all the same sizes.
   //----------------------------------------------------------------------------
-  void draw(Primitive const mode, GLint const first, uint32_t const count)
+  void draw(Mode const mode, GLint const first, uint32_t const count)
   {
     DEBUG("Prog '%s' draw {", cname());
     throw_if_not_compiled();
@@ -586,7 +586,7 @@ public:
   //! if the VAO cannot be bound or if VBOs have not all the same
   //! sizes.
   //----------------------------------------------------------------------------
-  inline void draw(GLVAO& vao, Primitive const mode, GLint const first, uint32_t const count)
+  inline void draw(GLVAO& vao, Mode const mode, GLint const first, uint32_t const count)
   {
     throw_if_vao_cannot_be_bound(vao);
     draw(mode, first, count);
@@ -600,7 +600,7 @@ public:
   //! if the VAO has not been bound or if VBOs have not all the same
   //! sizes.
   //----------------------------------------------------------------------------
-  inline void draw(Primitive const /*mode*/)
+  inline void draw(Mode const /*mode*/)
   {
     ERROR("%s", "Draw with implicit number of vertices is not yet implemented");
     //throw_if_not_compiled();
@@ -616,7 +616,7 @@ public:
   //! if the VAO has not been bound or if VBOs have not all the same
   //! sizes.
   //----------------------------------------------------------------------------
-  inline void draw(GLVAO& vao, Primitive const mode)
+  inline void draw(GLVAO& vao, Mode const mode)
   {
     throw_if_vao_cannot_be_bound(vao);
     draw(mode);
@@ -630,7 +630,7 @@ public:
   //! sizes.
   //----------------------------------------------------------------------------
   template<class T>
-  void draw(Primitive const mode, GLIndexBuffer<T>& index)
+  void draw(Mode const mode, GLIndexBuffer<T>& index)
   {
     DEBUG("Prog::drawIndex %zu elements", index.size());
 
@@ -657,7 +657,7 @@ public:
   //! sizes.
   //----------------------------------------------------------------------------
   template<class T>
-  void draw(GLVAO& vao, Primitive const mode, GLIndexBuffer<T>& index)
+  void draw(GLVAO& vao, Mode const mode, GLIndexBuffer<T>& index)
   {
     throw_if_vao_cannot_be_bound(vao);
     draw(mode, index);
@@ -1233,9 +1233,9 @@ private:
 //! GLVAO              vao2("VAO2");
 //!
 //! prog.bind(vao1);
-//! prog.draw(vao1, Primitive::TRIANGLES);
+//! prog.draw(vao1, Mode::TRIANGLES);
 //! prog.bind(vao2);
-//! prog.draw(Primitive::TRIANGLES); // vao2 is painted
+//! prog.draw(Mode::TRIANGLES); // vao2 is painted
 //! \endcode
 //!
 //! Beware: this example does not show shaders or VAO initialization.

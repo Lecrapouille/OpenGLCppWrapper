@@ -111,13 +111,13 @@ bool GLExample10::draw()
   m_fbo.render(0, 0, width(), height(), [this]() {
       glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
       glCheck(glClear(GL_COLOR_BUFFER_BIT));
-      m_prog_plane.draw(m_plane, Primitive::TRIANGLE_STRIP, 0, 4);
+      m_prog_plane.draw(m_plane, Mode::TRIANGLE_STRIP, 0, 4);
     });
 
   // Second pass: draw to the screen
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT));
-  m_prog_screen.draw(m_screen, Primitive::TRIANGLE_STRIP, 0, 4);
+  m_prog_screen.draw(m_screen, Mode::TRIANGLE_STRIP, 0, 4);
 
   return true;
 }
