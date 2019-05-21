@@ -32,10 +32,11 @@ class GLExample07: public IGLWindow
 public:
 
   GLExample07()
-    : m_cube("Cube"),
+    : m_shape("Shape"),
       m_skybox("SkyBox"),
-      m_progCube("progCube"),
+      m_progShape("progShape"),
       m_progSkyBox("progSkyBox"),
+      m_indices("indices"),
       m_camera(Vector3f(0.0f, 0.0f, 3.0f))
   {}
 
@@ -44,8 +45,8 @@ public:
 
 private:
 
-  bool createCube();
-  void drawCube();
+  bool createShape();
+  void drawShape();
   bool createSkyBox();
   void drawSkyBox();
   virtual void onMouseMoved(const double xpos, const double ypos) override;
@@ -57,8 +58,9 @@ private:
 
   GLVertexShader     vs1, vs2;
   GLFragmentShader   fs1, fs2;
-  GLVAO              m_cube, m_skybox;
-  GLProgram          m_progCube, m_progSkyBox;
+  GLVAO              m_shape, m_skybox;
+  GLProgram          m_progShape, m_progSkyBox;
+  GLIndexBuffer<uint32_t> m_indices;
   Camera             m_camera;
 };
 

@@ -20,6 +20,7 @@
 
 #include "07_SkyBoxTextureCube.hpp"
 #include "Maths.hpp"
+#include "Primitives.hpp"
 
 //------------------------------------------------------------------
 //! \file this example paints a cube inside a skybox. A skybox is
@@ -40,9 +41,9 @@ void GLExample07::onWindowSizeChanged(const float width, const float height)
   // Make sure the viewport matches the new window dimensions.
   glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 
-  m_progCube.matrix44f("projection") =
+  m_progShape.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
-  m_progSkyBox.matrix44f("projection") = m_progCube.matrix44f("projection");
+  m_progSkyBox.matrix44f("projection") = m_progShape.matrix44f("projection");
 }
 
 //------------------------------------------------------------------
@@ -90,49 +91,40 @@ bool GLExample07::createSkyBox()
 }
 
 //------------------------------------------------------------------
-//! \brief Create a cube.
+//! \brief Create a 3D shape (Cone, Pyramid, Cylinder, Tube).
 //------------------------------------------------------------------
-bool GLExample07::createCube()
+bool GLExample07::createShape()
 {
   // Load from ASCII file the vertex sahder (vs) as well the fragment shader
-  vs2.fromFile("shaders/07_SkyBoxTextureCube_cubemap.vs");
-  fs2.fromFile("shaders/07_SkyBoxTextureCube_cubemap.fs");
+  vs2.fromFile("shaders/07_SkyBoxTextureCube_shape.vs");
+  fs2.fromFile("shaders/07_SkyBoxTextureCube_shape.fs");
 
   // Compile shader as OpenGL program. This one will instanciate all OpenGL objects for you.
-  if (!m_progCube.attachShaders(vs2, fs2).compile())
+  if (!m_progShape.attachShaders(vs2, fs2).compile())
     {
       std::cerr << "failed compiling OpenGL program. Reason was '"
-                << m_progCube.getError() << "'" << std::endl;
+                << m_progShape.getError() << "'" << std::endl;
       return false;
     }
 
   // Init uniforms.
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
-  m_progCube.matrix44f("projection") =
+  m_progShape.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 
   // Binding empty VAO to OpenGL program will make it be populated
   // with all VBOs needed.
-  m_progCube.bind(m_cube);
+  m_progShape.bind(m_shape);
 
-  // Now we have to fill VBOs with data: here vertices. Because in
-  // vertex shader a_position is vect3 we have to cast to Vector3f.
-  m_cube.vector3f("aPos") =
-    {
-       #include "geometry/cube_position.txt"
-    };
-  m_cube.vector3f("aPos") /= 2.0f;
-
-  // Now we have to fill VBOs with data: here texture coordinates.
-  // Because in vertex shader a_texcoord is vect2 we have to cast
-  // to Vector2f.
-  m_cube.vector2f("aTexCoords") =
-    {
-       #include "geometry/cube_texture.txt"
-    };
+  // Now we have to fill VBOs with data.
+  Cone tube(1.0f, 1.0f, 32u);
+  m_shape.vector3f("aPos") = tube.vertices();
+  m_shape.vector2f("aTexCoords") = tube.textures();
+  m_shape.vector2f("aTexCoords") *= 2.0f;
+  m_indices = tube.indices();
 
   // Add a texture to the cube
-  if (!m_cube.texture2D("texture1").load("textures/path.png")) return false;
+  if (!m_shape.texture2D("texture1").load("textures/path.png")) return false;
 
   return true;
 }
@@ -150,19 +142,19 @@ bool GLExample07::setup()
 
   hideMouseCursor();
 
-  return createCube() && createSkyBox();
+  return createShape() && createSkyBox();
 }
 
 // --------------------------------------------------------------
-//! \brief Draw the cube.
+//! \brief Draw the shape.
 // --------------------------------------------------------------
-void GLExample07::drawCube()
+void GLExample07::drawShape()
 {
-  m_progCube.matrix44f("model") = Matrix44f(matrix::Identity);
-  m_progCube.matrix44f("view") = m_camera.GetViewMatrix();
+  m_progShape.matrix44f("model") = Matrix44f(matrix::Identity);
+  m_progShape.matrix44f("view") = m_camera.GetViewMatrix();
 
   glCheck(glDepthFunc(GL_LESS));
-  m_progCube.draw(m_cube, Mode::TRIANGLES, m_indices);
+  m_progShape.draw(m_shape, Mode::TRIANGLES, m_indices);
 }
 
 // --------------------------------------------------------------
@@ -189,7 +181,7 @@ bool GLExample07::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  drawCube();
+  drawShape();
   drawSkyBox();
 
   // Delta time

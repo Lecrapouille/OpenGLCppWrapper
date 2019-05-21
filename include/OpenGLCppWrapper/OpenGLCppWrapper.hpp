@@ -25,5 +25,6 @@
 #  include "GLFrameBuffers.hpp"
 #  include "GLImGUI.hpp"
 #  include "SceneGraph.hpp"
+#  include "Primitives.hpp"
 
 #endif // OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
