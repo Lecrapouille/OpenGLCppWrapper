@@ -71,14 +71,6 @@ public:
   ~PendingContainer()
   {}
 
-  void debugDirty(const char* bla)
-  {
-    size_t pos_start, pos_end;
-    getPendingData(pos_start, pos_end);
-    DEBUG("%s Dirty %d %d", bla, (int) pos_start, (int) pos_end);
-    (void) bla;
-  }
-
   inline size_t capacity() const
   {
     return m_container.capacity();
@@ -93,6 +85,12 @@ public:
   {
     throw_if_cannot_expand();
     m_container.reserve(count);
+  }
+
+  inline void resize(const size_t count)
+  {
+    throw_if_cannot_expand();
+    m_container.resize(count);
   }
 
   inline T& operator[](size_t nth)
@@ -128,23 +126,28 @@ public:
     clearPending(0_z);
   }
 
-  void append(std::initializer_list<T> il)
+  PendingContainer<T>&
+  append(std::initializer_list<T> il)
   {
     throw_if_cannot_expand();
     m_container.insert(m_container.end(), il);
     tagAsPending(m_container.size() - 1_z);
+    return *this;
   }
 
-  void append(const T* other, const size_t size)
+  PendingContainer<T>&
+  append(const T* other, const size_t size)
   {
     throw_if_cannot_expand();
     m_container.insert(m_container.end(),
                        other,
                        other + size);
     tagAsPending(m_container.size() - 1_z);
+    return *this;
   }
 
-  void append(std::vector<T> const& other)
+  PendingContainer<T>&
+  append(std::vector<T> const& other)
   {
     throw_if_cannot_expand();
 
@@ -152,19 +155,23 @@ public:
                        other.begin(),
                        other.end());
     tagAsPending(m_container.size() - 1_z);
+    return *this;
   }
 
-  void append(PendingContainer const& other)
+  PendingContainer<T>&
+  append(PendingContainer const& other)
   {
-    PendingContainer<T>::append(other.m_container);
+    return PendingContainer<T>::append(other.m_container);
   }
 
-  void append(T const& val)
+  PendingContainer<T>&
+  append(T const& val)
   {
     throw_if_cannot_expand();
 
     m_container.push_back(val);
     tagAsPending(0_z, m_container.size() - 1_z);
+    return *this;
   }
 
   inline T sum() const
