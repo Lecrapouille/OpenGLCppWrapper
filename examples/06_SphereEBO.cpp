@@ -45,7 +45,7 @@ void GLExample06::onWindowSizeChanged(const float width, const float height)
 }
 
 //------------------------------------------------------------------
-//! \brief
+//! \brief Create a VBO and a EBO (Element Buffer Object).
 //------------------------------------------------------------------
 void GLExample06::createSphere()
 {
@@ -55,16 +55,16 @@ void GLExample06::createSphere()
   constexpr float stepLon = 360.0f / static_cast<float>(NbPointsLon);
   constexpr float stepLat = 180.0f / static_cast<float>(NbPointsLat);
   constexpr float PI = 3.141592653589793238462643383279502884197169399375105820f;
-
   float latitude = -90.0f;
   float longitude = -180.0f;
 
+  // Bind the VAO to the program. This will populate VBOs.
+  // Get the reference of the desired VBO because vector3f()
+  // is not a faster method.
   m_prog.bind(m_sphere);
   auto& positions = m_sphere.vector3f("position");
-  positions.reserve(NbPointsLon * NbPointsLat);
-  m_indices.clear();
-  m_indices.reserve(NbPointsLon * NbPointsLat);
 
+  positions.reserve(NbPointsLon * NbPointsLat);
   for (uint32_t i = 0; i < NbPointsLon; ++i)
     {
       for (uint32_t j = 0; j < NbPointsLat; ++j)
@@ -85,9 +85,14 @@ void GLExample06::createSphere()
       latitude += stepLat;
     }
 
- for (uint32_t i = 0; i < NbPointsLon * NbPointsLat; ++i)
+  // Create the EBO (index for vertices) and return its reference.
+  // Fill the index with values.
+  GLIndexBuffer32& indices = m_sphere.index32();
+  indices.reserve(NbPointsLon * NbPointsLat);
+  uint32_t i = NbPointsLon * NbPointsLat;
+  while (i--)
     {
-      m_indices.append(i);
+      indices.append(i);
     }
 }
 
@@ -134,8 +139,8 @@ bool GLExample06::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  // Draw the sphere
-  m_prog.draw(m_sphere, Mode::POINTS, m_indices);
+  // Draw the sphere using the EBO
+  m_prog.draw(m_sphere, Mode::POINTS, m_sphere.index32());
 
   return true;
 }

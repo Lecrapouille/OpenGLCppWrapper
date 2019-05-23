@@ -560,21 +560,14 @@ public:
   //! \throw OpenGLException if the program has not been compiled or
   //! if no VAO is bound or if VBOs have not all the same sizes.
   //----------------------------------------------------------------------------
-  void draw(Mode const mode, GLint const first, uint32_t const count)
+  void draw(Mode const mode, size_t const first, size_t const count)
   {
     DEBUG("Prog '%s' draw {", cname());
     throw_if_not_compiled();
     throw_if_vao_not_bound();
     throw_if_inconsitency_attrib_sizes();
 
-    // FIXME: A optimiser car ca prend 43 appels OpenGL alors qu'avant
-    // il suffisait entre 16 et 35
-    begin();
-    //m_vao->begin();
-    glCheck(glDrawArrays(static_cast<GLenum>(mode), first, static_cast<GLsizei>(count)));
-    glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    //m_vao->end();
-    end();
+    doDraw(mode, first, count);
     DEBUG("} Prog '%s' draw", cname());
   }
 
@@ -586,10 +579,14 @@ public:
   //! if the VAO cannot be bound or if VBOs have not all the same
   //! sizes.
   //----------------------------------------------------------------------------
-  inline void draw(GLVAO& vao, Mode const mode, GLint const first, uint32_t const count)
+  inline void draw(GLVAO& vao, Mode const mode, size_t const first, size_t const count)
   {
+    DEBUG("Prog '%s' draw {", cname());
     throw_if_vao_cannot_be_bound(vao);
-    draw(mode, first, count);
+    throw_if_inconsitency_attrib_sizes();
+
+    doDraw(mode, first, count);
+    DEBUG("} Prog '%s' draw", cname());
   }
 
   //----------------------------------------------------------------------------
@@ -600,12 +597,16 @@ public:
   //! if the VAO has not been bound or if VBOs have not all the same
   //! sizes.
   //----------------------------------------------------------------------------
-  inline void draw(Mode const /*mode*/)
+  inline void draw(Mode const mode)
   {
-    ERROR("%s", "Draw with implicit number of vertices is not yet implemented");
-    //throw_if_not_compiled();
-    //throw_if_inconsitency_attrib_sizes();
-    //draw(static_cast<GLenum>(mode), 0, m_attributes.begin()->second->size());
+    DEBUG("Prog '%s' draw %zu elements {", cname(),
+          static_cast<uint32_t>(m_vao->m_vbos.begin()->second->size()));
+    throw_if_not_compiled();
+    throw_if_vao_not_bound();
+    throw_if_inconsitency_attrib_sizes();
+
+    doDraw(mode, 0, static_cast<uint32_t>(m_vao->m_vbos.begin()->second->size()));
+    DEBUG("} Prog '%s' draw", cname());
   }
 
   //----------------------------------------------------------------------------
@@ -632,7 +633,7 @@ public:
   template<class T>
   void draw(Mode const mode, GLIndexBuffer<T>& index)
   {
-    DEBUG("Prog::drawIndex %zu elements", index.size());
+    DEBUG("Prog '%s' drawIndex %zu elements {", cname(), index.size());
 
     throw_if_not_compiled();
     throw_if_vao_not_bound();
@@ -641,12 +642,14 @@ public:
     //m_vao->begin();
     begin();
     index.begin();
-    glCheck(glDrawElements(static_cast<GLenum>(mode), static_cast<GLsizei>(index.size()),
+    glCheck(glDrawElements(static_cast<GLenum>(mode),
+                           static_cast<GLsizei>(index.size()),
                            index.type(), 0));
     index.end();
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
     //m_vao->end();
+    DEBUG("} Prog '%s' drawIndex ", cname());
   }
 
   //----------------------------------------------------------------------------
@@ -684,6 +687,23 @@ public:
   }
 
 private:
+
+  //----------------------------------------------------------------------------
+  //! \brief Do the draw call. This method is only made for factorizing code.
+  //----------------------------------------------------------------------------
+  void doDraw(Mode const mode, size_t const first, size_t const count)
+  {
+    // FIXME: A optimiser car ca prend 43 appels OpenGL alors qu'avant
+    // il suffisait entre 16 et 35
+    begin();
+    //m_vao->begin();
+    glCheck(glDrawArrays(static_cast<GLenum>(mode),
+                         static_cast<GLint>(first),
+                         static_cast<GLsizei>(count)));
+    glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    //m_vao->end();
+    end();
+  }
 
   //----------------------------------------------------------------------------
   //! \brief

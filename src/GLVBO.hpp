@@ -34,6 +34,25 @@ namespace glwrap
 {
 
 // **************************************************************
+//! \brief Intermediate class needed by GLVAO for checking VBOs
+//! size.
+//!
+//! Because GLBuffer is template, GLVAO cannot hold this class
+//! in a container. This class is an interface needed by GLVAO.
+// **************************************************************
+class IGLBuffer
+  : public IGLObject<GLenum>
+{
+public:
+
+  IGLBuffer(std::string const& name)
+    : IGLObject(name)
+  {}
+
+  virtual size_t size() const = 0;
+};
+
+// **************************************************************
 //! \brief Buffer objects are OpenGL objects that store an array of
 //! unformatted memory allocated by the OpenGL context (aka: the
 //! GPU). These can be used to store vertex data, pixel data retrieved
@@ -41,14 +60,14 @@ namespace glwrap
 // **************************************************************
 template<typename T>
 class GLBuffer
-  : public IGLObject<GLenum>,
+  : public IGLBuffer,
     public PendingContainer<T>
 {
 public:
 
   //! \brief Constructor with the object name
   GLBuffer(std::string const& name, const GLenum target, BufferUsage const usage)
-    : IGLObject(name)
+    : IGLBuffer(name)
   {
     IGLObject::m_target = target;
     m_usage = static_cast<GLenum>(usage);
@@ -57,7 +76,7 @@ public:
   //! \brief Constructor with the object name and reserved number of
   //! elements.
   GLBuffer(std::string const& name, const GLenum target, const size_t init_size, BufferUsage const usage)
-    : IGLObject(name),
+    : IGLBuffer(name),
       PendingContainer<T>(init_size)
   {
     IGLObject::m_target = target;
@@ -72,6 +91,11 @@ public:
   inline GLenum usage() const
   {
     return m_usage;
+  }
+
+  virtual size_t size() const override
+  {
+    return PendingContainer<T>::size();
   }
 
 private:
@@ -260,6 +284,15 @@ inline GLenum GLIndexBuffer<uint16_t>::type() const { return GL_UNSIGNED_SHORT; 
 
 template<>
 inline GLenum GLIndexBuffer<uint8_t>::type() const { return GL_UNSIGNED_BYTE; }
+
+//! \brief Human Friendly name (hide template misery)
+using GLIndexBuffer32 = GLIndexBuffer<uint32_t>;
+
+//! \brief Human Friendly name (hide template misery)
+using GLIndexBuffer16 = GLIndexBuffer<uint16_t>;
+
+//! \brief Human Friendly name (hide template misery)
+using GLIndexBuffer8 = GLIndexBuffer<uint8_t>;
 
 } // namespace glwrap
 

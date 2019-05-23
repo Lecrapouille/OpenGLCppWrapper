@@ -175,7 +175,7 @@ bool GLExample09::CreateCube()
   m_prog.bind(*m_cube);
 
   // Fill the VBO for vertices
-  m_cube->VBO<Vector3f>("position") =
+  m_cube->vector3f("position") =
     {
       #include "geometry/cube_position.txt"
     };

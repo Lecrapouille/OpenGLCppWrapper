@@ -36,7 +36,6 @@ public:
       m_skybox("SkyBox"),
       m_progShape("progShape"),
       m_progSkyBox("progSkyBox"),
-      m_indices("indices"),
       m_camera(Vector3f(0.0f, 0.0f, 3.0f))
   {}
 
@@ -60,7 +59,6 @@ private:
   GLFragmentShader   fs1, fs2;
   GLVAO              m_shape, m_skybox;
   GLProgram          m_progShape, m_progSkyBox;
-  GLIndexBuffer<uint32_t> m_indices;
   Camera             m_camera;
 };
 

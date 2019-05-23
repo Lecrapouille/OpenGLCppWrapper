@@ -91,7 +91,8 @@ bool GLExample07::createSkyBox()
 }
 
 //------------------------------------------------------------------
-//! \brief Create a 3D shape (Cone, Pyramid, Cylinder, Tube).
+//! \brief Create a 3D shape (Cone, Pyramid, Cylinder, Tube). See
+//! these class like factories for instanciating VAO.
 //------------------------------------------------------------------
 bool GLExample07::createShape()
 {
@@ -116,12 +117,14 @@ bool GLExample07::createShape()
   // with all VBOs needed.
   m_progShape.bind(m_shape);
 
-  // Now we have to fill VBOs with data.
-  Cone tube(1.0f, 1.0f, 32u);
+  // Try other shape: Tube, Cone, Pyramid
+  Cylinder tube(1.0f, 1.0f, 32u);
   m_shape.vector3f("aPos") = tube.vertices();
   m_shape.vector2f("aTexCoords") = tube.textures();
   m_shape.vector2f("aTexCoords") *= 2.0f;
-  m_indices = tube.indices();
+  m_shape.index32() = tube.indices();
+
+  // Note: not shown in this example: tube.normals() return the list of normals.
 
   // Add a texture to the cube
   if (!m_shape.texture2D("texture1").load("textures/path.png")) return false;
@@ -154,7 +157,7 @@ void GLExample07::drawShape()
   m_progShape.matrix44f("view") = m_camera.GetViewMatrix();
 
   glCheck(glDepthFunc(GL_LESS));
-  m_progShape.draw(m_shape, Mode::TRIANGLES, m_indices);
+  m_progShape.draw(m_shape, Mode::TRIANGLES, m_shape.index32());
 }
 
 // --------------------------------------------------------------
