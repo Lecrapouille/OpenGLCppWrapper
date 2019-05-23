@@ -108,10 +108,12 @@ bool GLExample07::createShape()
       return false;
     }
 
-  // Init uniforms.
+  // Init uniforms. Set the Z-clipping of the camera to a high value
+  // in the aim to create an effect of deep when objects are far away
+  // (in contrast of the skybox which never changes its size).
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
   m_progShape.matrix44f("projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
+    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 100.0f);
 
   // Binding empty VAO to OpenGL program will make it be populated
   // with all VBOs needed.
