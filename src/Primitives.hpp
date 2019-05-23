@@ -28,6 +28,19 @@
 namespace glwrap
 {
 
+// *****************************************************************************
+//! \brief Return evenly spaced numbers over a specified interval.
+//! \param[in] start The starting scalar value of the sequence.
+//! \param[in] end The end value of the sequence, unless endpoint is set to false.
+//!    In that case, the sequence consists of all but the last of num + 1
+//!    evenly spaced samples, so that stop is excluded.
+//! \param[in] N Number of samples to generate. Should be > 1.
+//! \param[out] The vector of equally spaced samples in the closed interval [start, stop]
+//!   or the half-open interval [start, stop) (depending on whether endpoint is true or false).
+//! \return Size of spacing between samples. Return NaN if this value cannot be
+//! computed.
+//! \note: This code has been inpsired by the Numpy.linspace function.
+// *****************************************************************************
 template <typename T>
 static T linspace(T const start, T const end, size_t const N, std::vector<T>& result, const bool endpoint)
 {
@@ -55,6 +68,10 @@ static T linspace(T const start, T const end, size_t const N, std::vector<T>& re
   return delta;
 }
 
+// *****************************************************************************
+//! \brief Class holding list of vertice positions, normals, texture coordinate
+//! and vertice index.
+// *****************************************************************************
 class Shape
 {
 public:
@@ -65,21 +82,36 @@ public:
   ~Shape()
   {}
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the list of vertice positions.
+  //----------------------------------------------------------------------------
   inline std::vector<Vector3f> const& vertices() const
   {
+    // FIXME: use leazy method ? return positon();
+    // position() { if (!done) { create position list; done; } return { list } }
+    // this avoid creating other list like normals ...
     return m_positions;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the list of vertice index.
+  //----------------------------------------------------------------------------
   inline std::vector<uint32_t> const& indices() const
   {
     return m_indices;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the list of texture coordinate.
+  //----------------------------------------------------------------------------
   inline std::vector<Vector2f> const& textures() const
   {
     return m_textures;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the list of vertices normals.
+  //----------------------------------------------------------------------------
   inline std::vector<Vector3f> const& normals() const
   {
     return m_normals;
@@ -90,13 +122,23 @@ protected:
   std::vector<Vector3f>   m_positions;
   std::vector<Vector3f>   m_normals;
   std::vector<Vector2f>   m_textures;
-  std::vector<uint32_t>   m_indices; // todo uint8_t
+  std::vector<uint32_t>   m_indices; // TODO uint8_t ?
 };
 
+// *****************************************************************************
+//! \brief Create a tube shape
+// *****************************************************************************
 class Tube: public Shape
 {
 public:
 
+  //----------------------------------------------------------------------------
+  //! \brief Constructor. Z-axis aligned tube centered at origin.
+  //! \param top_radius The radius at the top of the cylinder
+  //! \param base_radius The radius at the base of the cylinder
+  //! \param height The height of the cylinder
+  //! \param slices The number of subdivisions around the Z axis.
+  //----------------------------------------------------------------------------
   Tube(float const top_radius, float const base_radius, float const height, uint32_t slices)
   {
     // None, Top, Bottom, Top+Bottom
@@ -155,6 +197,9 @@ public:
   }
 };
 
+//----------------------------------------------------------------------------
+//! \brief
+//----------------------------------------------------------------------------
 class Cylinder: public Tube
 {
 public:
@@ -164,17 +209,21 @@ public:
   {}
 };
 
+//----------------------------------------------------------------------------
+//! \brief
+//----------------------------------------------------------------------------
 class Cone: public Tube
 {
 public:
 
   Cone(float const radius, float const height, uint32_t slices)
     : Tube(0.0f, radius, height, slices)
-  {
-    m_positions.push_back(Vector3f(0.0f, 0.0f, height / 2.0f));
-  }
+  {}
 };
 
+//----------------------------------------------------------------------------
+//! \brief
+//----------------------------------------------------------------------------
 class Pyramid: public Cone
 {
 public:
