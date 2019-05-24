@@ -23,7 +23,7 @@
 #include "Primitives.hpp"
 
 //------------------------------------------------------------------
-//! \file this example paints a cube inside a skybox. A skybox is
+//! \file this example paints a shape inside a skybox. A skybox is
 //! cubic texture simuling a infinite landscape
 //!
 //! \note This example takes its inspiration from
@@ -119,14 +119,36 @@ bool GLExample07::createShape()
   // with all VBOs needed.
   m_progShape.bind(m_shape);
 
-  // Try other shape: Tube, Cone, Pyramid
-  Cylinder tube(1.0f, 1.0f, 32u);
-  m_shape.vector3f("aPos") = tube.vertices();
-  m_shape.vector2f("aTexCoords") = tube.textures();
-  m_shape.vector2f("aTexCoords") *= 2.0f;
-  m_shape.index32() = tube.indices();
+  // Uncomment to debug triangles
+  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  // Note: not shown in this example: tube.normals() return the list of normals.
+  const uint32_t slices = 8u;
+  const float radius = 1.0f;
+  const float height = 1.0f;
+
+  // Create a cylinder with two caps (bottom & top). Merge them into a
+  // single VAO.
+  Cylinder cylinder(radius, height, slices);
+  Circle circle1(radius, slices); circle1.vertices() += Vector3f(0.0f, 0.0f, 0.5f);
+  Circle circle2(radius, slices); circle1.vertices() -= Vector3f(0.0f, 0.0f, 0.5f);
+
+  m_shape.vector3f("aPos")
+    .append(circle1.vertices())
+    .append(circle2.vertices())
+    .append(cylinder.vertices());
+
+  m_shape.vector2f("aTexCoords")
+    .append(circle1.textures())
+    .append(circle2.textures())
+    .append(cylinder.textures());
+
+  m_shape.index32()
+    .append(circle1.indices())
+    .append(circle2.indices())
+    .append(cylinder.indices());
+
+  // Repeat the texture motif
+  m_shape.vector2f("aTexCoords") *= 2.0f;
 
   // Add a texture to the cube
   if (!m_shape.texture2D("texture1").load("textures/path.png")) return false;
@@ -158,12 +180,13 @@ void GLExample07::drawShape()
   m_progShape.matrix44f("model") = Matrix44f(matrix::Identity);
   m_progShape.matrix44f("view") = m_camera.GetViewMatrix();
 
+  // Set depth function back to default
   glCheck(glDepthFunc(GL_LESS));
   m_progShape.draw(m_shape, Mode::TRIANGLES, m_shape.index32());
 }
 
 // --------------------------------------------------------------
-//! \brief Draw skybox. Shall be draw as last.
+//! \brief Draw skybox. Should be draw as last.
 // --------------------------------------------------------------
 void GLExample07::drawSkyBox()
 {
@@ -171,8 +194,8 @@ void GLExample07::drawSkyBox()
   Matrix44f view = m_camera.GetViewMatrix();
   m_progSkyBox.matrix44f("view") = Matrix44f(Matrix33f(view));
 
-  // Note: change depth function so depth test passes when values are
-  // equal to depth buffer's content
+  // Change depth function so depth test passes when values are equal
+  // to depth buffer's content
   glCheck(glDepthFunc(GL_LEQUAL));
   m_progSkyBox.draw(m_skybox, Mode::TRIANGLES, 0, 36);
 }
@@ -186,7 +209,9 @@ bool GLExample07::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
+  // Draw scene as normal.
   drawShape();
+  // Draw skybox as last. Set depth function back to default
   drawSkyBox();
 
   // Delta time

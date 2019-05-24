@@ -85,7 +85,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Return the list of vertice positions.
   //----------------------------------------------------------------------------
-  inline std::vector<Vector3f> const& vertices() const
+  inline PendingContainer<Vector3f>& vertices()
   {
     // FIXME: use leazy method ? return positon();
     // position() { if (!done) { create position list; done; } return { list } }
@@ -96,7 +96,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Return the list of vertice index.
   //----------------------------------------------------------------------------
-  inline std::vector<uint32_t> const& indices() const
+  inline PendingContainer<uint32_t>& indices()
   {
     return m_indices;
   }
@@ -104,7 +104,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Return the list of texture coordinate.
   //----------------------------------------------------------------------------
-  inline std::vector<Vector2f> const& textures() const
+  inline PendingContainer<Vector2f>& textures()
   {
     return m_textures;
   }
@@ -112,17 +112,68 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Return the list of vertices normals.
   //----------------------------------------------------------------------------
-  inline std::vector<Vector3f> const& normals() const
+  inline PendingContainer<Vector3f>& normals()
   {
     return m_normals;
   }
 
 protected:
 
-  std::vector<Vector3f>   m_positions;
-  std::vector<Vector3f>   m_normals;
-  std::vector<Vector2f>   m_textures;
-  std::vector<uint32_t>   m_indices; // TODO uint8_t ?
+  PendingContainer<Vector3f>   m_positions;
+  PendingContainer<Vector3f>   m_normals;
+  PendingContainer<Vector2f>   m_textures;
+  PendingContainer<uint32_t>   m_indices; // TODO uint8_t ?
+};
+
+// *****************************************************************************
+//! \brief Create a tube shape
+// *****************************************************************************
+class Circle: public Shape
+{
+public:
+
+  Circle(float const radius, uint32_t const slices/*, bool const inversed*/)
+  {
+    const float pi = 3.1415f;
+
+    std::vector<float> angle;
+    linspace(0.0f, 2.0f * pi, slices + 1u, angle, true);
+
+    // Reserve memory
+    m_positions.reserve(slices);
+    m_normals.reserve(slices);
+    m_textures.reserve(slices);
+
+    // Constants
+    const float hypothenus = std::sqrt(2.0f * radius * radius);
+    const float hh = radius / hypothenus;
+
+    // Center
+    m_positions.append(Vector3f(0.0f, 0.0f, 0.0f));
+    m_normals.append(Vector3f(0.0f, 0.0f, 1.0f));
+    m_textures.append(Vector2f(0.5f, 0.5f));
+
+    // Arc
+    for (uint32_t i = 0; i <= slices; ++i)
+      {
+        float c = std::cos(angle[i]);
+        float s = std::sin(angle[i]);
+
+        m_positions.append(Vector3f(radius * c, radius * s, 0.0f));
+        m_normals.append(Vector3f(hh * c, hh * s, -hh));
+        m_textures.append(Vector2f((1.0f + c) / 2.0f, (1.0f + s) / 2.0f));
+      }
+
+    const uint32_t c0 = 0u;
+    const uint32_t i0 = 1u;
+
+    // Indices for the top cap
+    m_indices.reserve(slices);
+    for (uint32_t i = 0u; i <= slices; ++i)
+      {
+        m_indices.append(c0); m_indices.append(i0 + i); m_indices.append(i0 + i + 1u);
+      }
+  }
 };
 
 // *****************************************************************************
@@ -139,60 +190,60 @@ public:
   //! \param height The height of the cylinder
   //! \param slices The number of subdivisions around the Z axis.
   //----------------------------------------------------------------------------
-  Tube(float const top_radius, float const base_radius, float const height, uint32_t slices)
+  Tube(float const top_radius, float const base_radius, float const height, uint32_t const slices)
   {
     // None, Top, Bottom, Top+Bottom
-    static const uint32_t caps[4] = { 0u, 1u, 1u, 2u };
     const float pi = 3.1415f;
 
     std::vector<float> angle;
-    linspace(0.0f, 2.0f * pi, slices + 1u, angle, true);
+    linspace(0.0f, 2.0f * pi, slices, angle, true);
 
     std::vector<float> texture;
-    linspace(0.0f, 1.0f, slices + 1u, texture, true);
+    linspace(0.0f, 1.0f, slices, texture, true);
 
     // Reserve memory
-    const uint32_t n = (slices + 1u) * (2u + caps[0]); // todo
-    m_positions.reserve(n);
-    m_normals.reserve(n);
-    m_textures.reserve(n);
+    m_positions.reserve(2u * slices);
+    m_normals.reserve(2u * slices);
+    m_textures.reserve(2u * slices);
 
-    //
+    // Constants
+    const float h2 = height / 2.0f;
     const float r = top_radius - base_radius;
     const float hypothenus = std::sqrt(r * r + height * height);
     const float hh = height / hypothenus;
     const float rh = -r / hypothenus;
 
     // Top of the tube
-    for (uint32_t i = 0; i <= slices; ++i)
+    for (uint32_t i = 0; i < slices; ++i)
       {
         float c = std::cos(angle[i]);
         float s = std::sin(angle[i]);
 
-        m_positions.push_back(Vector3f(top_radius * c, top_radius * s, height / 2.0f));
-        m_normals.push_back(Vector3f(hh * c, hh * s, rh));
-        m_textures.push_back(Vector2f(texture[i], 0.0f));
+        m_positions.append(Vector3f(top_radius * c, top_radius * s, h2));
+        m_normals.append(Vector3f(hh * c, hh * s, rh));
+        m_textures.append(Vector2f(texture[i], 0.0f));
       }
 
     // Bottom of the tube
-    for (uint32_t i = 0; i <= slices; ++i)
+    for (uint32_t i = 0; i < slices; ++i)
       {
         float c = std::cos(angle[i]);
         float s = std::sin(angle[i]);
 
-        m_positions.push_back(Vector3f(base_radius * c, base_radius * s, -height / 2.0f));
-        m_normals.push_back(Vector3f(hh * c, hh * s, rh));
-        m_textures.push_back(Vector2f(texture[i], 1.0f));
+        m_positions.append(Vector3f(base_radius * c, base_radius * s, -h2));
+        m_normals.append(Vector3f(hh * c, hh * s, rh));
+        m_textures.append(Vector2f(texture[i], 1.0f));
       }
 
-    const uint32_t i0 = 0;
-    const uint32_t i1 = i0 + slices + 1;
+    const uint32_t i0 = 0u;
+    const uint32_t i1 = i0 + slices;
 
-    m_indices.reserve(4u * slices);
-    for (uint32_t i = 0; i <= slices; ++i)
+    // Indices for the tube
+    m_indices.reserve(3u * slices);
+    for (uint32_t i = 0u; i < slices; ++i)
       {
-        m_indices.push_back(i0 + i); m_indices.push_back(i0 + i + 1); m_indices.push_back(i1 + i);
-        m_indices.push_back(i1 + i); m_indices.push_back(i1 + i + 1); m_indices.push_back(i0 + i + 1);
+        m_indices.append(i0 + i); m_indices.append(i0 + i + 1u); m_indices.append(i1 + i);
+        m_indices.append(i1 + i); m_indices.append(i1 + i + 1u); m_indices.append(i0 + i + 1u);
       }
   }
 };
@@ -204,7 +255,7 @@ class Cylinder: public Tube
 {
 public:
 
-  Cylinder(float const radius, float const height, uint32_t slices)
+  Cylinder(float const radius, float const height, uint32_t const slices)
     : Tube(radius, radius, height, slices)
   {}
 };
@@ -216,7 +267,7 @@ class Cone: public Tube
 {
 public:
 
-  Cone(float const radius, float const height, uint32_t slices)
+  Cone(float const radius, float const height, uint32_t const slices)
     : Tube(0.0f, radius, height, slices)
   {}
 };
