@@ -152,7 +152,6 @@ bool GLExample05::draw()
   // Draw the first cube with a "pinkished" coloration.
   // Make this cube spining around itself.
   m_prog.vector4f("color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
-  m_prog.bind(m_cube);
   m_movable.rotate(4.0f * ct, Vector3f(0, 1, 0));    // Apply a rotation around Y-axis
   m_movable.position(Vector3f(-1.0f, 0.0f, -1.0f));  // Apply a translation
   m_prog.matrix44f("model") = m_movable.transform(); // Rotate and translate the cube
@@ -161,7 +160,6 @@ bool GLExample05::draw()
   // Draw a second cube (same model = same VAO) with a "darkished"
   // coloration. Make this cube static.
   m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
-  m_prog.bind(m_cube);
   m_movable.reset();
   m_movable.position(Vector3f(3.0f, 0.0f, 0.0f)); // Apply a translation
   m_prog.matrix44f("model") = m_movable.transform();
@@ -173,7 +171,7 @@ bool GLExample05::draw()
   m_movable.reset();
   m_movable.position(Vector3f(0.0f, 0.0f, 0.0f)); // Apply a translation
   m_prog.matrix44f("model") = m_movable.transform();
-  m_prog.draw(/*m_floor,*/ Mode::TRIANGLES/*, 0, 6*/); // Style 03: do not pass implict bound VAO
+  m_prog.draw(Mode::TRIANGLES); // Style 03: do not pass implict bound VAO and no vertices count
 
   return true;
 }
