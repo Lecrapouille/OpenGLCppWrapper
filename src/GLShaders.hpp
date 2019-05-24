@@ -221,7 +221,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool create() override
   {
-    DEBUG("Shader::create %s", cname());
+    DEBUG("  Shader '%s' create", cname());
     m_handle = glCheck(glCreateShader(m_target));
     return false;
   }
@@ -239,7 +239,7 @@ private:
   //----------------------------------------------------------------------------
   virtual bool setup() override
   {
-    DEBUG("Shader::setup %s", cname());
+    DEBUG("  Shader '%s' setup", cname());
     if (loaded() && !isCompiled())
       {
         char const *source = m_shader_code.c_str();
@@ -247,7 +247,6 @@ private:
         glCheck(glShaderSource(m_handle, 1, &source, &length));
         glCheck(glCompileShader(m_handle));
         m_compiled = checkCompilationStatus(m_handle);
-        DEBUG("Shader::setup %d", m_compiled);
       }
     else
       {
@@ -257,6 +256,7 @@ private:
         m_error_msg += '\n' + msg;
         ERROR("%s", msg.c_str());
       }
+    DEBUG("  Shader '%s' compiled? %d", cname(), m_compiled);
     return !m_compiled;
   }
 

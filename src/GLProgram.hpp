@@ -93,7 +93,7 @@ public:
   //----------------------------------------------------------------------------
   GLProgram& attachShader(GLShader& shader)
   {
-    DEBUG("%s", "Prog::attachShader");
+    DEBUG("Prog '%s' attaching Shader '%s'", cname(), shader.cname());
     m_shaders.push_back(&shader);
     return *this;
   }
@@ -114,7 +114,8 @@ public:
                            GLFragmentShader& fragment_shader,
                            GLGeometryShader& geometry_shader)
   {
-    DEBUG("%s", "Prog::attachShaders");
+    DEBUG("Prog '%s' attaching Shaders '%s, %s, %s'", cname(),
+          vertex_shader.cname(), fragment_shader.cname(), geometry_shader.cname());
     m_shaders.push_back(&vertex_shader);
     m_shaders.push_back(&fragment_shader);
     m_shaders.push_back(&geometry_shader);
@@ -135,7 +136,8 @@ public:
   GLProgram& attachShaders(GLVertexShader&   vertex_shader,
                            GLFragmentShader& fragment_shader)
   {
-    DEBUG("%s", "Prog::attachShaders");
+    DEBUG("Prog '%s' attaching Shaders '%s, %s'", cname(),
+          vertex_shader.cname(), fragment_shader.cname());
     m_shaders.push_back(&vertex_shader);
     m_shaders.push_back(&fragment_shader);
     return *this;
@@ -167,7 +169,7 @@ public:
   //----------------------------------------------------------------------------
   inline bool bind(GLVAO& vao)
   {
-    DEBUG("Gonna bind Prog '%s' with VAO named '%s'", cname(), vao.cname());
+    DEBUG("Binding VAO '%s' to Prog '%s'", vao.cname(), cname());
 
     // Try compile the GLProgram
     if (unlikely(!isCompiled()))
@@ -184,14 +186,15 @@ public:
       {
         // When binding the VAO to GLProgram for the first time:
         // create VBOs to the VAO.
-        DEBUG("Prog '%s' will initialize VAO named '%s'", cname(), vao.cname());
+        DEBUG("%s", "  First binding. VBOs will be populated {");
         initVAO(vao);
+        DEBUG("%s", "  } First binding. VBOs will be populated");
       }
     else if (unlikely(m_handle != vao.prog))
       {
         // Check if VAO has been previously bind by this GLProgram. If not
         // This is probably an error of the developper.
-        ERROR("Tried to bind VAO '%s' which has never been bound by GLProgram %s",
+        ERROR("Tried to bind VAO '%s' already bound to another Prog than '%s'",
               vao.cname(), cname());
         return false;
       }
@@ -384,6 +387,7 @@ public:
   template<class T>
   inline T& uniform(const char *name)
   {
+    DEBUG("Prog '%s' get uniform '%s'", cname(), name);
     return getUniform<T>(name).data();
   }
 
@@ -399,6 +403,7 @@ public:
   template<class T>
   inline const T& uniform(const char *name) const
   {
+    DEBUG("Prog '%s' const get uniform '%s'", cname(), name);
     return getUniform<T>(name).data();
   }
 
@@ -581,12 +586,12 @@ public:
   //----------------------------------------------------------------------------
   inline void draw(GLVAO& vao, Mode const mode, size_t const first, size_t const count)
   {
-    DEBUG("Prog '%s' draw {", cname());
+    DEBUG("Prog '%s' draw VAO '%s' {", cname(), vao.cname());
     throw_if_vao_cannot_be_bound(vao);
     throw_if_inconsitency_attrib_sizes();
 
     doDraw(mode, first, count);
-    DEBUG("} Prog '%s' draw", cname());
+    DEBUG("} Prog '%s' draw VAO '%s'", cname(), vao.cname());
   }
 
   //----------------------------------------------------------------------------
@@ -599,8 +604,7 @@ public:
   //----------------------------------------------------------------------------
   inline void draw(Mode const mode)
   {
-    DEBUG("Prog '%s' draw %zu elements {", cname(),
-          static_cast<uint32_t>(m_vao->m_vbos.begin()->second->size()));
+    DEBUG("Prog '%s' draw %zu elements {", cname(), m_vao->m_vbos.begin()->second->size());
     throw_if_not_compiled();
     throw_if_vao_not_bound();
     throw_if_inconsitency_attrib_sizes();
@@ -639,16 +643,22 @@ public:
     throw_if_vao_not_bound();
     throw_if_inconsitency_attrib_sizes();
 
-    //m_vao->begin();
+    DEBUG("Prog '%s' begin {", cname());
     begin();
+    DEBUG("} Prog '%s' begin", cname());
+
+    DEBUG("Prog '%s' index begin {", cname());
     index.begin();
+    DEBUG("} Prog '%s' index begin", cname());
+
+    DEBUG("%s", "Draw Elements");
     glCheck(glDrawElements(static_cast<GLenum>(mode),
                            static_cast<GLsizei>(index.size()),
                            index.type(), 0));
+    DEBUG("Prog '%s' end index, VAO", cname());
     index.end();
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
-    //m_vao->end();
     DEBUG("} Prog '%s' drawIndex ", cname());
   }
 
@@ -693,16 +703,24 @@ private:
   //----------------------------------------------------------------------------
   void doDraw(Mode const mode, size_t const first, size_t const count)
   {
+    DEBUG("<<<<<<<<<<<< Prog '%s' draw VAO '%s' {", cname(), m_vao->cname());
+
     // FIXME: A optimiser car ca prend 43 appels OpenGL alors qu'avant
     // il suffisait entre 16 et 35
+
+    DEBUG("Prog '%s' begin {", cname());
     begin();
-    //m_vao->begin();
+    DEBUG("} Prog '%s' begin", cname());
+
+    DEBUG("Draw Arrays %u %zu %zu", static_cast<uint32_t>(mode), first, count);
     glCheck(glDrawArrays(static_cast<GLenum>(mode),
                          static_cast<GLint>(first),
                          static_cast<GLsizei>(count)));
+
+    DEBUG("Prog '%s' end VAO", cname());
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    //m_vao->end();
     end();
+    DEBUG(">>>>>>>>>>>> } Prog '%s'", cname());
   }
 
   //----------------------------------------------------------------------------
@@ -845,7 +863,7 @@ private:
   //----------------------------------------------------------------------------
   virtual void activate() override
   {
-    DEBUG("Prog '%s' activate", cname());
+    DEBUG("Prog '%s' activate {", cname());
 
     if (unlikely(!isCompiled()))
       return ;
@@ -853,23 +871,46 @@ private:
       return ;
 
     glCheck(glUseProgram(m_handle));
+
+    DEBUG("Prog '%s' -> VAO '%s' begin {", cname(), m_vao->cname());
     m_vao->begin();
+    DEBUG("} Prog '%s' -> VAO '%s' begin", cname(), m_vao->cname());
+
     for (auto& it: m_attributes)
       {
+        DEBUG("Prog '%s' -> VAO '%s' -> VBO '%s' begin {",
+              cname(), m_vao->cname(), it.first.c_str());
         m_vao->m_vbos[it.first]->begin();
+        DEBUG("} Prog '%s' -> VAO '%s' -> VBO '%s' begin",
+              cname(), m_vao->cname(), it.first.c_str());
+
+        DEBUG("Prog '%s' -> VAO '%s' -> attribute '%s' begin {",
+              cname(), m_vao->cname(), it.second->cname());
         it.second->begin();
+        DEBUG("} Prog '%s' -> VAO '%s' -> attribute '%s' begin {",
+              cname(), m_vao->cname(), it.second->cname());
       }
     for (auto& it: m_uniforms)
       {
+        DEBUG("Prog '%s' -> uniform '%s' begin {", cname(), it.second->cname());
         it.second->begin();
+        DEBUG("} Prog '%s' -> uniform '%s' begin", cname(), it.second->cname());
       }
     for (auto& it: m_samplers)
       {
         // Important: activate the texture unit first before binding
         // texture.
+        DEBUG("Prog '%s' -> sampler '%s' begin {", cname(), it.second->cname());
         it.second->begin();
+        DEBUG("} Prog '%s' -> sample '%s' begin", cname(), it.second->cname());
+
+        DEBUG("Prog '%s' -> VAO '%s' -> attribute '%s' begin {",
+              cname(), m_vao->cname(), it.second->cname());
         m_vao->m_textures[it.first]->begin();
+        DEBUG("} Prog '%s' -> VAO '%s' -> attribute '%s' begin {",
+              cname(), m_vao->cname(), it.second->cname());
       }
+    DEBUG("} Prog '%s' activate", cname());
   }
 
   //----------------------------------------------------------------------------
@@ -884,10 +925,11 @@ private:
   //----------------------------------------------------------------------------
   virtual bool setup() override
   {
+    DEBUG("Prog '%s' setup {", cname());
     bool failure = false;
 
     // Compile shaders if they have not yet compiled
-    DEBUG("Prog '%s' setup: compile shaders", cname());
+    DEBUG("Prog '%s' compile shaders {", cname());
     for (auto& it: m_shaders)
       {
         it->begin();
@@ -902,11 +944,11 @@ private:
             failure = true;
           }
       }
+    DEBUG("} Prog '%s' compile shaders. Failure? %u", cname(), failure);
 
     if (!failure)
       {
         // Attach shaders to program
-        DEBUG("Prog '%s' setup: attach shaders", cname());
         for (auto& it: m_shaders)
           {
             glCheck(glAttachShader(m_handle, it->gpuID()));
@@ -914,7 +956,7 @@ private:
           }
 
         // Link shaders to the program
-        DEBUG("Prog '%s' setup: compile prog", cname());
+        DEBUG("Prog '%s' link shaders", cname());
         glCheck(glLinkProgram(m_handle));
         m_compiled = checkLinkageStatus(m_handle);
         if (m_compiled)
@@ -927,6 +969,7 @@ private:
           }
       }
 
+    DEBUG("} Prog '%s' setup. Linked? %u", cname(), m_compiled);
     return !m_compiled;
   }
 
@@ -990,27 +1033,30 @@ private:
     GLenum type;
 
     // Create the list of uniforms
-    DEBUG("%s", "Prog::get all attrib and uniform");
+    DEBUG("Prog '%s' populating shader uniforms and samplers {", cname());
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
     i = static_cast<GLuint>(count);
     while (i--)
       {
         glCheck(glGetActiveUniform(m_handle, i, bufSize, &length,
                                    &size, &type, name));
-        DEBUG("Uniform #%u Type: %u Name: %s", i, type, name);
+        DEBUG("  Uniform #%u Type: %u Name: %s", i, type, name);
         addNewUniform(type, name);
       }
+    DEBUG("} Prog '%s' populating shader uniforms and samplers", cname());
 
     // Create the list of attributes and list of VBOs
+    DEBUG("Prog '%s' populating shader attributes {", cname());
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_ATTRIBUTES, &count));
     i = static_cast<GLuint>(count);
     while (i--)
       {
         glCheck(glGetActiveAttrib(m_handle, i, bufSize, &length,
                                   &size, &type, name));
-        DEBUG("Attribute #%u Type: %u Name: %s", i, type, name);
+        DEBUG("  Attribute #%u Type: %u Name: %s", i, type, name);
         addNewAttribute(type, name);
       }
+    DEBUG("} Prog '%s' populating shader attributes", cname());
   }
 
   //----------------------------------------------------------------------------

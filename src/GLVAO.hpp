@@ -219,11 +219,12 @@ public:
   {
     if (unlikely(hasVBO(name)))
       {
-        ERROR("Try to create a VBO with name '%s' already used", name);
+        ERROR("VAO '%s' Tried to create a VBO with name '%s' already used",
+              cname(), name);
         return false;
       }
     m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
-    DEBUG("allocate new VBO '%s'", name);
+    DEBUG("VAO '%s' has a new VBO '%s'", cname(), name);
     return true;
   }
 
@@ -321,6 +322,7 @@ public:
   //------------------------------------------------------------------
   bool checkVBOSizes()
   {
+    DEBUG("VAO '%s' check VBO sizes", cname());
     if (likely(m_vbo_size_verified))
       {
         return true;
@@ -363,6 +365,7 @@ private:
   template<typename T>
   GLVertexBuffer<T>& VBO(const char *name)
   {
+    DEBUG("VAO '%s' get VBO '%s'", cname(), name);
     if (unlikely(nullptr == name))
       {
         throw OpenGLException("nullptr passed to VBO()");
@@ -383,7 +386,6 @@ private:
       }
 
     m_vbo_size_verified = false;
-    DEBUG("VAO::GetVBO '%s'", name);
     return *vbo;
   }
 
@@ -394,6 +396,7 @@ private:
   template<typename T>
   GLIndexBuffer<T>& index(BufferUsage const usage)
   {
+    DEBUG("VAO '%s' get index", cname());
     auto ptr = m_index.get();
     if (unlikely(nullptr == ptr))
       {
@@ -421,6 +424,7 @@ private:
   template<typename T>
   T& texture(const char *name)
   {
+    DEBUG("VAO '%s' get texture '%s'", cname(), name);
     if (unlikely(nullptr == name))
       {
         throw OpenGLException("nullptr passed to texture()");
@@ -440,7 +444,6 @@ private:
                               "' exists but has wrong template type");
       }
 
-    DEBUG("VAO::GetTexture '%s'", name);
     return *tex;
   }
 
@@ -455,11 +458,12 @@ private:
   {
     if (unlikely(hasTexture(name)))
       {
-        ERROR("Try to create a texture with name '%s' already used", name);
+        ERROR("VAO '%s' Tried to create a texture with name '%s' already used",
+              cname(), name);
         return false;
       }
     m_textures[name] = std::make_unique<T>(name);
-    DEBUG("allocate new Texture '%s'", name);
+    DEBUG("VAO '%s' has a new texture '%s'", cname(), name);
     return true;
   }
 

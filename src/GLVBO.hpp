@@ -102,20 +102,20 @@ private:
 
   virtual bool create() override
   {
-    DEBUG("VBO '%s' create", cname());
+    DEBUG("VBO '%s' create", this->cname());
     glCheck(glGenBuffers(1, &m_handle));
     return false;
   }
 
   virtual void activate() override
   {
-    DEBUG("VBO '%s' activate", cname());
+    DEBUG("VBO '%s' activate", this->cname());
     glCheck(glBindBuffer(m_target, m_handle));
   }
 
   virtual bool setup() override
   {
-    DEBUG("VBO '%s' setup", cname());
+    DEBUG("VBO '%s' setup", this->cname());
     const GLsizeiptr bytes = static_cast<GLsizeiptr>
       (PendingContainer<T>::capacity() * sizeof (T));
     glCheck(glBufferData(m_target, bytes, NULL, m_usage));
@@ -147,13 +147,13 @@ private:
 
   virtual void deactivate() override
   {
-    DEBUG("VBO '%s' deactivate", cname());
+    DEBUG("VBO '%s' deactivate", this->cname());
     glCheck(glBindBuffer(m_target, 0));
   }
 
   virtual void release() override
   {
-    DEBUG("VBO '%s' release", cname());
+    DEBUG("VBO '%s' release", this->cname());
     glCheck(glDeleteBuffers(1, &m_handle));
   }
 
@@ -188,6 +188,7 @@ public:
   // FIXME: why cannot be placed inside PendingContainer ????
   inline GLVertexBuffer<T>& operator=(std::initializer_list<T> il)
   {
+    DEBUG("VBO '%s' operator=(initializer_list)", this->cname());
     const size_t my_size = this->m_container.size();
     const size_t other_size = il.size();
 
@@ -201,11 +202,13 @@ public:
 
   inline GLVertexBuffer<T>& operator=(GLVertexBuffer<T> const& other)
   {
+    DEBUG("VBO '%s' copy from '%s'", this->cname(), other.cname());
     return this->operator=(other.m_container);
   }
 
   inline GLVertexBuffer<T>& operator=(std::vector<T> const& other)
   {
+    DEBUG("VBO '%s' operator=(vector)", this->cname());
     const size_t my_size = this->m_container.size();
     const size_t other_size = other.size();
 
@@ -244,6 +247,7 @@ public:
   // FIXME: why cannot be placed inside PendingContainer ????
   inline GLIndexBuffer<T>& operator=(std::initializer_list<T> il)
   {
+    DEBUG("EBO '%s' operator=(initializer_list)", this->cname());
     const size_t my_size = this->m_container.size();
     const size_t other_size = il.size();
 
@@ -257,11 +261,13 @@ public:
 
   inline GLIndexBuffer<T>& operator=(GLIndexBuffer<T> const& other)
   {
+    DEBUG("EBO '%s' copy from '%s'", this->cname(), other.cname());
     return this->operator=(other.m_container);
   }
 
   inline GLIndexBuffer<T>& operator=(std::vector<T> const& other)
   {
+    DEBUG("EBO '%s' operator=(vector)", this->cname());
     const size_t my_size = this->m_container.size();
     const size_t other_size = other.size();
 

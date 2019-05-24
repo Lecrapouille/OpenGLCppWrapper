@@ -138,9 +138,8 @@ bool IGLWindow::start()
 {
   if (hasCreatedContext())
     {
-      std::cerr << "Warning you called twice start(). "
-                << "OpenGL context already created"
-                << std::endl;
+      ERROR("Warning you called twice start(). "
+            "OpenGL context already created");
       goto l_runtime;
     }
 
@@ -148,7 +147,7 @@ bool IGLWindow::start()
   glfwSetErrorCallback(on_GLFW_error);
   if (!glfwInit())
     {
-      std::cerr << "Failed to initialize GLFW" << std::endl;
+      ERROR("Failed to initialize GLFW");
       return false;
     }
 
@@ -164,7 +163,7 @@ bool IGLWindow::start()
                                    m_title, nullptr, nullptr);
   if (nullptr == m_main_window)
     {
-      std::cerr << "Failed to open GLFW window" << std::endl;
+      ERROR("Failed to open GLFW window");
       return false;
     }
   glfwMakeContextCurrent(m_main_window);
@@ -174,7 +173,7 @@ bool IGLWindow::start()
   glewExperimental = GL_TRUE; // stops glew crashing on OSX :-/
   if (GLEW_OK != glewInit())
     {
-      std::cerr << "Failed to initialize GLFW" << std::endl;
+      ERROR("Failed to initialize GLFW");
       return false;
     }
 
@@ -187,7 +186,7 @@ bool IGLWindow::start()
   // Make sure OpenGL version 3.2 API is available
   if (!GLEW_VERSION_3_2)
     {
-      std::cerr << "OpenGL 3.2 API is not available." << std::endl;
+      ERROR("OpenGL 3.2 API is not available!");
       return false;
     }
 
@@ -226,12 +225,12 @@ l_runtime:
         }
       else
         {
-          std::cerr << "Failed setting-up graphics" << std::endl;
+          ERROR("Failed setting-up graphics");
         }
     }
   catch (const OpenGLException& e)
     {
-      std::cerr << "Caught exception: " << e.message() << std::endl;
+      ERROR("Caught exception: '%s'", e.message().c_str());
       res = false;
     }
 
@@ -246,10 +245,11 @@ bool IGLWindow::loop()
 {
   do
     {
+      DEBUG("%s", "************* LOOP");
       computeFPS();
       if (likely(false == draw()))
         {
-          std::cerr << "Aborting" << std::endl;
+          ERROR("Aborting");
           return false;
         }
       // Swap buffers
