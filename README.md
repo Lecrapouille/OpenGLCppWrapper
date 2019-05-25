@@ -2,7 +2,7 @@
 
 ## What is OpenGLCppWrapper ?
 
-OpenGLCppWrapper is a C++11 wrapper API for writing OpenGL `Core Profile` applications in few lines of code. It hides for you the complexity of calling in the correct order OpenGL functions and passing correct parameters on them. You'll have just to deal with writing your OpenGL shaders (GLSL language), this API will compile them and instantiate class wrapping VBOs, textures. As a consequence, you just have to load your desired textures and fill data in VBOs (vertices position, texture coordinates, normals ..) and nothing more! This API manages automatically OpenGL object lifetime as well as of the transfer of dirty CPU data (from your C++ space memory point of view) into GPU data (to graphics card memory point of view).
+OpenGLCppWrapper is a C++11 wrapper API for writing OpenGL `Core Profile` applications in few lines of code. It hides for you the complexity of calling in the correct order OpenGL functions and passing correct parameters on them. You'll have just to deal with writing your OpenGL shaders (GLSL language), this API will compile them and instantiate class wrapping VBOs, textures. As a consequence, you just have to load your desired textures and fill data in VBOs (vertices position, texture coordinates, normals ..) and nothing more! This API manages automatically OpenGL object lifetime as well as of the transfer of modified CPU data (from your C++ space memory point of view) into GPU data (to graphics card memory point of view).
 
 **Warning:** Do not confuse Core Profile OpenGL (>= 2.2) with Legacy OpenGL (<= 2.1). This API does not manage OpenGL Legacy but manages OpenGL version >= 3.0.
 
@@ -20,13 +20,15 @@ Short answer: I disliked others API I found on Github! Long answer:
 
 * As a consequence, the number of public interfaces of OpenGLCppWrapper is reduced as much as possible. Only OpenGL constants mandatory used in parameters of public methods are wrapped by C++ enum for using the strong type checking during the compilation of the project, avoiding to pass 'carrots' while 'potatoes' were expected.
 
-* This API does not only content to initialize VBOs during the init phase, but it also allows you to manipulate your 3D scene data during the run-time (meshes, color ...) from the CPU: the API will transmit automatically to the GPU all modified elements for their display. This is, of course, less performant that manipulating them from shaders code, but this offers you extra flexibility.
+* This API does not only content to initialize VBOs during the init phase, but it also allows you to manipulate your 3D scene data during the run-time (meshes, color ...) from the CPU: the API will transmit automatically to the GPU all modified elements for their display. This is, of course, less performant that manipulating them from shaders code, but this offers you extra flexibility (for scientific tools for example).
+
+* As drawbacks, this API is less cache friendly than calling directly your OpenGL routines (lot of if-then-else, smart pointers and dynamic cast). This is the price of hiding the complexity and staying generic.
 
 ## How to use this API? Explained 'Hello-world' example
 
-Here is the pseudo-C++ code of what you will have to write for many of your 3D scenes. All [Examples and tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md) included in this library follow this pseudo-code. You can compare the length of their code with any similar OpenGL tutorial.
+Here is the pseudo-C++ code of what you will have to write for many of your 3D scenes. All [Examples and tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md) included with this library follow this pseudo-code. You can compare the length of their code with any similar OpenGL tutorial.
 
-In this document, I consider that the reader knows the basic OpenGL code. There is nothing particularly difficult with this tutorial because everything is largely explained in OpenGL tutorials findable on the internet.
+In this document, I consider that the reader knows the basic OpenGL code. There is nothing particularly difficult with this tutorial because everything is largely explained in the first section of any OpenGL tutorials findable on the internet.
 
 Before showing C++ code with this API, we have to write a basic fragment and vertex shader (named `my_fragment_shader.glsl` and `my_vertex_shader.glsl`). As explained before, this API has been conceived to develop OpenGL applications by starting with their shaders.
 
@@ -78,7 +80,7 @@ In this vertex shader, we pass to the fragment shader the texel and the global c
 
 ##### main.cpp:
 
-Here the funniest part of this document: using OpenGLCppWrapper API. The code is written in pseudo-C++ code to be less boring to read. Explanations come after.
+Here the interesting part of this document: using OpenGLCppWrapper API. The code is written in pseudo-C++ code to be less boring to read. Explanations come after.
 
 ```
 01: GLProgram prog;
@@ -170,13 +172,13 @@ You have to compile and link shaders into the class GLProgram. `compile()` is op
 Shader uniforms can be initialized directly because they act like constant values inside shaders. Shader attributes and shader samplers need a bound VAO to be initialized (explained here after). Shader uniforms data are reachable through methods like `scalarf(const char*)`, `vector3f(const char*)`, `matrix44f(const char*)`, ... using the name of the shader attribute or shader sampler (respect the case). Note that `f` means float and `i` means integer.
 
 * line 22 and 33:
-To initialize your 3D model, you have to use a VAO and bind it to the desired GLProgram This last, helped with the list of shader attributes and samplers, will populate VBOs and textures inside the VAO instance. Shader attributes and samplers give their name to VBOs and textures. In our example, `vao1` and `vao2` will have a VBO named `position` and `UV` and a texture named `texID`. Their data are reachable through methods like `scalarf(const char*)`, `vector3f(const char*)`, `matrix44f(const char*)` or `texture2D(const char*)`, ... using the name of the shader attribute or shader sampler (respect the case).
+To initialize your 3D model, you have to use a VAO and bind it to the desired GLProgram This last, helped with its internal list of shader attributes and samplers, will populate VBOs and textures inside the VAO instance. Shader attributes and samplers give their name to VBOs and textures. In our example, `vao1` and `vao2` will have a VBO named `position` and `UV` and a texture named `texID`. Their data are reachable through methods like `scalarf(const char*)`, `vector3f(const char*)`, `matrix44f(const char*)` or `texture2D(const char*)`, ... using the name of the shader attribute or shader sampler (respect the case).
 
 * line 46, 51:
-GLProgram reserves a predefined number of elements in VBO if this information is given either within the GLProgram constructor or with the method `setInitVBOSize(size_t)`. VBOs and textures are instantiate automatically and only once during the first binding: the next binding will create nothing. Once VAO has been bind to a GLProgram it cannot be used by another GLProgram (else an exception would be thrown to prevent errors). Bind a VAO makes it the single active VAO to the lined GLProgram and replace the older bound VAO.
+GLProgram reserves a predefined number of elements in VBO if this information is given either within the GLProgram constructor or with the method `setInitVBOSize(size_t)`. VBOs and textures are instantiate automatically and only once during the first binding. On the next binding nothing are created. Once VAO has been bind to a GLProgram it cannot be bound to another GLProgram (an exception would be thrown to prevent this unexpected behavior). Binding a VAO makes it be the single activable VAO to this GLProgram. As consequence it replaces the older bound VAO.
 
 * lines 25-29:
-Textures and VBOs shall be initialized. Textures are uniforms but they are filled like attributes (need a bind VAO). Textures dimension depends on the sampler used in your GLSL code: the can be 1D, 2D, 3D or Cube. You can load jpeg, BMP, png, TGA ... files and for 2D textures, you have to use `load(const char*)`. VBO is a GPU buffer for storing data of your 3d models (vertex position, texture coordinates, normals ...). All VBOs shall have the same size. **TODO** automatic check will be added.
+Textures and VBOs shall be initialized. Textures are uniforms but they are filled like attributes (need a bind VAO). Textures dimension depends on the sampler used in your GLSL code: the can be 1D, 2D, 3D or Cube. You can load jpeg, BMP, png, TGA ... files and for 2D textures, you have to use `load(const char*)`. VBO is a GPU buffer for storing data of your 3d models (vertex position, texture coordinates, normals ...). All VBOs shall have the same size. Automatic checks of their sizes are made.
 
 * line 33-38:
 You can create as many VAOs as desired. The number of VAOs only depends on how many 3D models you desire to create. You have to redo the same steps for filling VBOs and textures. In this example, two VAOs are bound the same shader program but you can add more shader programs. For example, see my examples using framebuffers;
@@ -195,9 +197,9 @@ Depending on your GLSL code, if you use [Model View Projection matrices](http://
 * lines 64-68:
 In this example, we defined matrices for the model view projection. The matrix `"projection"` is usually updated when the user changes the dimension of the GUI window (`onWindowSizeChanged(uint32 const width, uint32 const height)` of GLWindow and in `setup()`). The `"view"` matrix is updated when your camera is moved (see Legacy OpenGL `glLookAt` routine). Finally, the `"model"` matrix is used for placing models over the world (so to be placed before any `GLProgram::draw` methods).
 
-**Note:** `Mode::TRIANGLES` is a strong type alias for GL_TRIANGLES. For all public methods needing an OpenGL GLint or GLenum types I replaced them by a C++ `enum class` (see GLEnum.hpp file for other types). This allows detecting bugs with the wrong type like trying to pass GL_DYNAMIC_DRAW instead of GL_TRIANGLES. Note that internally in classes, I keep using GL_XXX names because they cannot be accessed outside the API.
+**Note:** `Mode::TRIANGLES` is a strong type alias for `GL_TRIANGLES`. For all public methods needing an OpenGL GLint or GLenum types I replaced them by a C++ `enum class` (see GLEnum.hpp file for other types). This allows detecting bugs with the wrong type like trying to pass GL_DYNAMIC_DRAW instead of GL_TRIANGLES. Note that, inside private classes, I keep using GL_XXX names because they are not exposed to the public API.
 
-**Note:** a GLSL coding rule suggests to prefix uniform names bu "u_" and attribute names "a_". This is not mandatory for this API. The only requirement, for the moment, is to use the same name both for uniform and attribute is not managed by the API (and I'm not sure GLSL can be compiled anyway).
+**Note:** a GLSL coding rule suggests to prefix uniform names by "u_" and attribute names "a_". This is not mandatory for this API. The only requirement, for the moment, is to use the same name both for uniform and attribute is not managed by the API (and I'm not sure GLSL can be compiled anyway).
 
 **Note:** Contrary to Glumpy, where GLProgram can modify both textures, uniforms, and attributes, in this API GLProgram only modifies uniforms and GLVAO modifies attributes (named VBO) or textures.
 
@@ -274,7 +276,9 @@ sudo apt-get update && apt-get install crpcut crpcut-dev
 
 ### Compilation
 
-To compile the API + examples:
+Works for Linux. Should work for OS X. Not working for Windows (need help on completing the Makefile).
+
+To compile the API and its examples:
 ```sh
 git clone --recurse-submodules https://github.com/Lecrapouille/OpenGLCppWrapper.git --depth=1
 cd cd OpenGLCppWrapper
@@ -290,7 +294,7 @@ make -j4
 
 A `build/` folder shall have been created containing the compiled and runnable files. Two libraries (one static the second dynamic) shall also be present. You can use them for your project.
 
-**Note:** make commands `download-external-libs` and `compile-external-libs` plays the same role than a recursive git clone (but I do not like so I do not use except for my makefiles). They will download, compile (but not install) GitHub libs like: Backward, SOIL and Dear IMgui.
+**Note:** make commands `download-external-libs` and `compile-external-libs` plays the same role than a recursive git clone (which I do not like it so I only use it for my makefiles). They will download, compile (but not install) GitHub libraries like: Backward, SOIL and Dear IMgui.
 
 To compile API examples:
 ```sh
@@ -328,7 +332,7 @@ ls -la libOpenGLCppWrapper*
 ```
 Or better:
 ```
-pkg-config openglcppwrapper-0.6 --libs
+pkg-config openglcppwrapper --libs
 ```
 
 ### Unit tests
