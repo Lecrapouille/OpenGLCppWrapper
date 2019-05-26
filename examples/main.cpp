@@ -50,7 +50,7 @@ static void usage(char *argv[])
   std::cout << "  4: TODO" << std::endl;
   std::cout << "  5: Multiple VAOs versus multiple VBOs." << std::endl;
   std::cout << "  6: Draw a sphere using VBO and EBO." << std::endl;
-  std::cout << "  7: Draw a cube inside a skybox (cubic texture)." << std::endl;
+  std::cout << "  7: Draw a cylinder inside a skybox (cubic texture)." << std::endl;
   std::cout << "  8: Create a terrain using a 3d texture." << std::endl;
   std::cout << "  9: Draw 3 moving robots using a scene graph." << std::endl;
   std::cout << " 10: Draw a 2D square in a framebuffer." << std::endl;

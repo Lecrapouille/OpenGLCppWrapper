@@ -47,7 +47,9 @@ THIRDPART_LIBS +=
 # is needed please read the external/README.md file.
 
 ifeq ($(ARCHI),Darwin)
-LDFLAGS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
+LDFLAGS += -I/usr/local/include -I/opt/local/include -framework \
+OpenGL -framework Cocoa -framework IOKit -framework CoreVideo   \
+-L/usr/local/lib -L/opt/local/lib -lGLEW -lglfw
 else ifeq ($(ARCHI),Linux)
 PKG_LIBS += glew glfw3
 else

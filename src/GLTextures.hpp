@@ -34,7 +34,7 @@
 #  include "IGLObject.hpp"
 #  include "PendingContainer.hpp"
 #  include "SOIL/SOIL.h"
-#  include <vector>
+#  include <array>
 
 namespace glwrap
 {
@@ -686,6 +686,9 @@ public:
   //----------------------------------------------------------------------------
   GLTextureCube(std::string const& name)
     : IGLTexture(name, GL_TEXTURE_CUBE_MAP)
+  {}
+
+  virtual ~GLTextureCube()
   {}
 
   //----------------------------------------------------------------------------

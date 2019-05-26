@@ -50,8 +50,9 @@ bool GLExample10::setup()
                         "  gl_Position = vec4(position,0.0,1.0); \n"
                         "}");
   m_fs_plane.fromString("#version 330 core                       \n"
+                        "out vec4 fragColor;                     \n"
                         "void main() {                           \n"
-                        "  gl_FragColor = vec4(10,10,10,1);      \n"
+                        "  fragColor = vec4(10,10,10,1);         \n"
                         "}");
   if (!m_prog_plane.attachShaders(m_vs_plane, m_fs_plane).compile())
     {
@@ -69,11 +70,11 @@ bool GLExample10::setup()
                          "  v_texcoord = 0.85*position;                \n"
                          "}");
   m_fs_screen.fromString("#version 330 core                            \n"
-                         "uniform sampler2D texture;                   \n"
+                         "uniform sampler2D screenTexture;             \n"
                          "in vec2 v_texcoord;                          \n"
                          "out vec4 fragColor;                          \n"
                          "void main() {                                \n"
-                         "  vec4 color = texture2D(texture, v_texcoord);\n"
+                         "  vec4 color = texture(screenTexture, v_texcoord);\n"
                          "  fragColor = color / vec4(20,20,20,1);      \n"
                          "}");
   if (!m_prog_screen.attachShaders(m_vs_screen, m_fs_screen).compile())
@@ -97,7 +98,7 @@ bool GLExample10::setup()
 
   // Framebuffer
   m_fbo.resize(width(), height());
-  m_fbo.createColorTexture(m_screen.texture2D("texture"));
+  m_fbo.createColorTexture(m_screen.texture2D("screenTexture"));
 
   return true;
 }
