@@ -29,11 +29,6 @@
 //! https://www.youtube.com/watch?v=-kbal7aGUpk&list=PLRIWtICgwaX0u7Rf9zkZhLoLuZVfUksDP&index=17
 //------------------------------------------------------------------
 
-static std::vector<Vector2f> initial_position =
-{
-  Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f), Vector2f(0.0f, 1.0f)
-};
-
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
@@ -134,7 +129,7 @@ bool GLExample03::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-  m_prog.draw(m_triangle, Primitive::TRIANGLES, 0, 3);
+  m_prog.draw(m_triangle, Mode::TRIANGLES, 0, 3);
 
   return true;
 }

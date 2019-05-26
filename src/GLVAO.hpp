@@ -54,9 +54,9 @@ class GLVAO: public IGLObject<GLenum>
   friend class GLProgram;
 
   // Unordered map = hash table = O(1) access time.
-  using IGLObjectPtr = std::unique_ptr<IGLObject>;
+  using GLBufferPtr = std::unique_ptr<IGLBuffer>;
   using IGLTexturePtr = std::unique_ptr<IGLTexture>;
-  using mapIGLObject = std::unordered_map<std::string, IGLObjectPtr>;
+  using mapGLBuffer = std::unordered_map<std::string, GLBufferPtr>;
   using mapGLTexture = std::unordered_map<std::string, IGLTexturePtr>;
 
 public:
@@ -124,7 +124,50 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Check if program has a non empty list of VBOs.
+  //! \brief Check if this instance holds a GLIndexBuffer.
+  //!
+  //! \return true if the .
+  //----------------------------------------------------------------------------
+  inline bool hasIndex()
+  {
+    return nullptr != m_index.get();
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the index type of uint32_t.
+  //!
+  //! This method wraps the \a index() method hidding the misery of the
+  //! template.
+  //----------------------------------------------------------------------------
+  inline GLIndexBuffer<uint32_t>& index32(BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  {
+    return index<uint32_t>(usage);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the index type of uint16_t.
+  //!
+  //! This method wraps the \a index() method hidding the misery of the
+  //! template.
+  //----------------------------------------------------------------------------
+  inline GLIndexBuffer<uint16_t>& index16(BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  {
+    return index<uint16_t>(usage);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the index type of uint8_t.
+  //!
+  //! This method wraps the \a index() method hidding the misery of the
+  //! template.
+  //----------------------------------------------------------------------------
+  inline GLIndexBuffer<uint8_t>& index8(BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  {
+    return index<uint8_t>(usage);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Check if this instance has a non empty list of VBOs.
   //!
   //! \return true if the list is non empty.
   //----------------------------------------------------------------------------
@@ -145,7 +188,7 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Check if program has a non empty list of textures.
+  //! \brief Check if this instance has a non empty list of textures.
   //!
   //! \return true if the list is non empty.
   //----------------------------------------------------------------------------
@@ -166,37 +209,23 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Locate and get the VBO refered by the name and its type T.
+  //! \brief
   //!
-  //! \return the reference of the VBO if it exists.
-  //!
-  //! \throw OpenGLException if the VBO is not in the list
-  //! (probably due to a typo in the name) or if the type T does not match.
+  //! \note: name duplicata is not managed because this case should
+  //! never happen.
   //----------------------------------------------------------------------------
   template<typename T>
-  GLVertexBuffer<T>& VBO(const char *name)
+  bool createVBO(const char *name, size_t const vbo_init_size, BufferUsage const usage)
   {
-    if (unlikely(nullptr == name))
+    if (unlikely(hasVBO(name)))
       {
-        throw OpenGLException("nullptr passed to VBO()");
+        ERROR("VAO '%s' Tried to create a VBO with name '%s' already used",
+              cname(), name);
+        return false;
       }
-
-    auto ptr = m_vbos[name].get();
-    if (unlikely(nullptr == ptr))
-      {
-        throw OpenGLException("GLVertexBuffer '" + std::string(name) +
-                              "' does not exist");
-      }
-
-    GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(ptr);
-    if (unlikely(nullptr == vbo))
-      {
-        throw OpenGLException("GLVertexBuffer '" + std::string(name) +
-                              "' exists but has wrong template type");
-      }
-
-    DEBUG("VAO::GetVBO '%s'", name);
-    return *vbo;
+    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
+    DEBUG("VAO '%s' has a new VBO '%s'", cname(), name);
+    return true;
   }
 
   //----------------------------------------------------------------------------
@@ -241,40 +270,6 @@ public:
   inline GLVertexBuffer<float>& scalarf(const char *name)
   {
     return VBO<float>(name);
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Locate and get the texture refered by the name and its type T.
-  //!
-  //! \return the reference of the texture if it exists.
-  //!
-  //! \throw OpenGLException if the VBO is not in the list
-  //! (probably due to a typo in the name) or if the type T does not match.
-  //----------------------------------------------------------------------------
-  template<typename T>
-  T& texture(const char *name)
-  {
-    if (unlikely(nullptr == name))
-      {
-        throw OpenGLException("nullptr passed to texture()");
-      }
-
-    auto ptr = m_textures[name].get();
-    if (unlikely(nullptr == ptr))
-      {
-        throw OpenGLException("GLTexture '" + std::string(name) +
-                              "' does not exist");
-      }
-
-    T* tex = dynamic_cast<T*>(ptr);
-    if (unlikely(nullptr == tex))
-      {
-        throw OpenGLException("GLTexture '" + std::string(name) +
-                              "' exists but has wrong template type");
-      }
-
-    DEBUG("VAO::GetTexture '%s'", name);
-    return *tex;
   }
 
   //----------------------------------------------------------------------------
@@ -327,44 +322,129 @@ public:
   //------------------------------------------------------------------
   bool checkVBOSizes()
   {
-    if (prog == 0 || m_vbos.empty())
+    DEBUG("VAO '%s' check VBO sizes", cname());
+    if (likely(m_vbo_size_verified))
       {
+        return true;
+      }
+
+    if (unlikely(prog == 0 || m_vbos.empty()))
+      {
+        ERROR("VAO '%s' is not yet bound to a GLProgram", cname());
         return false;
       }
-    /* FIXME
-    size_t size = m_vbos.begin().second->size();
-    for (auto const& it: m_vbos)
+
+    size_t size = m_vbos.begin()->second->size();
+    for (auto& it: m_vbos)
       {
-        if (size != it.second->size())
+        if (unlikely(size != it.second->size()))
           {
-            ERROR("VAO %s does not have all of its VBOs with the same size",
+            ERROR("VAO '%s' does not have all of its VBOs with the same size",
                   cname());
+            for (auto& itt: m_vbos)
+              {
+                ERROR("=> VBO '%s' size is %zu", itt.first.c_str(), itt.second->size());
+              }
             return false;
           }
       }
-    */
+    m_vbo_size_verified = true;
     return true;
   }
 
 private:
 
   //----------------------------------------------------------------------------
-  //! \brief
+  //! \brief Locate and get the VBO refered by the name and its type T.
   //!
-  //! \note: name duplicata is not managed because this case should
-  //! never happen.
+  //! \return the reference of the VBO if it exists.
+  //!
+  //! \throw OpenGLException if the VBO is not in the list
+  //! (probably due to a typo in the name) or if the type T does not match.
   //----------------------------------------------------------------------------
   template<typename T>
-  bool createVBO(const char *name, size_t const vbo_init_size, BufferUsage const usage)
+  GLVertexBuffer<T>& VBO(const char *name)
   {
-    if (unlikely(hasVBO(name)))
+    DEBUG("VAO '%s' get VBO '%s'", cname(), name);
+    if (unlikely(nullptr == name))
       {
-        ERROR("Try to create a VBO with name '%s' already used", name);
-        return false;
+        throw OpenGLException("nullptr passed to VBO()");
       }
-    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
-    DEBUG("allocate new VBO '%s'", name);
-    return true;
+
+    auto ptr = m_vbos[name].get();
+    if (unlikely(nullptr == ptr))
+      {
+        throw OpenGLException("GLVertexBuffer '" + std::string(name) +
+                              "' does not exist");
+      }
+
+    GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(ptr);
+    if (unlikely(nullptr == vbo))
+      {
+        throw OpenGLException("GLVertexBuffer '" + std::string(name) +
+                              "' exists but has wrong template type");
+      }
+
+    m_vbo_size_verified = false;
+    return *vbo;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Get the GLIndexBuffer.
+  //! \note if the GLIndexBuffer does not exist it is created.
+  //----------------------------------------------------------------------------
+  template<typename T>
+  GLIndexBuffer<T>& index(BufferUsage const usage)
+  {
+    DEBUG("VAO '%s' get index", cname());
+    auto ptr = m_index.get();
+    if (unlikely(nullptr == ptr))
+      {
+        m_index = std::make_unique<GLIndexBuffer<T>>(name() + "_index", usage);
+        ptr = m_index.get();
+      }
+
+    GLIndexBuffer<T> *ib = dynamic_cast<GLIndexBuffer<T>*>(ptr);
+    if (unlikely(nullptr == ib))
+      {
+        throw OpenGLException("GLIndexBuffer exists but has wrong template type");
+      }
+
+    return *ib;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Locate and get the texture refered by the name and its type T.
+  //!
+  //! \return the reference of the texture if it exists.
+  //!
+  //! \throw OpenGLException if the VBO is not in the list
+  //! (probably due to a typo in the name) or if the type T does not match.
+  //----------------------------------------------------------------------------
+  template<typename T>
+  T& texture(const char *name)
+  {
+    DEBUG("VAO '%s' get texture '%s'", cname(), name);
+    if (unlikely(nullptr == name))
+      {
+        throw OpenGLException("nullptr passed to texture()");
+      }
+
+    auto ptr = m_textures[name].get();
+    if (unlikely(nullptr == ptr))
+      {
+        throw OpenGLException("GLTexture '" + std::string(name) +
+                              "' does not exist");
+      }
+
+    T* tex = dynamic_cast<T*>(ptr);
+    if (unlikely(nullptr == tex))
+      {
+        throw OpenGLException("GLTexture '" + std::string(name) +
+                              "' exists but has wrong template type");
+      }
+
+    return *tex;
   }
 
   //----------------------------------------------------------------------------
@@ -378,11 +458,12 @@ private:
   {
     if (unlikely(hasTexture(name)))
       {
-        ERROR("Try to create a texture with name '%s' already used", name);
+        ERROR("VAO '%s' Tried to create a texture with name '%s' already used",
+              cname(), name);
         return false;
       }
     m_textures[name] = std::make_unique<T>(name);
-    DEBUG("allocate new Texture '%s'", name);
+    DEBUG("VAO '%s' has a new texture '%s'", cname(), name);
     return true;
   }
 
@@ -439,20 +520,22 @@ private:
     glCheck(glDeleteVertexArrays(1, &m_handle));
   }
 
-  //Callable by GLProgram
-  //static void unbind()
-  //{
-  //  glCheck(glBindVertexArray(0U));
-  //}
-
 private:
 
   //! \brief Hold VBOs.
-  mapIGLObject m_vbos;
+  // FIXME instead of hold IGLBuffer we should hold GLBuffer<T>
+  // but this is not possible in C++. So I have no idea.
+  mapGLBuffer m_vbos;
   //! \brief Hold textures.
   mapGLTexture m_textures;
+  //! \brief Optionally hold vertex indices.
+  GLBufferPtr m_index;
   //! \brief Hold the ID of the bound GLProgam.
+  //! \note this varibale is modified durectly
+  //! by the GLProgam.
   GLenum prog = 0;
+  //! \brief boolean avoiding to make uncessary checks on VBO size.
+  bool m_vbo_size_verified = false;
 };
 
 } // namespace glwrap

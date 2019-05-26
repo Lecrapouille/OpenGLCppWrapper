@@ -32,8 +32,7 @@ public:
 
   GLExample06()
     : m_sphere("VAO_sphere"),
-      m_prog("prog"),
-      m_indices("indices")
+      m_prog("prog")
   {}
 
   ~GLExample06()
@@ -53,7 +52,6 @@ private:
   GLVAO              m_sphere;
   GLProgram          m_prog;
   Movable<float, 3U> m_movable;
-  GLIndexBuffer<uint32_t> m_indices;
 };
 
 #endif // EXAMPLE_06_SPHERE_EBO_HPP

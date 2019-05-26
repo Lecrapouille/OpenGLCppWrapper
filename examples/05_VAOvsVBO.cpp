@@ -68,7 +68,7 @@ bool GLExample05::cubeSetup()
 }
 
 //------------------------------------------------------------------
-//! \brief Create a cube (= second VAO).
+//! \brief Create a floor (= second VAO).
 //------------------------------------------------------------------
 bool GLExample05::floorSetup()
 {
@@ -98,7 +98,8 @@ bool GLExample05::floorSetup()
 
 //------------------------------------------------------------------
 //! \brief Load vertex and fragment shaders. Create two VAOs and fill
-//! their VBOs and textures.
+//! their VBOs and textures. Note that examples of EBO (aka vertice
+//! index) are shown in examples 06 and 07.
 //------------------------------------------------------------------
 bool GLExample05::setup()
 {
@@ -136,7 +137,8 @@ bool GLExample05::setup()
 }
 
 //------------------------------------------------------------------
-//! \brief Paint our scene. Here we are using the delta time to
+//! \brief Paint our scene. We are using the delta time to spin
+//! one cube. We show different ways to draw VAO.
 //------------------------------------------------------------------
 bool GLExample05::draw()
 {
@@ -150,20 +152,18 @@ bool GLExample05::draw()
   // Draw the first cube with a "pinkished" coloration.
   // Make this cube spining around itself.
   m_prog.vector4f("color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
-  m_prog.bind(m_cube);
-  m_movable.rotate(4.0f * ct, Vector3f(0, 1, 0)); // Apply a rotation around Y-axis
-  m_movable.position(Vector3f(-1.0f, 0.0f, -1.0f)); // Apply a translation
+  m_movable.rotate(4.0f * ct, Vector3f(0, 1, 0));    // Apply a rotation around Y-axis
+  m_movable.position(Vector3f(-1.0f, 0.0f, -1.0f));  // Apply a translation
   m_prog.matrix44f("model") = m_movable.transform(); // Rotate and translate the cube
-  m_prog.draw(Primitive::TRIANGLES, 0, 36);
+  m_prog.draw(m_cube, Mode::TRIANGLES, 0, 36);       // Style 01: pass all parameters
 
   // Draw a second cube (same model = same VAO) with a "darkished"
   // coloration. Make this cube static.
   m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
-  m_prog.bind(m_cube);
   m_movable.reset();
   m_movable.position(Vector3f(3.0f, 0.0f, 0.0f)); // Apply a translation
   m_prog.matrix44f("model") = m_movable.transform();
-  m_prog.draw(Primitive::TRIANGLES, 0, 36); // FIXME 0, 36 a cacher
+  m_prog.draw(m_cube, Mode::TRIANGLES /*, 0, 36*/); // Style 02: do not pass first and count vertices
 
   // Draw the floor (second model = second VAO).
   m_prog.vector4f("color") = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -171,7 +171,7 @@ bool GLExample05::draw()
   m_movable.reset();
   m_movable.position(Vector3f(0.0f, 0.0f, 0.0f)); // Apply a translation
   m_prog.matrix44f("model") = m_movable.transform();
-  m_prog.draw(Primitive::TRIANGLES, 0, 6);
+  m_prog.draw(Mode::TRIANGLES); // Style 03: do not pass implict bound VAO and no vertices count
 
   return true;
 }

@@ -1,6 +1,7 @@
 #ifndef OPENGLCPPWRAPPER_NONCPPSTD_HPP
 #  define OPENGLCPPWRAPPER_NONCPPSTD_HPP
 
+#  include "Verbose.hpp"
 #  include <cstddef>
 #  include <memory>
 
@@ -67,14 +68,6 @@ inline int ARRAY_SIZE(T (&)[S])
 #    define unlikely(x)     __builtin_expect(!!(x),0)
 # endif
 
-#  ifndef PRINTFLIKE
-#    if __GNUC__ > 2 || defined(__INTEL_COMPILER)
-#      define PRINTFLIKE(a, b) __attribute__((format(printf, a, b)))
-#    else
-#      define PRINTFLIKE(a, b)
-#    endif
-#  endif
-
 #  ifndef NORETURN
 #    if __GNUC__ > 2 || defined(__INTEL_COMPILER)
 #      define NORETURN __attribute__((__noreturn__))
@@ -82,7 +75,5 @@ inline int ARRAY_SIZE(T (&)[S])
 #      define NORETURN
 #    endif
 #  endif
-
-#  include "Verbose.hpp"
 
 #endif // OPENGLCPPWRAPPER_NONCPPSTD_HPP

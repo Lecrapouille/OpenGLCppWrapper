@@ -110,7 +110,7 @@ enum class FrameBuffer : GLenum
     /* 0x1802 */ STENCIL = GL_STENCIL_BUFFER_BIT,
   };
 
-enum class Primitive : GLenum
+enum class Mode : GLenum
   {
     /* 0x0000 */ POINTS = GL_POINTS,
     /* 0x0001 */ LINES = GL_LINES,

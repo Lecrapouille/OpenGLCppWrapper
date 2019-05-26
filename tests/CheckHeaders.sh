@@ -32,6 +32,7 @@ do
     # Generate the cpp file including the header file.
     cat << EOF > checkheaders.cpp
     #include "$FILE"
+    namespace glwrap { void errout(char const*, char const*, unsigned int, char const*, ...) { } }
     unsigned char* SOIL_load_image(const char *, int *, int *, int *, int) { return NULL; }
     void SOIL_free_image_data (unsigned char *) {}
     int main() { return 0; }

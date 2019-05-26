@@ -39,6 +39,8 @@ OpenGLCppWrapper holds VBO and textures. The list of VBOs and textures are popul
 
 In OpenGLCppWrapper, modifying a shader uniform is made from the GLProgram, while modifying a VBO or texture is made from the bound VAO. In Glumpy all is made directly from the shader program.
 
+In OpenGLCppWrapper, modifying a VBO makes the VAO forced to check if all its VBO have the same size.
+
 ##### texture.py vs GLTextures.hpp
 
 OpenGLCppWrapper uses SOIL library and implement `load()` methods for loading jpeg, bmp ... files. It use a structure TextureOptions for its setup. OpenGLCppWrapper call less glBindTexture in `setup` and `update`.

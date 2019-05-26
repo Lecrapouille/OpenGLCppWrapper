@@ -76,7 +76,6 @@ static bool doload2D(const char *const filename, const PixelLoadFormat format,
 {
   if (unlikely(nullptr == filename)) return false;
   DEBUG("Loading texture '%s'", filename);
-  data.debugDirty("doload");
 
   // Load the image as a C array.
   int w, h;
@@ -91,7 +90,6 @@ static bool doload2D(const char *const filename, const PixelLoadFormat format,
       size_t size = static_cast<size_t>(w * h) * sizeof(unsigned char)
         * ((format == PixelLoadFormat::LOAD_RGBA) ? 4 : 3);
       data.append(image, size); // FIXME: not working with preallocated size
-      //data.debugDirty();
       SOIL_free_image_data(image);
       DEBUG("Successfully loaded %ux%u texture '%s'", width, height, filename);
       return true;
@@ -434,6 +432,7 @@ public:
   //----------------------------------------------------------------------------
   inline bool load(const char *const filename)
   {
+    DEBUG("Texture2D '%s' load bitmap '%s'", cname(), filename);
     m_buffer.clear(); m_width = m_height = 0;
     return doload2D(filename, PixelLoadFormat::LOAD_RGBA, m_buffer, m_width, m_height);
   }
@@ -730,6 +729,8 @@ public:
   {
     const size_t index = static_cast<size_t>(target) -
       static_cast<size_t>(GL_TEXTURE_CUBE_MAP_POSITIVE_X);
+
+    DEBUG("TextureCube '%s' %zu load bitmap '%s'", cname(), index, filename);
     return m_textures[index]->load(filename);
   }
 
@@ -857,6 +858,8 @@ public:
     m_buffer.clear();
     for (size_t i = 0; i < depth; ++i)
       {
+        DEBUG("Texture3D '%s' load bitmap '%s'", cname(), filenames[i].c_str());
+
         // Load a Texture2D and pack it subsequently into a large 2D texture
         width = height = 0;
         if (unlikely(!doload2D(filenames[i].c_str(), PixelLoadFormat::LOAD_RGBA, m_buffer, width, height)))

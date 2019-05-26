@@ -26,7 +26,6 @@
 // *****************************************************************************
 
 #  include "GLEnum.hpp"
-#  include "private/NonCppStd.hpp"
 #  include "private/Exception.hpp"
 
 namespace glwrap
