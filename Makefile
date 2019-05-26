@@ -43,7 +43,11 @@ include $(P)/Makefile.common
 OBJ_CORE = Verbose.o Exception.o OpenGL.o GLWindow.o
 OBJ_IMGUI = GLImGUI.o
 OBJS += $(OBJ_CORE) $(OBJ_IMGUI)
+ifeq ($(ARCHI),Darwin)
+THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/*.o)
+else
 THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/obj/*.o)
+endif
 
 ###################################################
 # Compile static and shared libraries

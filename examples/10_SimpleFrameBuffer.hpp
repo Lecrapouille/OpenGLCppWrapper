@@ -31,8 +31,12 @@ class GLExample10: public IGLWindow
 public:
 
   GLExample10()
-    : m_prog_plane("prog_plane"),
+    : m_vs_plane("VS_plane"),
+      m_fs_plane("FS_plane"),
+      m_prog_plane("prog_plane"),
       m_plane("VAO_plane"),
+      m_vs_screen("VS_screen"),
+      m_fs_screen("FS_screen"),
       m_prog_screen("prog_screen"),
       m_screen("VAO_screen"),
       m_fbo("FBO")

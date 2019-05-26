@@ -1,3 +1,7 @@
+version 0.7.1:
+
+    Fix some errors found on Darwin architecture.
+
 version 0.7:
 
     Hide vertex indices inside VAO: this avoids to application to hold it explicitely.

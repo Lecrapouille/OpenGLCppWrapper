@@ -78,7 +78,7 @@ static bool almostEqual(float const A, float const B)
 }
 #pragma GCC diagnostic pop
 
-static bool almostZero(float const A)
+static inline bool almostZero(float const A)
 {
   return almostEqual(A, 0.0f);
 }
