@@ -1,3 +1,13 @@
+version 0.7:
+
+    Hide vertex indices inside VAO: this avoids to application to hold it explicitely.
+    VAO check its VBO sizes.
+    GLProgram can draw VAO without passing number of vertices.
+    Add first 3D primitives (tube and derivated).
+    Update PendingContainer API.
+    Export less C++ macros (ERROR, IMGUI).
+    Fix some comments in examples.
+
 version 0.6.1:
 
     Update Makefile.
