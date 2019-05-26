@@ -169,7 +169,7 @@ public:
 
     // Indices for the top cap
     m_indices.reserve(slices);
-    for (uint32_t i = 0u; i <= slices; ++i)
+    for (uint32_t i = 0u; i < slices; ++i)
       {
         m_indices.append(c0); m_indices.append(i0 + i); m_indices.append(i0 + i + 1u);
       }

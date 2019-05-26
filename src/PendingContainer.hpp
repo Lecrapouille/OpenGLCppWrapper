@@ -174,6 +174,36 @@ public:
     return *this;
   }
 
+  //! \brief Append EBO
+  PendingContainer<T>&
+  appendIndex(std::vector<T> const& other)
+  {
+    throw_if_cannot_expand();
+
+    T older_index{0};
+    if (likely(0_z != size()))
+      {
+        older_index = max();
+        older_index += T(1);
+      }
+
+    DEBUG("appendIndex => older_index %zu", static_cast<size_t>(older_index));
+
+    m_container.reserve(other.size());
+    for (auto it: other)
+      {
+        m_container.push_back(it + older_index);
+      }
+    tagAsPending(m_container.size() - 1_z);
+    return *this;
+  }
+
+  PendingContainer<T>&
+  appendIndex(PendingContainer const& other)
+  {
+    return PendingContainer<T>::appendIndex(other.m_container);
+  }
+
   inline T sum() const
   {
     T sum_of_elems = 0;
@@ -187,12 +217,20 @@ public:
 
   inline T min() const
   {
-    return std::min_element(m_container.begin(), m_container.end());
+    if (unlikely(0_z == m_container.size()))
+      {
+        throw std::out_of_range("Cannot compute the min of an empty container");
+      }
+    return *std::min_element(m_container.begin(), m_container.end());
   }
 
   inline T max() const
   {
-    return std::max_element(m_container.begin(), m_container.end());
+    if (unlikely(0_z == m_container.size()))
+      {
+        throw std::out_of_range("Cannot compute the max of an empty container");
+      }
+    return *std::max_element(m_container.begin(), m_container.end());
   }
 
   template<class Function>
@@ -334,6 +372,11 @@ public:
       {
         return nullptr;
       }
+  }
+
+  inline std::vector<T>& data()
+  {
+    return m_container;
   }
 
   //private:

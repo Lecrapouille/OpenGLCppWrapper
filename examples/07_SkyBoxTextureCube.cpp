@@ -122,7 +122,7 @@ bool GLExample07::createShape()
   // Uncomment to debug triangles
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  const uint32_t slices = 8u;
+  const uint32_t slices = 32u;
   const float radius = 1.0f;
   const float height = 1.0f;
 
@@ -130,7 +130,7 @@ bool GLExample07::createShape()
   // single VAO.
   Cylinder cylinder(radius, height, slices);
   Circle circle1(radius, slices); circle1.vertices() += Vector3f(0.0f, 0.0f, 0.5f);
-  Circle circle2(radius, slices); circle1.vertices() -= Vector3f(0.0f, 0.0f, 0.5f);
+  Circle circle2(radius, slices); circle2.vertices() -= Vector3f(0.0f, 0.0f, 0.5f);
 
   m_shape.vector3f("aPos")
     .append(circle1.vertices())
@@ -143,9 +143,9 @@ bool GLExample07::createShape()
     .append(cylinder.textures());
 
   m_shape.index32()
-    .append(circle1.indices())
-    .append(circle2.indices())
-    .append(cylinder.indices());
+    .appendIndex(circle1.indices())   // Starting index: 0
+    .appendIndex(circle2.indices())   // Starting index: 34
+    .appendIndex(cylinder.indices()); // Starting index: 68
 
   // Repeat the texture motif
   m_shape.vector2f("aTexCoords") *= 2.0f;
