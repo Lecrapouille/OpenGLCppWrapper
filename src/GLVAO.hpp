@@ -55,7 +55,7 @@ class GLVAO: public IGLObject<GLenum>
 
   // Unordered map = hash table = O(1) access time.
   using GLBufferPtr = std::unique_ptr<IGLBuffer>;
-  using IGLTexturePtr = std::unique_ptr<IGLTexture>;
+  using IGLTexturePtr = std::unique_ptr<IGLTexture<uint8_t>>;
   using mapGLBuffer = std::unordered_map<std::string, GLBufferPtr>;
   using mapGLTexture = std::unordered_map<std::string, IGLTexturePtr>;
 

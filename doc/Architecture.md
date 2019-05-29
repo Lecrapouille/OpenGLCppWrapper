@@ -1,43 +1,26 @@
 # OpenGL Wrapper API Architecture
 
-This API allows to wrap OpenGL Core API (>= 3.3) within C++
-classes. It has been greatly inspired by the Python library
-[GLumpy](https://glumpy.github.io/),
+This API allows wrapping OpenGL Core API (>= 3.0) within C++ classes. It has been greatly inspired by the Python library [GLumpy](https://glumpy.github.io/),
 
-**Warning:** Do not confuse OpenGL Core (>= 3.3) with OpenGL Legacy (<=
-3.2). This API does not manage OpenGL Legacy.
+**Warning:** Do not confuse Core Profile OpenGL (>= 2.2) with Legacy OpenGL (<= 2.1). This API does not manage OpenGL Legacy but manages OpenGL version >= 3.0.
 
-**Warning:** *this API is currently in gestation. This document is the
-expected final API behavior, when reading this line, the current
-version may not yet be totally compliant with this page. If you notice
-something wrong, please contribute by reporting either a bug or a
-fix !*
+**Warning:** *this API is currently in gestation. This document describes the expected final API behavior. Note that, when the reader is reading this document, the current version may not yet be totally compliant with this page. If you notice something wrong, please contribute by reporting either a bug or a pull request !*
 
 ## OpenGL terminology
 
-Basic OpenGL objects offered to the developers are the following:
+Here a quick list of basic OpenGL objects offered to the developers by the OpenGL API:
 
-* Vertex Buffer Object (VBO) is a portion of GPU memory in which we
-store data like vertices, textures, normals, colors.
+* Vertex is a collection of data that represent a single point.
 
-* Element Buffer Object (EBO) is an buffer indexing vertices in the
-aim to save GPU memory by replacing duplicated information by an
-index. Usually compression factor: a 3D coordinate in float is
-replaced by an uint8 identifier.
+* Vertex Buffer Object (VBO) is a portion of GPU memory in which we store data like vertices, textures coordinates, normals, colors ...
 
-* Vertex Array Object (VAO) is an object referencing several VBO (and
-up to one EBO) and telling OpenGL how to interpret data. VAOs were
-optional in traditional OpenGL version but they are now mandatory.
-VAO they avoid for each display of the scene to transfer data from CPU
-into VBOs and prevent telling to OpenGL how to interpret data.
+* Element Buffer Object (EBO) is a buffer that stores indices of vertices for indexed drawing. EBO saves GPU memory by avoiding the duplication of vertices position.
 
-* VAO links to VBO is named attribute locations are also an OpenGL
-object.
+* Vertex Array Object (VAO) is an object referencing several VBOs (and optionally an EBO) and telling OpenGL how to interpret their data. VAOs were optional in Legacy OpenGL version but they are mandatory in Core OpenGL. VAO avoid, at each display of the scene, to transfer this information from CPU to GPU.
 
-* VAO can be seen has the identifier of a 3D model. For example in a 3D
-scene showing two house, and one car: you have to create two VAOs: one
-for the car, one for the house. When displaying the two house we just
-display the same object at two different location.
+* VAO links to VBO has named attribute locations are also an OpenGL object.
+
+* VAO can be seen as the identifier of a 3D model. For example in a 3D scene showing two house, and one car: you have to create two VAOs: one for the car, one for the house. When displaying the two house we just display the same object at two different location.
 
 * Shader is a program that can be run by the GPU with a syntax near to
 the C language.

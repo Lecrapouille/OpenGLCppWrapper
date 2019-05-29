@@ -58,6 +58,30 @@ enum class TextureWrap : GLenum
     /* 0x8370 */ MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
   };
 
+enum class TextureWrapS : GLenum
+  {
+    /* 0x2901 */ REPEAT = GL_REPEAT,
+    /* 0x812D */ CLAMP_TO_BORDER = GL_CLAMP_TO_BORDER,
+    /* 0x812F */ CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE,
+    /* 0x8370 */ MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
+  };
+
+enum class TextureWrapT : GLenum
+  {
+    /* 0x2901 */ REPEAT = GL_REPEAT,
+    /* 0x812D */ CLAMP_TO_BORDER = GL_CLAMP_TO_BORDER,
+    /* 0x812F */ CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE,
+    /* 0x8370 */ MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
+  };
+
+enum class TextureWrapR : GLenum
+  {
+    /* 0x2901 */ REPEAT = GL_REPEAT,
+    /* 0x812D */ CLAMP_TO_BORDER = GL_CLAMP_TO_BORDER,
+    /* 0x812F */ CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE,
+    /* 0x8370 */ MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
+  };
+
 //! \brief Cubic Texture.
 enum class CubeMap : GLenum
   {
@@ -74,22 +98,20 @@ enum class PixelFormat : GLenum
   {
     /* 0x1901 */ STENCIL_INDEX = GL_STENCIL_INDEX,
     /* 0x1902 */ DEPTH_COMPONENT = GL_DEPTH_COMPONENT,
-    /* 0x1903 */ RED = GL_RED,
-    /* 0x1904 */ GREEN = GL_GREEN,
-    /* 0x1905 */ BLUE = GL_BLUE,
-    /* 0x1906 */ ALPHA = GL_ALPHA,
-    /* 0x1907 */ RGB = GL_RGB,
     /* 0x1908 */ RGBA = GL_RGBA,
-    /* 0x1909 */ LUMINANCE = GL_LUMINANCE,
-    /* 0x190A */ LUMINANCE_ALPHA = GL_LUMINANCE_ALPHA,
-    /* 0x80E0 */ BGR = GL_BGR,
-    /* 0x84F9 */ DEPTH_STENCIL = GL_DEPTH_STENCIL,
+    /*        */ RGBAF = GL_RGBA32F,
   };
 
 //! \brief Texture Pixel Type.
 enum class PixelType : GLenum
   {
     /* 0x1401 */ UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
+    /*        */ UNSIGNED_SHORT = GL_UNSIGNED_SHORT,
+    /*        */ UNSIGNED_INT = GL_UNSIGNED_INT,
+    /*        */ BYTE = GL_BYTE,
+    /*        */ SHORT = GL_SHORT,
+    /*        */ INT = GL_INT,
+    /*        */ FLOAT = GL_FLOAT
   };
 
 // **************************************************************
