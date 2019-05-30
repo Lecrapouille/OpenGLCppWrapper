@@ -1,3 +1,7 @@
+// Copyright Youtube OpenGL 3D Game Tutorial 17: Multitexturing
+// by ThinMatrix
+// https://www.youtube.com/watch?v=-kbal7aGUpk&list=PLRIWtICgwaX0u7Rf9zkZhLoLuZVfUksDP&index=17
+
 #version 330 core
 
 in  vec2 texUV;     // Texture coordinate

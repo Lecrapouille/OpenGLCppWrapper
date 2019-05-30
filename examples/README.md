@@ -37,7 +37,7 @@ Example 03:
 
 This example paints a multi-textured triangle. The goal of this example is to show how to use multiple textures. The code source of this example has been inspired by the following tutorial
 [Youtube OpenGL 3D Game Tutorial 17: Multitexturing](https://www.youtube.com/watch?v=-kbal7aGUpk&list=PLRIWtICgwaX0u7Rf9zkZhLoLuZVfUksDP&index=17)
-made by ThinMatrix.
+made by ThinMatrix. The shader has not been modified.
 
 Example 04:
 ===========
