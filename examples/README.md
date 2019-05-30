@@ -98,3 +98,10 @@ Example 11:
 This example paints a 3d cube using the framebuffer and then some post processing effect is applied to the scene. The goal of this example is to show how to use a basic framebuffer (texture + depth test).
 
 The code source of this example has been inspired by the following document: https://learnopengl.com/Advanced-OpenGL/Framebuffers and http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
+
+Example 12:
+===========
+
+This example shows a complex shader example picked from https://shaderfrog.com just for testing my API.
+
+The shader code comes from Universe Nursery by andrewray https://shaderfrog.com/app/view/47

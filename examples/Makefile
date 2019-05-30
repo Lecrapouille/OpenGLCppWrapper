@@ -51,6 +51,7 @@ OBJS += \
   09_SceneGraph.o \
   10_SimpleFrameBuffer.o \
   11_PostProdFrameBuffer.o \
+  12_ComplexShader.o \
   main.o
 
 ###################################################
