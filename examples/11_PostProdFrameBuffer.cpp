@@ -150,6 +150,9 @@ bool GLExample11::setup()
 //------------------------------------------------------------------
 bool GLExample11::draw()
 {
+  static float time = 0.0f;
+  time += dt();
+
   // First pass: draw to the framebuffer texture
   m_fbo.render(0, 0, width(), height(), [this]() {
       glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
@@ -163,7 +166,7 @@ bool GLExample11::draw()
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
   glDisable(GL_DEPTH_TEST);
-  m_prog_screen.scalarf("time") = dt();
+  m_prog_screen.scalarf("time") = time;
   m_prog_screen.draw(m_screen, Mode::TRIANGLES, 0, 6);
 
   return true;
