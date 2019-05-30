@@ -74,7 +74,9 @@ void GLExample02::debug()
 //------------------------------------------------------------------
 bool GLExample02::setup()
 {
-  // Load vertex and fragment shaders with GLSL code.
+  // Load vertex and fragment shaders with GLSL code. Note, you can
+  // use C++11 raw string litterals instead of concatening '"' and
+  // '\n' chars. Like fromString(R"GLSL(#version 330 core ... })GLSL");
   m_vertex_shader.fromString("#version 330 core                        \n"
                              "in vec2      position;                   \n"
                              "void main() {                            \n"
