@@ -30,6 +30,7 @@
 #include "10_SimpleFrameBuffer.hpp"
 #include "11_PostProdFrameBuffer.hpp"
 #include "12_ComplexShader.hpp"
+#include "13_Lighting.hpp"
 #include <iostream>
 #include <map>
 #include <stdlib.h>
@@ -57,6 +58,7 @@ static void usage(char *argv[])
   std::cout << " 10: Draw a 2D square in a framebuffer." << std::endl;
   std::cout << " 11: Draw a cube in a framebuffer." << std::endl;
   std::cout << " 12: Universe Nursery" << std::endl;
+  std::cout << " 13: Light + material" << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -123,6 +125,9 @@ int main(int argc, char *argv[])
       break;
     case 12:
       win = std::make_unique<GLExample12>();
+      break;
+    case 13:
+      win = std::make_unique<GLExample13>();
       break;
     default:
       std::cerr << "Incorrect example id !" << std::endl;
