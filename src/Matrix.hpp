@@ -141,11 +141,29 @@ public:
   }
 
   //! \brief Acces to the nth row in read mode.
-  const Vector<T, cols>& operator[](size_t const i) const
+  Vector<T, cols> const& operator[](size_t const i) const
   {
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wstrict-aliasing"
-    return reinterpret_cast<const Vector<T, cols> &>(m_data[i * cols]);
+    return reinterpret_cast<Vector<T, cols> const&>(m_data[i * cols]);
+#  pragma GCC diagnostic pop
+  }
+
+  //! \brief Access to the nth row in write mode.
+  Vector<T, cols>& operator[](int const i)
+  {
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wstrict-aliasing"
+    return reinterpret_cast<Vector<T, cols> &>(m_data[size_t(i) * cols]);
+#  pragma GCC diagnostic pop
+  }
+
+  //! \brief Acces to the nth row in read mode.
+  Vector<T, cols> const& operator[](int const i) const
+  {
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wstrict-aliasing"
+    return reinterpret_cast<Vector<T, cols> const&>(m_data[size_t(i) * cols]);
 #  pragma GCC diagnostic pop
   }
 

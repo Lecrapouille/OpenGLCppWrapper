@@ -260,7 +260,7 @@ This project depends on my GitHub Makefile project (used for compiling all my Gi
 ##### Ubuntu, Debian:
 
 ```sh
-sudo apt-get update && apt-get install libglew-dev libglfw3-dev
+sudo apt-get update && apt-get install libglew-dev libglfw3-dev libbz2-dev
 ```
 
 ##### Mac OS X:

@@ -51,7 +51,7 @@ LDFLAGS += -I/usr/local/include -I/opt/local/include -framework \
 OpenGL -framework Cocoa -framework IOKit -framework CoreVideo   \
 -L/usr/local/lib -L/opt/local/lib -lGLEW -lglfw
 else ifeq ($(ARCHI),Linux)
-PKG_LIBS += glew glfw3
+PKG_LIBS += glew --static glfw3
 else
 $(error Unknown architecture)
 endif
