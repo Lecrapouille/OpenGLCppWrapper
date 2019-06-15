@@ -29,6 +29,15 @@ CXXFLAGS += $(CXX_WHOLE_FLAGS)
 LDFLAGS  +=
 
 ###################################################
+# Disable some compilation flags depending on the
+# compiler version
+ifeq ("$(COMPILER_NAME)","g++")
+ifeq ($(shell test $(COMPILER_VERSION) -lt 40905; echo $$?),0)
+CXXFLAGS += -Wno-shadow -Wno-undef
+endif
+endif
+
+###################################################
 # Project defines.
 # CHECK_OPENGL allows to check if bad parameters are
 #   passed to OpenGL routines. Produce an error message
