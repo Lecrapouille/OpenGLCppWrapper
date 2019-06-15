@@ -62,9 +62,10 @@ download-resources:
 ###################################################
 # Compile and launch unit tests and generate the code coverage html report.
 .PHONY: unit-tests
-unit-tests:
+.PHONY: check
+unit-tests check:
 	@$(call print-simple,"Compiling unit tests")
-	@make -C tests coverage
+	@$(MAKE) -C tests coverage
 
 ###################################################
 # Install project. You need to be root.
@@ -85,21 +86,21 @@ install: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
 
 ###################################################
 # Uninstall the project. You need to be root. FIXME: to be updated
-.PHONY: uninstall
-uninstall:
-	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
-	@rm $(PROJECT_EXE)
-	@rm -r $(PROJECT_DATA_ROOT)
+#.PHONY: uninstall
+#uninstall:
+#	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
+#	@rm $(PROJECT_EXE)
+#	@rm -r $(PROJECT_DATA_ROOT)
 
 ###################################################
 # Clean the whole project.
 .PHONY: veryclean
 veryclean: clean
-	@rm -fr cov-int OpenGLCppWrapper.tgz *.log foo 2> /dev/null
-	@cd tests && make -s clean; cd - > /dev/null
-	@cd examples/ && make -s clean; cd - > /dev/null
+	@rm -fr cov-int $(PROJECT).tgz *.log foo 2> /dev/null
+	@(cd tests && $(MAKE) -s clean)
+	@(cd examples/ && $(MAKE) -s clean)
 	@$(call print-simple,"Cleaning","$(PWD)/doc/html")
-	@cd doc/ && rm -fr html
+	@rm -fr $(THIRDPART)/*/ doc/html 2> /dev/null
 
 ###################################################
 # Sharable informations between all Makefiles
