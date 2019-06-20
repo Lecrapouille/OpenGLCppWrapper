@@ -58,7 +58,7 @@ void checkError(const char* filename, const uint32_t line, const char* expressio
       // Do not use directly LOG macros because it will catch this
       // filename and its line instead of the faulty file/line which
       // produced the OpenGL error.
-      errout("GLERR", filename, line, "Failed executing '%s'. Reason is '%s'",
+      errout(stderr, "GLERR", filename, line, "Failed executing '%s'. Reason is '%s'",
              expression, error);
     }
 }
