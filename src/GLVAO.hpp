@@ -223,8 +223,9 @@ public:
               cname(), name);
         return false;
       }
+    DEBUG("VAO '%s' creating a new VBO '%s' of %zu elements of %zu bytes",
+          cname(), name, vbo_init_size, sizeof (T));
     m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
-    DEBUG("VAO '%s' has a new VBO '%s'", cname(), name);
     return true;
   }
 

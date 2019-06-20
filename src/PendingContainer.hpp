@@ -35,7 +35,7 @@ namespace glwrap
 // which have been changed and has to updated.
 // **************************************************************
 template<class T>
-class PendingContainer: public /*protected*/ PendingData
+class PendingContainer: public PendingData
 {
 public:
 
@@ -43,33 +43,57 @@ public:
     : PendingData()
   {}
 
-  PendingContainer(size_t count)
+  explicit PendingContainer(size_t const count)
     : PendingData(count),
       m_container(count)
-  {}
+  {
+    GPUMemory() += memory();
+    DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
+          count, sizeof (T), GPUMemory().load());
+  }
 
-  PendingContainer(size_t count, T const& val)
+  explicit PendingContainer(size_t const count, T const& val)
     : PendingData(count),
       m_container(count, val)
-  {}
+  {
+    GPUMemory() += memory();
+    DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
+          count, sizeof (T), GPUMemory().load());
+  }
 
- PendingContainer(PendingContainer const& other)
-   : PendingData(other.getPendingData()),
+  explicit PendingContainer(PendingContainer const& other)
+    : PendingData(other.getPendingData()),
       m_container(other.m_container)
-  {}
+  {
+    GPUMemory() += memory();
+    DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
+          other.size(), sizeof (T), GPUMemory().load());
+  }
 
-  PendingContainer(std::vector<T> const& other)
+  explicit PendingContainer(std::vector<T> const& other)
     : PendingData(other.size()),
       m_container(other)
-  {}
+  {
+    GPUMemory() += memory();
+    DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
+          other.size(), sizeof (T), GPUMemory().load());
+  }
 
-   PendingContainer(std::initializer_list<T> il)
-     : PendingData(il.size()),
-       m_container(il)
-  {}
+  explicit PendingContainer(std::initializer_list<T> il)
+    : PendingData(il.size()),
+      m_container(il)
+  {
+    GPUMemory() += memory();
+    DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
+          il.size(), sizeof (T), GPUMemory().load());
+  }
 
   ~PendingContainer()
-  {}
+  {
+    GPUMemory() -= memory();
+    DEBUG("Removing %zu bytes. GPU memory: %zu bytes",
+          memory(), GPUMemory().load());
+  }
 
   inline size_t capacity() const
   {
@@ -81,40 +105,54 @@ public:
     return m_container.size();
   }
 
-  inline void reserve(const size_t count)
+  inline size_t memory() const
+  {
+    DEBUG("Internal GPU memory: %zu bytes", sizeof (T) * m_container.size());
+    return sizeof (T) * m_container.size();
+  }
+
+  inline void reserve(size_t const count)
   {
     throw_if_cannot_expand();
     m_container.reserve(count);
   }
 
-  inline void resize(const size_t count)
+  inline void resize(size_t const count)
   {
     throw_if_cannot_expand();
     m_container.resize(count);
+    GPUMemory() -= memory();
+    GPUMemory() += count * sizeof (T);
+    DEBUG("Resizing %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          count, sizeof (T), GPUMemory().load());
   }
 
-  inline T& operator[](size_t nth)
+  inline T& operator[](size_t const nth)
   {
     if (unlikely(nth > m_container.capacity()))
       {
-        reserve(nth);
+        resize(nth);
       }
     tagAsPending(nth);
-    //std::cout << "tagPend " << std::endl;
     return m_container.operator[](nth);
   }
 
-  inline T const& operator[](size_t nth) const
+  inline T const& operator[](size_t const nth) const
   {
     return m_container.operator[](nth);
   }
 
-  inline T& at(const size_t nth)
+  inline T& at(size_t const nth)
   {
+    if (unlikely(nth > m_container.capacity()))
+      {
+        resize(nth);
+      }
+    tagAsPending(nth);
     return m_container.at(nth);
   }
 
-  inline T const& at(const size_t nth) const
+  inline T const& at(size_t const nth) const
   {
     return m_container.at(nth);
   }
@@ -122,6 +160,9 @@ public:
   void clear()
   {
     throw_if_cannot_expand();
+    GPUMemory() -= memory();
+    DEBUG("Clearing %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          size(), sizeof (T), GPUMemory().load());
     m_container.clear();
     clearPending(0_z);
   }
@@ -132,17 +173,23 @@ public:
     throw_if_cannot_expand();
     m_container.insert(m_container.end(), il);
     tagAsPending(m_container.size() - 1_z);
+    GPUMemory() += il.size() * sizeof (T);
+    DEBUG("Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          il.size(), sizeof (T), GPUMemory().load());
     return *this;
   }
 
   PendingContainer<T>&
-  append(const T* other, const size_t size)
+  append(const T* other, size_t const size)
   {
     throw_if_cannot_expand();
     m_container.insert(m_container.end(),
                        other,
                        other + size);
     tagAsPending(m_container.size() - 1_z);
+    GPUMemory() += size * sizeof (T);
+    DEBUG("Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          size, sizeof (T), GPUMemory().load());
     return *this;
   }
 
@@ -155,6 +202,9 @@ public:
                        other.begin(),
                        other.end());
     tagAsPending(m_container.size() - 1_z);
+    GPUMemory() += other.size() * sizeof (T);
+    DEBUG("Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          other.size(), sizeof (T), GPUMemory().load());
     return *this;
   }
 
@@ -171,6 +221,9 @@ public:
 
     m_container.push_back(val);
     tagAsPending(0_z, m_container.size() - 1_z);
+    GPUMemory() += sizeof (T);
+    DEBUG("Appending 1 element of size %zu bytes. GPU memory: %zu bytes",
+          sizeof (T), GPUMemory().load());
     return *this;
   }
 
@@ -195,6 +248,9 @@ public:
         m_container.push_back(it + older_index);
       }
     tagAsPending(m_container.size() - 1_z);
+    GPUMemory() += other.size() * sizeof (T);
+    DEBUG("AppendingIndex %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          other.size(), sizeof (T), GPUMemory().load());
     return *this;
   }
 
@@ -261,14 +317,13 @@ public:
     apply([](T& x){ std::cos(x); });
   }
 
-#if 0
   inline PendingContainer<T>& operator=(PendingContainer<T> const& other)
   {
     return this->operator=(other.m_container);
   }
 
   template<class U>
-  inline PendingContainer<T>& operator=(std::vector<U> const& other)
+  PendingContainer<T>& operator=(std::vector<U> const& other)
   {
     const size_t my_size = m_container.size();
     const size_t other_size = other.size();
@@ -277,13 +332,18 @@ public:
       throw_if_cannot_expand();
     }
 
+    GPUMemory() -= memory();
+    GPUMemory() += other.size() * sizeof (T);
+    DEBUG("Affecting %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          other.size(), sizeof (T), GPUMemory().load());
+
     m_container = other;
     tagAsPending(0_z, other_size - 1_z);
     return *this;
   }
 
   template<class U>
-  inline PendingContainer<T>& operator=(std::initializer_list<U> il)
+  PendingContainer<T>& operator=(std::initializer_list<U> il)
   {
     const size_t my_size = m_container.size();
     const size_t other_size = il.size();
@@ -292,11 +352,15 @@ public:
       throw_if_cannot_expand();
     }
 
+    GPUMemory() -= memory();
+    GPUMemory() += il.size() * sizeof (T);
+    DEBUG("Affecting %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          il.size(), sizeof (T), GPUMemory().load());
+
     m_container = il;
     tagAsPending(0_z, other_size - 1_z);
     return *this;
   }
-#endif
 
   template<class U>
   inline PendingContainer<T>& operator*=(U const& val)
@@ -379,7 +443,6 @@ public:
     return m_container;
   }
 
-  //private:
 protected:
 
   inline void throw_if_cannot_expand()
@@ -394,8 +457,8 @@ protected:
     m_can_expand = false;
   }
 
-  bool m_can_expand = true;
   std::vector<T> m_container;
+  bool m_can_expand = true;
 };
 
 } // namespace glwrap
