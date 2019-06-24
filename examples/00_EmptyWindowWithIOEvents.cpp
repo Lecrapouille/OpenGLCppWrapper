@@ -51,7 +51,7 @@ bool GLExample00::setup()
   std::cout << "Add your OpenGL code here for initializing your scene." << std::endl;
 
   // Do not show the mouse cursor
-  hideMouseCursor();
+  // hideMouseCursor();
 
   // Success
   return true;
@@ -82,6 +82,16 @@ bool GLExample00::draw()
   // Success
   return true;
 }
+
+// --------------------------------------------------------------
+//! \brief Mouse event
+// --------------------------------------------------------------
+void GLExample00::onMouseButtonPressed(const int button, const int action)
+{
+  std::cout << "Mouse button pressed: button=" << button
+            << " action=" << action << std::endl;
+}
+
 // --------------------------------------------------------------
 //! \brief Mouse event
 // --------------------------------------------------------------

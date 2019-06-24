@@ -79,6 +79,17 @@ static void on_mouse_scrolled(GLFWwindow* window, double xoffset, double yoffset
 }
 
 //------------------------------------------------------------------------------
+//! \brief Static function allowing to "cast" a function pointer to a
+//! method pointer. This function is triggered when the mouse has been pressed.
+//------------------------------------------------------------------------------
+static void on_mouse_button_pressed(GLFWwindow* window, int button, int action, int /*mods*/)
+{
+  assert(nullptr != window);
+  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
+  obj->onMouseButtonPressed(button, action);
+}
+
+//------------------------------------------------------------------------------
 //! \brief Static function allowing to "cast" a function pointer to
 //! a method pointer. This function is triggered when the window
 //! has been resized.
@@ -216,6 +227,7 @@ bool IGLWindow::start()
   glfwSetFramebufferSizeCallback(m_main_window, on_window_resized);
   glfwSetCursorPosCallback(m_main_window, on_mouse_moved);
   glfwSetScrollCallback(m_main_window, on_mouse_scrolled);
+  glfwSetMouseButtonCallback(m_main_window, on_mouse_button_pressed);
   // Ensure we can capture keyboard being pressed below
   glfwSetInputMode(m_main_window, GLFW_STICKY_KEYS, GL_TRUE);
 

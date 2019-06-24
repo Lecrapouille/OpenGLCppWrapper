@@ -43,6 +43,7 @@ public:
 protected:
 
   virtual void onWindowSizeChanged(const float width, const float height) override;
+  virtual void onMouseButtonPressed(const int button, const int action) override;
   virtual void onMouseMoved(const double xpos, const double ypos) override;
   virtual bool setup() override;
   virtual bool draw() override;
