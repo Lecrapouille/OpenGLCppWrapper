@@ -43,10 +43,14 @@ public:
     : PendingData()
   {}
 
+  //! \note: we call .reserve(count) and not .resize(count) or pass
+  //! count to the std::vector constructor (which called resize)
+  //! because we do not want, for VBOs, to transfer invalid dummy data
+  //! to the GPU.
   explicit PendingContainer(size_t const count)
-    : PendingData(count),
-      m_container(count)
+    : PendingData(count)
   {
+    m_container.reserve(count);
     GPUMemory() += memory();
     DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
           count, sizeof (T), GPUMemory().load());
