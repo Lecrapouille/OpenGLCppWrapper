@@ -53,6 +53,7 @@ OBJS += \
   11_PostProdFrameBuffer.o \
   12_ComplexShader.o \
   13_Lighting.o \
+  14_MapEditor.o \
   main.o
 
 ###################################################
