@@ -375,8 +375,17 @@ private:
     auto ptr = m_vbos[name].get();
     if (unlikely(nullptr == ptr))
       {
-        throw OpenGLException("GLVertexBuffer '" + std::string(name) +
-                              "' does not exist");
+        if (prog == 0 || m_vbos.empty())
+          {
+            throw OpenGLException("GLVertexBuffer '" + std::string(name) +
+                                  "' does not exist because VAO '" + cname()
+                                  + "' is not bound to a GLProgram");
+          }
+        else
+          {
+            throw OpenGLException("GLVertexBuffer '" + std::string(name) +
+                                  "' does not exist");
+          }
       }
 
     GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(ptr);
@@ -434,8 +443,17 @@ private:
     auto ptr = m_textures[name].get();
     if (unlikely(nullptr == ptr))
       {
-        throw OpenGLException("GLTexture '" + std::string(name) +
-                              "' does not exist");
+        if (prog == 0 || m_vbos.empty())
+          {
+            throw OpenGLException("GLTexture '" + std::string(name) +
+                                  "' does not exist because VAO '" + cname()
+                                  + "' is not bound to a GLProgram");
+          }
+        else
+          {
+            throw OpenGLException("GLTexture '" + std::string(name) +
+                                  "' does not exist");
+          }
       }
 
     T* tex = dynamic_cast<T*>(ptr);
