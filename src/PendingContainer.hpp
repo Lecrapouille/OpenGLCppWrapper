@@ -21,6 +21,7 @@
 #ifndef OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP
 #  define OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP
 
+#  include "private/Memory.hpp"
 #  include "PendingData.hpp"
 #  include <vector>
 #  include <algorithm>
@@ -48,7 +49,6 @@ public:
   //! because we do not want, for VBOs, to transfer invalid dummy data
   //! to the GPU.
   explicit PendingContainer(size_t const count)
-    : PendingData(count)
   {
     m_container.reserve(count);
     GPUMemory() += memory();
@@ -65,10 +65,17 @@ public:
           count, sizeof (T), GPUMemory().load());
   }
 
-  explicit PendingContainer(PendingContainer const& other)
-    : PendingData(other.getPendingData()),
-      m_container(other.m_container)
+  explicit PendingContainer(PendingContainer<T> const& other)
+    : PendingData()
   {
+    // Copy container as well as the capacity
+    m_container.reserve(other.capacity());
+    m_container = other.m_container;
+
+    // Set pending data
+    const auto bound = other.getPendingData();
+    tagAsPending(bound.first, bound.second);
+
     GPUMemory() += memory();
     DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
           other.size(), sizeof (T), GPUMemory().load());
@@ -123,15 +130,40 @@ public:
 
   inline void resize(size_t const count)
   {
+    size_t old_count = size();
+
+    // Same size: ignore!
+    if (unlikely(count == old_count))
+      return ;
+
+    // Resize the container
     throw_if_cannot_expand();
     m_container.resize(count);
+
+    // Case of container is reduced: update pending data
+    if (unlikely(count < old_count))
+      {
+        if (0_z == count)
+          {
+            clearPending();
+          }
+        else
+          {
+            size_t pos_start;
+            size_t pos_end;
+            getPendingData(pos_start, pos_end);
+            clearPending();
+            tagAsPending(std::min(pos_start, count), std::min(pos_end, count));
+          }
+      }
+
     GPUMemory() -= memory();
     GPUMemory() += count * sizeof (T);
     DEBUG("Resizing %zu elements of size %zu bytes. GPU memory: %zu bytes",
           count, sizeof (T), GPUMemory().load());
   }
 
-  inline T& operator[](size_t const nth)
+  inline T& set(size_t const nth)
   {
     if (unlikely(nth > m_container.capacity()))
       {
@@ -141,22 +173,7 @@ public:
     return m_container.operator[](nth);
   }
 
-  inline T const& operator[](size_t const nth) const
-  {
-    return m_container.operator[](nth);
-  }
-
-  inline T& at(size_t const nth)
-  {
-    if (unlikely(nth > m_container.capacity()))
-      {
-        resize(nth);
-      }
-    tagAsPending(nth);
-    return m_container.at(nth);
-  }
-
-  inline T const& at(size_t const nth) const
+  inline T const& get(size_t const nth) const
   {
     return m_container.at(nth);
   }
@@ -175,8 +192,9 @@ public:
   append(std::initializer_list<T> il)
   {
     throw_if_cannot_expand();
+    size_t start = m_container.size();
     m_container.insert(m_container.end(), il);
-    tagAsPending(m_container.size() - 1_z);
+    tagAsPending(start, m_container.size());
     GPUMemory() += il.size() * sizeof (T);
     DEBUG("Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
           il.size(), sizeof (T), GPUMemory().load());
@@ -187,10 +205,11 @@ public:
   append(const T* other, size_t const size)
   {
     throw_if_cannot_expand();
+    size_t start = m_container.size();
     m_container.insert(m_container.end(),
                        other,
                        other + size);
-    tagAsPending(m_container.size() - 1_z);
+    tagAsPending(start, m_container.size());
     GPUMemory() += size * sizeof (T);
     DEBUG("Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
           size, sizeof (T), GPUMemory().load());
@@ -201,11 +220,11 @@ public:
   append(std::vector<T> const& other)
   {
     throw_if_cannot_expand();
-
+    size_t start = m_container.size();
     m_container.insert(m_container.end(),
                        other.begin(),
                        other.end());
-    tagAsPending(m_container.size() - 1_z);
+    tagAsPending(start, m_container.size());
     GPUMemory() += other.size() * sizeof (T);
     DEBUG("Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
           other.size(), sizeof (T), GPUMemory().load());
@@ -224,7 +243,7 @@ public:
     throw_if_cannot_expand();
 
     m_container.push_back(val);
-    tagAsPending(0_z, m_container.size() - 1_z);
+    tagAsPending(0_z, m_container.size());
     GPUMemory() += sizeof (T);
     DEBUG("Appending 1 element of size %zu bytes. GPU memory: %zu bytes",
           sizeof (T), GPUMemory().load());
@@ -251,7 +270,7 @@ public:
       {
         m_container.push_back(it + older_index);
       }
-    tagAsPending(m_container.size() - 1_z);
+    tagAsPending(m_container.size());
     GPUMemory() += other.size() * sizeof (T);
     DEBUG("AppendingIndex %zu elements of size %zu bytes. GPU memory: %zu bytes",
           other.size(), sizeof (T), GPUMemory().load());
@@ -266,13 +285,34 @@ public:
 
   inline T sum() const
   {
-    T sum_of_elems = 0;
+    if (unlikely(0_z == m_container.size()))
+      {
+        throw std::out_of_range("Cannot compute the summation of an empty container");
+      }
 
-    for (auto& n : m_container) {
-      sum_of_elems += n;
-    }
+    T sum_of_elems = 0;
+    for (auto& n : m_container)
+      {
+        sum_of_elems += n;
+      }
 
     return sum_of_elems;
+  }
+
+  inline T prod() const
+  {
+    if (unlikely(0_z == m_container.size()))
+      {
+        throw std::out_of_range("Cannot compute the product of an empty container");
+      }
+
+    T prod_of_elems = 1;
+
+    for (auto& n : m_container) {
+      prod_of_elems *= n;
+    }
+
+    return prod_of_elems;
   }
 
   inline T min() const
@@ -294,31 +334,36 @@ public:
   }
 
   template<class Function>
-  inline PendingContainer<T>& apply(Function& f)
+  inline PendingContainer<T>& apply(Function f)
   {
     clearPending(m_container.size());
     std::for_each(m_container.begin(), m_container.end(), f);
     return *this;
   }
 
-  inline void abs() const
+  inline PendingContainer<T>& abs()
   {
-    apply([](T& x){ std::abs(x); });
+    return apply([](T& x){ x = std::abs(x); });
   }
 
-  inline void sqrt() const
+  inline PendingContainer<T>& sqrt()
   {
-    apply([](T& x){ std::sqrt(x); });
+    return apply([](T& x){ x = std::sqrt(x); });
   }
 
-  inline void sin() const
+  inline PendingContainer<T>& squared()
   {
-    apply([](T& x){ std::sin(x); });
+    return apply([](T& x){ x = x * x; });
   }
 
-  inline void cos() const
+  inline PendingContainer<T>& sin()
   {
-    apply([](T& x){ std::cos(x); });
+    return apply([](T& x){ x = std::sin(x); });
+  }
+
+  inline PendingContainer<T>& cos()
+  {
+    return apply([](T& x){ x = std::cos(x); });
   }
 
   inline PendingContainer<T>& operator=(PendingContainer<T> const& other)
@@ -342,7 +387,7 @@ public:
           other.size(), sizeof (T), GPUMemory().load());
 
     m_container = other;
-    tagAsPending(0_z, other_size - 1_z);
+    tagAsPending(0_z, other_size);
     return *this;
   }
 
@@ -362,7 +407,7 @@ public:
           il.size(), sizeof (T), GPUMemory().load());
 
     m_container = il;
-    tagAsPending(0_z, other_size - 1_z);
+    tagAsPending(0_z, other_size);
     return *this;
   }
 
@@ -373,7 +418,7 @@ public:
     for (auto& x: m_container) {
       x *= val;
     }
-    tagAsPending(0_z, m_container.size() - 1_z);
+    tagAsPending(0_z, m_container.size());
     return *this;
   }
 
@@ -384,7 +429,7 @@ public:
     for (auto& x: m_container) {
       x += val;
     }
-    tagAsPending(0_z, m_container.size() - 1_z);
+    tagAsPending(0_z, m_container.size());
     return *this;
   }
 
@@ -395,7 +440,7 @@ public:
     for (auto& x: m_container) {
       x -= val;
     }
-    tagAsPending(0_z, m_container.size() - 1_z);
+    tagAsPending(0_z, m_container.size());
     return *this;
   }
 
@@ -408,11 +453,11 @@ public:
   friend std::ostream& operator<<(std::ostream& stream, const PendingContainer& cont)
   {
     stream << "PendingContainer: ";
-    if (cont.size())
+    if (0_z != cont.size())
       {
-        stream << cont[0];
+        stream << cont.m_container[0];
         for (size_t i = 1_z; i < cont.size(); ++i) {
-          stream << ", " << cont[i];
+          stream << ", " << cont.m_container[i];
         }
       }
     return stream;

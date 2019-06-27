@@ -26,12 +26,6 @@ namespace glwrap
 //! This macro will generate code for members.
 IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
 
-std::atomic<size_t>& GPUMemory()
-{
-  static std::atomic<size_t> mem_gpu{0_z};
-  return mem_gpu;
-}
-
 void checkError(const char* filename, const uint32_t line, const char* expression)
 {
   GLenum id;

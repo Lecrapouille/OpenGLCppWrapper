@@ -26,6 +26,7 @@
 // *****************************************************************************
 
 #  include "GLEnum.hpp"
+#  include "private/Memory.hpp"
 #  include "private/Exception.hpp"
 #  include <atomic>
 
@@ -50,12 +51,6 @@ inline static bool& hasCreatedContext()
   static bool s_context_started = false;
   return s_context_started;
 }
-
-//----------------------------------------------------------------------------
-//! \brief Estimated GPU consumption for this program.
-//! \return The estimated GPU used by this program in kilo bytes.
-//----------------------------------------------------------------------------
-std::atomic<size_t>& GPUMemory();
 
 //----------------------------------------------------------------------------
 //! \brief Allow to detect if the last OpenGL command succeeded or failed.

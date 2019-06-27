@@ -21,103 +21,139 @@
 #ifndef OPENGLCPPWRAPPER_PENDINGDATA_HPP
 #  define OPENGLCPPWRAPPER_PENDINGDATA_HPP
 
+// *****************************************************************************
+//! \file Define an interface class keeping track of the smallest
+//! contiguous area having been changed and needs to be
+//! uploaded. This class cannot be use alone but for inheritance.
+// *****************************************************************************
+
 #  include "private/NonCppStd.hpp"
 
 namespace glwrap
 {
 
-// **************************************************************
-//! \brief Define an interface class keeping track of the smallest
-//! contiguous area that have been changed and needs to be
-//! uploaded. This class cannot be use alone but for inheritance.
-// **************************************************************
-
+// ***************************************************************************
+//! \class PendingData PendingData.hpp
+//!
+//! \brief Define class tracks the smallest contiguous area in a container
+//! having been modified (aka updated aka dirty). This class cannot be use
+//! alone. Use it with inheritance.
+//!
+//! This class is used in this API for knowing dirty CPU data that needs to be
+//! updated to the GPU.
+// ***************************************************************************
 class PendingData
 {
-private:
+public:
 
-  static constexpr size_t c_initial_position = static_cast<size_t>(-1);
+  //--------------------------------------------------------------------------
+  //! \brief When the container is empty place the smallest contiguous area of
+  //! dirty elements is not defined. So use -1 instead of 0. It is equivalent
+  //! of std::string::npos.
+  //--------------------------------------------------------------------------
+  static constexpr size_t npos = static_cast<size_t>(-1);
 
 protected:
 
-  //! \brief Make this class abstract, but any inheriting classes will
-  //! not by default be abstract.
+  //--------------------------------------------------------------------------
+  //! \brief Make this class abstract to forbid to use it as standalone.
+  //! Derivate this class to use it.
+  //--------------------------------------------------------------------------
   virtual ~PendingData() {};
 
 public:
 
-  //! \brief Empty constructor: no pending data.
+  //--------------------------------------------------------------------------
+  //! \brief Empty constructor with no pending data.
+  //--------------------------------------------------------------------------
   PendingData()
   {}
 
-  //! \brief Constructor: number of elements of the container.
-  PendingData(size_t nb_elt)
+  //--------------------------------------------------------------------------
+  //! \brief Constructor with an already known number of dirty elements
+  //! (starting from the first).
+  //--------------------------------------------------------------------------
+  PendingData(size_t const nb_elt)
   {
     clearPending(nb_elt);
   }
 
-  //! \brief Return a boolean indicating if some elements of the block
-  //! has chnaged.
+  //--------------------------------------------------------------------------
+  //! \brief Return a boolean indicating if some elements of the container
+  //! are dirty (modified).
+  //!
+  //! \return true if data are dirty.
+  //--------------------------------------------------------------------------
   inline bool hasPendingData() const
   {
-    return (c_initial_position != m_pending_start);
+    return (npos != m_pending_start);
   }
 
-  //! \brief Return the smallest contiguous area that needs to be
-  //! uploaded. If there is no pending data, pos_start will be set to
-  //! -1. You can call hasPendingData() before this method.
-  void getPendingData(size_t &pos_start, size_t &pos_end) const
+  //--------------------------------------------------------------------------
+  //! \brief Return the smallest contiguous area of the container having
+  //! dirty elements.
+  //!
+  //! In the case there is no pending data, the return area bound is logicaly
+  //! undefined but we return pos_start and pos_end are set to \c npos. You
+  //! can call hasPendingData() before calling this method.
+  //--------------------------------------------------------------------------
+  void getPendingData(size_t& pos_start, size_t& pos_end) const
   {
-    if (likely(hasPendingData()))
-    {
-      pos_start = m_pending_start;
-      pos_end = m_pending_end;
-    }
-    else
-    {
-      pos_start = 0_z;
-      pos_end = 0_z;
-    }
+    pos_start = m_pending_start;
+    pos_end = m_pending_end;
   }
 
-  //! \brief Return the smallest contiguous area that needs to be
-  //! uploaded. If there is no pending data, pos_start will be set to
-  //! -1. You can call hasPendingData() before this method.
+  //--------------------------------------------------------------------------
+  //! \brief Return the smallest contiguous area of the container having
+  //! dirty elements.
+  //!
+  //! In the case there is no pending data, the return area bound is logicaly
+  //! undefined but we return pos_start and pos_end are set to \c npos. You
+  //! can call hasPendingData() before calling this method.
+  //!
+  //! \return {pos_start, pos_end}
+  //--------------------------------------------------------------------------
   std::pair<size_t, size_t> getPendingData() const
   {
-    if (likely(hasPendingData()))
-    {
-      return std::make_pair(m_pending_start, m_pending_end);
-    }
-    else
-    {
-      return std::make_pair(0_z, 0_z);
-    }
+    return { m_pending_start, m_pending_end };
   }
 
-  //! \brief Call this function when changed elements have been uploaded.
+  //--------------------------------------------------------------------------
+  //! \brief Reset the smallest contiguous area of the container having
+  //! dirty elements.
+  //!
+  //! Call this the smallest contiguous area have been updated and therefore
+  //! when there is no more dirty data.
+  //--------------------------------------------------------------------------
   void clearPending()
   {
-    m_pending_start = c_initial_position;
-    m_pending_end = c_initial_position;
+    m_pending_start = npos;
+    m_pending_end = npos;
   }
 
-  void clearPending(const size_t nb_elt)
+  //--------------------------------------------------------------------------
+  //! \brief Reset the smallest contiguous area of the container having dirty
+  //! elements and tag the \c nb_elt first elements as dirty. Use this method
+  //! from constructors.
+  //--------------------------------------------------------------------------
+  void clearPending(size_t const nb_elt)
   {
     if (0_z == nb_elt)
-    {
-      m_pending_start = c_initial_position;
-      m_pending_end = c_initial_position;
-    }
+      {
+        m_pending_start = npos;
+        m_pending_end = npos;
+      }
     else
-    {
-      m_pending_start = 0_z;
-      m_pending_end = nb_elt - 1_z;
-    }
+      {
+        m_pending_start = 0_z;
+        m_pending_end = nb_elt;
+      }
   }
 
-  //! \brief Update the range indexes of changed elements with a new range.
-  void tagAsPending(const size_t pos_start, const size_t pos_end)
+  //--------------------------------------------------------------------------
+  //! \brief Update the area of dirty elements with a new range.
+  //--------------------------------------------------------------------------
+  void tagAsPending(size_t const pos_start, size_t const pos_end)
   {
     if (likely(hasPendingData()))
       {
@@ -131,8 +167,11 @@ public:
       }
   }
 
-  //! \brief Update the range indexes of changed elements with a new range.
-  inline void tagAsPending(const size_t pos)
+  //--------------------------------------------------------------------------
+  //! \brief Update the area of dirty elements by passing the newly dirty
+  //! element.
+  //--------------------------------------------------------------------------
+  inline void tagAsPending(size_t const pos)
   {
     if (likely(hasPendingData()))
       {
@@ -141,16 +180,18 @@ public:
       }
     else
       {
-        m_pending_start = 0_z;
+        m_pending_start = pos;
         m_pending_end = pos;
       }
   }
 
 protected:
 
-  //! Indicate which elements have been changed.
-  size_t m_pending_start = c_initial_position;
-  size_t m_pending_end = c_initial_position;
+  //! Tracks the staring bound of elementsthat  have been changed.
+  size_t m_pending_start = npos;
+
+  //! Tracks the ending bound of elementsthat  have been changed.
+  size_t m_pending_end = npos;
 };
 
 } // namespace glwrap

@@ -38,10 +38,15 @@ include $(M)/Makefile.header
 include $(P)/Makefile.common
 
 ###################################################
+# Allow to hide protected and private keyword
+CXXFLAGS += -Wno-keyword-macro
+
+###################################################
 # List of files to compile.
 OBJS  = VectorTests.o MatrixTests.o
 OBJS += IGLObjectTests.o GLVAOTests.o GLVBOTests.o
 OBJS += GLShadersTests.o GLProgramTests.o
+OBJS += PendingDataTests.o PendingContainerTests.o
 OBJS += UnitTests.o
 
 ###################################################

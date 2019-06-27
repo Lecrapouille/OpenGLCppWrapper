@@ -137,7 +137,7 @@ private:
          cname(), pos_start, pos_end);
 
     size_t offset = sizeof (T) * pos_start;
-    size_t nbytes = sizeof (T) * (pos_end - pos_start + 1_z);
+    size_t nbytes = sizeof (T) * (pos_end - pos_start);
     glCheck(glBufferSubData(m_target,
                             static_cast<GLintptr>(offset),
                             static_cast<GLsizeiptr>(nbytes),
