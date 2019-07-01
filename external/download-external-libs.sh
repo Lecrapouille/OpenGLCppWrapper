@@ -26,7 +26,7 @@ function print-clone
 ### is needed but some libraries are needed (libdw-dev, binutils-dev, ...).
 ### License: MIT
 print-clone backward-cpp
-git clone https://github.com/bombela/backward-cpp.git --depth=1 > /dev/null 2> /dev/null
+git clone https://github.com/Lecrapouille/backward-cpp.git --depth=1 > /dev/null 2> /dev/null
 
 ### Library SOIL for opening pictures files (jpeg, png ...)
 print-clone SOIL
