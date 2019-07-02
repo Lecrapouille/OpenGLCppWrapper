@@ -488,6 +488,8 @@ public:
     return GLTexture2D::get((u * m_width + v) * 4 + off);
   }
 
+private:
+
   //----------------------------------------------------------------------------
   //! \brief Specify to OpenGL a two-dimensional texture image.
   //----------------------------------------------------------------------------
@@ -619,6 +621,8 @@ public:
     // is not a good condition because allowed.
     return 0 != m_buffer.size();
   }
+
+private:
 
   //----------------------------------------------------------------------------
   //! \brief sApply OpenGL texture settings.
