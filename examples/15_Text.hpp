@@ -18,14 +18,35 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
-#  define OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
+#ifndef EXAMPLE_15_TEXT_HPP
+#  define EXAMPLE_15_TEXT_HPP
 
-#  include "GLProgram.hpp"
-#  include "GLFrameBuffers.hpp"
-#  include "GLImGUI.hpp"
-#  include "SceneGraph.hpp"
-#  include "Primitives.hpp"
-#  include "GLFont.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include <iostream>
 
-#endif // OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
+using namespace glwrap;
+
+class GLExample15: public IGLWindow
+{
+public:
+
+  GLExample15()
+  // : m_string("textures/firasans-medium.ttf")
+  {}
+
+  ~GLExample15()
+  {}
+
+protected:
+
+  virtual void onWindowSizeChanged(const float width, const float height) override;
+  virtual bool setup() override;
+  virtual bool draw() override;
+
+private:
+
+  FTFont   m_fonts[2];
+  //GLString m_string;
+};
+
+#endif // EXAMPLE_15_TEXT_HPP
