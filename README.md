@@ -2,39 +2,23 @@
 
 ## What is OpenGLCppWrapper ?
 
-OpenGLCppWrapper is a C++11 wrapper API for writing OpenGL `Core Profile` applications in few lines of code. It hides for you the complexity of calling in the correct order OpenGL functions and passing correct parameters on them. You'll have just to deal with writing your OpenGL shaders (GLSL language), this API will compile them and instantiate class wrapping VBOs, textures. As a consequence, you just have to load your desired textures and fill data in VBOs (vertices position, texture coordinates, normals ..) and nothing more! This API manages automatically OpenGL object lifetime as well as of the transfer of modified CPU data (from your C++ space memory point of view) into GPU data (to graphics card memory point of view).
+OpenGLCppWrapper is a C++11 wrapper API for writing OpenGL `Core Profile` applications in few lines of code. This API, contrary to other C++ OpenGL API really uses object-oriented and does not just content to give a C++ flavor name to OpenGL routines. It hides for you the complexity of calling in the correct order OpenGL functions as well as passing correct parameters to them. You, as developper, will have just to deal with writing your OpenGL shaders (GLSL language) and the OpenGLCppWrapper will compile them and instantiate classes wrapping OpenGL VAOs, VBOs, textures. Then you will have just to write the code filling your 3d models by calling your desired textures and loading data for filling your VBOs (such as vertices position, texture coordinates, normals ..) and which and when 3D model to paint. Nothing more complex! This API also manages OpenGL object lifetime: it makes the transfer of "dirty" CPU data (from your C++ space memory point of view) to the graphics card memory (VBOs, textures).
 
 **Warning:** Do not confuse Core Profile OpenGL (>= 2.2) with Legacy OpenGL (<= 2.1). This API does not manage OpenGL Legacy but manages OpenGL version >= 3.0.
 
-**Warning:** This library is not a game engine but just an oriented object wrapper for OpenGL that can be used in a game engine. This API, contrary to other C++ OpenGL API really uses object-oriented and does not just content to give a C++ flavor name to OpenGL routines. It hides for you all the complexity!
+**Warning:** This library is not a game engine but just an oriented object wrapper for OpenGL that can be used for a game engine.
 
-## Why another C++ wrapper for OpenGL?
+## How to use this API? An explained 'Hello-world' example
 
-Short answer: I disliked others API I found on Github! Long answer:
+This section will treat on how to use this API. This is a small tutorial explaining the template for your projects. Indeed, the pseudo-C++ code shown in this tutorial will be the same for many of your 3D applications that you will make. As proof, I made numerous [examples](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md) included with the code source of this library, which follow the pseudo-code of this tutorial. My examples are greatly inspired by several OpenGL tutorials found on the internet (see their README for credits). You can compare the length of the code.
 
-* As a beginner of OpenGL Core, I always get confused by the order of creation/binding of OpenGL objects. With OpenGLCppWrapper, you'll do not have to really know what is OpenGL VBOs, VAOs, framebuffer, shader attributes, ... and in what order they have to be created or bound. What you probably prefer to deal with questions like: "what texture fit the best to my model?" or "What is the list of triangles for my model?" but certainly not low-level issue questions like "is mytexyure.jpg bound to GL_TEXTURE0 or GL_TEXTURE1 ?".
+In this document, I consider that the reader has basic knowledge of modern OpenGL (which is my case). There is nothing particularly difficult with this tutorial because everything is already largely explained in the first chapters of any OpenGL tutorials foundable on the internet.
 
-* C++ APIs I saw on GitHub just give a C++ flavor'ish taste to OpenGL C functions. None of them have real class inheritance over OpenGL objects and encapsulate routines. As a consequence, you still have to deal with the correct order of calling routines. The only API demarking to others was [Glumpy](https://github.com/glumpy/glumpy) but written in Python.
-
-* OpenGLCppWrapper takes the opposite direction over OpenGL tutorials: it does not start with a list of triangles, to push them in VBOs and finish coding with shaders (and depending on which OpenGL version, uses or not a VAO). This API does the inverse: it starts from shaders and hides for you the generation of VBOs, attributes, uniforms, texture sampler. You have just to request from the shader program to create for you a new 3D object (aka VAO) that you have to init (VBOs, textures) with data you wanted: vertices, color, texture position.
-
-* As a consequence, the number of public interfaces of OpenGLCppWrapper is reduced as much as possible. Only OpenGL constants mandatory used in parameters of public methods are wrapped by C++ enum for using the strong type checking during the compilation of the project, avoiding to pass 'carrots' while 'potatoes' were expected.
-
-* This API does not only content to initialize VBOs during the init phase, but it also allows you to manipulate your 3D scene data during the run-time (meshes, color ...) from the CPU: the API will transmit automatically to the GPU all modified elements for their display. This is, of course, less performant that manipulating them from shaders code, but this offers you extra flexibility (for scientific tools for example).
-
-* As drawbacks, this API is less cache friendly than calling directly your OpenGL routines (lot of if-then-else, smart pointers and dynamic cast). This is the price of hiding the complexity and staying generic.
-
-## How to use this API? Explained 'Hello-world' example
-
-Here is the pseudo-C++ code of what you will have to write for many of your 3D scenes. All [Examples and tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md) included with this library follow this pseudo-code. You can compare the length of their code with any similar OpenGL tutorial.
-
-In this document, I consider that the reader knows the basic OpenGL code. There is nothing particularly difficult with this tutorial because everything is largely explained in the first section of any OpenGL tutorials findable on the internet.
-
-Before showing C++ code with this API, we have to write a basic fragment and vertex shader (named `my_fragment_shader.glsl` and `my_vertex_shader.glsl`). As explained before, this API has been conceived to develop OpenGL applications by starting with their shaders.
+Before showing the C++ pseudo-code using OpenGLCppWrapper, we have, first, to write a basic fragment and vertex shader named `my_fragment_shader.glsl` and `my_vertex_shader.glsl`. OpenGLCppWrapper has been conceived to develop OpenGL applications by starting with their shaders and finish by filling VBOs. This is the opposite way of thinking compared to the way tutorials make you learn OpenGL.
 
 ##### my_fragment_shader.glsl:
 
-In this fragment shader, we simply pick the color of the texture (texel) and mix it with a uniform (global) color.
+In this fragment shader, we simply pick the color of the texture (texel) and mix it with a uniform color. Uniforms are kind of global variables, while `in` and `out` are the inputs and outputs of the OpenGL pipeline connecting shaders to framebuffers.
 
 ```
 01: #version 330 core
@@ -52,7 +36,7 @@ In this fragment shader, we simply pick the color of the texture (texel) and mix
 
 ##### my_vertex_shader.glsl:
 
-In this vertex shader, we pass to the fragment shader the texel and the global color. We applied to vertices position a [Model-View-Projection matrix](http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices) (change of basis). Again this kind of basic shaders is largely described on the internet. For the fun, we applied an additional scaling factor.
+In this vertex shader, we pass to the fragment shader the texel and the global color. We applied to vertices position a [Model-View-Projection matrix](http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices) (change of basis). For the fun, we applied an additional scaling factor. Again, this kind of basic shaders is largely described on the internet.
 
 ```
 01: #version 330 core
@@ -155,10 +139,10 @@ Here the interesting part of this document: using OpenGLCppWrapper API. The code
 
 ### Explanations
 
-Init phase: This code is usually made once and in the `setup()` method (for example called by a GLWindow).
+Initialization phase: This code is usually made once and in the `setup()` method (for example called by a GLWindow).
 
 * lines 01-02 and 07-08:
-GL*x*Shader, GLProgram, and GLVAO are some OpenGL objects that the library is exposing to the developer (where *x* is referring either to Fragment or Vertex or Geometry). A GL*x*Shader holds the GLSL code source and compile it (and in future will allow adding other macro processing features). A GLProgram holds at least two GLxShaders (vertex and fragment) and links them. Once compiled, a GLProgram holds internally and in privacy locations of shader uniforms, shader attributes and texture samplers. A GLVAO can be considered as the OpenGL handler to your 3D model: it is an interface between CPU data and GPU data by holding VBOs and textures. You can modify data of textures and data of VBOs: the API will transfer modified values to your graphical card.
+GL*x*Shader, GLProgram, and GLVAO are some OpenGL objects that OpenGLCppWrapper is exposing to the developer (where *x* is referring either to Fragment or Vertex or Geometry). A GL*x*Shader holds the GLSL code source and compile it (in future it will may offer macro processing features). A GLProgram holds at least two GLxShaders (vertex and fragment) and links them. Once compiled, a GLProgram holds internally and in privacy locations of shader uniforms, shader attributes and texture samplers. A GLVAO can be considered as the OpenGL handler to your 3D model: it is an interface between CPU data and GPU data by holding VBOs and textures. You can modify data of textures and data of VBOs: the API will transfer modified values to your graphical card.
 
 * lines 07-08:
 You have to load and compile your GLSL code given as vertex and fragment shader (and optionally geometry shader). You can either refer the file path with `loadFromFile(std::string const&)` or directly pass the code as a string with `fromString(std::string const&)`.
@@ -221,11 +205,19 @@ If you want to paint two cubes (let say for this example), you do not have to cr
 
 With this method, for this example, you will save GPU memory by avoiding storing an additional VAO and all its VBOs needed for drawing a cube.
 
+### API Documentation and examples
+
+* [Code Architecture](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Architecture.md)
+* Doxygen documention can be generated by typing `make doc`.
+* [Examples and tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md)
+
 ### What else in OpenGLCppWrapper?
 
-Not shown in this readme but this API can manage framebuffer and cubic, 3D or 1D texture. It also includes features that are not directly in relation to wrapping OpenGL routines. It allows:
+Not shown in this document but OpenGLCppWrapper can manage framebuffer and cubic, 3D, 2D or 1D textures, multi-textures. It also includes features that are not directly in relation to wrapping OpenGL routines. It allows:
 
 * to estimate the GPU memory usage.
+* Make some security checks like detecting uninitilized VBOs, textures or VBO mismatch number of elements.
+* (work in progress) TrueType fonts.
 * to use Matrix and Vector classes (like glm library).
 * to create movable objects allowing to combine transformations like rotation, translation, projection on a model.
 * to create a 'scene graph' of objects: a graph where nodes contain a transformation matrix relative to the current node and its parent. Note that the matrix is mandatory for each node of the scene graph while the 3d model is optional: this allows us to add invisible transformations.
@@ -233,12 +225,6 @@ Not shown in this readme but this API can manage framebuffer and cubic, 3D or 1D
 * to wrap OpenGL window and offers to the user the init, run-time phase and callbacks like keyboard and windows resizing.
 
 See my [examples](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md) directory to know how to do it concretely.
-
-### API Documentation and examples
-
-* [Code Architecture](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Architecture.md)
-* [Examples and tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md)
-* Doxygen documention can be generated by typing `make doc`.
 
 ### Work in progress
 
@@ -256,17 +242,17 @@ You can contribute by reporting issues, fixing my poor English, adding more exam
 
 ### Prerequisite
 
-This project depends on my GitHub Makefile project (used for compiling all my GitHub projects) automatically cloned as git submodule [MyMakefile](https://github.com/Lecrapouille/MyMakefile).
+This project depends on:
+* [MyMakefile](https://github.com/Lecrapouille/MyMakefile) my GitHub Makefile project used for compiling all my GitHub projects. It's automatically cloned as git submodule.
+* [OpenGLCppWrapper-data](https://github.com/Lecrapouille/OpenGLCppWrapper-data) this repo contains all textures needed by examples. This repo is downloaded by a Makefile rule.
+* [SOIL](https://github.com/kbranigan/Simple-OpenGL-Image-Library.git) for loading picture files (jpeg, png ...). This library is downloaded by a Makefile rule.
+* [imgui](https://github.com/ocornut/imgui) for adding widgets to your applications. This library is downloaded by a Makefile rule.
+* [backward-cpp](https://github.com/bombela/backward-cpp), only needed for debug purpose, display stack when a crash occured. This library is downloaded by a Makefile rule.
 
 ##### Ubuntu, Debian:
 
 ```sh
 sudo apt-get update && apt-get install libglew-dev libglfw3-dev libbz2-dev
-```
-
-##### Mac OS X:
-```sh
-brew install glfw glew
 ```
 
 Optionally if you want to write/launch unit tests, install `crpcut`
@@ -275,27 +261,46 @@ add-apt-repository ppa:jonlar/crpcut
 sudo apt-get update && apt-get install crpcut crpcut-dev
 ```
 
+##### Mac OS X:
+```sh
+brew install glfw glew
+```
+
 ### Compilation
 
-Works for Linux. Should work for OS X. Not working for Windows (need help on completing the Makefile).
+Made for Linux, it also works for OS X (while I can hardly test on it because I have to borrow a MacBook). Not yet working for Windows because I do not have windows for developping (and, as well, I need help on completing my Makefile project).
 
-To compile the API and its examples:
+To download the project, its external libraries and compile the API with its examples:
 ```sh
 git clone --recurse-submodules https://github.com/Lecrapouille/OpenGLCppWrapper.git --depth=1
 cd cd OpenGLCppWrapper
 ./build.sh
 ```
 
-For compiling the API `build.sh` will do:
+Calling `build.sh` will do:
 ```sh
 make download-external-libs
 make compile-external-libs
-make -j4
+make download-resources
+make
+cd examples
+make
+```
+
+To compile the API:
+```sh
+make download-external-libs
+make compile-external-libs
+make
 ```
 
 A `build/` folder shall have been created containing the compiled and runnable files. Two libraries (one static the second dynamic) shall also be present. You can use them for your project.
 
-**Note:** make commands `download-external-libs` and `compile-external-libs` plays the same role than a recursive git clone (which I do not like it so I only use it for my makefiles). They will download, compile (but not install) GitHub libraries like: Backward, SOIL and Dear IMgui.
+If, after that, you want to modify code source, just do `make`. You can type `make help` for displaying rules.
+
+**Note:** Makefile rules `download-external-libs` and `compile-external-libs` play the same role than a recursive git clone: they will download, compile (but not install) GitHub libraries like: Backward, SOIL and Dear IMgui. You have to do it once (or for updating).
+
+**Note:** I hate git submodules: it always make things painful. `repo` with its manifests is a bit overkill, so I prefer Makefile rules or script shell.
 
 To compile API examples:
 ```sh
@@ -304,14 +309,18 @@ cd OpenGLCppWrapper/examples
 make -j4
 ```
 
+A `build/` folder shall have been created containing the compiled and runnable files. Two libraries (one static the second dynamic) shall also be present. You can use them for your project.
+
 Run examples:
 ```sh
 ./build/OpenGLExamples
 ```
 
+Will display the list of possible examples. Type `./build/OpenGLExamples 1` for example for running the 1st example.
+
 ### Installation
 
-Multiple versions of this library can co-exist (thanks to their version number).
+Multiple versions of this library can coexist thanks to their versioning number.
 ```sh
 cd OpenGLCppWrapper
 make download-external-libs
@@ -339,11 +348,11 @@ pkg-config openglcppwrapper --libs
 ### Unit tests
 
 ```sh
-cd tests
+cd OpenGLCppWrapper/tests
 make coverage -j4
 ```
 
-If all tests passed the coverage report is created in `doc/coverage/index.html` and is opened automatically.
+If all tests passed, a coverage report is created inside `doc/coverage/` and the `index.html` is opened automatically.
 
 ## How to use OpenGLCppWrapper in your project?
 
@@ -364,22 +373,38 @@ Example with a simple file main.cpp:
 g++ -W -Wall --std=c++11 main.cpp -o prog `pkg-config openglcppwrapper --cflags --libs`
 ```
 
+## Why another C++ wrapper for OpenGL?
+
+Short answer: I disliked others API I found on Github! Long answer:
+
+* Contrary to legacy OpenGL, learning modern OpenGL (aka OpenGL Core Profile), is more difficult for beginners.
+
+* As a beginner of OpenGL Core, I always get confused by the order of creation/binding of OpenGL objects. With OpenGLCppWrapper, you'll do not have to really know what is OpenGL VBOs, VAOs, framebuffer, shader attributes, ... and in what order they have to be created or bound. What you probably prefer to deal with questions like: "what texture fit the best to my model?" or "What is the list of triangles for my model?" but certainly not low-level issue questions like "is myTexture.jpg is bound to GL_TEXTURE0 or GL_TEXTURE1 ?".
+
+* When working on my personal project
+[SimTaDyn](https://github.com/Lecrapouille/SimTaDyn) I was looking for a C++ API wrapping OpenGL routines. The first need was to hide the OpenGL boilerplate. I looked for such a kind of OpenGL library on GitHub but I found none which allowed me to write OpenGL scenes in few lines. The second need, is that OpenGL does not manage dynamic size VBOs easily (as far as I know). I needed to edit maps with an arbitrary number of nodes and arcs which is problematic with fixed size VBO (OpenGL is made for games and characters are rendering with almost the same number of vertices (if we except tessellation with geometry shaders).
+
+* C++ APIs I saw on GitHub just give a C++ flavor'ish taste to OpenGL C functions. None of them have real class inheritance wrapping OpenGL objects and encapsulate for hiding the misery of calling routines. As a consequence, you still have to deal with the correct order of calling routines.
+
+* APIs like [ogl](https://github.com/opengl-tutorials/ogl) or [OOGL](https://github.com/Overv/OOGL) or [gl](https://github.com/acdemiralp/gl) are wrong (even with thousands of stars) because there is too much code like `glBindBuffer`, `BindAttribute(... 3, 42 * sizeof(float))` or `glVertexAttribPointer`, `program.set_uniform(program.uniform_location` that I absolutely do not want to see in a high-level code.
+
+* I also wanted an API that not only content to initialize VBOs during the init phase (meshes, color, textures ...), but that also allows you to manipulate your 3D scene data during the runtime from the CPU point of view: the API will transmit automatically to the GPU all modified elements for their display. This is, of course, less performant that manipulating them from shaders code, but this offers you extra flexibility (for scientific tools for example).
+
+* The only API demarking to others was [Glumpy](https://github.com/glumpy/glumpy). It was the API I was looking for but unfortunately written in Python! I had to make its portage into C++. I also discovered later [opengl4csharp](https://github.com/giawa/opengl4csharp), written in C#, quite similar to Glumpy but I think some designs are less good.
+
+* I found no good C++ OpenGL wrapper API, so I make my own largely inspired by Glumpy which takes the opposite direction over OpenGL tutorials: it does not start with a list of triangles, to push them in VBOs and finish coding with shaders (and depending on which OpenGL version, uses or not a VAO) it does the inverse: it starts from shaders and hides for you the generation of VBOs, attributes, uniforms, texture samplers. As a developper, you'll have just to request the shader program to instanciate a new 3D model (aka VAO), initialize it with data the shader needs: vertices, colors, texture positions. Finally paint the model with the bound shader.
+
+* The number of public interfaces of OpenGLCppWrapper is reduced as much as possible. Only OpenGL constants used as parameters in public methods are wrapped by C++ enum for using the strong type checking during the compilation of the project, avoiding to pass 'carrots' while 'potatoes' were expected.
+
+## Drawbacks
+
+As drawbacks, this API is less cache friendly than calling directly your OpenGL routines (due to a lot of if-then-else, smart pointers and dynamic cast). This is the price of hiding the complexity and staying generic.
+
 ## Credits
 
 This API is largely inspired by projects such as:
 * [Glumpy](https://github.com/glumpy/glumpy) python project.
 * [opengl4csharp](https://github.com/giawa/opengl4csharp) C# project.
-
-### Why I decided to make this API?
-
-* The first need from this API is that contrary to legacy OpenGL, learning modern OpenGL (aka OpenGL core), is very difficult for beginners.
-
-* When working on my personal project
-[SimTaDyn](https://github.com/Lecrapouille/SimTaDyn) I was looking for an OpenGL wrapper in C++. The first need was to hide the OpenGL boilerplate. I looked for such a kind of OpenGL library on GitHub but I founded none which allowed me to write OpenGL scenes in few lines. The second need from this API is that OpenGL does not manage dynamic size VBOs easily (as far as I know). I needed to edit maps with an arbitrary number of nodes and arcs which is problematic with fixed size VBO (OpenGL is made for games and characters are rendering with almost the same number of vertices (if we except tessellation with geometry shaders).
-
-* APIs like [ogl](https://github.com/opengl-tutorials/ogl) or [OOGL](https://github.com/Overv/OOGL) or [gl](https://github.com/acdemiralp/gl) are wrong (even with thousands of stars) because there is too much code like `glBindBuffer`, `BindAttribute(... 3, 42 * sizeof(float))` or `glVertexAttribPointer`, `program.set_uniform(program.uniform_location` that I absolutely do not want to see in a high-level code.
-
-* [Glumpy](https://github.com/glumpy/glumpy) was the exact OpenGL wrapper I was looking for! Unfortunately written in Python! I had to make its portage into C++. I also discovered later [opengl4csharp](https://github.com/giawa/opengl4csharp) written in C# which is quite similar to Glumpy but I think some designs are less good. So finally I found no good C++ OpenGL wrapper API.
 
 **Note: OpenGLCppWrapper is not a full-feature portage of Glumpy or opengl4csharp**
 
@@ -387,3 +412,4 @@ This API is largely inspired by projects such as:
 
 * The second reason is, maybe I'm totally wrong, that Glumpy does not use by default VAOs (because it uses OpenGL < 3.3) but access to VBOs through OpenGL program attributes. This also perturbs me because in the case of you have several models (therefore several VAOs) to paint this seems problematic to draw them. In my API only VAOs have to be created. They hold VBOs and texture once bound to GLProgram. The result is equivalent to Glumpy but the internal code is different. See this file
 [differences](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Differences.md) for more differences.
+
