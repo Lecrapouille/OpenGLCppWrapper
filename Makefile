@@ -19,23 +19,16 @@
 ##=====================================================================
 
 ###################################################
+# Location of the project directory and Makefiles
+P := .
+M := $(P)/.makefile
+
+###################################################
 # Executable name
-PROJECT = OpenGLCppWrapper
 TARGET = $(PROJECT)
 DESCRIPTION = C++11 API wrapping Core Profile OpenGL routines and allowing to write applications in few lines of code
-
-###################################################
-# Debug mode or Release mode
 BUILD_TYPE = debug
 
-###################################################
-# Location from the project root directory.
-P=.
-
-###################################################
-# Sharable informations between all Makefiles
-M=$(P)/.makefile
-include $(M)/Makefile.header
 include $(P)/Makefile.common
 
 ###################################################
@@ -52,12 +45,6 @@ endif
 ###################################################
 # Compile static and shared libraries
 all: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
-
-###################################################
-# Download textures and other resources needed by examples
-.PHONY: download-resources
-download-resources:
-	@(cd external && ./download-resources.sh)
 
 ###################################################
 # Compile and launch unit tests and generate the code coverage html report.

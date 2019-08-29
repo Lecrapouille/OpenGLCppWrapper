@@ -19,27 +19,17 @@
 ##=====================================================================
 
 ###################################################
-# Executable name
-PROJECT = OpenGLCppWrapper
-TARGET = $(PROJECT)-UnitTest
+# Location of the project directory and Makefiles
+P=..
+M=$(P)/.makefile
 
 ###################################################
-# Debug mode or Release mode
+# Project definition
+TARGET = $(PROJECT)-UnitTest
+DESCRIPTION = Unit tests for $(PROJECT)
 BUILD_TYPE = debug
 
-###################################################
-# Location from the project root directory.
-P=..
-
-###################################################
-# Sharable informations between all Makefiles
-M=$(P)/.makefile
-include $(M)/Makefile.header
 include $(P)/Makefile.common
-
-###################################################
-# Allow to hide protected and private keyword
-CXXFLAGS += -Wno-keyword-macro
 
 ###################################################
 # List of files to compile.
@@ -57,13 +47,8 @@ NOT_PKG_LIBS += -lcrpcut -ldl
 ###################################################
 # Code coverage. Comment these lines if coveraging
 # is not desired.
-CXXFLAGS += --coverage
-LDFLAGS += --coverage
-
-###################################################
-#
-CXXFLAGS += \
-  -Wno-inline -Wno-suggest-attribute=noreturn -Wno-stack-protector
+COMPIL_FLAGS += --coverage
+LINKER_FLAGS += --coverage
 
 ###################################################
 # Set Libraries compiled in the external/ directory.

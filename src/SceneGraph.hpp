@@ -39,7 +39,7 @@ public:
 
   virtual ~ISceneGraphRenderer() {}
   // FIXME should ideally be a const method with a const renderable
-  virtual void drawSceneNode(R& renderable, Matrix<T, D + 1u, D + 1u> const& transformation) = 0;
+  virtual void drawSceneNode(R& renderable, Matrix<T, D + 1_z, D + 1_z> const& transformation) = 0;
 };
 
 // *************************************************************************************************
@@ -183,7 +183,7 @@ public:
     //! \brief Return the world transform matrix.
     //! \note the local transform matrix is given by Movable::transform().
     //-----------------------------------------------------------------
-    inline Matrix<T, D + 1u, D + 1u> const& worldTransform() const
+    inline Matrix<T, D + 1_z, D + 1_z> const& worldTransform() const
     {
       return m_world_transform;
     }
@@ -224,7 +224,7 @@ public:
       // Sheets are optional, so do not forget to check against nullptr
       if (nullptr != m_renderable)
         {
-          Matrix<T, D + 1u, D + 1u> transform =
+          Matrix<T, D + 1_z, D + 1_z> transform =
             matrix::scale(m_world_transform, m_local_scaling);
           renderer.drawSceneNode(*m_renderable, transform);
         }
@@ -289,7 +289,7 @@ public:
     /*NodePtr */ Node*     m_parent = nullptr;
     //! \brief World transformation matrix. Stored faor avoiding to compute it every times when
     //! traversing the scene graph.
-    Matrix<T, D + 1u, D + 1u>  m_world_transform;
+    Matrix<T, D + 1_z, D + 1_z>  m_world_transform;
     //! List of Node as children. Pointers are never nullptr.
     std::vector<NodePtr>   m_children;
     //! Scale factors for the current 3D entity

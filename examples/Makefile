@@ -19,22 +19,16 @@
 ##=====================================================================
 
 ###################################################
-# Executable name
-PROJECT = OpenGLExamples
-TARGET = $(PROJECT)
+# Location of the project directory and Makefiles
+P=..
+M=$(P)/.makefile
 
 ###################################################
-# Debug mode or Release mode
+# Project definition
+TARGET = OpenGLExamples
+DESCRIPTION = Unit tests for $(PROJECT)
 BUILD_TYPE = debug
 
-###################################################
-# Location from the project root directory.
-P=..
-
-###################################################
-# Sharable informations between all Makefiles
-M=$(P)/.makefile
-include $(M)/Makefile.header
 include $(P)/Makefile.common
 
 ###################################################

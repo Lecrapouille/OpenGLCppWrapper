@@ -31,7 +31,7 @@ namespace glwrap
 //! This class allow an object to move in a 2D-world (if n == 2U) or 3D-world (if n == 3U).
 //! Not a thread safe class.
 // *************************************************************************************************
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 class Movable
 {
 public:
@@ -114,10 +114,10 @@ public:
     m_to_update = true;
   }
 
-  inline Vector<T, n + 1u> rotation()
+  inline Vector<T, n + 1_z> rotation()
   {
-    // FIXME Make x, y, z implicit like Vector<T, n + 1u> r(m_rot_axis, m_rot_angle);
-    Vector<T, n + 1u> r(m_rot_axis.x, m_rot_axis.y, m_rot_axis.z, m_rot_angle);
+    // FIXME Make x, y, z implicit like Vector<T, n + 1_z> r(m_rot_axis, m_rot_angle);
+    Vector<T, n + 1_z> r(m_rot_axis.x, m_rot_axis.y, m_rot_axis.z, m_rot_angle);
     return r;
   }
 
@@ -151,11 +151,11 @@ public:
   //! Note:
   //!   Be careful of operation order: we apply scale first, then
   //!   the rotation then the translation.
-  Matrix<T, n + 1U, n + 1U> const &transform()
+  Matrix<T, n + 1_z, n + 1_z> const &transform()
   {
     if (m_to_update)
       {
-        Matrix<T,n+1U,n+1U> I(matrix::Identity);
+        Matrix<T,n+1_z,n+1_z> I(matrix::Identity);
         m_transform = matrix::translate(I, m_position - m_origin);
         m_transform = matrix::rotate(m_transform, m_rot_angle, m_rot_axis);
         m_transform = matrix::scale(m_transform, m_scale);
@@ -167,7 +167,7 @@ public:
   }
 
   //! \brief Return the 4x4 inverse transform matrix.
-  Matrix<T, n + 1U, n + 1U> const &invTransform()
+  Matrix<T, n + 1_z, n + 1_z> const &invTransform()
   {
     if (m_inv_to_update)
       {
@@ -184,8 +184,8 @@ protected:
   Vector<T, n> m_scale;
   Vector<T, n> m_rot_axis;
   T m_rot_angle;
-  Matrix<T, n + 1U, n + 1U> m_transform;
-  Matrix<T, n + 1U, n + 1U> m_inverse_transform;
+  Matrix<T, n + 1_z, n + 1_z> m_transform;
+  Matrix<T, n + 1_z, n + 1_z> m_inverse_transform;
   bool m_to_update;
   bool m_inv_to_update;
 };
