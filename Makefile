@@ -20,11 +20,13 @@
 
 ###################################################
 # Location of the project directory and Makefiles
+#
 P := .
 M := $(P)/.makefile
 
 ###################################################
 # Executable name
+#
 TARGET = $(PROJECT)
 DESCRIPTION = C++11 API wrapping Core Profile OpenGL routines and allowing to write applications in few lines of code
 BUILD_TYPE = debug
@@ -33,6 +35,7 @@ include $(P)/Makefile.common
 
 ###################################################
 # Make the list of compiled files
+#
 OBJ_CORE = Verbose.o Exception.o OpenGL.o GLWindow.o
 OBJ_IMGUI = GLImGUI.o
 OBJS += $(OBJ_CORE) $(OBJ_IMGUI)
@@ -49,10 +52,14 @@ all: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
 ###################################################
 # Compile and launch unit tests and generate the code coverage html report.
 .PHONY: unit-tests
-.PHONY: check
-unit-tests check:
+unit-tests:
 	@$(call print-simple,"Compiling unit tests")
 	@$(MAKE) -C tests coverage
+
+###################################################
+# Compile and launch unit tests and generate the code coverage html report.
+.PHONY: check
+check: unit-tests
 
 ###################################################
 # Install project. You need to be root.

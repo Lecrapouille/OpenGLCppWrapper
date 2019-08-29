@@ -29,18 +29,20 @@ include $(M)/Makefile.header
 #   passed to OpenGL routines. Produce an error message
 #   in the console but does not abort the program.
 # ENABLE_DEBUG activate logs on the console.
+#
 DEFINES += -DCHECK_OPENGL -UENABLE_DEBUG
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
+#
 THIRDPART_LIBS +=
 
 ###################################################
 # Set Libraries. For knowing which libraries
 # is needed please read the external/README.md file.
-
+#
 ifeq ($(ARCHI),Darwin)
 INCLUDES += -I/usr/local/include -I/opt/local/include
 LINKER_FLAGS += \
@@ -56,8 +58,10 @@ endif
 
 ###################################################
 # Inform Makefile where to find header files
+#
 INCLUDES += -I$(P)/include -I$(P)/src -I$(THIRDPART) -I$(THIRDPART)/imgui
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
+#
 VPATH += $(P)/src:$(P)/src/private:$(THIRDPART):$(THIRDPART)/imgui:$(THIRDPART)/SOIL/obj

@@ -20,11 +20,13 @@
 
 ###################################################
 # Location of the project directory and Makefiles
+#
 P=..
 M=$(P)/.makefile
 
 ###################################################
 # Project definition
+#
 TARGET = OpenGLExamples
 DESCRIPTION = Unit tests for $(PROJECT)
 BUILD_TYPE = debug
@@ -33,6 +35,7 @@ include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
+#
 OBJS += \
   00_EmptyWindowWithIOEvents.o \
   01_EmptyWindowWithImgui.o \
@@ -55,6 +58,7 @@ OBJS += \
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
 #FIXME: the static lib name shall be extracted from root makefile
+#
 THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.$(shell cat $(P)/VERSION))
 
 ###################################################
@@ -63,6 +67,7 @@ all: $(THIRDPART_LIBS) $(TARGET)
 
 ###################################################
 # Be sure the main project have been compiled
+#
 $(OBJS): | $(THIRDPART_LIBS)
 $(THIRDPART_LIBS):
 	@$(call print-to,"Compiling","$(THIRDPART_LIBS)","$@","$(VERSION)")

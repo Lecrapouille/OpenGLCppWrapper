@@ -20,11 +20,13 @@
 
 ###################################################
 # Location of the project directory and Makefiles
+#
 P=..
 M=$(P)/.makefile
 
 ###################################################
 # Project definition
+#
 TARGET = $(PROJECT)-UnitTest
 DESCRIPTION = Unit tests for $(PROJECT)
 BUILD_TYPE = debug
@@ -33,6 +35,7 @@ include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
+#
 OBJS  = VectorTests.o MatrixTests.o
 OBJS += IGLObjectTests.o GLVAOTests.o GLVBOTests.o
 OBJS += GLShadersTests.o GLProgramTests.o
@@ -42,11 +45,13 @@ OBJS += UnitTests.o
 ###################################################
 # Link against the crpcut unit test lib.
 # Note: that crpcut does not provide pkg-config file.
+#
 NOT_PKG_LIBS += -lcrpcut -ldl
 
 ###################################################
 # Code coverage. Comment these lines if coveraging
 # is not desired.
+#
 COMPIL_FLAGS += --coverage
 LINKER_FLAGS += --coverage
 
@@ -55,6 +60,7 @@ LINKER_FLAGS += --coverage
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
 #FIXME: the static lib name shall be extracted from root makefile
+#
 THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.$(shell cat $(P)/VERSION))
 
 ###################################################
@@ -63,6 +69,7 @@ all: $(THIRDPART_LIBS) $(TARGET)
 
 ###################################################
 # Be sure the main project have been compiled
+#
 $(OBJS): | $(THIRDPART_LIBS)
 $(THIRDPART_LIBS):
 	@$(call print-to,"Compiling","$(THIRDPART_LIBS)","$@","$(VERSION)")
