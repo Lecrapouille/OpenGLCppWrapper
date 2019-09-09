@@ -38,11 +38,11 @@ public:
 
   //! \brief Empty construction. Set an identity 4x4 transformation matrix.
   Movable()
-    : m_origin(0),
-      m_position(0),
-      m_scale(1),
-      m_rot_axis(1),
-      m_rot_angle(0),
+    : m_origin(maths::zero<T>()),
+      m_position(maths::zero<T>()),
+      m_scale(maths::one<T>()),
+      m_rot_axis(maths::one<T>()),
+      m_rot_angle(maths::zero<T>()),
       m_transform(matrix::Identity),
       m_inverse_transform(matrix::Identity),
       m_to_update(false),
@@ -53,14 +53,14 @@ public:
   //! \brief Reset states. Set an identity 4x4 transformation matrix.
   inline void reset()
   {
-    const Vector<T, n> zero(0);
-    const Vector<T, n> one(1);
+    const Vector<T, n> z(maths::zero<T>());
+    const Vector<T, n> o(maths::one<T>());
 
-    m_origin = zero;
-    m_position = zero;
-    m_rot_axis = one;
-    m_rot_angle = T(0);
-    m_scale = one;
+    m_origin = z;
+    m_position = z;
+    m_rot_axis = o;
+    m_rot_angle = maths::zero<T>();
+    m_scale = o;
     matrix::identity(m_transform);
     matrix::identity(m_inverse_transform);
     m_to_update = false;

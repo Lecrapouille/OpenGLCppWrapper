@@ -96,6 +96,12 @@ static T clamp(T const value, T const lower, T const upper)
   return value;
 }
 
+//! \brief Allow to redefine neutral and/or absorbing element in algebra.
+template<class T> T one() { return T(1); }
+
+//! \brief Allow to redefine neutral and/or absorbing element in algebra.
+template<class T> T zero() { return T(0); }
+
 } // namespace maths
 
 // *************************************************************************************************
@@ -105,7 +111,7 @@ static T clamp(T const value, T const lower, T const upper)
   /*! \brief Empty constructor */                                       \
   Vector()                                                              \
   {                                                                     \
-    static_assert(N >= 2_z, "Minimun dimension for a vector is 2");      \
+    static_assert(N >= 2_z, "Minimun dimension for a vector is 2");     \
   }                                                                     \
                                                                         \
   /*! \brief Constructor with initialization list */                    \
@@ -122,7 +128,7 @@ static T clamp(T const value, T const lower, T const upper)
     /* Zero-fill any remaining elements */                              \
     for (size_t i = m; i < N; ++i)                                      \
       {                                                                 \
-        m_data[i] = T(0);                                               \
+        m_data[i] = maths::zero<T>();                                 \
       }                                                                 \
   }                                                                     \
                                                                         \
@@ -150,7 +156,7 @@ static T clamp(T const value, T const lower, T const upper)
     /* Zero-fill any remaining elements */                              \
     for (i = m; i < N; ++i)                                             \
       {                                                                 \
-        m_data[i] = T(0);                                               \
+        m_data[i] = maths::zero<T>();                                 \
       }                                                                 \
   }                                                                     \
                                                                         \
@@ -231,13 +237,13 @@ public:
 
 // Predifined vectors
 template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::DUMMY(T(NAN));
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::ZERO(T(0));
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::UNIT_SCALE(T(1));
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::NEGATIVE_UNIT_SCALE(T(-1));
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::UNIT_X(T(1), T(0));
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::UNIT_Y(T(0), T(1));
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::NEGATIVE_UNIT_X(T(-1), T(0));
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::NEGATIVE_UNIT_Y(T(0), T(-1));
+template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::ZERO(maths::zero<T>());
+template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::UNIT_SCALE(maths::one<T>());
+template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::NEGATIVE_UNIT_SCALE(-maths::one<T>());
+template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::UNIT_X(maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::UNIT_Y(maths::zero<T>(), maths::one<T>());
+template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::NEGATIVE_UNIT_X(-maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>());
 
 // *************************************************************************************************
 //! \brief Specialization for n = 3
@@ -247,14 +253,14 @@ class Vector<T, 3_z>
 {
 public:
 
-  Vector(Vector<T, 2_z> const &v, const T scalar_z = T(0))
+  Vector(Vector<T, 2_z> const &v, const T scalar_z = maths::zero<T>())
   {
     x = v.x;
     y = v.y;
     z = scalar_z;
   }
 
-  Vector(const T scalar_x, const T scalar_y, const T scalar_z = T(0))
+  Vector(const T scalar_x, const T scalar_y, const T scalar_z = maths::zero<T>())
   {
     x = scalar_x;
     y = scalar_y;
@@ -289,15 +295,15 @@ public:
 };
 
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::DUMMY(T(NAN));
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ZERO(T(0));
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_SCALE(T(1));
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_SCALE(T(-1));
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_X(T(1), T(0), T(0));
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_Y(T(0), T(1), T(0));
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_Z(T(0), T(0), T(1));
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_X(T(-1), T(0), T(0));
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_Y(T(0), T(-1), T(0));
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_Z(T(0), T(0), T(-1));
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ZERO(maths::zero<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_SCALE(maths::one<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_SCALE(-maths::one<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_X(maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_Y(maths::zero<T>(), maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_Z(maths::zero<T>(), maths::zero<T>(), maths::one<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_X(-maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_Z(maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
 
 // *************************************************************************************************
 // Specializations for n = 4
@@ -307,7 +313,7 @@ class Vector<T, 4_z>
 {
 public:
 
-  Vector(Vector<T, 3_z> const &v, const T scalar_w = T(0))
+  Vector(Vector<T, 3_z> const &v, const T scalar_w = maths::zero<T>())
   {
     x = v.x;
     y = v.y;
@@ -353,17 +359,17 @@ public:
 };
 
 template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::DUMMY(T(NAN));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::ZERO(T(0));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_SCALE(T(1));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_SCALE(T(-1));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_X(T(1), T(0), T(0), T(0));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_Y(T(0), T(1), T(0), T(0));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_Z(T(0), T(0), T(1), T(0));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_W(T(0), T(0), T(0), T(1));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_X(T(-1), T(0), T(0), T(0));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_Y(T(0), T(-1), T(0), T(0));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_Z(T(0), T(0), T(-1), T(0));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(T(0), T(0), T(0), T(-1));
+template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::ZERO(maths::zero<T>());
+template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_SCALE(maths::one<T>());
+template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_SCALE(-maths::one<T>());
+template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_X(maths::one<T>(), maths::zero<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_Y(maths::zero<T>(), maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_Z(maths::zero<T>(), maths::zero<T>(), maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_W(maths::zero<T>(), maths::zero<T>(), maths::zero<T>(), maths::one<T>());
+template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_X(-maths::one<T>(), maths::zero<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_Z(maths::zero<T>(), maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths::zero<T>(), maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
 
 // *************************************************************************************************
 // Overloaded math operators
@@ -613,7 +619,7 @@ namespace vector
   {
     // Null vector ?
     if (maths::almostZero(u[0]) || maths::almostZero(v[0]))
-      return T(0);
+      return maths::zero<T>();
 
     const T k = u[0] / v[0];
     for (size_t i = 1_z; i < n; ++i)
@@ -638,7 +644,7 @@ namespace vector
   bool equivalent(Vector<T, n> const &u, Vector<T, n> const &v)
   {
     T k = collinearity(u, v);
-    return maths::almostEqual(k, T(1));
+    return maths::almostEqual(k, maths::one<T>());
   }
 
   //! \brief Check if three points A, B, C are aligned.
@@ -678,7 +684,7 @@ namespace vector
   template <typename T, size_t n>
   T dot(Vector<T, n> const &a, Vector<T, n> const &b)
   {
-    T result(0);
+    T result(maths::zero<T>());
     size_t i = n;
 
     while (i--)
@@ -758,16 +764,16 @@ namespace vector
     // Implementation due to Sam Hocevar - see blog post:
     // http://lolengine.net/blog/2013/09/21/picking-orthogonal-Vector-combing-coconuts
     if (std::abs(a.x) > std::abs(a.z))
-      return { -a.y, a.x, T(0) };
+      return { -a.y, a.x,maths::zero<T>() };
     else
-      return { T(0), -a.z, a.y };
+      return { maths::zero<T>(), -a.z, a.y };
   }
 
   template <typename T, size_t n>
   typename std::enable_if<std::numeric_limits<T>::is_integer, bool>::type
   orthogonal(Vector<T, n> const &a, Vector<T, n> const &b)
   {
-    return T(0) == dot(a, b);
+    return maths::zero<T>() == dot(a, b);
   }
 
   template <typename T, size_t n>
@@ -787,7 +793,7 @@ namespace vector
     //  lenProduct = 1e-6f;
 
     T f = dot(org, dest) / lenProduct;
-    f = std::min(std::max(f, T(-1)), T(1));
+    f = std::min(std::max(f, -maths::one<T>()), maths::one<T>());
     return T(std::acos(f) * 180.0 / 3.14159265);
   }
 

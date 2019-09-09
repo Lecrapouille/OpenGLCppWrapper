@@ -63,7 +63,7 @@ public:
     // Zero-fill any remaining elements.
     for (size_t i = m; i < rows * cols; ++i)
       {
-        m_data[i] = T(0);
+        m_data[i] = maths::zero<T>();
       }
   }
 
@@ -89,7 +89,7 @@ public:
         i = rows * cols;
         while (i--)
           {
-            m_data[i] = (i % (rows + 1u) == 0) ? T(1) : T(0);
+            m_data[i] = (i % (rows + 1_z) == 0) ? maths::one<T>() : maths::zero<T>();
           }
         break;
       default:
@@ -112,13 +112,13 @@ public:
         // Zero-fill any remaining cols
         for (size_t j = c; j < cols; ++j)
           {
-            (*this)[i][j] = T(0);
+            (*this)[i][j] = maths::zero<T>();
           }
       }
     // Zero-fill any remaining rows
     for (size_t i = r * cols; i < rows * cols; ++i)
       {
-        m_data[i] = T(0);
+        m_data[i] = maths::zero<T>();
       }
   }
 
@@ -324,7 +324,7 @@ DEFINE_RELATIONAL_OPERATORS(>=)
 template <typename T, size_t rows, size_t inner, size_t cols>
 Matrix<T, rows, cols> operator*(Matrix<T, rows, inner> const &a, Matrix<T, inner, cols> const &b)
 {
-  Matrix<T, rows, cols> result(T(0));
+  Matrix<T, rows, cols> result(maths::zero<T>());
   for (size_t i = 0_z; i < rows; ++i)
     for (size_t j = 0_z; j < cols; ++j)
       for (size_t k = 0; k < inner; ++k)
@@ -336,7 +336,7 @@ Matrix<T, rows, cols> operator*(Matrix<T, rows, inner> const &a, Matrix<T, inner
 template <typename T, size_t rows, size_t cols>
 Vector<T, rows> operator*(Matrix<T, rows, cols> const &a, Vector<T, cols> const &b)
 {
-  Vector<T, rows> result(T(0));
+  Vector<T, rows> result(maths::zero<T>());
   size_t i = rows;
   while (i--)
     {
@@ -351,7 +351,7 @@ Vector<T, rows> operator*(Matrix<T, rows, cols> const &a, Vector<T, cols> const 
 template <typename T, size_t rows, size_t cols>
 Vector<T, cols> operator*(Vector<T, rows> const &a, Matrix<T, rows, cols> const &b)
 {
-  Vector<T, cols> result (T(0));
+  Vector<T, cols> result (maths::zero<T>());
   size_t i = rows;
 
   while (i--)
@@ -386,11 +386,11 @@ namespace matrix
   void identity(Matrix<T, rows, cols> &a)
   {
     static_assert(rows == cols, "Can't construct identity for a non-square matrix");
-    a *= T(0);
+    a *= maths::zero<T>();
     size_t i = rows;
     while (i--)
       {
-        a[i][i] = T(1);
+        a[i][i] = maths::one<T>();
       }
   }
 
@@ -449,7 +449,7 @@ namespace matrix
   {
     static_assert(rows == cols, "Can't compute the trace of a non-square matrix");
 
-    T result = T(0);
+    T result = maths::zero<T>();
     size_t i = rows;
 
     while (i--)
@@ -556,8 +556,8 @@ namespace matrix
     size_t i, j;
 
     // Set matrices to 0
-    L *= T(0);
-    U *= T(0);
+    L *= maths::zero<T>();
+    U *= maths::zero<T>();
 
     // FIXME: Copy not necessary
     Matrix<T, rows, cols> A(AA);
@@ -567,7 +567,7 @@ namespace matrix
         double max = std::abs(A[i][i]);
         size_t pivot = i;
 
-        for (j = i + 1u; j < rows; ++j)
+        for (j = i + 1_z; j < rows; ++j)
           {
             if (std::abs(A[j][i]) > max)
               {
@@ -586,12 +586,12 @@ namespace matrix
         // -- original code:  if (A[i][i] != 0.0)
         // -- new code which seems to give less good results: if (fabs(A[i][i]) > 0.00001)
         // we cannot use == with floats or double !!!!
-        if (A[i][i] != T(0))
+        if (A[i][i] != maths::zero<T>())
           {
-            for (j = i + 1u; j < rows; ++j)
+            for (j = i + 1_z; j < rows; ++j)
               {
                 A[j][i] = A[j][i] / A[i][i];
-                for (size_t k = i + 1u; k < rows; ++k)
+                for (size_t k = i + 1_z; k < rows; ++k)
                   {
                     A[j][k] = A[j][k] - A[j][i] * A[i][k];
                   }
@@ -600,7 +600,7 @@ namespace matrix
       }
     for (i = 0_z; i < rows; ++i)
       {
-        L[i][i] = T(1);
+        L[i][i] = maths::one<T>();
         for (j = 0_z; j < rows; ++j)
           {
             if (j < i)
@@ -631,7 +631,7 @@ namespace matrix
     // y = U.x, thus Ly = b
     // solve for y by forward substitution
     y[0] = b[0] / L[0][0];
-    for (size_t i = 1u; i < rows; ++i)
+    for (size_t i = 1_z; i < rows; ++i)
       {
         y[i] = b[i] / L[i][i];
         for (size_t j = 0_z; j < i; ++j)
@@ -642,13 +642,12 @@ namespace matrix
 
     // U.x = y
     // Solve for x by backward substitution
-    size_t r = rows - 1u;
+    size_t r = rows - 1_z;
     solution[r] = y[r] / U[r][r];
 
     size_t i = r;
     while (i--)
       {
-        assert(i >= 0);
         solution[i] = y[i] / U[i][i];
         for (size_t j = i + 1u; j < rows; j++)
           {

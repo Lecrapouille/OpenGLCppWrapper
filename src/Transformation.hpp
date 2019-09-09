@@ -63,7 +63,7 @@ namespace matrix
     T const s = std::sin(a);
 
     Vector<T, 3_z> axis(vector::normalize(v));
-    Vector<T, 3_z> temp((T(1) - c) * axis);
+    Vector<T, 3_z> temp((maths::one<T>() - c) * axis);
     Matrix<T, 4_z, 4_z> rotate;
 
     rotate[0][0] = c + temp[0] * axis[0];
@@ -94,7 +94,7 @@ namespace matrix
 
     M[0][0] = T(2) / (right - left);
     M[1][1] = T(2) / (top - bottom);
-    M[2][2] = T(-1);
+    M[2][2] = -maths::one<T>();
     M[3][0] = -(right + left) / (right - left);
     M[3][1] = -(top + bottom) / (top - bottom);
 
@@ -116,9 +116,9 @@ namespace matrix
     T const tanHalfFovY = std::tan(fovY / T(2));
     Matrix<T, 4_z, 4_z> M(0);
 
-    M[0][0] = T(1) / (aspect * tanHalfFovY);
-    M[1][1] = T(1) / (tanHalfFovY);
-    M[2][3] = T(-1);
+    M[0][0] = maths::one<T>() / (aspect * tanHalfFovY);
+    M[1][1] = maths::one<T>() / (tanHalfFovY);
+    M[2][3] = -maths::one<T>();
     M[2][2] = -(zFar + zNear) / (zFar - zNear);
     M[3][2] = -(T(2) * zFar * zNear) / (zFar - zNear);
 
