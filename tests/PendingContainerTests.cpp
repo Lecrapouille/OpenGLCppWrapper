@@ -352,22 +352,22 @@ TESTSUITE(PendingContainerTests)
     try {
       pc0.sum();
       ASSERT_FALSE("Exception not caught");
-    } catch (std::out_of_range) { }
+    } catch (std::out_of_range&) { }
 
     try {
       pc0.prod();
       ASSERT_FALSE("Exception not caught");
-    } catch (std::out_of_range) { }
+    } catch (std::out_of_range&) { }
 
     try {
       pc0.min();
       ASSERT_FALSE("Exception not caught");
-    } catch (std::out_of_range) { }
+    } catch (std::out_of_range&) { }
 
     try {
       pc0.max();
       ASSERT_FALSE("Exception not caught");
-    } catch (std::out_of_range) { }
+    } catch (std::out_of_range&) { }
   }
 
   TEST(TestNotExpandable)
@@ -383,7 +383,7 @@ TESTSUITE(PendingContainerTests)
         pc0 = {4, 6, 8, 10};
         ASSERT_FALSE("Exception not caught");
       }
-    catch (std::out_of_range)
+    catch (std::out_of_range&)
       {
         ASSERT_EQ(false, pc0.hasPendingData());
         ASSERT_EQ(PendingData::npos, pc0.getPendingData().first);
@@ -396,7 +396,7 @@ TESTSUITE(PendingContainerTests)
         pc0.append({4, 6, 8, 10});
         ASSERT_FALSE("Exception not caught");
       }
-    catch (std::out_of_range)
+    catch (std::out_of_range&)
       {
         ASSERT_EQ(false, pc0.hasPendingData());
         ASSERT_EQ(PendingData::npos, pc0.getPendingData().first);
@@ -410,7 +410,7 @@ TESTSUITE(PendingContainerTests)
         pc0.reserve(10_z);
         ASSERT_FALSE("Exception not caught");
       }
-    catch (std::out_of_range)
+    catch (std::out_of_range&)
       {
         ASSERT_EQ(false, pc0.hasPendingData());
         ASSERT_EQ(PendingData::npos, pc0.getPendingData().first);
@@ -424,7 +424,7 @@ TESTSUITE(PendingContainerTests)
         pc0.resize(10_z);
         ASSERT_FALSE("Exception not caught");
       }
-    catch (std::out_of_range)
+    catch (std::out_of_range&)
       {
         ASSERT_EQ(false, pc0.hasPendingData());
         ASSERT_EQ(PendingData::npos, pc0.getPendingData().first);
