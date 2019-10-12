@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#define MAX_EXAMPLES 12
+#define MAX_EXAMPLES 14
 
 //------------------------------------------------------------------------------
 __attribute__((__noreturn__))
@@ -45,7 +45,7 @@ static void usage(char *argv[])
 {
   std::cout << "Usage: " << std::endl
             << "  " << argv[0] << " <integer>" << std::endl;
-  std::cout << "Where: <integer> is the example id (1 .. " << MAX_EXAMPLES << "): " << std::endl;
+  std::cout << "Where: <integer> is the example id (0 .. " << MAX_EXAMPLES << "): " << std::endl;
   std::cout << "  0: Create an empty window reacting to IO events." << std::endl;
   std::cout << "  1: Create an empty window with dear a Daear IMGui widget." << std::endl;
   std::cout << "  2: Draw a triangle moving and blinking." << std::endl;
