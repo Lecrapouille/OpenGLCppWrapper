@@ -127,8 +127,9 @@ public:
   //! \param name the name of this instance used by GLProgram and GLVAO.
   //! \param target the texture type (GL_TEXTURE_1D .. GL_TEXTURE_3D ...)
   //----------------------------------------------------------------------------
-  IGLTexture(std::string const& name, const GLenum target)
-    : IGLObject(name)
+  IGLTexture(const uint8_t dimension, std::string const& name, const GLenum target)
+    : IGLObject(name),
+      m_dimension(dimension)
   {
     m_target = target;
   }
@@ -216,11 +217,10 @@ public:
 
   //----------------------------------------------------------------------------
   //! \brief Return the texture dimension (1D, 2D, 3D).
-  //! FIXME can we use template ?
   //----------------------------------------------------------------------------
-  virtual uint8_t dimension() const
+  inline uint8_t dimension() const
   {
-    return 0u;
+    return m_dimension;
   }
 
   //----------------------------------------------------------------------------
@@ -326,11 +326,17 @@ protected:
 
   TextureOptions m_options;
   TextureData    m_buffer;
+  //! \brief For Texture1D, Texture2D, Texture3D, TextureCube
   uint32_t       m_width = 0;
   //! \brief For Texture2D, Texture3D, TextureCube
   uint32_t       m_height = 0;
   //! \brief For Texture3D, TextureCube
   uint8_t        m_depth = 0u;
+
+private:
+
+  //! \brief Texture1D, Texture2D, Texture3D, TextureCube
+  const uint8_t  m_dimension;
 };
 
 // *****************************************************************************
@@ -355,7 +361,7 @@ public:
   //! \param name the name of this instance used by GLProgram and GLVAO.
   //----------------------------------------------------------------------------
   GLTexture2D(std::string const& name)
-    : IGLTexture(name, GL_TEXTURE_2D)
+    : IGLTexture(2u, name, GL_TEXTURE_2D)
   {}
 
   //----------------------------------------------------------------------------
@@ -371,7 +377,7 @@ public:
   //! \param height Buffer height (pixel). Shall be > 0.
   //----------------------------------------------------------------------------
  GLTexture2D(std::string const& name, const uint32_t width, const uint32_t height)
-    : IGLTexture(name, GL_TEXTURE_2D)
+    : IGLTexture(2u, name, GL_TEXTURE_2D)
   {
     // TODO Forbid texture with 0x0 dimension ?
     m_width = width;
@@ -383,14 +389,6 @@ public:
   //----------------------------------------------------------------------------
   virtual ~GLTexture2D()
   {}
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the texture dimension: 2D.
-  //----------------------------------------------------------------------------
-  virtual uint8_t dimension() const override
-  {
-    return 2u;
-  }
 
   //----------------------------------------------------------------------------
   //! \brief Allow to know if data have been transfered into the CPU
@@ -598,16 +596,8 @@ public:
   //! \brief
   //----------------------------------------------------------------------------
   GLTexture1D(std::string const& name)
-    : IGLTexture(name, GL_TEXTURE_1D)
+    : IGLTexture(1u, name, GL_TEXTURE_1D)
   {}
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the texture dimension: 1D
-  //----------------------------------------------------------------------------
-  virtual uint8_t dimension() const override
-  {
-    return 1u;
-  }
 
   //----------------------------------------------------------------------------
   //! \brief \brief Allow to know if data have been transfered into
@@ -689,19 +679,11 @@ public:
   //! \param name the name of this instance used by GLProgram and GLVAO.
   //----------------------------------------------------------------------------
   GLTextureCube(std::string const& name)
-    : IGLTexture(name, GL_TEXTURE_CUBE_MAP)
+    : IGLTexture(3u, name, GL_TEXTURE_CUBE_MAP)
   {}
 
   virtual ~GLTextureCube()
   {}
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the texture dimension: 3D
-  //----------------------------------------------------------------------------
-  virtual uint8_t dimension() const override
-  {
-    return 3u;
-  }
 
   //----------------------------------------------------------------------------
   //! \brief \brief Allow to know if data have been transfered into
@@ -840,16 +822,8 @@ public:
   //! \brief
   //----------------------------------------------------------------------------
   GLTexture3D(std::string const& name)
-    : IGLTexture(name, GL_TEXTURE_3D)
+    : IGLTexture(3u, name, GL_TEXTURE_3D)
   {}
-
-  //----------------------------------------------------------------------------
-  //! \brief
-  //----------------------------------------------------------------------------
-  virtual uint8_t dimension() const override
-  {
-    return 3u;
-  }
 
   //----------------------------------------------------------------------------
   //! \brief
