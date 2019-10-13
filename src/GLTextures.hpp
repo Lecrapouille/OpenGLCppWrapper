@@ -164,7 +164,12 @@ public:
   //!
   //! \return true if texture data have been loaded.
   //----------------------------------------------------------------------------
-  virtual inline bool loaded() const = 0;
+  virtual inline bool loaded() const
+  {
+    // Do not check m_width and m_height because FrameBuffer allows to have 0
+    // sizes.
+    return 0 != m_buffer.size();
+  }
 
   //----------------------------------------------------------------------------
   //! \brief Change minifier and magnifier options.
@@ -324,7 +329,9 @@ private:
 
 protected:
 
+  //! \brief Options to pass to OpenGL
   TextureOptions m_options;
+  //! \brief Hold the texture (CPU side)
   TextureData    m_buffer;
   //! \brief For Texture1D, Texture2D, Texture3D, TextureCube
   uint32_t       m_width = 0;
@@ -376,10 +383,10 @@ public:
   //! \param width Buffer width (pixels). Shall be > 0.
   //! \param height Buffer height (pixel). Shall be > 0.
   //----------------------------------------------------------------------------
- GLTexture2D(std::string const& name, const uint32_t width, const uint32_t height)
+  GLTexture2D(std::string const& name, const uint32_t width, const uint32_t height)
     : IGLTexture(2u, name, GL_TEXTURE_2D)
   {
-    // TODO Forbid texture with 0x0 dimension ?
+    // Note: Allow texture with no size for FrameBuffers
     m_width = width;
     m_height = height;
   }
@@ -399,8 +406,11 @@ public:
   //----------------------------------------------------------------------------
   virtual inline bool loaded() const override
   {
-    return (0 != m_buffer.size()) // Texture loaded from a file (jpeg ...)
-      || ((0 != m_width) && (0 != m_height)); // Or dummy texture for framebuffer
+    return
+      // Texture loaded from a file (jpeg ...)
+      IGLTexture::loaded() ||
+      // Dummy textures accepted by FrameBuffer
+      ((0 != m_width) && (0 != m_height));
   }
 
   //----------------------------------------------------------------------------
@@ -598,19 +608,6 @@ public:
   GLTexture1D(std::string const& name)
     : IGLTexture(1u, name, GL_TEXTURE_1D)
   {}
-
-  //----------------------------------------------------------------------------
-  //! \brief \brief Allow to know if data have been transfered into
-  //! the CPU memory.
-  //!
-  //! \return true if texture data have been loaded.
-  //----------------------------------------------------------------------------
-  virtual inline bool loaded() const override
-  {
-    // Note: return (0u != m_width) && (0u != m_height)
-    // is not a good condition because allowed.
-    return 0 != m_buffer.size();
-  }
 
 private:
 
@@ -865,17 +862,6 @@ public:
     m_height = static_cast<uint32_t>(height);
     m_depth = static_cast<uint8_t>(depth);
     return true;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Allow to know if data have been transfered into the CPU
-  //! memory.
-  //----------------------------------------------------------------------------
-  virtual inline bool loaded() const override
-  {
-    // Note: return (0u != m_width) && (0u != m_height)
-    // is not a good condition because allowed.
-    return 0 != m_buffer.size();
   }
 
 private:
