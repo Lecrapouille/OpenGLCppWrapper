@@ -21,11 +21,11 @@
 #include "09_SceneGraph.hpp"
 #include <sstream>
 
-//------------------------------------------------------------------
-//! \file Display a scere graphe made of 3 moving robots. Each robots
-//! are nodes of the scere graph. Each element of robots is also a
-//! part of the scene graph.
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//! \file Display a scene graphe made of 3 animated robots. Each robots are
+//! nodes of the scene graph. Each element of robots is also a part of the scene
+//! graph.
+//------------------------------------------------------------------------------
 
 CubicRobot::CubicRobot(VAOPtr cube, const char *name)
   : SceneNode(nullptr, name)
@@ -63,27 +63,28 @@ CubicRobot::CubicRobot(VAOPtr cube, const char *name)
   m_rightLeg->position(Vector3f(8.0f, 0.0f, 0.0f));
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //! \brief Move element of the robot body
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void CubicRobot::update(float const dt)
 {
   DEBUG("%s", "Robot::update");
 
-  const GLfloat degreesPerSecond = 1.0f;
-  degreesRotated += dt * degreesPerSecond;
-  degreesRotated = maths::wrapTo180(degreesRotated);
+  // Speed: 36 degrees per second
+  const GLfloat radiansPerSecond = maths::toRadian(36.0f);
+  radiansRotated = dt * radiansPerSecond;
+  radiansRotated = maths::wrapToPI(radiansRotated);
 
-  rotate(degreesRotated, Vector3f(0.0f, 1.0f, 0.0f));
-  m_head->rotate(-degreesRotated, Vector3f(0.0f, 1.0f, 0.0f));
-  m_leftArm->rotate(-degreesRotated, Vector3f(1.0f, 0.0f, 0.0f));
-  m_rightArm->rotate(degreesRotated, Vector3f(1.0f, 0.0f, 0.0f));
+  rotateY(radiansRotated);
+  m_head->rotateY(-radiansRotated);
+  m_leftArm->rotateX(-radiansRotated);
+  m_rightArm->rotateX(radiansRotated);
   SceneNode::update(dt);
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //! \brief Paint the GUI
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void GLImGUI::observeNode(SceneNode const& node) const
 {
   std::string nodename("Node '" + node.id() + "'");
@@ -121,9 +122,9 @@ void GLImGUI::observeNode(SceneNode const& node) const
     }
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //! \brief Paint the GUI
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GLImGUI::render()
 {
   ImGui::SetNextTreeNodeOpen(true);
@@ -147,9 +148,9 @@ bool GLImGUI::render()
   return true;
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void GLExample09::onWindowSizeChanged(float const width, float const height)
 {
   // Note: height is never zero !
@@ -162,9 +163,9 @@ void GLExample09::onWindowSizeChanged(float const width, float const height)
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //! \brief Create a cube constituing parts of robots.
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GLExample09::CreateCube()
 {
   m_cube = std::make_shared<GLVAO>("VAO_cube");
@@ -197,9 +198,9 @@ bool GLExample09::CreateCube()
   return true;
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //! Create the cene graph: 3 robots
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GLExample09::setup()
 {
   // Init the context of the DearIMgui library
@@ -278,9 +279,9 @@ bool GLExample09::setup()
   return true;
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //! Draw the scene graph (made of robots)
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GLExample09::draw()
 {
   DEBUG("%s", "GLExample09::draw()");
@@ -303,9 +304,9 @@ bool GLExample09::draw()
   return true;
 }
 
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //! Draw the current Scene node (= draw a part of robots)
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void GLExample09::drawSceneNode(GLVAO& vao, Matrix44f const& transform)
 {
   m_prog.matrix44f("model") = transform;

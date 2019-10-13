@@ -84,7 +84,6 @@ public:
     {
       m_renderable = renderable;
       m_id = id;
-      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -95,7 +94,6 @@ public:
     Node(ObjPtr renderable = nullptr)
     {
       m_renderable = renderable;
-      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -105,7 +103,6 @@ public:
     Node(I const& id)
     {
       m_id = id;
-      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -196,16 +193,10 @@ public:
     //-----------------------------------------------------------------
     virtual void update(float const dt)
     {
+      m_world_transform = Movable<T, D>::transform();
       if (nullptr != m_parent)
         {
-          // This  node  has a parent
-          m_world_transform = Movable<T, D>::transform()
-            * m_parent->m_world_transform;
-        }
-      else
-        {
-          // Root node, world transform is local transform
-          m_world_transform = Movable<T, D>::transform();
+          m_world_transform *= m_parent->m_world_transform;
         }
 
       // Update all children
@@ -225,7 +216,7 @@ public:
       if (nullptr != m_renderable)
         {
           Matrix<T, D + 1_z, D + 1_z> transform =
-            matrix::scale(m_world_transform, m_local_scaling);
+            matrix::scale(m_world_transform, Movable<T, D>::localScale());
           renderer.drawSceneNode(*m_renderable, transform);
         }
 
@@ -234,25 +225,6 @@ public:
         {
           i->draw(renderer);
         }
-    }
-
-    //-----------------------------------------------------------------
-    //! \brief Set a local scaling of the object. By local we mean that
-    //! will not impact children (they will not be scaled).
-    //! \note for scaling children use methods Movable::scale or
-    //! Movable::scaleFactor.
-    //-----------------------------------------------------------------
-    inline void localScale(Vector<T, D> const &scale)
-    {
-      m_local_scaling = scale;
-    }
-
-    //-----------------------------------------------------------------
-    //! \brief Get the local scaling.
-    //-----------------------------------------------------------------
-    inline Vector<T, D> const &localScale() const
-    {
-      return m_local_scaling;
     }
 
     //-----------------------------------------------------------------
@@ -292,8 +264,6 @@ public:
     Matrix<T, D + 1_z, D + 1_z>  m_world_transform;
     //! List of Node as children. Pointers are never nullptr.
     std::vector<NodePtr>   m_children;
-    //! Scale factors for the current 3D entity
-    Vector<T, D>           m_local_scaling;
   };
 
 private:

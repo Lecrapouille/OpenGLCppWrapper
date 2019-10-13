@@ -97,7 +97,7 @@ private:
   SceneNodePtr m_rightArm;
   SceneNodePtr m_leftLeg;
   SceneNodePtr m_rightLeg;
-  float degreesRotated = 0.0f;
+  float radiansRotated = 0.0f;
 };
 
 // *****************************************************************
