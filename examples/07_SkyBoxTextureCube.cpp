@@ -42,7 +42,7 @@ void GLExample07::onWindowSizeChanged(const float width, const float height)
   glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 
   m_progShape.matrix44f("projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
+    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
   m_progSkyBox.matrix44f("projection") = m_progShape.matrix44f("projection");
 }
 
@@ -66,7 +66,7 @@ bool GLExample07::createSkyBox()
   // Init uniforms.
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
   m_progSkyBox.matrix44f("projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
+    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
 
   // Binding empty VAO to OpenGL program will make it be populated
   // with all VBOs needed.
@@ -113,7 +113,7 @@ bool GLExample07::createShape()
   // (in contrast of the skybox which never changes its size).
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
   m_progShape.matrix44f("projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 100.0f);
+    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
 
   // Binding empty VAO to OpenGL program will make it be populated
   // with all VBOs needed.

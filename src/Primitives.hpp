@@ -29,45 +29,7 @@
 namespace glwrap
 {
 
-// *****************************************************************************
-//! \brief Return evenly spaced numbers over a specified interval.
-//! \param[in] start The starting scalar value of the sequence.
-//! \param[in] end The end value of the sequence, unless endpoint is set to false.
-//!    In that case, the sequence consists of all but the last of num + 1
-//!    evenly spaced samples, so that stop is excluded.
-//! \param[in] N Number of samples to generate. Should be > 1.
-//! \param[out] The vector of equally spaced samples in the closed interval [start, stop]
-//!   or the half-open interval [start, stop) (depending on whether endpoint is true or false).
-//! \return Size of spacing between samples. Return NaN if this value cannot be
-//! computed.
-//! \note: This code has been inpsired by the Numpy.linspace function.
-// *****************************************************************************
-template <typename T>
-static T linspace(T const start, T const end, size_t const N, std::vector<T>& result, const bool endpoint)
-{
-  const T not_a_number = std::numeric_limits<T>::quiet_NaN();
-  result.clear();
-
-  if (0 == N) return not_a_number;
-  if (1 == N)
-    {
-      result.push_back(start);
-      return not_a_number;
-    }
-
-  result.reserve(N);
-  T delta = (end - start) / static_cast<T>(N-1);
-  for (size_t i = 0; i < N-1; ++i)
-    {
-      result.push_back(start + delta * T(i));
-    }
-
-  if (endpoint)
-    {
-      result.push_back(end);
-    }
-  return delta;
-}
+static const float PI2 = static_cast<float>(2.0 * maths::PI);
 
 // *****************************************************************************
 //! \brief Class holding list of vertice positions, normals, texture coordinate
@@ -135,10 +97,8 @@ public:
 
   Circle(float const radius, uint32_t const slices/*, bool const inversed*/)
   {
-    const float pi = 3.1415f;
-
     std::vector<float> angle;
-    linspace(0.0f, 2.0f * pi, slices + 1u, angle, true);
+    maths::linspace(0.0f, PI2, slices + 1u, angle, true);
 
     // Reserve memory
     m_positions.reserve(slices);
@@ -193,14 +153,11 @@ public:
   //----------------------------------------------------------------------------
   Tube(float const top_radius, float const base_radius, float const height, uint32_t const slices)
   {
-    // None, Top, Bottom, Top+Bottom
-    const float pi = 3.1415f;
-
     std::vector<float> angle;
-    linspace(0.0f, 2.0f * pi, slices, angle, true);
+    maths::linspace(0.0f, PI2, slices + 1u, angle, true);
 
     std::vector<float> texture;
-    linspace(0.0f, 1.0f, slices, texture, true);
+    maths::linspace(0.0f, 1.0f, slices, texture, true);
 
     // Reserve memory
     m_positions.reserve(2u * slices);

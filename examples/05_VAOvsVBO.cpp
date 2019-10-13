@@ -39,7 +39,7 @@ void GLExample05::onWindowSizeChanged(const float width, const float height)
   glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 
   m_prog.matrix44f("projection") =
-    matrix::perspective(maths::radians(60.0f), ratio, 0.1f, 10.0f);
+    matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10.0f);
 }
 
 //------------------------------------------------------------------
@@ -127,7 +127,7 @@ bool GLExample05::setup()
   // Init Model-View-Project matrices (shader uniforms)
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
   m_prog.matrix44f("projection") =
-    matrix::perspective(maths::radians(60.0f), ratio, 0.1f, 10.0f);
+    matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10.0f);
   m_prog.matrix44f("model") = m_movable.transform();
   m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));

@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "09_SceneGraph.hpp"
-#include "Maths.hpp"
 #include <sstream>
 
 //------------------------------------------------------------------
@@ -160,7 +159,7 @@ void GLExample09::onWindowSizeChanged(float const width, float const height)
   glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 
   m_prog.matrix44f("u_projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
+    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
 }
 
 //------------------------------------------------------------------
@@ -230,7 +229,7 @@ bool GLExample09::setup()
   m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
   m_prog.matrix44f("projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10000.0f);
+    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10000.0f);
   m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(0.0f, 10.0f, 100.0f), Vector3f(30), Vector3f(0,1,0));
 

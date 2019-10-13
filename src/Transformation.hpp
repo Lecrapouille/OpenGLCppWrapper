@@ -55,6 +55,7 @@ namespace matrix
     return M;
   }
 
+  //! \brief angle in radian
   template<typename T>
   Matrix<T, 4_z, 4_z> rotate(Matrix<T, 4_z, 4_z> const &m, T const angle, Vector<T, 3_z> const &v)
   {

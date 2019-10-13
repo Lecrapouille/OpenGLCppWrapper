@@ -33,10 +33,7 @@ void GLExample13::onWindowSizeChanged(const float width, const float height)
   glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
 
   m_prog_lamp.matrix44f("projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 100.0f);
-
-  m_prog_cube.matrix44f("projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 100.0f);
+    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
 }
 
 //------------------------------------------------------------------
@@ -65,7 +62,7 @@ bool GLExample13::createLamp()
 
   float ratio = static_cast<float>(width()) / static_cast<float>(height());
   m_prog_lamp.matrix44f("projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 100.0f);
+    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
 
   Movable<float, 3U> movable;
   movable.position(lightPos);
@@ -145,7 +142,7 @@ bool GLExample13::createCube()
 
   float ratio = static_cast<float>(width()) / static_cast<float>(height());
   m_prog_cube.matrix44f("projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 100.0f);
+    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
 
   Movable<float, 3U> movable;
   m_prog_cube.matrix44f("model") = movable.transform();

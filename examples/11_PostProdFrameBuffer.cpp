@@ -38,7 +38,7 @@ void GLExample11::onWindowSizeChanged(const float width, const float height)
 
   //m_fbo.resize(width, height);
   m_prog_scene.matrix44f("projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
+    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
 }
 
 //------------------------------------------------------------------
@@ -86,7 +86,7 @@ bool GLExample11::firstProgram()
   // Init Model-View-Project matrices (shader uniforms)
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
   m_prog_scene.matrix44f("projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
+    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
   m_prog_scene.matrix44f("model") = Matrix44f(matrix::Identity);
   m_prog_scene.matrix44f("view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
