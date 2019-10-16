@@ -47,6 +47,18 @@ namespace std
 #  endif
 
 // **************************************************************
+//! \brief Forward declaration of classes with shared and unique
+//! pointers:
+//! - Class,
+//! - ClassSP: shared_pointer<Class>
+//! - classUP: unique_pointer<Class>
+// **************************************************************
+#define DECLARE_CLASS(TypeName)                      \
+    class TypeName;                                  \
+    using TypeName##_SP = std::shared_ptr<TypeName>; \
+    using TypeName##_UP = std::unique_ptr<TypeName>;
+
+// **************************************************************
 //! \brief Return the number of elements in an array.
 //! S for size and T for the type.
 // **************************************************************

@@ -49,10 +49,8 @@ namespace glwrap
 class GLProgram: public IGLObject<GLenum>
 {
   // Unordered map = hash table = O(1) access time.
-  using GLLocationPtr = std::unique_ptr<GLLocation>;
-  using GLSamplerPtr = std::unique_ptr<GLSampler>;
-  using mapGLLocation = std::unordered_map<std::string, GLLocationPtr>;
-  using mapGLSampler = std::unordered_map<std::string, GLSamplerPtr>;
+  using mapGLLocation = std::unordered_map<std::string, GLLocation_SP>;
+  using mapGLSampler = std::unordered_map<std::string, GLSampler_SP>;
 
 public:
 

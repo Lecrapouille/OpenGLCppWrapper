@@ -27,7 +27,7 @@
 //! graph.
 //------------------------------------------------------------------------------
 
-CubicRobot::CubicRobot(VAOPtr cube, const char *name)
+CubicRobot::CubicRobot(GLVAO_SP cube, const char *name)
   : SceneNode(nullptr, name)
 {
   DEBUG("%s", "Cstr CubicRobot");
@@ -91,7 +91,7 @@ void GLImGUI::observeNode(SceneNode const& node) const
   ImGui::SetNextTreeNodeOpen(true);
   if (ImGui::TreeNode(nodename.c_str()))
     {
-      VAOPtr const& mesh = node.renderable();
+      GLVAO_SP const& mesh = node.renderable();
       if (nullptr != mesh)
         {
           std::string name("Meshes '" + mesh->name() + "'");
@@ -242,10 +242,10 @@ bool GLExample09::setup()
     return false;
 
   // Create 3 robots
-  SceneNodePtr root = std::make_shared<SceneNode>(nullptr, "root");
-  SceneNodePtr robot1 = std::make_shared<CubicRobot>(m_cube, "CubicRobot1");
-  SceneNodePtr robot2 = std::make_shared<CubicRobot>(m_cube, "CubicRobot2");
-  SceneNodePtr robot3 = std::make_shared<CubicRobot>(m_cube, "CubicRobot3");
+  SceneNode_SP root = std::make_shared<SceneNode>(nullptr, "root");
+  SceneNode_SP robot1 = std::make_shared<CubicRobot>(m_cube, "CubicRobot1");
+  SceneNode_SP robot2 = std::make_shared<CubicRobot>(m_cube, "CubicRobot2");
+  SceneNode_SP robot3 = std::make_shared<CubicRobot>(m_cube, "CubicRobot3");
 
   // Link nodes of the scene graph
   m_scenegraph.attach(root);
@@ -266,7 +266,7 @@ bool GLExample09::setup()
   // manage nodes with duplicated identifier: it will halt on the
   // first id.
   std::string key("CubicRobot2");
-  SceneNodePtr node = m_scenegraph.findNode(key);
+  SceneNode_SP node = m_scenegraph.findNode(key);
   if (nullptr == node)
     {
       std::cout << "I did not found '" << key << "'" << std::endl;

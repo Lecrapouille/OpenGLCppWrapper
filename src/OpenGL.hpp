@@ -26,6 +26,7 @@
 // *****************************************************************************
 
 #  include "GLEnum.hpp"
+#  include "Classes.hpp"
 #  include "private/Memory.hpp"
 #  include "private/Exception.hpp"
 #  include <atomic>

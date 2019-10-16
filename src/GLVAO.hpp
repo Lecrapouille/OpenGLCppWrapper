@@ -54,10 +54,8 @@ class GLVAO: public IGLObject<GLenum>
   friend class GLProgram;
 
   // Unordered map = hash table = O(1) access time.
-  using GLBufferPtr = std::unique_ptr<IGLBuffer>;
-  using IGLTexturePtr = std::unique_ptr<IGLTexture>;
-  using mapGLBuffer = std::unordered_map<std::string, GLBufferPtr>;
-  using mapGLTexture = std::unordered_map<std::string, IGLTexturePtr>;
+  using mapGLBuffer = std::unordered_map<std::string, IGLBuffer_UP>;
+  using mapGLTexture = std::unordered_map<std::string, IGLTexture_UP>;
 
 public:
 
@@ -548,7 +546,7 @@ private:
   //! \brief Hold textures.
   mapGLTexture m_textures;
   //! \brief Optionally hold vertex indices.
-  GLBufferPtr m_index;
+  IGLBuffer_UP m_index;
   //! \brief Hold the ID of the bound GLProgam.
   //! \note this varibale is modified durectly
   //! by the GLProgam.

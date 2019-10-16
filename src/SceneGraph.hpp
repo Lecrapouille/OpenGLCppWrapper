@@ -60,7 +60,7 @@ public:
 template <typename I, typename R, typename T, size_t D>
 class SceneGraph_t
 {
-  using ObjPtr = std::shared_ptr<R>;
+  using Obj_SP = std::shared_ptr<R>;
 
 public:
 
@@ -71,7 +71,7 @@ public:
   class Node : public Transformable<T, D>
   {
     friend SceneGraph_t;
-    using NodePtr = std::shared_ptr<Node>;
+    using Node_SP = std::shared_ptr<Node>;
 
   public:
 
@@ -80,7 +80,7 @@ public:
     //! it. The transform matrix is the identity matrix. nullptr is
     //! accepted. renderable shall inherite from the Renderable class.
     //-----------------------------------------------------------------
-    Node(ObjPtr renderable, I const& id)
+    Node(Obj_SP renderable, I const& id)
     {
       m_renderable = renderable;
       m_id = id;
@@ -91,7 +91,7 @@ public:
     //! it. The transform matrix is the identity matrix. nullptr is
     //! accepted. renderable shall inherite from the Renderable class.
     //-----------------------------------------------------------------
-    Node(ObjPtr renderable = nullptr)
+    Node(Obj_SP renderable = nullptr)
     {
       m_renderable = renderable;
     }
@@ -117,7 +117,7 @@ public:
     //! \brief Replace the renderable attached to the scene node. Smart
     //! pointers will do their job if needed. nullptr is accepted.
     //-----------------------------------------------------------------
-    inline void renderable(ObjPtr renderable)
+    inline void renderable(Obj_SP renderable)
     {
       m_renderable = renderable;
     }
@@ -126,7 +126,7 @@ public:
     //! \brief Get the renderable attached to the scene node. nullptr can be
     //! returned.
     //-----------------------------------------------------------------
-    inline ObjPtr renderable()
+    inline Obj_SP renderable()
     {
       return m_renderable;
     }
@@ -135,7 +135,7 @@ public:
     //! \brief Get the renderable attached to the scene node. nullptr can be
     //! returned.
     //-----------------------------------------------------------------
-    inline ObjPtr const renderable() const
+    inline Obj_SP const renderable() const
     {
       return m_renderable;
     }
@@ -145,9 +145,9 @@ public:
     //! graph as a child of this class.
     //! \return the created smart pointer of the scene node.
     //-----------------------------------------------------------------
-    NodePtr attach()
+    Node_SP attach()
     {
-      NodePtr node = std::make_shared<Node>();
+      Node_SP node = std::make_shared<Node>();
       node->m_parent = this;
       m_children.push_back(node);
       return node;
@@ -159,9 +159,9 @@ public:
     //! its smart pointer.
     //! \return the created smart pointer of the scene node.
     //-----------------------------------------------------------------
-    NodePtr attach(ObjPtr renderable, I const& id)
+    Node_SP attach(Obj_SP renderable, I const& id)
     {
-      NodePtr node = attach();
+      Node_SP node = attach();
       node->renderable(renderable);
       node->m_id = id;
       return node;
@@ -171,7 +171,7 @@ public:
     //! \brief Attach on the scene graph a created node refered by its
     //! smart pointer.
     //-----------------------------------------------------------------
-    void attach(NodePtr node)
+    void attach(Node_SP node)
     {
       m_children.push_back(node);
     }
@@ -238,7 +238,7 @@ public:
     //-----------------------------------------------------------------
     //! \brief Get the list of child nodes.
     //-----------------------------------------------------------------
-    inline std::vector<NodePtr> const &children() const
+    inline std::vector<Node_SP> const &children() const
     {
       return m_children;
     }
@@ -256,19 +256,19 @@ public:
     //! \brief Identifier for searching elements.
     I                      m_id;
     //! \brief holds a 3D entity. If no entity has to be hold set it to nullptr.
-    ObjPtr                 m_renderable;
+    Obj_SP                 m_renderable;
     //! \brief Pointer on the parent : nullptr for the root, for children it's never nullptr.
-    /*NodePtr */ Node*     m_parent = nullptr;
+    /*Node_SP */ Node*     m_parent = nullptr;
     //! \brief World transformation matrix. Stored faor avoiding to compute it every times when
     //! traversing the scene graph.
     Matrix<T, D + 1_z, D + 1_z>  m_world_transform;
     //! List of Node as children. Pointers are never nullptr.
-    std::vector<NodePtr>   m_children;
+    std::vector<Node_SP>   m_children;
   };
 
 private:
 
-  using NodePtr = std::shared_ptr<Node>;
+  using Node_SP = std::shared_ptr<Node>;
 
 public:
 
@@ -304,7 +304,7 @@ public:
   //! for beeing indexed by index but have a parent-child world
   //! transformation.
   //-----------------------------------------------------------------
-  NodePtr findNode(I const& id)
+  Node_SP findNode(I const& id)
   {
     return findNode(id, m_root);
   }
@@ -312,9 +312,9 @@ public:
   //-----------------------------------------------------------------
   //! \brief Wrapper for findNode but return the renderable object.
   //-----------------------------------------------------------------
-  ObjPtr findRenderable(I const& id)
+  Obj_SP findRenderable(I const& id)
   {
-    NodePtr o = findNode(id, m_root);
+    Node_SP o = findNode(id, m_root);
     if (nullptr != o)
       return o->renderable();
     return nullptr;
@@ -323,7 +323,7 @@ public:
   //-----------------------------------------------------------------
   //! \brief Attach a scene node to te
   //-----------------------------------------------------------------
-  void attach(NodePtr node)
+  void attach(Node_SP node)
   {
     if (nullptr == m_root)
       {
@@ -340,7 +340,7 @@ public:
   //-----------------------------------------------------------------
   //! \brief
   //-----------------------------------------------------------------
-  NodePtr attach()
+  Node_SP attach()
   {
     if (nullptr == m_root)
       {
@@ -354,7 +354,7 @@ public:
   //-----------------------------------------------------------------
   //! \brief
   //-----------------------------------------------------------------
-  NodePtr attach(ObjPtr renderable, I const& id)
+  Node_SP attach(Obj_SP renderable, I const& id)
   {
     if (nullptr == m_root)
       {
@@ -370,7 +370,7 @@ public:
   //-----------------------------------------------------------------
   //! \brief Return the root of the scene graph.
   //-----------------------------------------------------------------
-  inline NodePtr root()
+  inline Node_SP root()
   {
     return m_root;
   }
@@ -403,7 +403,7 @@ private:
   //! \note this method has been placed here and not in the scene node
   //! class because to avoid inherting from std::enable_shared_from_this.
   //-----------------------------------------------------------------
-  NodePtr findNode(I const& id, NodePtr res)
+  Node_SP findNode(I const& id, Node_SP res)
   {
     // This case is suppose to never happen
     if (nullptr == res)
@@ -419,7 +419,7 @@ private:
 
     for (auto i: res->m_children)
       {
-        NodePtr n = findNode(id, i);
+        Node_SP n = findNode(id, i);
         if (nullptr != n)
           return n;
       }
@@ -430,7 +430,7 @@ private:
 private:
 
   //! \brief the root node of the tree.
-  NodePtr m_root = nullptr;
+  Node_SP m_root = nullptr;
 };
 
 } // namespace glwrap

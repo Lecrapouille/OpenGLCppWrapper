@@ -31,8 +31,7 @@ using namespace glwrap;
 //------------------------------------------------------------------
 using SceneGraph    = SceneGraph_t<std::string, GLVAO, float, 3u>;
 using SceneNode     = SceneGraph::Node;
-using SceneNodePtr  = std::shared_ptr<SceneNode>;
-using VAOPtr = std::shared_ptr<GLVAO>;
+using SceneNode_SP  = std::shared_ptr<SceneNode>;
 
 // *****************************************************************
 //! \brief This class allows to display a GUI for debuging a scene
@@ -81,7 +80,7 @@ class CubicRobot: public SceneNode
 {
 public:
 
-  CubicRobot(VAOPtr cube, const char *name);
+  CubicRobot(GLVAO_SP cube, const char *name);
   ~CubicRobot()
   {
     DEBUG("%s", "---------------- destroy CubicRobot -----------------");
@@ -91,12 +90,12 @@ public:
 
 private:
 
-  SceneNodePtr m_body;
-  SceneNodePtr m_head;
-  SceneNodePtr m_leftArm;
-  SceneNodePtr m_rightArm;
-  SceneNodePtr m_leftLeg;
-  SceneNodePtr m_rightLeg;
+  SceneNode_SP m_body;
+  SceneNode_SP m_head;
+  SceneNode_SP m_leftArm;
+  SceneNode_SP m_rightArm;
+  SceneNode_SP m_leftLeg;
+  SceneNode_SP m_rightLeg;
   float radiansRotated = 0.0f;
 };
 
@@ -131,7 +130,7 @@ private:
 
   GLVertexShader    m_vertex_shader;
   GLFragmentShader  m_fragment_shader;
-  VAOPtr            m_cube;
+  GLVAO_SP            m_cube;
   GLProgram         m_prog;
   SceneGraph        m_scenegraph;
   GLImGUI           m_imgui;
