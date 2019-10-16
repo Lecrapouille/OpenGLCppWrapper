@@ -64,10 +64,10 @@ bool GLExample13::createLamp()
   m_prog_lamp.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
 
-  Movable<float, 3U> movable;
-  movable.position(lightPos);
-  movable.scale(Vector3f(0.05f)); // a smaller cube
-  m_prog_lamp.matrix44f("model") = movable.transform();
+  Transformable<float, 3U> transformable;
+  transformable.position(lightPos);
+  transformable.scale(Vector3f(0.05f)); // a smaller cube
+  m_prog_lamp.matrix44f("model") = transformable.transform();
 
   return true;
 }
@@ -144,8 +144,8 @@ bool GLExample13::createCube()
   m_prog_cube.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
 
-  Movable<float, 3U> movable;
-  m_prog_cube.matrix44f("model") = movable.transform();
+  Transformable<float, 3U> transformable;
+  m_prog_cube.matrix44f("model") = transformable.transform();
 
   // Material properties
   // Note: specular lighting doesn't have full effect on this object's material

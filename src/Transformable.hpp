@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_MOVABLE_HPP
-#  define OPENGLCPPWRAPPER_MOVABLE_HPP
+#ifndef OPENGLCPPWRAPPER_TRANSFORMABLE_HPP
+#  define OPENGLCPPWRAPPER_TRANSFORMABLE_HPP
 
 #  include "Transformation.hpp"
 
@@ -27,17 +27,17 @@ namespace glwrap
 {
 
 // *************************************************************************************************
-//! \brief a Movable defines a 4x4 transformation matrix from a translation, a rotation and a scale.
+//! \brief a Transformable defines a 4x4 transformation matrix from a translation, a rotation and a scale.
 //! This class allow an object to move in a 2D-world (if n == 2U) or 3D-world (if n == 3U).
 //! Not a thread safe class.
 // *************************************************************************************************
 template <typename T, size_t n>
-class Movable
+class Transformable
 {
 public:
 
   //! \brief Empty constructor.
-  Movable()
+  Transformable()
     : m_origin(maths::zero<T>()),
       m_position(maths::zero<T>()),
       m_scale(maths::one<T>()),
@@ -143,8 +143,8 @@ public:
   //-----------------------------------------------------------------
   //! \brief Set a local scaling of the object. By local we mean that
   //! will not impact children (they will not be scaled).
-  //! \note for scaling children use methods Movable::scale or
-  //! Movable::scaleFactor.
+  //! \note for scaling children use methods Transformable::scale or
+  //! Transformable::scaleFactor.
   //-----------------------------------------------------------------
   inline void localScale(Vector<T, n> const &scale)
   {
@@ -289,4 +289,4 @@ protected:
 
 } // namespace glwrap
 
-#endif // OPENGLCPPWRAPPER_MOVABLE_HPP
+#endif // OPENGLCPPWRAPPER_TRANSFORMABLE_HPP

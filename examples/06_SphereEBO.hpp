@@ -51,7 +51,7 @@ private:
   GLFragmentShader   m_fragment_shader;
   GLVAO              m_sphere;
   GLProgram          m_prog;
-  Movable<float, 3U> m_movable;
+  Transformable<float, 3U> m_transformable;
 };
 
 #endif // EXAMPLE_06_SPHERE_EBO_HPP

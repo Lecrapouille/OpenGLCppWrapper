@@ -128,7 +128,7 @@ bool GLExample05::setup()
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
   m_prog.matrix44f("projection") =
     matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10.0f);
-  m_prog.matrix44f("model") = m_movable.transform();
+  m_prog.matrix44f("model") = m_transformable.transform();
   m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
 
@@ -152,25 +152,25 @@ bool GLExample05::draw()
   // Draw the first cube with a "pinkished" coloration.
   // Make this cube spining around itself.
   m_prog.vector4f("color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
-  m_movable.rotateY(4.0f * ct);                      // Apply a rotation around Y-axis
-  m_movable.position(Vector3f(-1.0f, 0.0f, -1.0f));  // Apply a translation
-  m_prog.matrix44f("model") = m_movable.transform(); // Rotate and translate the cube
+  m_transformable.rotateY(4.0f * ct);                      // Apply a rotation around Y-axis
+  m_transformable.position(Vector3f(-1.0f, 0.0f, -1.0f));  // Apply a translation
+  m_prog.matrix44f("model") = m_transformable.transform(); // Rotate and translate the cube
   m_prog.draw(m_cube, Mode::TRIANGLES, 0, 36);       // Style 01: pass all parameters
 
   // Draw a second cube (same model = same VAO) with a "darkished"
   // coloration. Make this cube static.
   m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
-  m_movable.reset();
-  m_movable.position(Vector3f(3.0f, 0.0f, 0.0f)); // Apply a translation
-  m_prog.matrix44f("model") = m_movable.transform();
+  m_transformable.reset();
+  m_transformable.position(Vector3f(3.0f, 0.0f, 0.0f)); // Apply a translation
+  m_prog.matrix44f("model") = m_transformable.transform();
   m_prog.draw(m_cube, Mode::TRIANGLES /*, 0, 36*/); // Style 02: do not pass first and count vertices
 
   // Draw the floor (second model = second VAO).
   m_prog.vector4f("color") = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
   m_prog.bind(m_floor);
-  m_movable.reset();
-  m_movable.position(Vector3f(0.0f, 0.0f, 0.0f)); // Apply a translation
-  m_prog.matrix44f("model") = m_movable.transform();
+  m_transformable.reset();
+  m_transformable.position(Vector3f(0.0f, 0.0f, 0.0f)); // Apply a translation
+  m_prog.matrix44f("model") = m_transformable.transform();
   m_prog.draw(Mode::TRIANGLES); // Style 03: do not pass implict bound VAO and no vertices count
 
   return true;

@@ -197,10 +197,10 @@ If you want to paint two cubes (let say for this example), you do not have to cr
 
 * Add [Model View Projection](http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/) matrices in your vertex shader.
 * Bind your VAO to your GLProgram.
-* Use the Movable class to place (translate, rotate, scale) your first cube in the scene: this will create a 4x4 Matrix.
+* Use the Transformable class to place (translate, rotate, scale) your first cube in the scene: this will create a 4x4 Matrix.
 * Apply this matrix to your shader uniform matrix named "model" of the Model View Projection.
 * Draw the first cube.
-* Use again the Movable for placing the second cube: redo the three previous steps but this time, draw the second cube (update movable, apply a matrix to uniform, draw).
+* Use again the Transformable for placing the second cube: redo the three previous steps but this time, draw the second cube (update transformable, apply a matrix to uniform, draw).
 * See my [examples](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md) directory to know how to do it concretely.
 
 With this method, for this example, you will save GPU memory by avoiding storing an additional VAO and all its VBOs needed for drawing a cube.
@@ -219,7 +219,7 @@ Not shown in this document but OpenGLCppWrapper can manage framebuffer and cubic
 * Make some security checks like detecting uninitilized VBOs, textures or VBO mismatch number of elements.
 * (work in progress) TrueType fonts.
 * to use Matrix and Vector classes (like glm library).
-* to create movable objects allowing to combine transformations like rotation, translation, projection on a model.
+* to create transformable objects allowing to combine transformations like rotation, translation, projection on a model.
 * to create a 'scene graph' of objects: a graph where nodes contain a transformation matrix relative to the current node and its parent. Note that the matrix is mandatory for each node of the scene graph while the 3d model is optional: this allows us to add invisible transformations.
 * to wrap the initialization of [Dear ImGui](https://github.com/ocornut/imgui) an API for developing GUI in immediate mode (using just if then else instead of callbacks/signal-slot/observers methods like done with GTK+ or Qt).
 * to wrap OpenGL window and offers to the user the init, run-time phase and callbacks like keyboard and windows resizing.

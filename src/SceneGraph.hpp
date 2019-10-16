@@ -25,7 +25,7 @@
 // New Castle University, Tutorial 6: Scene Graphs
 // https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/scenegraphs/Tutorial%206%20-%20Scene%20Graphs.pdf
 
-#  include "Movable.hpp"
+#  include "Transformable.hpp"
 #  include <memory>
 #  include <vector>
 
@@ -68,7 +68,7 @@ public:
   //! \brief A Scene Node is made of a transformation matrix (defined by its type T and dimension D
   //! mostly: T = float and D = 4) and an optional renderable object (implementing a draw() method).
   // ***********************************************************************************************
-  class Node : public Movable<T, D>
+  class Node : public Transformable<T, D>
   {
     friend SceneGraph_t;
     using NodePtr = std::shared_ptr<Node>;
@@ -178,7 +178,7 @@ public:
 
     //-----------------------------------------------------------------
     //! \brief Return the world transform matrix.
-    //! \note the local transform matrix is given by Movable::transform().
+    //! \note the local transform matrix is given by Transformable::transform().
     //-----------------------------------------------------------------
     inline Matrix<T, D + 1_z, D + 1_z> const& worldTransform() const
     {
@@ -193,7 +193,7 @@ public:
     //-----------------------------------------------------------------
     virtual void update(float const dt)
     {
-      m_world_transform = Movable<T, D>::transform();
+      m_world_transform = Transformable<T, D>::transform();
       if (nullptr != m_parent)
         {
           m_world_transform *= m_parent->m_world_transform;
@@ -216,7 +216,7 @@ public:
       if (nullptr != m_renderable)
         {
           Matrix<T, D + 1_z, D + 1_z> transform =
-            matrix::scale(m_world_transform, Movable<T, D>::localScale());
+            matrix::scale(m_world_transform, Transformable<T, D>::localScale());
           renderer.drawSceneNode(*m_renderable, transform);
         }
 

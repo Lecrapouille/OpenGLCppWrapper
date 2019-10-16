@@ -57,7 +57,7 @@ private:
   GLVAO              m_cube;
   GLVAO              m_floor;
   GLProgram          m_prog;
-  Movable<float, 3U> m_movable;
+  Transformable<float, 3U> m_transformable;
 };
 
 #endif // EXAMPLE_05_VAOS_VERSUS_VBOS_HPP

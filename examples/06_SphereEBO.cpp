@@ -120,7 +120,7 @@ bool GLExample06::setup()
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
   m_prog.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
-  m_prog.matrix44f("model") = m_movable.transform();
+  m_prog.matrix44f("model") = m_transformable.transform();
   m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(1,1,1), Vector3f(0,1,0));
 
