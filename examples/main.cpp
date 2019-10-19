@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
       std::cerr << "Coming soon" << std::endl;
       //win = std::make_unique<GLExample04>();
       return EXIT_FAILURE;
-      break;
+      //break;
     case 5:
       win = std::make_unique<GLExample05>();
       break;

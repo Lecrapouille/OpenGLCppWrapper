@@ -21,15 +21,17 @@
 #ifndef OPENGLCPPWRAPPER_MATHS_HPP
 #  define OPENGLCPPWRAPPER_MATHS_HPP
 
+#  include <vector>
+
 namespace glwrap
 {
   namespace maths
   {
     //! \brief Allow to redefine neutral and/or absorbing element in algebra.
-    template<class T> T one() { return T(1); }
+    template<typename T> T one() { return T(1); }
 
     //! \brief Allow to redefine neutral and/or absorbing element in algebra.
-    template<class T> T zero() { return T(0); }
+    template<typename T> T zero() { return T(0); }
 
     //! \brief PI number
     static double PI = 3.14159265358979323846;
@@ -44,7 +46,7 @@ namespace glwrap
 #   pragma GCC diagnostic ignored "-Wcast-qual"
 #   pragma GCC diagnostic ignored "-Wsign-conversion"
 
-    static bool almostEqual(float const A, float const B)
+    static inline bool almostEqual(float const A, float const B)
     {
       if (A == B)
         return true;
@@ -78,38 +80,51 @@ namespace glwrap
       return almostEqual(A, zero<float>());
     }
 
-    //! \brief Constrain value: std::min(std::max(a[i], lower), upper)
-    template<typename T>
-    static T clamp(T const value, T const lower, T const upper)
+    template<typename T, class =
+             typename std::enable_if<std::is_integral<T>::value>::type>
+    bool inline isPowerOfTwo(T const value)
     {
-      if (value < lower)
+      return ((value & (value - one<T>())) == zero<T>()) &&
+        (value != zero<T>());
+    }
+
+    //! \brief Constrain value: std::min(std::max(x, lower), upper)
+    template<typename T>
+    static inline T clamp(T const x, T const lower, T const upper)
+    {
+      if (x < lower)
         return lower;
 
-      if (value > upper)
+      if (x > upper)
         return upper;
 
-      return value;
+      return x;
+    }
+
+    //! \brief Return the sign of the number: -1 or 0 or +1.
+    template<typename T>
+    static inline int sign(T const val)
+    {
+      return (zero<T>() < val) - (val < zero<T>);
     }
 
     //! \brief Converts radians to degrees and returns the result.
     template<typename T>
-    inline T toRadian(T const degrees)
+    static inline T toRadian(T const degrees)
     {
-      double rad = degrees * 0.01745329251994329576923690768489;
-      return T(rad);
+      return static_cast<T>(degrees * 0.01745329251994329576923690768489);
     }
 
     //! \brief Converts degrees to radians and returns the result.
     template<typename T>
-    inline T toDegree(T const radians)
+    static inline T toDegree(T const radians)
     {
-      double deg = radians * 57.295779513082320876798154814105;
-      return T(deg);
+      return static_cast<T>(radians * 57.295779513082320876798154814105);
     }
 
     //! \brief Normalize the angle given in degrees to [-180 +180] degrees.
     template<typename T>
-    inline T wrapTo180(T const degrees)
+    static inline T wrapTo180(T const degrees)
     {
       T angle = degrees;
       while (angle <= -T(180))
@@ -121,7 +136,7 @@ namespace glwrap
 
     //! \brief Normalize the angle given in degrees to [0 +360] degrees.
     template<typename T>
-    inline T wrapTo360(T const degrees)
+    static inline T wrapTo360(T const degrees)
     {
       T angle = degrees;
       while (angle < T(0))
@@ -133,7 +148,7 @@ namespace glwrap
 
     //! \brief Normalize the angle given in radians to [-PI +PI] radians.
     template<typename T>
-    inline T wrapToPI(T const radians)
+    static inline T wrapToPI(T const radians)
     {
       T angle = radians;
       while (angle <= -T(PI))
@@ -145,7 +160,7 @@ namespace glwrap
 
     //! \brief Normalize the angle given in radians to [0 2*PI] radians.
     template<typename T>
-    inline T wrapTo2PI(T const radians)
+    static inline T wrapTo2PI(T const radians)
     {
       T angle = radians;
       while (angle < T(0))
@@ -153,6 +168,23 @@ namespace glwrap
       while (angle >= T(2.0 * PI))
         angle -= T(2.0 * PI);
       return angle;
+    }
+
+    //! \brief Linear mapping of x from range [start1 stop1] to range [start2 stop2].
+    template<typename T>
+    static inline T lmap(T const x, T const start1, T const stop1, T const start2, T const stop2)
+    {
+      T mapped = start2 + (stop2 - start2) * ((x - start1) / (stop1 - start1));
+      return mapped;
+    }
+
+    //! \brief Linear interpolation between a and b for the parameter t with t
+    //! inside the range [0,1].
+    template<typename T>
+    static inline T lerp(T const a, T const b, T const t)
+    {
+      static_assert((t >= zero<T>()) && (t <= one<T>()), "param t shall be [0 1]");
+      return (one<T>() - t) * a + t * b;
     }
 
     // *****************************************************************************
@@ -168,7 +200,7 @@ namespace glwrap
     //! computed.
     //! \note: This code has been inpsired by the Numpy.linspace function.
     // *****************************************************************************
-    template <typename T>
+    template<typename T>
     static T linspace(T const start, T const end, size_t const N, std::vector<T>& result, const bool endpoint)
     {
       const T not_a_number = std::numeric_limits<T>::quiet_NaN();

@@ -49,7 +49,7 @@ Exception::Exception(const Exception& exc)
 }
 
 
-Exception::~Exception() throw()
+Exception::~Exception() /* throw() */
 {
   delete m_pNested;
 }
@@ -69,19 +69,19 @@ Exception& Exception::operator = (const Exception& exc)
 }
 
 
-const char* Exception::name() const throw()
+const char* Exception::name() const /* throw() */
 {
   return "Exception";
 }
 
 
-const char* Exception::className() const throw()
+const char* Exception::className() const /* throw() */
 {
   return typeid(*this).name();
 }
 
 
-const char* Exception::what() const throw()
+const char* Exception::what() const noexcept /* throw() */
 {
   return name();
 }

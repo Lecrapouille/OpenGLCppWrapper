@@ -41,19 +41,19 @@ public:
   Exception(const Exception& exc);
   /// Copy constructor.
 
-  ~Exception() throw();
+  ~Exception(); /* throw() */
   /// Destroys the exception and deletes the nested exception.
 
   Exception& operator = (const Exception& exc);
   /// Assignment operator.
 
-  virtual const char* name() const throw();
+  virtual const char* name() const; /* throw() */
   /// Returns a static string describing the exception.
 
-  virtual const char* className() const throw();
+  virtual const char* className() const; /* throw() */
   /// Returns the name of the exception class.
 
-  virtual const char* what() const throw();
+  virtual const char* what() const noexcept override; /* throw() */
   /// Returns a static string describing the exception.
   ///
   /// Same as name(), but for compatibility with std::exception.
@@ -146,10 +146,10 @@ inline int Exception::code() const
     CLS(const std::string& msg, const std::string& arg, int code = CODE); \
     CLS(const std::string& msg, const Exception& exc, int code = CODE); \
     CLS(const CLS& exc);                                                \
-    ~CLS() throw();                                                     \
+    ~CLS(); /* throw() */                                               \
     CLS& operator = (const CLS& exc);                                   \
-    const char* name() const throw();                                   \
-    const char* className() const throw();                              \
+    const char* name() const; /* throw() */                             \
+    const char* className() const; /* throw() */                        \
     Exception* clone() const;                                           \
     void rethrow() const;                                               \
   };
@@ -176,7 +176,7 @@ inline int Exception::code() const
   CLS::CLS(const CLS& exc): BASE(exc)                                   \
   {                                                                     \
   }                                                                     \
-  CLS::~CLS() throw()                                                   \
+  CLS::~CLS() /* throw() */                                             \
   {                                                                     \
   }                                                                     \
   CLS& CLS::operator = (const CLS& exc)                                 \
@@ -184,11 +184,11 @@ inline int Exception::code() const
     BASE::operator = (exc);                                             \
     return *this;                                                       \
   }                                                                     \
-  const char* CLS::name() const throw()                                 \
+  const char* CLS::name() const /* throw() */                           \
   {                                                                     \
     return NAME;                                                        \
   }                                                                     \
-  const char* CLS::className() const throw()                            \
+  const char* CLS::className() const /* throw() */                      \
   {                                                                     \
     return typeid(*this).name();                                        \
   }                                                                     \
