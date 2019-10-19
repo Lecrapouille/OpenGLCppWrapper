@@ -110,8 +110,8 @@ bool GLExample05::setup()
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
   // Load vertex and fragment shaders with GLSL code.
-  m_vertex_shader.fromFile("shaders/04_VAOvsVBO.vs");
-  m_fragment_shader.fromFile("shaders/04_VAOvsVBO.fs");
+  m_vertex_shader.fromFile("shaders/05_VAOvsVBO.vs");
+  m_fragment_shader.fromFile("shaders/05_VAOvsVBO.fs");
 
   // Compile the shader program
   if (!m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())

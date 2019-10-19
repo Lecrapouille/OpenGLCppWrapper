@@ -63,8 +63,8 @@ bool GLExample14::setup()
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
   // Load vertex and fragment shaders with GLSL code.
-  m_vertex_shader.fromFile("shaders/13_MapEditor.vs");
-  m_fragment_shader.fromFile("shaders/13_MapEditor.fs");
+  m_vertex_shader.fromFile("shaders/14_MapEditor.vs");
+  m_fragment_shader.fromFile("shaders/14_MapEditor.fs");
 
   // Compile the shader program
   if (!m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
