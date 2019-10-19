@@ -21,10 +21,10 @@
 #include "12_ComplexShader.hpp"
 #include "Maths.hpp"
 
-void GLExample12::onWindowSizeChanged(const float width, const float height)
+void GLExample12::onWindowSizeChanged()
 {
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
+  glCheck(glViewport(0, 0, width<int>(), height<int>()));
 }
 
 //------------------------------------------------------------------

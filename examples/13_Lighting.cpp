@@ -24,13 +24,23 @@
 // lighting
 static Vector3f lightPos(1.2f, 1.0f, 2.0f);
 
-void GLExample13::onWindowSizeChanged(const float width, const float height)
+// --------------------------------------------------------------
+//! \brief Mouse event
+// --------------------------------------------------------------
+void GLExample13::onMouseMoved(window::Mouse const& mouse)
+{
+  float const dx = static_cast<float>(mouse.displacement.x);
+  float const dy = static_cast<float>(mouse.displacement.y);
+  m_camera.ProcessMouseMovement(dx, dy);
+}
+
+void GLExample13::onWindowSizeChanged()
 {
   // Note: height is never zero !
-  float ratio = width / height;
+  float ratio = width<float>() / height<float>();
 
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
+  glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
   m_prog_lamp.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
@@ -60,7 +70,7 @@ bool GLExample13::createLamp()
       #include "geometry/cube_position.txt"
     };
 
-  float ratio = static_cast<float>(width()) / static_cast<float>(height());
+  float ratio = width<float>() / height<float>();
   m_prog_lamp.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
 
@@ -140,7 +150,7 @@ bool GLExample13::createCube()
       #include "geometry/cube_normals.txt"
     };
 
-  float ratio = static_cast<float>(width()) / static_cast<float>(height());
+  float ratio = width<float>() / height<float>();
   m_prog_cube.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
 
@@ -210,44 +220,15 @@ bool GLExample13::draw()
   m_prog_cube.draw(m_cube, Mode::TRIANGLES);
   m_prog_lamp.draw(m_lamp, Mode::TRIANGLES);
 
-  // std::cout << "P: " << m_camera.Position << std::endl;
-  // std::cout << "Y: " << m_camera.Yaw << std::endl;
-  // std::cout << "p: " << m_camera.Pitch << std::endl;
-
   // Key pressed
   if (keyPressed(GLFW_KEY_W))
-    m_camera.ProcessKeyboard(FORWARD, dt());
+    m_camera.ProcessKeyboard(Camera_Movement::FORWARD, dt());
   if (keyPressed(GLFW_KEY_S))
-    m_camera.ProcessKeyboard(BACKWARD, dt());
+    m_camera.ProcessKeyboard(Camera_Movement::BACKWARD, dt());
   if (keyPressed(GLFW_KEY_A))
-    m_camera.ProcessKeyboard(LEFT, dt());
+    m_camera.ProcessKeyboard(Camera_Movement::LEFT, dt());
   if (keyPressed(GLFW_KEY_D))
-    m_camera.ProcessKeyboard(RIGHT, dt());
+    m_camera.ProcessKeyboard(Camera_Movement::RIGHT, dt());
 
   return true;
-}
-
-// --------------------------------------------------------------
-//! \brief Mouse event
-// --------------------------------------------------------------
-void GLExample13::onMouseMoved(const double xpos, const double ypos)
-{
-  static double lastX = 0.0f;
-  static double lastY = 0.0f;
-  static bool firstMouse = true;
-
-  if (firstMouse)
-    {
-      lastX = xpos;
-      lastY = ypos;
-      firstMouse = false;
-    }
-
-  double xoffset = xpos - lastX;
-  double yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-  lastX = xpos;
-  lastY = ypos;
-  m_camera.ProcessMouseMovement(static_cast<float>(xoffset),
-                                static_cast<float>(yoffset));
 }

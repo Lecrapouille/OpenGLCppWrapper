@@ -32,16 +32,16 @@
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void GLExample06::onWindowSizeChanged(const float width, const float height)
+void GLExample06::onWindowSizeChanged()
 {
   // Note: height is never zero !
-  float ratio = width / height;
+  float ratio = width<float>() / height<float>();
 
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
+  glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
   m_prog.matrix44f("projection") =
-    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
+    matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10.0f);
 }
 
 //------------------------------------------------------------------
@@ -117,7 +117,7 @@ bool GLExample06::setup()
     }
 
   // Init shader uniforms
-  float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
+  float ratio = width<float>() / height<float>();
   m_prog.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
   m_prog.matrix44f("model") = m_transformable.transform();

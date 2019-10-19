@@ -43,7 +43,7 @@ private:
   bool createTerrain();
   void generateAltitudes(const uint32_t dim);
   void loadTerrain(const uint32_t dim);
-  virtual void onWindowSizeChanged(const float width, const float height) override;
+  virtual void onWindowSizeChanged() override;
   virtual bool setup() override;
   virtual bool draw() override;
 

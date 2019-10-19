@@ -25,30 +25,13 @@
 //! VAO has a reserved number of elements.
 //------------------------------------------------------------------
 
-namespace utils
-{
-  template<class T>
-  static T map(T const value, T const start1, T const stop1, T const start2, T const stop2)
-  {
-    T mapped = start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1));
-    return mapped;
-  }
-} // namespace utils
-
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void GLExample14::onWindowSizeChanged(float const width, float const height)
+void GLExample14::onWindowSizeChanged()
 {
-  // Note: height is never zero !
-  float ratio = width / height;
-
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
-
-  std::cout << "New Window dimension "
-    << static_cast<int>(width) << " x " << static_cast<int>(height)
-    << ". Ratio is " << ratio << std::endl;
+  glCheck(glViewport(0, 0, width<int>(), height<int>()));
 }
 
 //------------------------------------------------------------------
@@ -203,12 +186,16 @@ void GLExample14::SelectTool()
 // --------------------------------------------------------------
 //! \brief Mouse event
 // --------------------------------------------------------------
-void GLExample14::onMouseButtonPressed(int const button, int const action)
+void GLExample14::onMouseButtonPressed(Mouse const& mouse)
 {
-  if ((button == GLFW_MOUSE_BUTTON_LEFT) && (action == GLFW_PRESS))
+  if ((mouse.button == ButtonType::LEFT) && (mouse.pressed))
     {
-      float x = utils::map(m_mouse.x, 0.0f, static_cast<float>(width()), -1.0f, 1.0f);
-      float y = utils::map(static_cast<float>(height()) - m_mouse.y, 0.0f, static_cast<float>(height()), -1.0f, 1.0f);
+      const float w = width<float>();
+      const float h = height<float>();
+      const float px = static_cast<float>(mouse.position.x);
+      const float py = static_cast<float>(mouse.position.y);
+      const float x = maths::lmap(px, 0.0f, w, -1.0f, 1.0f);
+      const float y = maths::lmap(h - py, 0.0f, h, -1.0f, 1.0f);
 
       // Equivalent to: m_actions[m_action][m_brush](x, y);
       (this->*m_execute)(x, y);
@@ -218,8 +205,6 @@ void GLExample14::onMouseButtonPressed(int const button, int const action)
 // --------------------------------------------------------------
 //! \brief Mouse event
 // --------------------------------------------------------------
-void GLExample14::onMouseMoved(double const xpos, double const ypos)
+void GLExample14::onMouseMoved(Mouse const& /*mouse*/)
 {
-  m_mouse.x = static_cast<float>(xpos);
-  m_mouse.y = static_cast<float>(ypos);
 }

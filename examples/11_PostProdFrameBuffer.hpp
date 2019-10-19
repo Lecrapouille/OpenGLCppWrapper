@@ -46,7 +46,7 @@ private:
 
   bool firstProgram();
   bool secondProgram();
-  virtual void onWindowSizeChanged(const float width, const float height) override;
+  virtual void onWindowSizeChanged() override;
   virtual bool setup() override;
   virtual bool draw() override;
 

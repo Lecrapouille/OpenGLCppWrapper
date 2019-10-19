@@ -227,6 +227,13 @@ public:
     return m_angle;
   }
 
+  Vector3f direction()
+  {
+    Matrix44f& m = transform();
+    Vector3f v(-m[0][2], -m[1][2], -m[2][2]);
+    return vector::normalize(v);
+  }
+
   //! \brief Return the 4x4 transform matrix combining the
   //! position/rotation/scale/origin of the object.
   //!

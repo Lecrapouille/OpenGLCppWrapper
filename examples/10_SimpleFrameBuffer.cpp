@@ -30,10 +30,10 @@
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void GLExample10::onWindowSizeChanged(const float width, const float height)
+void GLExample10::onWindowSizeChanged()
 {
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
+  glCheck(glViewport(0, 0, width<int>(), height<int>()));
 }
 
 //------------------------------------------------------------------
@@ -98,7 +98,7 @@ bool GLExample10::setup()
     };
 
   // Framebuffer
-  m_fbo.resize(width(), height());
+  m_fbo.resize(width<uint32_t>(), height<uint32_t>());
   m_fbo.createColorTexture(m_screen.texture2D("screenTexture"));
 
   return true;
@@ -110,7 +110,7 @@ bool GLExample10::setup()
 bool GLExample10::draw()
 {
   // First pass: draw to the framebuffer texture
-  m_fbo.render(0, 0, width(), height(), [this]() {
+  m_fbo.render(0u, 0u, width<uint32_t>(), height<uint32_t>(), [this]() {
       glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
       glCheck(glClear(GL_COLOR_BUFFER_BIT));
       m_prog_plane.draw(m_plane, Mode::TRIANGLE_STRIP, 0, 4);

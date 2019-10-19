@@ -26,10 +26,42 @@
 // *****************************************************************************
 
 #  include "OpenGL.hpp"
+#  include "Vector.hpp"
 #  include <GLFW/glfw3.h>
 
 namespace glwrap
 {
+namespace window
+{
+
+  //! \brief Button type
+  enum ButtonType
+    {
+     LEFT = GLFW_MOUSE_BUTTON_LEFT,
+     RIGHT = GLFW_MOUSE_BUTTON_RIGHT,
+     MIDDLE = GLFW_MOUSE_BUTTON_MIDDLE,
+     ONE = GLFW_MOUSE_BUTTON_1,
+     TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT
+    };
+
+  //! \brief Structure holding mouse states
+  struct Mouse
+  {
+    //! \brief position (x and y coordinate)
+    Vector2g position;
+    //! \brief displacement (delta position)
+    Vector2g displacement;
+    //! \brief scrolling
+    Vector2g scroll;
+    //! \brief is cursor visible ?
+    bool visible;
+    //! \brief button pressed or released ?
+    bool pressed;
+    //! \brief which button was pressed or released.
+    ButtonType button;
+  };
+
+} // namespace window
 
 // *****************************************************************************
 //! \class GLWindow GLWindow.hpp
@@ -58,49 +90,47 @@ public:
   bool start();
 
   //----------------------------------------------------------------------------
-  //! \brief Hide mouse cursor.
+  //! \brief Hide and grab the mouse cursor.
   //----------------------------------------------------------------------------
-  inline void hideMouseCursor() const
-  {
-    if (nullptr != m_main_window)
-    {
-      glfwSetInputMode(m_main_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
-  }
+  void hideMouseCursor();
+
+  //----------------------------------------------------------------------------
+  //! \brief Make the cursor visible.
+  //----------------------------------------------------------------------------
+  void showMouseCursor();
 
   //----------------------------------------------------------------------------
   //! \brief Return the delta time (in ms) with.
   //----------------------------------------------------------------------------
-  inline float dt() const
-  {
-    return m_deltaTime;
-  }
+  inline float dt() const { return m_deltaTime; }
 
   //----------------------------------------------------------------------------
   //! \brief Return the number of frame per seconds.
   //----------------------------------------------------------------------------
-  inline uint32_t fps() const
-  {
-    return m_fps;
-  }
+  inline uint32_t fps() const { return m_fps; }
 
   //----------------------------------------------------------------------------
   //! \brief Return the address of the GLFW window.
   //----------------------------------------------------------------------------
-  inline GLFWwindow *window()
-  {
-    return m_main_window;
-  }
+  inline GLFWwindow *window() { return m_main_window; }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the structure holding mouse states.
+  //! \note this method shall not be called directly.
+  //----------------------------------------------------------------------------
+  inline window::Mouse& mouse() { return m_mouse; }
 
   //----------------------------------------------------------------------------
   //! \brief Return the current width of the window.
   //----------------------------------------------------------------------------
-  inline uint32_t width() const { return m_width; }
+  template<typename T>
+  inline T width() const { return static_cast<T>(m_width); }
 
   //----------------------------------------------------------------------------
   //! \brief Return the current height of the window.
   //----------------------------------------------------------------------------
-  inline uint32_t height() const { return m_height; }
+  template<typename T>
+  inline T height() const { return static_cast<T>(m_height); }
 
   //----------------------------------------------------------------------------
   //! \brief Change the position of the window.
@@ -109,33 +139,32 @@ public:
 
   //----------------------------------------------------------------------------
   //! \brief Check if the keyboard has been pressed.
+  //! \note we suppose nullptr != m_main_window.
   //----------------------------------------------------------------------------
   inline bool keyPressed(const int key) const
   {
-    if (nullptr != m_main_window)
-      return GLFW_PRESS == glfwGetKey(m_main_window, key);
-    return false;
+    return GLFW_PRESS == glfwGetKey(m_main_window, key);
   }
 
   //----------------------------------------------------------------------------
   //! \brief Callback when the mouse has been moved. Default behavior
   //! is to do nothing.
   //----------------------------------------------------------------------------
-  virtual void onMouseMoved(const double /*xpos*/, const double /*ypos*/)
+  virtual void onMouseMoved(window::Mouse const& /*mouse*/)
   {}
 
   //----------------------------------------------------------------------------
   //! \brief Callback when the mouse has been scrolled. Default behavior
   //! is to do nothing.
   //----------------------------------------------------------------------------
-  virtual void onMouseScrolled(const double /*xoffset*/, const double /*yoffset*/)
+  virtual void onMouseScrolled(window::Mouse const& /*mouse*/)
   {}
 
   //----------------------------------------------------------------------------
   //! \brief Callback when the mouse has been pressed. Default behavior
   //! is to do nothing.
   //----------------------------------------------------------------------------
-  virtual void onMouseButtonPressed(const int /*button*/, const int /*action*/)
+  virtual void onMouseButtonPressed(window::Mouse const& /*mouse*/)
   {}
 
 private:
@@ -152,7 +181,8 @@ private:
   //! \param width is never <= 0
   //! \param height is never <= 0
   //----------------------------------------------------------------------------
-  virtual void onWindowSizeChanged(const float width, const float height) = 0;
+  virtual void onWindowSizeChanged()
+  {}
 
   //----------------------------------------------------------------------------
   //! \brief Add here all stuffs concerning the init of your 3D game.
@@ -183,14 +213,23 @@ private:
 
 private:
 
+  //! \brief
   double m_lastTime = 0.0;
+  //! \brief
   double m_lastFrameTime = 0.0;
+  //! \brief Frames Per Seconds
   uint32_t m_fps = 0;
+  //! \brief
   float m_deltaTime = 0.0f;
-
+  //! \brief Windows current width
   uint32_t m_width;
+  //! \brief Windows current height
   uint32_t m_height;
+  //! \brief Windows title
   const char *m_title;
+  //! \brief window::Mouse states
+  window::Mouse m_mouse;
+  //! \brief GLF window context
   GLFWwindow *m_main_window = nullptr;
 };
 

@@ -26,11 +26,7 @@
 #  include <map>
 
 using namespace glwrap;
-
-struct Mouse
-{
-  float x, y;
-};
+using namespace glwrap::window;
 
 class GLExample14: public IGLWindow
 {
@@ -54,9 +50,9 @@ protected:
   enum class Brush { Node, Arc, Zone };
   enum class Action { Insertion, Deletion, Moving };
 
-  virtual void onWindowSizeChanged(const float width, const float height) override;
-  virtual void onMouseButtonPressed(const int button, const int action) override;
-  virtual void onMouseMoved(const double xpos, const double ypos) override;
+  virtual void onWindowSizeChanged() override;
+  virtual void onMouseButtonPressed(Mouse const& mouse) override;
+  virtual void onMouseMoved(Mouse const& mouse) override;
   virtual bool setup() override;
   virtual bool draw() override;
 
@@ -86,7 +82,7 @@ private:
 
   execute_t          m_execute = &GLExample14::InsertNode;
   bool               m_arcing = false;
-  bool               m_zoning = false;
+  //bool               m_zoning = false;
   Vector2f           m_from;
 
   std::map<Action, std::map<Brush, execute_t>> m_actions =

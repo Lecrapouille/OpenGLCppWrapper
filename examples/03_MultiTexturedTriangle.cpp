@@ -32,10 +32,10 @@
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void GLExample03::onWindowSizeChanged(const float width, const float height)
+void GLExample03::onWindowSizeChanged()
 {
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
+  glCheck(glViewport(0, 0, width<int>(), height<int>()));
 }
 
 //------------------------------------------------------------------

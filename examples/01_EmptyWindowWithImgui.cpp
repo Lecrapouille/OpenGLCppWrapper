@@ -28,10 +28,9 @@
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void GLExample01::onWindowSizeChanged(const float width, const float height)
+void GLExample01::onWindowSizeChanged()
 {
-  //setWindowSize(width, height);
-  GLExample00::onWindowSizeChanged(width, height);
+  GLExample00::onWindowSizeChanged();
 }
 
 //------------------------------------------------------------------
@@ -70,7 +69,7 @@ bool GLExample01::draw()
 // --------------------------------------------------------------
 //! \brief Mouse event
 // --------------------------------------------------------------
-void GLExample01::onMouseMoved(const double xpos, const double ypos)
+void GLExample01::onMouseMoved(Mouse const& mouse)
 {
-  GLExample00::onMouseMoved(xpos, ypos);
+  GLExample00::onMouseMoved(mouse);
 }

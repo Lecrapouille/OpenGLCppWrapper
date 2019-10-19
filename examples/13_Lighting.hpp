@@ -55,8 +55,8 @@ protected:
   bool createCube();
   bool createLamp();
   void changeLightProperties(float const time);
-  virtual void onMouseMoved(const double xpos, const double ypos) override;
-  virtual void onWindowSizeChanged(const float width, const float height) override;
+  virtual void onMouseMoved(window::Mouse const& mouse) override;
+  virtual void onWindowSizeChanged() override;
   virtual bool setup() override;
   virtual bool draw() override;
 

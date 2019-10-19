@@ -33,17 +33,27 @@
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void GLExample07::onWindowSizeChanged(const float width, const float height)
+void GLExample07::onWindowSizeChanged()
 {
   // Note: height is never zero !
-  float ratio = width / height;
+  float ratio = width<float>() / height<float>();
 
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
+  glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
   m_progShape.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
   m_progSkyBox.matrix44f("projection") = m_progShape.matrix44f("projection");
+}
+
+// --------------------------------------------------------------
+//! \brief Mouse event
+// --------------------------------------------------------------
+void GLExample07::onMouseMoved(window::Mouse const& mouse)
+{
+  float const dx = static_cast<float>(mouse.displacement.x);
+  float const dy = static_cast<float>(mouse.displacement.y);
+  m_camera.ProcessMouseMovement(dx, dy);
 }
 
 //------------------------------------------------------------------
@@ -64,7 +74,7 @@ bool GLExample07::createSkyBox()
     }
 
   // Init uniforms.
-  float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
+  float ratio = width<float>() / height<float>();
   m_progSkyBox.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
 
@@ -111,7 +121,7 @@ bool GLExample07::createShape()
   // Init uniforms. Set the Z-clipping of the camera to a high value
   // in the aim to create an effect of deep when objects are far away
   // (in contrast of the skybox which never changes its size).
-  float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
+  float ratio = width<float>() / height<float>();
   m_progShape.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
 
@@ -214,43 +224,15 @@ bool GLExample07::draw()
   // Draw skybox as last. Set depth function back to default
   drawSkyBox();
 
-  // Delta time
-  const float deltaTime = dt();
-
   // Key pressed
   if (keyPressed(GLFW_KEY_W))
-    m_camera.ProcessKeyboard(FORWARD, deltaTime);
+    m_camera.ProcessKeyboard(Camera_Movement::FORWARD, dt());
   if (keyPressed(GLFW_KEY_S))
-    m_camera.ProcessKeyboard(BACKWARD, deltaTime);
+    m_camera.ProcessKeyboard(Camera_Movement::BACKWARD, dt());
   if (keyPressed(GLFW_KEY_A))
-    m_camera.ProcessKeyboard(LEFT, deltaTime);
+    m_camera.ProcessKeyboard(Camera_Movement::LEFT, dt());
   if (keyPressed(GLFW_KEY_D))
-    m_camera.ProcessKeyboard(RIGHT, deltaTime);
+    m_camera.ProcessKeyboard(Camera_Movement::RIGHT, dt());
 
   return true;
-}
-
-// --------------------------------------------------------------
-//! \brief Mouse event
-// --------------------------------------------------------------
-void GLExample07::onMouseMoved(const double xpos, const double ypos)
-{
-  static double lastX = 0.0f;
-  static double lastY = 0.0f;
-  static bool firstMouse = true;
-
-  if (firstMouse)
-    {
-      lastX = xpos;
-      lastY = ypos;
-      firstMouse = false;
-    }
-
-  double xoffset = xpos - lastX;
-  double yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-  lastX = xpos;
-  lastY = ypos;
-  m_camera.ProcessMouseMovement(static_cast<float>(xoffset),
-                                static_cast<float>(yoffset));
 }

@@ -151,16 +151,16 @@ bool GLImGUI::render()
 //------------------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------------------
-void GLExample09::onWindowSizeChanged(float const width, float const height)
+void GLExample09::onWindowSizeChanged()
 {
   // Note: height is never zero !
-  const float ratio = width / height;
+  const float ratio =  width<float>() / height<float>();
 
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
+  glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
   m_prog.matrix44f("u_projection") =
-    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
+    matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10.0f);
 }
 
 //------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ bool GLExample09::setup()
   // Init shader uniforms
   m_prog.scalarf("scale") = 1.0f;
   m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
-  float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
+  float ratio = width<float>() / height<float>();
   m_prog.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10000.0f);
   m_prog.matrix44f("view") =

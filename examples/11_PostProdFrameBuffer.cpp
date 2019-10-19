@@ -28,13 +28,13 @@
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void GLExample11::onWindowSizeChanged(const float width, const float height)
+void GLExample11::onWindowSizeChanged()
 {
   // Note: height is never zero !
-  float ratio = width / height;
+  float ratio = width<float>() / height<float>();
 
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
+  glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
   //m_fbo.resize(width, height);
   m_prog_scene.matrix44f("projection") =
@@ -84,7 +84,7 @@ bool GLExample11::firstProgram()
   if (!m_floor.texture2D("texture1").load("textures/path.png")) return false;
 
   // Init Model-View-Project matrices (shader uniforms)
-  float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
+  float ratio = width<float>() / height<float>();
   m_prog_scene.matrix44f("projection") =
     matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
   m_prog_scene.matrix44f("model") = Matrix44f(matrix::Identity);
@@ -138,7 +138,7 @@ bool GLExample11::setup()
   if (!secondProgram()) return false;
 
   // Framebuffer
-  m_fbo.resize(width(), height());
+  m_fbo.resize(width<uint32_t>(), height<uint32_t>());
   m_fbo.createColorTexture(m_screen.texture2D("screenTexture"));
   m_fbo.createDepthBuffer();
 
@@ -154,7 +154,7 @@ bool GLExample11::draw()
   time += dt();
 
   // First pass: draw to the framebuffer texture
-  m_fbo.render(0, 0, width(), height(), [this]() {
+  m_fbo.render(0u, 0u, width<uint32_t>(), height<uint32_t>(), [this]() {
       glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
       glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
       glEnable(GL_DEPTH_TEST);

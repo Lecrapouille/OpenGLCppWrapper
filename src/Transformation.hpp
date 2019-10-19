@@ -124,30 +124,44 @@ namespace matrix
     M[3][2] = -(T(2) * zFar * zNear) / (zFar - zNear);
 
     return M;
-}
+  }
 
+  // *************************************************************************************************
+  //! \brief Camera looks at.
+  //! \param position camera position.
+  //! \param target the target position the camera is looking at.
+  //! \param up upwards direction of the camera.
+  //!
+  //!          | Rx Ry Rz 0 |   | 1 0 0 -Px |
+  //! LookAt = | Ux Uy Uz 0 | x | 0 1 0 -Py |
+  //!          | Dx Dy Dz 0 |   | 0 0 1 -Pz |
+  //!          |  0  0  0 1 |   | 0 0 0 1   |
+  //!
+  //! Where U is the up vector, D is the direction vector, P is the camera's
+  //! position vector and R is the right vector (= cross product between U and D).
+  // *************************************************************************************************
   template<typename T>
-  Matrix<T, 4_z, 4_z> lookAt(Vector<T, 3_z> const &eye,
-                             Vector<T, 3_z> const &center,
-                             Vector<T, 3_z> const &up)
+  Matrix<T, 4_z, 4_z> lookAt(Vector<T, 3_z> const &position,
+                             Vector<T, 3_z> const &target,
+                             Vector<T, 3_z> const &upwards)
   {
-    Vector<T, 3_z> const f(vector::normalize(center - eye));
-    Vector<T, 3_z> const s(vector::normalize(vector::cross(f, up)));
-    Vector<T, 3_z> const u(vector::cross(s, f));
+    Vector<T, 3_z> const direction(vector::normalize(target - position));
+    Vector<T, 3_z> const right(vector::normalize(vector::cross(direction, upwards)));
+    Vector<T, 3_z> const up(vector::cross(right, direction));
     Matrix<T, 4_z, 4_z> M(matrix::Identity);
 
-    M[0][0] = s.x;
-    M[1][0] = s.y;
-    M[2][0] = s.z;
-    M[0][1] = u.x;
-    M[1][1] = u.y;
-    M[2][1] = u.z;
-    M[0][2] = -f.x;
-    M[1][2] = -f.y;
-    M[2][2] = -f.z;
-    M[3][0] = -(vector::dot(s, eye));
-    M[3][1] = -(vector::dot(u, eye));
-    M[3][2] = vector::dot(f, eye);
+    M[0][0] = right.x;
+    M[1][0] = right.y;
+    M[2][0] = right.z;
+    M[0][1] = up.x;
+    M[1][1] = up.y;
+    M[2][1] = up.z;
+    M[0][2] = -direction.x;
+    M[1][2] = -direction.y;
+    M[2][2] = -direction.z;
+    M[3][0] = -(vector::dot(right, position));
+    M[3][1] = -(vector::dot(up, position));
+    M[3][2] = vector::dot(direction, position);
 
     return M;
   }

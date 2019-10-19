@@ -30,16 +30,16 @@
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void GLExample00::onWindowSizeChanged(const float width, const float height)
+void GLExample00::onWindowSizeChanged()
 {
   // Note: height is never zero !
-  float ratio = width / height;
+  float ratio = width<float>() / height<float>();
 
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
+  glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
   std::cout << "New Window dimension "
-    << static_cast<int>(width) << " x " << static_cast<int>(height)
+    << width<int>() << " x " << height<int>()
     << ". Ratio is " << ratio << std::endl;
 }
 
@@ -86,18 +86,31 @@ bool GLExample00::draw()
 // --------------------------------------------------------------
 //! \brief Mouse event
 // --------------------------------------------------------------
-void GLExample00::onMouseButtonPressed(const int button, const int action)
+void GLExample00::onMouseButtonPressed(Mouse const& mouse)
 {
-  std::cout << "Mouse button pressed: button=" << button
-            << " action=" << action << std::endl;
+  std::cout << "Mouse button " << static_cast<int>(mouse.button)
+            << " was " << (mouse.pressed ? "pressed" : "released")
+            << std::endl;
 }
 
 // --------------------------------------------------------------
 //! \brief Mouse event
 // --------------------------------------------------------------
-void GLExample00::onMouseMoved(const double xpos, const double ypos)
+void GLExample00::onMouseScrolled(Mouse const& mouse)
+{
+  std::cout << "Mouse scrolled " << mouse.scroll.x << std::endl;
+}
+
+// --------------------------------------------------------------
+//! \brief Mouse event
+// --------------------------------------------------------------
+void GLExample00::onMouseMoved(Mouse const& mouse)
 {
   std::cout << "Mouse moved to "
-    << static_cast<int>(xpos) << " x " << static_cast<int>(ypos)
-    << std::endl;
+    << static_cast<int>(mouse.position.x) << " x "
+    << static_cast<int>(mouse.position.y) << std::endl;
+
+  std::cout << "Mouse delta movement "
+            << mouse.displacement.x << " x "
+            << mouse.displacement.y << std::endl;
 }

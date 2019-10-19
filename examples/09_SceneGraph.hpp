@@ -119,8 +119,7 @@ public:
 
 private:
 
-  virtual void onWindowSizeChanged(float const width,
-                                   float const height) override;
+  virtual void onWindowSizeChanged() override;
   virtual bool setup() override;
   virtual bool draw() override;
   bool CreateCube();

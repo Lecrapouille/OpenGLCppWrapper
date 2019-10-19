@@ -59,11 +59,32 @@ static void display_gpu_memory()
 //! method pointer. This function is triggered when the mouse is
 //! moved.
 //------------------------------------------------------------------------------
-static void on_mouse_moved(GLFWwindow* window, double xpos, double ypos)
+static void on_mouse_moved(GLFWwindow* obj, double xpos, double ypos)
 {
+  static double m_lastX = 0.0;
+  static double m_lastY = 0.0;
+  static bool m_firstMouse = true;
+
   assert(nullptr != window);
-  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
-  obj->onMouseMoved(xpos, ypos);
+  IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
+  window::Mouse& mouse = window->mouse();
+
+  mouse.position = Vector2g(xpos, ypos);
+
+  if (m_firstMouse)
+    {
+      m_lastX = xpos;
+      m_lastY = ypos;
+      m_firstMouse = false;
+    }
+
+  // Reversed since y-coordinates go from bottom to top
+  mouse.displacement = Vector2g(xpos - m_lastX, m_lastY - ypos);
+
+  m_lastX = xpos;
+  m_lastY = ypos;
+
+  window->onMouseMoved(mouse);
 }
 
 //------------------------------------------------------------------------------
@@ -71,22 +92,29 @@ static void on_mouse_moved(GLFWwindow* window, double xpos, double ypos)
 //! method pointer. This function is triggered when the mouse button
 //! is scrolled.
 //------------------------------------------------------------------------------
-static void on_mouse_scrolled(GLFWwindow* window, double xoffset, double yoffset)
+static void on_mouse_scrolled(GLFWwindow* obj, double xoffset, double yoffset)
 {
   assert(nullptr != window);
-  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
-  obj->onMouseScrolled(xoffset, yoffset);
+  IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
+  window::Mouse& mouse = window->mouse();
+
+  mouse.scroll = Vector2g(xoffset, yoffset);
+  window->onMouseScrolled(mouse);
 }
 
 //------------------------------------------------------------------------------
 //! \brief Static function allowing to "cast" a function pointer to a
 //! method pointer. This function is triggered when the mouse has been pressed.
 //------------------------------------------------------------------------------
-static void on_mouse_button_pressed(GLFWwindow* window, int button, int action, int /*mods*/)
+static void on_mouse_button_pressed(GLFWwindow* obj, int button, int action, int /*mods*/)
 {
   assert(nullptr != window);
-  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
-  obj->onMouseButtonPressed(button, action);
+  IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
+  window::Mouse& mouse = window->mouse();
+
+  mouse.button = static_cast<window::ButtonType>(button);
+  mouse.pressed = (action == GLFW_PRESS); // else GLFW_RELEASE
+  window->onMouseButtonPressed(mouse);
 }
 
 //------------------------------------------------------------------------------
@@ -94,13 +122,13 @@ static void on_mouse_button_pressed(GLFWwindow* window, int button, int action, 
 //! a method pointer. This function is triggered when the window
 //! has been resized.
 //------------------------------------------------------------------------------
-static void on_window_resized(GLFWwindow* window, int width, int height)
+static void on_window_resized(GLFWwindow* obj, int width, int height)
 {
   assert(nullptr != window);
-  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
+  IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
   if (unlikely(0 >= width)) { width = 1; }
   if (unlikely(0 >= height)) { height = 1; }
-  obj->setWindowSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+  window->setWindowSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
 }
 
 //------------------------------------------------------------------------------
@@ -127,6 +155,26 @@ IGLWindow::~IGLWindow()
 }
 
 //------------------------------------------------------------------------------
+void IGLWindow::hideMouseCursor()
+{
+  if (likely(nullptr != m_main_window))
+    {
+      m_mouse.visible = false;
+      glfwSetInputMode(m_main_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+}
+
+//------------------------------------------------------------------------------
+void IGLWindow::showMouseCursor()
+{
+  if (likely(nullptr != m_main_window))
+    {
+      m_mouse.visible = true;
+      glfwSetInputMode(m_main_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+}
+
+//------------------------------------------------------------------------------
 void IGLWindow::setWindowSize(uint32_t const width, uint32_t const height)
 {
   m_width = width;
@@ -135,9 +183,8 @@ void IGLWindow::setWindowSize(uint32_t const width, uint32_t const height)
   if (unlikely(0u == m_width)) { m_width = 1u; }
   if (unlikely(0u == m_height)) { m_height = 1u; }
 
-  // Calbback to be implemented by the derived class
-  onWindowSizeChanged(static_cast<float>(width),
-                      static_cast<float>(height));
+  // Callback to be implemented by the derived class
+  onWindowSizeChanged();
 }
 
 //------------------------------------------------------------------------------
@@ -154,7 +201,7 @@ void IGLWindow::computeFPS()
       // If last prinf() was more than 1sec ago printf and reset
       std::ostringstream oss;
       m_fps = nbFrames;
-      int ms_by_frame = static_cast<int>(1000.0 / static_cast<double>(m_fps));
+      int ms_by_frame = static_cast<int>(1000.0f / static_cast<float>(m_fps));
       oss << '[' << m_fps << " FPS, " << ms_by_frame << " ms] " << m_title;
       glfwSetWindowTitle(m_main_window, oss.str().c_str());
       nbFrames = 0u;
