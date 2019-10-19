@@ -20,7 +20,7 @@
 
 #define protected public
 #define private public
-#include "GLVAO.hpp"
+#include "OpenGL/VAO.hpp"
 #undef protected
 #undef private
 #include <crpcut.hpp>

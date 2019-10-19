@@ -22,7 +22,7 @@
 #define private public
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wfloat-equal"
-#include "Vector.hpp"
+#include "Math/Vector.hpp"
 # pragma GCC diagnostic pop
 #undef protected
 #undef private
@@ -40,7 +40,7 @@ static Vector3f v6 = { -4, 5, -6 };
 static Vector3f dummy = Vector3f::DUMMY;
 static Vector3f v7(Vector2f(1, 2));
 
-#define ASSERT_DOUBLES_EQUAL(a,b,c) ASSERT_EQ(true, std::abs(a-b) < c)
+#define ASSERT_DOUBLES_EQUAL(a,b,c) ASSERT_EQ(true, maths::abs(a-b) < c)
 
 //--------------------------------------------------------------------------
 static void CHECK_VECTOR3B(Vector3b const& v, const bool x, const bool y, const bool z)

@@ -21,10 +21,11 @@
 #ifndef OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
 #  define OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
 
-#  include "GLProgram.hpp"
-#  include "GLFrameBuffers.hpp"
-#  include "GLImGUI.hpp"
-#  include "SceneGraph.hpp"
-#  include "Primitives.hpp"
+#  include "OpenGL/Program.hpp"
+#  include "OpenGL/FrameBuffers.hpp"
+#  include "Camera/Camera.hpp"
+#  include "UI/ImGUI.hpp"
+#  include "Scene/SceneGraph.hpp"
+#  include "Geometry/Geometry.hpp"
 
 #endif // OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP

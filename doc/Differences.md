@@ -6,7 +6,7 @@ OpenGLCppWrapper is not a C++ portage of gloo part of Glumpy (written in Python)
 
 OpenGLCppWrapper does not use a C++ portage of numpy (like done with https://github.com/dpilger26/NumCpp). It use a simple std::vector.
 
-##### globject.py vs. IGLObject.hpp
+##### globject.py vs. GLObject.hpp
 
 `activate()` and `deactivate()` have been renamed to `begin()` and `end()` in OpenGLCppWrapper in memory of `glBegin()` and `glEnd()`
 

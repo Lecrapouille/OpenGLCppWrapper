@@ -59,9 +59,12 @@ endif
 ###################################################
 # Inform Makefile where to find header files
 #
-INCLUDES += -I$(P)/include -I$(P)/src -I$(THIRDPART) -I$(THIRDPART)/imgui
+INCLUDES += -I$(P)/include -I$(P)/. -I$(P)/src -I$(THIRDPART)
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
 #
-VPATH += $(P)/src:$(P)/src/private:$(THIRDPART):$(THIRDPART)/imgui:$(THIRDPART)/SOIL/obj
+VPATH += $(P)/src $(P)/src/Common $(P)/src/Math \
+         $(P)/src/Camera $(P)/src/OpenGL \
+         $(P)/src/Geometry $(P)/src/Scene $(P)/src/UI \
+         $(THIRDPART) $(THIRDPART)/imgui $(THIRDPART)/SOIL/obj

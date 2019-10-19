@@ -36,8 +36,8 @@ include $(P)/Makefile.common
 ###################################################
 # Make the list of compiled files
 #
-OBJ_CORE = Verbose.o Exception.o OpenGL.o GLWindow.o
-OBJ_IMGUI = GLImGUI.o
+OBJ_CORE = Verbose.o Exception.o OpenGL.o Window.o
+OBJ_IMGUI = ImGUI.o
 OBJS += $(OBJ_CORE) $(OBJ_IMGUI)
 ifeq ($(ARCHI),Darwin)
 THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/*.o)

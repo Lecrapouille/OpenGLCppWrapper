@@ -40,16 +40,17 @@ do
 EOF
 
     # Compile the generate file.
-    g++ -W -Wall --std=c++11 -I../external -I../build -DPROJECT_DATA_PATH=\"FOO\" checkheaders.cpp -o prog > /dev/null 2> foo2
+    g++ -W -Wall --std=c++11 -I../external -I../build -I../include -I../. -I../src \
+      -DPROJECT_DATA_PATH=\"FOO\" checkheaders.cpp -o prog > /dev/null 2> foo2
 
     # Get the g++ errors and warnings.
     RES=`cat foo2`
     if [ "$RES" = "" ];
     then
-        echo "SUCCESS $FILE"
+        echo -e "\033[32mSUCCESS $FILE\033[00m"
     else
         # Save all file and g++ errors in a global result file.
-        echo "FAILURE $FILE:"
+        echo -e "\033[31mFAILURE $FILE\033[00m"
         echo "#####################################" >> $OUT
         echo "FAILURE $FILE" >> $OUT
         echo "$RES" >> $OUT

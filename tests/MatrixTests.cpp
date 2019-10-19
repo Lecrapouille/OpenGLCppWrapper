@@ -22,7 +22,7 @@
 #define private public
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wfloat-equal"
-#include "Matrix.hpp"
+#include "Math/Matrix.hpp"
 # pragma GCC diagnostic pop
 #undef protected
 #undef private
@@ -148,7 +148,7 @@ static void compareMatricesEps(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
 {
   for (size_t i = 0_z; i < r * c; ++i)
     {
-      ASSERT_EQ(true, std::abs(a.m_data[i] - b.m_data[i]) < T(0.000001));
+      ASSERT_EQ(true, maths::abs(a.m_data[i] - b.m_data[i]) < T(0.000001));
     }
 }
 

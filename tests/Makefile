@@ -37,7 +37,7 @@ include $(P)/Makefile.common
 # List of files to compile.
 #
 OBJS  = VectorTests.o MatrixTests.o
-OBJS += IGLObjectTests.o GLVAOTests.o GLVBOTests.o
+OBJS += GLObjectTests.o GLVAOTests.o GLVBOTests.o
 OBJS += GLShadersTests.o GLProgramTests.o
 OBJS += PendingDataTests.o PendingContainerTests.o
 OBJS += UnitTests.o
