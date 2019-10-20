@@ -54,6 +54,14 @@ OBJS += \
   main.o
 
 ###################################################
+# Downoad textures
+RESOURCES_DONE=../textures/resources.downloaded
+
+define DOWNLOAD_RESOURCES
+	@(cd $(P)/external && ./download-resources.sh && cd - > /dev/null && touch $(RESOURCES_DONE))
+endef
+
+###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
@@ -63,15 +71,24 @@ THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.$(shell cat $(P)/VE
 
 ###################################################
 # Compile tutorials
-all: $(THIRDPART_LIBS) $(TARGET)
+all: $(THIRDPART_LIBS) $(TARGET) $(RESOURCES_DONE)
 
 ###################################################
 # Be sure the main project have been compiled
-#
+# and textures downloaded
 $(OBJS): | $(THIRDPART_LIBS)
 $(THIRDPART_LIBS):
 	@$(call print-to,"Compiling","$(THIRDPART_LIBS)","$@","$(VERSION)")
 	@cd $(P) && $(MAKE)
+
+###################################################
+# Download textures and other resources needed by examples
+.PHONY: download-resources
+download-resources: | $(BUILD)
+	@$(call DOWNLOAD_RESOURCES)
+
+$(RESOURCES_DONE): | $(BUILD)
+	@$(call DOWNLOAD_RESOURCES)
 
 ###################################################
 # Sharable informations between all Makefiles

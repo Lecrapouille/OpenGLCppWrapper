@@ -58,7 +58,6 @@ Calling `build.sh` will do:
 ```sh
 make download-external-libs
 make compile-external-libs
-make download-resources
 make
 cd examples
 make
