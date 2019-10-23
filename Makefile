@@ -1,6 +1,6 @@
 ##=====================================================================
 ## OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+## Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 ##
 ## This file is part of OpenGLCppWrapper.
 ##
@@ -9,7 +9,7 @@
 ## the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
 ##
-## This program is distributed in the hope that it will be useful, but
+## OpenGLCppWrapper is distributedin the hope that it will be useful, but
 ## WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ## General Public License for more details.
@@ -25,7 +25,7 @@ P := .
 M := $(P)/.makefile
 
 ###################################################
-# Executable name
+# Project definition
 #
 TARGET = $(PROJECT)
 DESCRIPTION = C++11 API wrapping Core Profile OpenGL routines and allowing to write applications in few lines of code

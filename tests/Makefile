@@ -21,8 +21,8 @@
 ###################################################
 # Location of the project directory and Makefiles
 #
-P=..
-M=$(P)/.makefile
+P := ..
+M := $(P)/.makefile
 
 ###################################################
 # Project definition
@@ -34,7 +34,7 @@ BUILD_TYPE = debug
 include $(P)/Makefile.common
 
 ###################################################
-# List of files to compile.
+# Make the list of compiled files
 #
 OBJS  = VectorTests.o MatrixTests.o
 OBJS += GLObjectTests.o GLVAOTests.o GLVBOTests.o
@@ -50,9 +50,10 @@ NOT_PKG_LIBS += -lcrpcut -ldl
 
 ###################################################
 # Code coverage. Comment these lines if coveraging
-# is not desired.
+# is not desired. All -fno-*inline* forces lcov to
+# count non used template methods.
 #
-COMPIL_FLAGS += --coverage
+COMPIL_FLAGS += --coverage -O0 -fno-inline -fno-inline-small-functions -fno-default-inline -fno-elide-constructors
 LINKER_FLAGS += --coverage
 
 ###################################################
@@ -85,3 +86,4 @@ unit-tests: $(TARGET)
 ###################################################
 # Sharable informations between all Makefiles
 include $(M)/Makefile.footer
+#$(error "QQ $(CXXFLAGS)")

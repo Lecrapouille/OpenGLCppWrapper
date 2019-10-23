@@ -73,12 +73,12 @@ TESTSUITE(Programs)
       try {
         prog.uniform<int>("aaa");
         ASSERT_TRUE("Exception should have occured");
-      } catch(OpenGLException) { }
+      } catch(OpenGLException&) { }
 
       try {
         prog.uniform<int>(nullptr);
         ASSERT_TRUE("Exception should have occured");
-      } catch(OpenGLException) { }
+      } catch(OpenGLException&) { }
 
       // TODO: try add name conflict wit different types
       prog.addNewUniform(GL_FLOAT, "u1");
