@@ -24,6 +24,7 @@
 #  include <cstdint>
 #  include <vector>
 #  include <cassert>
+#  include <cmath>
 #  include <limits>
 
 namespace glwrap
@@ -46,6 +47,32 @@ namespace glwrap
     static inline T abs(T const x)
     {
       return (x >= zero<T>()) ? x : -x;
+    }
+
+    // TODO https://gist.github.com/MikimotoH/282dca62e08b90b9b673
+    static inline float sqrt(int const x)
+    {
+      return ::sqrtf(static_cast<float>(x));
+    }
+
+    static inline float sqrt(size_t const x)
+    {
+      return ::sqrtf(static_cast<float>(x));
+    }
+
+    static inline float sqrt(float const x)
+    {
+      return ::sqrtf(x);
+    }
+
+    static inline long double sqrt(long double const x)
+    {
+      return ::sqrtl(x);
+    }
+
+    static inline double sqrt(double const x)
+    {
+      return ::sqrt(x);
     }
 
 #   pragma GCC diagnostic push

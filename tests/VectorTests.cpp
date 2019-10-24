@@ -211,36 +211,47 @@ TESTSUITE(Vectors)
     CHECK_VECTOR3F(vector::middle(-Vector3f::UNIT_X, Vector3f::UNIT_X), 0.0f, 0.0f, 0.0f);
     CHECK_VECTOR3F(-vector::middle(Vector3f::UNIT_X, Vector3f::UNIT_X), -1.0f, 0.0f, 0.0f);
 
+    // Add scaled
+    v1 = Vector3f::UNIT_SCALE;
+    v1.addScaled(Vector3f::UNIT_X, 2.0f);
+    CHECK_VECTOR3B((v1 == Vector3f(3.0f, 1.0f, 1.0f)), true, true, true);
+
     // Distance
     v1 = Vector3f::UNIT_SCALE * 2.0f;
-    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), std::sqrt(12.0f), vector::distance(v1, Vector3f::ZERO));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), maths::sqrt(12.0f), vector::distance(v1, Vector3f::ZERO));
     v1 = Vector3f::ZERO;
     ASSERT_EQ(0.0f, vector::distance(v1, Vector3f::ZERO));
 
     // Norm
     ASSERT_EQ(5, vector::norm(Vector2i(-3, 4)));
-    ASSERT_EQ(5, vector::length(Vector2i(-3, 4)));
-    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),5.0f, std::sqrt(vector::squaredLength(Vector2f(-3, 4))));
-    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),1.0f, vector::length(Vector3f::UNIT_X));
-    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), std::sqrt(3.0f), vector::length(Vector3f::UNIT_SCALE));
-    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), std::sqrt(3.0f), vector::length(-Vector3f::UNIT_SCALE));
-    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),3.0f, vector::squaredLength(Vector3f::UNIT_SCALE));
+    ASSERT_EQ(5, vector::magnitude(Vector2i(-3, 4)));
+    ASSERT_EQ(5.0f, Vector2f(-3, 4).norm());
+    ASSERT_EQ(5.0f, Vector2f(-3, 4).norm());
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),5.0f, maths::sqrt(vector::squaredMagnitude(Vector2f(-3, 4))));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),1.0f, vector::magnitude(Vector3f::UNIT_X));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), maths::sqrt(3.0f), vector::magnitude(Vector3f::UNIT_SCALE));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), maths::sqrt(3.0f), vector::magnitude(-Vector3f::UNIT_SCALE));
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),3.0f, vector::squaredMagnitude(Vector3f::UNIT_SCALE));
     ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),0.0f, vector::dot(Vector3f::UNIT_X, Vector3f::UNIT_Y));
     ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2),3.0f, vector::dot(Vector3f::UNIT_SCALE, Vector3f::UNIT_SCALE));
 
     // Normalize
     v1 = vector::normalize(Vector3f::UNIT_SCALE * 2.0f);
-    v2 = Vector3f::UNIT_SCALE / std::sqrt(3.0f);
+    v2 = Vector3f::UNIT_SCALE / maths::sqrt(3.0f);
     CHECK_VECTOR3B(v2 == v1, true, true, true);
 
     // Perpendicular 2D
     Vector2f a = Vector2f(2.0f, 4.0f);
     Vector2f o = vector::orthogonal(Vector2f(2.0f, 4.0f));
-    ASSERT_EQ(true, vector::orthogonal(o, a));
+    ASSERT_EQ(true, vector::areOrthogonal(o, a));
     ASSERT_EQ(true, vector::eq(o, Vector2f(-4.0f, 2.0f)));
-    ASSERT_EQ(false, vector::orthogonal(a, Vector2f(3.0f, 2.0f)));
+    ASSERT_EQ(false, vector::areOrthogonal(a, Vector2f(3.0f, 2.0f)));
 
     // Perpendicular 3D
+
+    // Colinear 2D
+    ASSERT_EQ(true, vector::areCollinear(Vector2f(3.0f, -2.0f), Vector2f(-15.0f, 10.0f)));
+    ASSERT_EQ(false, vector::areCollinear(Vector2f(6.0f, 4.0f), Vector2f(4.0f, 2.0f)));
 
     // Cross product 3D
     Vector3f v = vector::cross(Vector3f::UNIT_X, Vector3f::UNIT_Y);
@@ -248,19 +259,33 @@ TESTSUITE(Vectors)
     v = vector::cross(Vector3f::UNIT_Y, Vector3f::UNIT_X);
     CHECK_VECTOR3B((v == -Vector3f::UNIT_Z), true, true, true);
 
-    // Cross product 2D
-    //Vector2f b = cross(Vector2f::UNIT_X, Vector2f::UNIT_Y);
-    //ASSERT_EQ(true, eq(b, Vector2f::UNIT_Z));
-    //b = cross(Vector2f::UNIT_Y, Vector2f::UNIT_X);
-    //ASSERT_EQ(true, eq(b, -Vector2f::UNIT_Z));
+    // Cross product 3D
+    v = Vector3f::UNIT_X % Vector3f::UNIT_Y;
+    CHECK_VECTOR3B((v == Vector3f::UNIT_Z), true, true, true);
+    v = Vector3f::UNIT_Y % Vector3f::UNIT_X;
+    CHECK_VECTOR3B((v == -Vector3f::UNIT_Z), true, true, true);
 
-    // Complex math
+    // Cross product 2D
+    float b = vector::cross(Vector2f::UNIT_X, Vector2f::UNIT_Y);
+    ASSERT_EQ(1.0f, b);
+    b = vector::cross(Vector2f::UNIT_Y, Vector2f::UNIT_X);
+    ASSERT_EQ(-1.0f, b);
+
+    // Scalar product
+    b = Vector3f::UNIT_X * Vector3f::UNIT_X;
+    ASSERT_EQ(1.0f, b);
+    b = Vector3f::UNIT_X * Vector3f::UNIT_Y;
+    ASSERT_EQ(0.0f, b);
+  }
+
+  //--------------------------------------------------------------------------
+  TEST(testComplexMath)
+  {
     ASSERT_EQ(true, vector::eq(Vector3f::NEGATIVE_UNIT_X, vector::reflect(Vector3f::UNIT_X, Vector3f::UNIT_X)));
     ASSERT_EQ(true, vector::eq(Vector3f::NEGATIVE_UNIT_Y, vector::reflect(Vector3f::UNIT_Y, Vector3f::UNIT_Y)));
     ASSERT_EQ(true, vector::eq(Vector3f::NEGATIVE_UNIT_Z, vector::reflect(Vector3f::UNIT_Z, Vector3f::UNIT_Z)));
     ASSERT_EQ(true, vector::eq(Vector3f::UNIT_X, vector::reflect(Vector3f::UNIT_X, Vector3f::UNIT_Y)));
 
-    // Complex math
     ASSERT_DOUBLES_EQUAL(00.0f, vector::angleBetween(Vector3f::UNIT_X, Vector3f::UNIT_X), 0.0001f);
     ASSERT_DOUBLES_EQUAL(90.0f, vector::angleBetween(Vector3f::UNIT_X, Vector3f::UNIT_Y), 0.0001f);
     ASSERT_DOUBLES_EQUAL(90.0f, vector::angleBetween(Vector3f::UNIT_Y, Vector3f::UNIT_X), 0.0001f);
@@ -269,5 +294,32 @@ TESTSUITE(Vectors)
     ASSERT_DOUBLES_EQUAL(90.0f, vector::angleBetween(Vector3f::UNIT_X, Vector3f::NEGATIVE_UNIT_Y), 0.0001f);
     ASSERT_DOUBLES_EQUAL(90.0f, vector::angleBetween(Vector3f::NEGATIVE_UNIT_X, Vector3f::UNIT_Y), 0.0001f);
     ASSERT_DOUBLES_EQUAL(90.0f, vector::angleBetween(Vector3f::NEGATIVE_UNIT_X, Vector3f::UNIT_Z), 0.0001f);
+
+    Vector2f a(1.0, 2.0);
+    ASSERT_EQ(1.5f, vector::mean(a));
+    Vector3f b(1.0, 2.0, 3.0);
+    ASSERT_EQ(2.0f, vector::mean(b));
+    Vector4f c(1.0, 2.0, 3.0, 4.0);
+    ASSERT_EQ(2.5f, vector::mean(c));
+
+    Vector<float, 5_z> measurements({2.0f, 4.0f, 5.0f, 7.0f, 7.0f});
+    float m = vector::mean(measurements); // (2+4+5+7+7)/5 = 5
+    ASSERT_EQ(5.0f, m);
+    // Deviation from average = mean - x[i]
+    // = [5-2, 5-4, 5-5, 5-7, 5-7]
+    // = [3 1 0 2 2]
+    Vector<float, 5_z> deviation = m - measurements;
+    // Square of the deviation: (mean - x[i])^2
+    // = [3^2 1^2 0^2 2^2 2^2]
+    Vector<float, 5_z> deviation2 = vector::componentProduct(deviation, deviation);
+    // Variance: sum((mean - x[i])^2) / size()
+    // = (3^2 + 1^2 + 0^2 + 2^2 + 2^2) / 5
+    ASSERT_EQ(3.6f, vector::mean(deviation2));
+  }
+
+  //--------------------------------------------------------------------------
+  TEST(testDisplay)
+  {
+    std::cout << Vector2f::UNIT_Y << " " << Vector3f::UNIT_Z << " " << Vector4f::UNIT_W << std::endl;
   }
 }

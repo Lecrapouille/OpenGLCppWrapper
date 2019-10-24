@@ -20,11 +20,14 @@
 
 #ifndef OPENGLCPPWRAPPER_VECTOR_HPP
 #  define OPENGLCPPWRAPPER_VECTOR_HPP
-
+#include <iostream>
 // *************************************************************************************************
-// Inspired from https://github.com/Reedbeta/reed-util
+// This file has been inspired by the following documents:
+// https://github.com/Reedbeta/reed-util
 // and http://www.reedbeta.com/blog/on-vector-math-libraries/
 // and http://www.ogre3d.org
+// and "Vectors in Julia" by Reese Pathak, David Zeng, Keegan Go, Stephen Boyd, Stanford University.
+// and the book: "Game Physics Engine Development" by Ian Millington
 // *************************************************************************************************
 
 #  include <initializer_list>
@@ -52,7 +55,7 @@ namespace glwrap
   /*! \brief Constructor with initialization list */                    \
   Vector(std::initializer_list<T> initList)                             \
   {                                                                     \
-    const size_t m = std::min(static_cast<size_t>(N), initList.size());  /* FIXME cast */                    \
+    const size_t m = std::min(static_cast<size_t>(N), initList.size());  /* FIXME cast */ \
     auto iter = initList.begin();                                       \
     for (size_t i = 0_z; i < m; ++i)                                    \
       {                                                                 \
@@ -79,9 +82,9 @@ namespace glwrap
                                                                         \
   /*! \brief Constructor by copy */                                     \
   template <typename U, size_t nOther>                                  \
-  explicit Vector(Vector<U, nOther> const &other)                       \
+  explicit Vector(Vector<U, nOther> const& other)                       \
   {                                                                     \
-    const size_t m = std::min(static_cast<size_t>(N), nOther);  /* FIXME cast */              \
+    const size_t m = std::min(static_cast<size_t>(N), nOther);  /* FIXME cast */ \
     size_t i = m;                                                       \
     while (i--)                                                         \
       {                                                                 \
@@ -95,8 +98,39 @@ namespace glwrap
       }                                                                 \
   }                                                                     \
                                                                         \
+                                                                        \
+  /*! \brief Flips all the components of the vector */                  \
+  void invert()                                                         \
+  {                                                                     \
+    size_t i = N;                                                       \
+    while (i--)                                                         \
+      {                                                                 \
+        m_data[i] = -m_data[i];                                         \
+      }                                                                 \
+  }                                                                     \
+                                                                        \
+  /*! \brief Add the given vector to this, scaled by the given amount */ \
+  void addScaled(Vector<T,N> const& other, T const scale)               \
+  {                                                                     \
+    size_t i = N;                                                       \
+    while (i--)                                                         \
+      {                                                                 \
+        m_data[i] += (scale * other.m_data[i]);                         \
+      }                                                                 \
+  }                                                                     \
+                                                                        \
+  /*! \brief Vector product (aka cross product). */                     \
+  Vector<T,N>& operator%=(Vector<T,N> const& b)                         \
+  {                                                                     \
+    *this = cross(*this, b);                                            \
+    return *this;                                                       \
+  }                                                                     \
+                                                                        \
   /*! \brief Return the dimension */                                    \
-  size_t size() const { return N; }                                     \
+  inline size_t size() const { return N; }                              \
+                                                                        \
+  /*! \brief Return the dimension */                                    \
+  inline size_t length() const { return N; }                            \
                                                                         \
   /* Accessors */                                                       \
   T& operator[](size_t const i)          { return m_data[i]; }          \
@@ -110,11 +144,11 @@ namespace glwrap
   operator array_t ()                   { return m_data; }              \
   operator const_array_t () const       { return m_data; }              \
                                                                         \
-  private:                                                              \
+private:                                                                \
                                                                         \
-  /* Disallow bool conversions (without this, they'd happen implicitly*/\
-  /* via the array conversions) */                                      \
-  operator bool();
+ /* Disallow bool conversions (without this, they'd happen implicitly*/ \
+ /* via the array conversions) */                                       \
+ operator bool()
 
 // *************************************************************************************************
 //! \brief Generic mathematic vector: T for the type (float, int) and n the vector dimension
@@ -124,11 +158,32 @@ class Vector
 {
 public:
 
-  VECTOR_DIM(n)
+  VECTOR_DIM(n);
+
+  T norm() const
+  {
+    T l = maths::zero<T>();
+    size_t i = n;
+
+    while (i--)
+      l += (m_data[i] * m_data[i]);
+    return maths::sqrt(l);
+  }
+
+  void normalize()
+  {
+    T const l = maths::one<T>() / norm();
+    size_t i = n;
+
+    while (i--)
+      {
+        m_data[i] *= l;
+      }
+  }
 
 protected:
 
-  T m_data[n];
+  T m_data[n]; // TODO: std::array to avoid segfaut in huge dimension
 };
 
 // *************************************************************************************************
@@ -145,7 +200,19 @@ public:
     y = scalar_y;
   }
 
-  VECTOR_DIM(2_z)
+  VECTOR_DIM(2_z);
+
+  inline T norm() const
+  {
+    return maths::sqrt(x * x + y * y);
+  }
+
+  void normalize()
+  {
+    T const l = maths::one<T>() / norm();
+    x *= l;
+    y *= l;
+  }
 
 public:
 
@@ -188,7 +255,7 @@ class Vector<T, 3_z>
 {
 public:
 
-  Vector(Vector<T, 2_z> const &v, const T scalar_z = maths::zero<T>())
+  Vector(Vector<T, 2_z> const& v, const T scalar_z = maths::zero<T>())
   {
     x = v.x;
     y = v.y;
@@ -202,7 +269,20 @@ public:
     z = scalar_z;
   }
 
-  VECTOR_DIM(3_z)
+  VECTOR_DIM(3_z);
+
+  inline T norm() const
+  {
+    return maths::sqrt(x * x + y * y + z * z);
+  }
+
+  void normalize()
+  {
+    T const l = maths::one<T>() / norm();
+    x *= l;
+    y *= l;
+    z *= l;
+  }
 
 public:
 
@@ -248,7 +328,7 @@ class Vector<T, 4_z>
 {
 public:
 
-  Vector(Vector<T, 3_z> const &v, const T scalar_w = maths::zero<T>())
+  Vector(Vector<T, 3_z> const& v, const T scalar_w = maths::zero<T>())
   {
     x = v.x;
     y = v.y;
@@ -264,7 +344,21 @@ public:
     w = scalar_w;
   }
 
-  VECTOR_DIM(4_z)
+  VECTOR_DIM(4_z);
+
+  inline T norm() const
+  {
+    return maths::sqrt(x * x + y * y + z * z + w * w);
+  }
+
+  void normalize()
+  {
+    T const l = maths::one<T>() / norm();
+    x *= l;
+    y *= l;
+    z *= l;
+    w *= l;
+  }
 
 public:
 
@@ -312,7 +406,7 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths
 
 #define DEFINE_UNARY_OPERATOR(op)                       \
   template <typename T, size_t n>                       \
-  Vector<T, n> operator op (Vector<T, n> const &a)      \
+  Vector<T, n> operator op (Vector<T, n> const& a)      \
   {                                                     \
     Vector<T, n> result;                                \
     size_t i = n;                                       \
@@ -324,7 +418,7 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths
 #define DEFINE_BINARY_OPERATORS(op)                                     \
   /* Vector-Vector op */                                                \
   template <typename T, size_t n>                                       \
-  Vector<T, n> operator op (Vector<T, n> const &a, Vector<T, n> const &b) \
+  Vector<T, n> operator op (Vector<T, n> const& a, Vector<T, n> const& b) \
   {                                                                     \
     Vector<T, n> result;                                                \
     size_t i = n;                                                       \
@@ -334,7 +428,7 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths
   }                                                                     \
   /* Scalar-Vector op */                                                \
   template <typename T, size_t n>                                       \
-  Vector<T, n> operator op (T const a, Vector<T, n> const &b)           \
+  Vector<T, n> operator op (T const a, Vector<T, n> const& b)           \
   {                                                                     \
     Vector<T, n> result;                                                \
     size_t i = n;                                                       \
@@ -344,7 +438,7 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths
   }                                                                     \
   /* Vector-scalar op */                                                \
   template <typename T, size_t n>                                       \
-  Vector<T, n> operator op (Vector<T, n> const &a, T const b)           \
+  Vector<T, n> operator op (Vector<T, n> const& a, T const b)           \
   {                                                                     \
     Vector<T, n> result;                                                \
     size_t i = n;                                                       \
@@ -356,7 +450,7 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths
 #define DEFINE_INPLACE_OPERATORS(op)                                    \
   /* Vector-Vector op */                                                \
   template <typename T, size_t n>                                       \
-  Vector<T, n>& operator op (Vector<T, n> &a, Vector<T, n> const &b)    \
+  Vector<T, n>& operator op (Vector<T, n> &a, Vector<T, n> const& b)    \
   {                                                                     \
     size_t i = n;                                                       \
     while (i--)                                                         \
@@ -376,7 +470,7 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths
 #define DEFINE_RELATIONAL_OPERATORS(op)                                 \
   /* Vector-Vector op */                                                \
   template <typename T, typename U, size_t n>                           \
-  Vector<bool, n> operator op (Vector<T, n> const &a, Vector<U, n> const &b) \
+  Vector<bool, n> operator op (Vector<T, n> const& a, Vector<U, n> const& b) \
   {                                                                     \
     Vector<bool, n> result;                                             \
     size_t i = n;                                                       \
@@ -386,7 +480,7 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths
   }                                                                     \
   /* Scalar-Vector op */                                                \
   template <typename T, typename U, size_t n>                           \
-  Vector<bool, n> operator op (T const &a, Vector<U, n> const &b)       \
+  Vector<bool, n> operator op (T const& a, Vector<U, n> const& b)       \
   {                                                                     \
     Vector<bool, n> result;                                             \
     size_t i = n;                                                       \
@@ -396,7 +490,7 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths
   }                                                                     \
   /* Vector-scalar op */                                                \
   template <typename T, typename U, size_t n>                           \
-  Vector<bool, n> operator op (Vector<T, n> const &a, U const &b)       \
+  Vector<bool, n> operator op (Vector<T, n> const& a, U const& b)       \
   {                                                                     \
     Vector<bool, n> result;                                             \
     size_t i = n;                                                       \
@@ -405,33 +499,33 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths
     return result;                                                      \
   }
 
-#define DEFINE_FUN1_OPERATOR(name, op)                          \
-  template <typename T, size_t n>                               \
-  Vector<T, n> name(Vector<T, n> const &a)                      \
-  {                                                             \
-    Vector<T, n> result;                                        \
-    size_t i = n;                                               \
-                                                                \
-    while (i--)                                                 \
-      result[i] = op(a[i]);                                     \
-    return result;                                              \
+#define DEFINE_FUN1_OPERATOR(name, op)          \
+  template <typename T, size_t n>               \
+  Vector<T, n> name(Vector<T, n> const& a)      \
+  {                                             \
+    Vector<T, n> result;                        \
+    size_t i = n;                               \
+                                                \
+    while (i--)                                 \
+      result[i] = op(a[i]);                     \
+    return result;                              \
   }
 
-#define DEFINE_FUN2_OPERATOR(name, op)                          \
-  template <typename T, size_t n>                               \
-  Vector<T, n> name(Vector<T, n> const &a, Vector<T, n> const &b) \
-  {                                                             \
-    Vector<T, n> result;                                        \
-    size_t i = n;                                               \
-                                                                \
-    while (i--)                                                 \
-      result[i] = op(a[i], b[i]);                               \
-    return result;                                              \
+#define DEFINE_FUN2_OPERATOR(name, op)                                  \
+  template <typename T, size_t n>                                       \
+  Vector<T, n> name(Vector<T, n> const& a, Vector<T, n> const& b)       \
+  {                                                                     \
+    Vector<T, n> result;                                                \
+    size_t i = n;                                                       \
+                                                                        \
+    while (i--)                                                         \
+      result[i] = op(a[i], b[i]);                                       \
+    return result;                                                      \
   }
 
 #define DEFINE_BOOL_OPERATOR(name, op)                          \
   template <typename T, size_t n>                               \
-  bool name(Vector<T, n> const &a, Vector<T, n> const &b)       \
+  bool name(Vector<T, n> const& a, Vector<T, n> const& b)       \
   {                                                             \
     size_t i = n;                                               \
                                                                 \
@@ -447,7 +541,6 @@ DEFINE_BINARY_OPERATORS(+)
 DEFINE_BINARY_OPERATORS(-)
 DEFINE_UNARY_OPERATOR(-)
 DEFINE_UNARY_OPERATOR(+)
-DEFINE_BINARY_OPERATORS(*)
 DEFINE_BINARY_OPERATORS(/)
 DEFINE_BINARY_OPERATORS(&)
 DEFINE_BINARY_OPERATORS(|)
@@ -459,9 +552,6 @@ DEFINE_INPLACE_OPERATORS(+=)
 DEFINE_INPLACE_OPERATORS(-=)
 DEFINE_INPLACE_OPERATORS(*=)
 DEFINE_INPLACE_OPERATORS(/=)
-DEFINE_INPLACE_OPERATORS(&=)
-DEFINE_INPLACE_OPERATORS(|=)
-DEFINE_INPLACE_OPERATORS(^=)
 
 DEFINE_RELATIONAL_OPERATORS(==)
 DEFINE_RELATIONAL_OPERATORS(!=)
@@ -470,8 +560,55 @@ DEFINE_RELATIONAL_OPERATORS(>)
 DEFINE_RELATIONAL_OPERATORS(<=)
 DEFINE_RELATIONAL_OPERATORS(>=)
 
+/* Scalar-Vector op */
+template <typename T, size_t n>
+Vector<T, n> operator*(T const a, Vector<T, n> const& b)
+{
+  Vector<T, n> result;
+  size_t i = n;
+  while (i--)
+    result[i] = a * b[i];
+  return result;
+}
+
+/* Vector-scalar op */
+template <typename T, size_t n>
+Vector<T, n> operator*(Vector<T, n> const& a, T const b)
+{
+  Vector<T, n> result;
+  size_t i = n;
+  while (i--)
+    result[i] = a[i] * b;
+  return result;
+}
+
 namespace vector
 {
+
+  //! \brief Calculates and returns a component-wise product of this vector with
+  //! the given vector.
+  template <typename T, size_t n>
+  Vector<T, n> componentProduct(Vector<T, n> const& a, Vector<T, n> const& b)
+  {
+    Vector<T, n> result;
+    size_t i = n;
+    while (i--)
+    result[i] = a[i] * b[i];
+    return result;
+  }
+
+  //! \brief Performs a component-wise product with the given vector and sets this
+  //! vector to its result.
+  template <typename T, size_t n>
+  Vector<T, n> componentProductUpdate(Vector<T, n> const& a)
+  {
+    Vector<T, n> result;
+    size_t i = n;
+    while (i--)
+      result[i] *= a[i];
+    return result;
+  }
+
   //! \brief Return a matrix where each e
   DEFINE_FUN2_OPERATOR(min, std::min)
   DEFINE_FUN2_OPERATOR(max, std::max)
@@ -487,7 +624,7 @@ namespace vector
   //! \return true if all elements have the same value.
   template <typename T, size_t n>
   typename std::enable_if<std::numeric_limits<T>::is_integer, bool>::type
-  eq(Vector<T, n> const &a, Vector<T, n> const &b)
+  eq(Vector<T, n> const& a, Vector<T, n> const& b)
   {
     if (&a != &b)
       {
@@ -507,7 +644,7 @@ namespace vector
   //! \return true if all elements have the same value.
   template <typename T, size_t n>
   typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-  eq(Vector<T, n> const &a, Vector<T, n> const &b)
+  eq(Vector<T, n> const& a, Vector<T, n> const& b)
   {
     if (&a != &b)
       {
@@ -522,7 +659,7 @@ namespace vector
   }
 
   template <typename T, size_t n>
-  bool ne(Vector<T, n> const &a, Vector<T, n> const &b)
+  bool ne(Vector<T, n> const& a, Vector<T, n> const& b)
   {
     return !vector::eq(a, b);
   }
@@ -546,11 +683,12 @@ namespace vector
   //! scalar k != 0, where: u = k v (note: if u is a null vector, any
   //! vector v is collinear to u because k = 0).
   //!
-  //! \return Nan if vectors are not collinear. Return 0 if Return k if they are collinear.
+  //! \return k if vectors are collinear, else return NaN if vectors are not
+  //! collinear, else return 0 if zero vector.
   //!
   //! \note Use this function for T a familly of float and not for integers.
   template <typename T, size_t n>
-  T collinearity(Vector<T, n> const &u, Vector<T, n> const &v)
+  T collinearity(Vector<T, n> const& u, Vector<T, n> const& v)
   {
     // Null vector ?
     if (maths::almostZero(u[0]) || maths::almostZero(v[0]))
@@ -566,46 +704,36 @@ namespace vector
   }
 
   //! \brief Check if two vectors are parallels.
+  //! \note Use this function for T a familly of float and not for integers.
+  // http://www.educastream.com/vecteurs-colineaires-seconde
   template <typename T, size_t n>
-  bool collinear(Vector<T, n> const &u, Vector<T, n> const &v)
+  bool areCollinear(Vector<T, n> const& u, Vector<T, n> const& v)
   {
     T k = collinearity(u, v);
-    return !isnan(k);
+    return !std::isnan(k);
   }
 
   //! \brief Check if two vectors are mathematicaly equivalent: same
-  //! norm (length), same direction (parallel) and same sign.
+  //! norm (magnitude), same direction (parallel) and same sign.
+  //! \note Use this function for T a familly of float and not for integers.
   template <typename T, size_t n>
-  bool equivalent(Vector<T, n> const &u, Vector<T, n> const &v)
+  bool areEquivalent(Vector<T, n> const& u, Vector<T, n> const& v)
   {
     T k = collinearity(u, v);
     return maths::almostEqual(k, maths::one<T>());
   }
 
   //! \brief Check if three points A, B, C are aligned.
+  //! \note Use this function for T a familly of float and not for integers.
   template <typename T, size_t n>
-  bool arePointsAligned(Vector<T, n> const &a, Vector<T, n> const &b, Vector<T, n> const &c)
+  bool arePointsAligned(Vector<T, n> const& a, Vector<T, n> const& b, Vector<T, n> const& c)
   {
-    return collinear(b - a, c - a);
+    return areCollinear(b - a, c - a);
   }
 
-// collinear
-// http://www.educastream.com/vecteurs-colineaires-seconde
-
-// FIXME u et v colineaires s'il existe k: v = ku
-// FIXME bool colineaire(v1, v2) // [2 -3] et [4 -6]
-// ==> x1y2 == x2y1
-// x1/x2 == y1/y2 == z1/z2 == k
-
-// colineaire: [3 -2] et [-15 10]
-// Non col (6 4) (4 2); (3 -2) (12 -5)
-
-// ==> paralles: ssi colineaire
-// aligned(A, B, C): colineare(AB, AC)
-
-  //! \brief Constrain each value of the vectorto lower and upper bounds.
+  //! \brief Constrain each element of the vector to lower and upper bounds.
   template <typename T, size_t n>
-  Vector<T, n> clamp(Vector<T, n> const &a, T const lower, T const upper)
+  Vector<T, n> clamp(Vector<T, n> const& a, T const lower, T const upper)
   {
     Vector<T, n> result;
     size_t i = n;
@@ -615,11 +743,30 @@ namespace vector
     return result;
   }
 
-  //! \brief Dot product.
-  template <typename T, size_t n>
-  T dot(Vector<T, n> const &a, Vector<T, n> const &b)
+  //! \brief Vector Product (aka for cross product). Specialization for 2D vectors.
+  template <typename T>
+  T cross(Vector<T, 2_z> const& a, Vector<T, 2_z> const& b)
   {
-    T result(maths::zero<T>());
+    return a.x * b.y - a.y * b.x;
+  }
+
+  //! \briefVector Product (aka for cross product). Specialization for 3D vectors.
+  template <typename T>
+  Vector<T, 3_z> cross(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
+  {
+    return
+      {
+       a.y * b.z - a.z * b.y,
+       a.z * b.x - a.x * b.z,
+       a.x * b.y - a.y * b.x,
+      };
+  }
+
+  //! \brief Dot product (general algorithm).
+  template <typename T, size_t n>
+  T dot(Vector<T, n> const& a, Vector<T, n> const& b)
+  {
+    T result = maths::zero<T>();
     size_t i = n;
 
     while (i--)
@@ -627,45 +774,78 @@ namespace vector
     return result;
   }
 
+  //! \brief Dot product (specialization for 3D vectors).
   template <typename T, size_t n>
-  T squaredLength(Vector<T, n> const &a)
+  T dot(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
+  {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+  }
+
+  //! \brief Gets the squared magnitude of this vector.
+  //! \note Alias for squaredNorm()
+  template <typename T, size_t n>
+  T squaredMagnitude(Vector<T, n> const& a)
   {
     return dot(a, a);
   }
 
+  //! \brief Gets the squared magnitude of this vector.
+  //! \note Alias for squaredMagnitude()
   template <typename T, size_t n>
-  T length(Vector<T, n> const &a)
+  T squaredNorm(Vector<T, n> const& a)
   {
-    return T(std::sqrt(squaredLength(a)));
+    return dot(a, a);
   }
 
+  //! \brief Gets the magnitude of this vector.
+  //! \note Alias for squaredNorm()
   template <typename T, size_t n>
-  T norm(Vector<T, n> const &a)
+  T magnitude(Vector<T, n> const& a)
   {
-    return length(a);
+    return T(maths::sqrt(dot(a, a)));
   }
 
+  //! \brief Gets the magnitude of this vector.
+  //! \note Alias for squaredMagnitude()
   template <typename T, size_t n>
-  T squaredDistance(Vector<T, n> const &a, Vector<T, n> const &b)
+  T norm(Vector<T, n> const& a)
   {
-    return squaredLength(a - b);
+    return T(maths::sqrt(dot(a, a)));
   }
 
+  //! \brief Gets the squared magnitude of a - b.
   template <typename T, size_t n>
-  T distance(Vector<T, n> const &a, Vector<T, n> const &b)
+  T squaredDistance(Vector<T, n> const& a, Vector<T, n> const& b)
   {
-    return std::sqrt(squaredDistance(a, b));
+    return squaredNorm(a - b);
   }
 
+  //! \brief Gets the magnitude of a - b.
   template <typename T, size_t n>
-  Vector<T, n> normalize(Vector<T, n> const &a)
+  T distance(Vector<T, n> const& a, Vector<T, n> const& b)
   {
-    // FIXME: throw exception
-    return a / length(a);
+    return maths::sqrt(squaredDistance(a, b));
   }
 
+  // FIXME: throw exception
+  //! \brief Turns a non-zero vector into a vector of unit length.
   template <typename T, size_t n>
-  Vector<T, n> middle(Vector<T, n> const &a, Vector<T, n> const &b)
+  Vector<T, n> normalize(Vector<T, n> const& a)
+  {
+    return a / norm(a);
+  }
+
+  //! \brief Turns a non-zero vector into a vector of unit length.
+  template <typename T, size_t n>
+  Vector<T, n> normalise(Vector<T, n> const& a)
+  {
+    return a / norm(a);
+  }
+
+  //! \brief Returns a vector at a point half way between the two
+  //! given positions.
+  template <typename T, size_t n>
+  Vector<T, n> middle(Vector<T, n> const& a, Vector<T, n> const& b)
   {
     Vector<T, n> result;
     size_t i = n;
@@ -675,51 +855,37 @@ namespace vector
     return result;
   }
 
+  //! \brief Return the perpendicular vector (specialization for 2D vectors).
   template <typename T>
-  Vector<T, 3_z> cross(Vector<T, 3_z> const &a, Vector<T, 3> const &b)
-  {
-    return
-      {
-        a.y * b.z - a.z * b.y,
-        a.z * b.x - a.x * b.z,
-        a.x * b.y - a.y * b.x,
-      };
-  }
-
-  //! \brief Perpendicular
-  template <typename T>
-  Vector<T, 2_z> orthogonal(Vector<T, 2_z> const &a)
+  Vector<T, 2_z> orthogonal(Vector<T, 2_z> const& a)
   {
     return { -a.y, a.x };
   }
 
+  //! \brief Return the perpendicular vector (specialization for 3D vectors).
   template <typename T>
-  Vector<T, 3_z> orthogonal(Vector<T, 3_z> const &a)
+  Vector<T, 3_z> orthogonal(Vector<T, 3_z> const& a)
   {
     // Implementation due to Sam Hocevar - see blog post:
     // http://lolengine.net/blog/2013/09/21/picking-orthogonal-Vector-combing-coconuts
     if (maths::abs(a.x) > maths::abs(a.z))
-      return { -a.y, a.x,maths::zero<T>() };
+      return { -a.y, a.x, maths::zero<T>() };
     else
       return { maths::zero<T>(), -a.z, a.y };
   }
 
-  template <typename T, size_t n>
-  typename std::enable_if<std::numeric_limits<T>::is_integer, bool>::type
-  orthogonal(Vector<T, n> const &a, Vector<T, n> const &b)
-  {
-    return maths::zero<T>() == dot(a, b);
-  }
-
+  //! \brief Check if the given two vectors are perpendicular between them.
   template <typename T, size_t n>
   typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-  orthogonal(Vector<T, n> const &a, Vector<T, n> const &b)
+  areOrthogonal(Vector<T, n> const& a, Vector<T, n> const& b)
   {
     return maths::almostZero(dot(a, b));
   }
 
+  //! \brief Gets the angle (in degrees) between 2 vectors.
+  //! Compute: acos(dot(a,b) / (norm(a) * norm(b)))
   template <typename T, size_t n>
-  T angleBetween(Vector<T, n> const &org, Vector<T, n> const &dest)
+  T angleBetween(Vector<T, n> const& org, Vector<T, n> const& dest)
   {
     T lenProduct = norm(org) * norm(dest);
 
@@ -729,16 +895,89 @@ namespace vector
 
     T f = dot(org, dest) / lenProduct;
     f = std::min(std::max(f, -maths::one<T>()), maths::one<T>());
-    return T(std::acos(f) * 180.0 / 3.14159265);
+    return T(maths::toDegree(std::acos(f)));
   }
 
+  //! \brief Calculates a reflection vector to the plane with the given normal.
   template <typename T, size_t n>
-  Vector<T, n> reflect(Vector<T, n> const &v, Vector<T, n> const &normal)
+  Vector<T, n> reflect(Vector<T, n> const& v, Vector<T, n> const& normal)
   {
     return v - (T(2) * dot(v, normal) * normal);
   }
+
+  //! \brief Summation
+  template <typename T, size_t n>
+  T sum(Vector<T, n> const& v)
+  {
+    T res = maths::zero<T>();
+    size_t i = n;
+    while (i--)
+      {
+        res += v[i];
+      }
+
+    return res;
+  }
+
+  //! \brief Mean (general algorithm)
+  template <typename T, size_t n>
+  T mean(Vector<T, n> const& v)
+  {
+    return sum(v) / T(n);
+  }
+
+  //! \brief Mean (specialization for 2D vectors).
+  template <typename T>
+  T mean(Vector<T, 2_z> const& v)
+  {
+    return (v[0] + v[1]) / T(2);
+  }
+
+  //! \brief Mean (specialization for 3D vectors).
+  template <typename T>
+  T mean(Vector<T, 3_z> const& v)
+  {
+    return (v[0] + v[1] + v[2]) / T(3);
+  }
+
+  //! \brief Mean (specialization for 4D vectors).
+  template <typename T>
+  T mean(Vector<T, 4_z> const& v)
+  {
+    return (v[0] + v[1] + v[2] + v[3]) / T(4);
+  }
+
+  //! \brief Root Mean Square
+  template <typename T, size_t n>
+  T rms(Vector<T, n> const& v)
+  {
+    return norm(v) / maths::sqrt(v.size());
+  }
+
+  //! \brief Standard deviation
+  template <typename T, size_t n>
+  T std(Vector<T, n> const& v)
+  {
+    return norm(v - vector::mean(v)) / maths::sqrt(v.size());
+  }
+
+} // namespace vector
+
+//! \brief Scalar product.
+template <typename T, size_t n>
+T operator*(Vector<T, n> const& a, Vector<T, n> const& b)
+{
+  return vector::dot(a, b);
 }
 
+//! \brief Vector product (aka cross product).
+template <typename T, size_t n>
+Vector<T, n> operator%(Vector<T, n> const& a, Vector<T, n> const& b)
+{
+  return vector::cross(a, b);
+}
+
+//! \brief Display a vector (global algorithm).
 template <typename T, size_t n>
 std::ostream& operator<<(std::ostream& os, Vector<T, n> const& v)
 {
@@ -747,8 +986,28 @@ std::ostream& operator<<(std::ostream& os, Vector<T, n> const& v)
     {
       os << ", " << v[i];
     }
-  os << ')';
-  return os;
+  return os << ')';
+}
+
+//! \brief Display a vector (specialization for 2D vectors).
+template <typename T>
+std::ostream& operator<<(std::ostream& os, Vector<T, 2_z> const& v)
+{
+  return os << "Vector(" << v[0] << ", " << v[1] << ')';
+}
+
+//! \brief Display a vector (specialization for 3D vectors).
+template <typename T>
+std::ostream& operator<<(std::ostream& os, Vector<T, 3_z> const& v)
+{
+  return os << "Vector(" << v[0] << ", " << v[1] << ", " << v[2] << ')';
+}
+
+//! \brief Display a vector (specialization for 4D vectors).
+template <typename T>
+std::ostream& operator<<(std::ostream& os, Vector<T, 4_z> const& v)
+{
+  return os << "Vector(" << v[0] << ", " << v[1] << ", " << v[2]  << ", " << v[3] << ')';
 }
 
 // *************************************************************************************************
