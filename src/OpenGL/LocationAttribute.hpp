@@ -30,19 +30,19 @@
 #  include "OpenGL/Locations.hpp"
 #  include <cassert>
 
-// *****************************************************************************
-//! \file Attribute.hpp file implements:
-//!   - GLAttribute:
-// *****************************************************************************
-
 namespace glwrap
 {
 
 // *****************************************************************************
-//! \brief Attribute represents a shader program attribute variable.
+//! \class GLAttribute LocationAttribute.hpp
+//! \ingroup OpenGL
 //!
-//! This class only stores information about the attribute (dimension, type).
-//! These info are used by the GLProgam to create VBOs when a VAO is bind to it.
+//! \brief Represent an attribute variable used in a GLSL shader program.
+//!
+//! This class only stores information about the attribute variable (dimension,
+//! type). These information are used by GLProgam when a VAO is bind to it for
+//! creating GLVBO inside the VAO. GLAttribute should be used directly by the
+//! user, it is an internal class for GLProgram.
 // *****************************************************************************
 class GLAttribute: public GLLocation
 {
@@ -50,6 +50,13 @@ public:
 
   //----------------------------------------------------------------------------
   //! \brief See GLLocation constructor.
+  //! \param[in] name Give a name to the instance. GLProgram uses these names in
+  //! their internal hash table.
+  //! \param[in] dim set the dimension of variable (1 for scalar else the
+  //! dimension for vector)
+  //! \param[in] gltype set the OpenGL type of data (GL_FLOAT ...)
+  //! \param[in] prog the handle of the GLProgram (which is the owner of this
+  //! instance).
   //----------------------------------------------------------------------------
   GLAttribute(const char *name, const GLint dim, const GLint gltype, const GLuint prog)
     : GLLocation(name, dim, static_cast<GLenum>(gltype), prog)
@@ -126,16 +133,28 @@ private:
   virtual void release() override
   {}
 
+protected:
+
+  //----------------------------------------------------------------------------
+  //! \brief Release the memory allocated on CPU and GPU. By default do nothing.
+  //----------------------------------------------------------------------------
+  virtual void onReset()
+  {
+    m_index = 0;
+    m_stride = 0;
+    m_offset = 0;
+  }
+
 private:
 
-  //! \brief Hack ! This is an alias for m_handle but of different
-  //! type.
+  //! \brief Hack ! This is an alias for m_handle but with a different type.
   GLuint m_index = 0;
-  //! \brief Specifies the byte offset between consecutive generic
-  //! vertex attributes.
+  //! \brief Specifies the byte offset between consecutive generic vertex
+  //! attributes. See OpenGL API doc for glVertexAttribPointer().
   size_t m_stride = 0;
-  //! \brief Specifies a offset of the first component of the first
-  //! generic vertex attribute in the array in the data store.
+  //! \brief Specifies a offset of the first component of the first generic
+  //! vertex attribute in the array in the data store. See OpenGL API doc for
+  //! glVertexAttribPointer().
   size_t m_offset = 0;
 };
 

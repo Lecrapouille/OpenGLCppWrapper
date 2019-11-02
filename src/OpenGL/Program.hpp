@@ -27,12 +27,6 @@
 #ifndef OPENGLCPPWRAPPER_GLPROGRAM_HPP
 #  define OPENGLCPPWRAPPER_GLPROGRAM_HPP
 
-// *****************************************************************************
-//! \file Program.hpp manages a list of GLSL shaders and lists of shader
-//! variables (uniforms, samplers and attributes), can initialize VAO and render
-//! them.
-// *****************************************************************************
-
 #  include "OpenGL/ShaderVertex.hpp"
 #  include "OpenGL/ShaderFragment.hpp"
 #  include "OpenGL/ShaderGeometry.hpp"
@@ -1375,7 +1369,7 @@ private:
 //!     Object) bound to this instance of GLProgram (note that filling VBO is
 //!     made from GLVAO's methods).
 //!   - their sampler variables GLSamplers which are used for creating the list
-//!     of extures (GLTexture1D, GLTexture2D, GLTexture3D, GLTextureCube) to
+//!     of textures (GLTexture1D, GLTexture2D, GLTexture3D, GLTextureCube) to
 //!     the GLVAO (Vertex Array Object) bound to this instance of GLProgram
 //!     (note that filling VBO is made from GLVAO's methods).
 //! Finally, a GLProgram can render (draw) the GLVAO bound to it (note that

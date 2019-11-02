@@ -20,15 +20,15 @@
 
 #ifndef OPENGLCPPWRAPPER_VECTOR_HPP
 #  define OPENGLCPPWRAPPER_VECTOR_HPP
-#include <iostream>
-// *************************************************************************************************
+
+// *****************************************************************************
 // This file has been inspired by the following documents:
 // https://github.com/Reedbeta/reed-util
 // and http://www.reedbeta.com/blog/on-vector-math-libraries/
 // and http://www.ogre3d.org
 // and "Vectors in Julia" by Reese Pathak, David Zeng, Keegan Go, Stephen Boyd, Stanford University.
 // and the book: "Game Physics Engine Development" by Ian Millington
-// *************************************************************************************************
+// *****************************************************************************
 
 #  include <initializer_list>
 #  include <algorithm>
@@ -42,9 +42,9 @@
 namespace glwrap
 {
 
-// *************************************************************************************************
+// *****************************************************************************
 //! \brief Macro for building constructors
-// *************************************************************************************************
+// *****************************************************************************
 #define VECTOR_DIM(N)                                                   \
   /*! \brief Empty constructor */                                       \
   Vector()                                                              \
@@ -150,9 +150,14 @@ private:                                                                \
  /* via the array conversions) */                                       \
  operator bool()
 
-// *************************************************************************************************
-//! \brief Generic mathematic vector: T for the type (float, int) and n the vector dimension
-// *************************************************************************************************
+// *****************************************************************************
+//! \brief Generic mathematic vector for a given dimension.
+//!
+//! \tparam T the type of the vector (float, int).
+//! \tparam n the vector dimension.
+//! \note be n small enough to be stored inside the stack of the program without
+//! making a stack overflow. No checks are made again stack overflow.
+// *****************************************************************************
 template <typename T, size_t n>
 class Vector
 {
@@ -160,6 +165,7 @@ public:
 
   VECTOR_DIM(n);
 
+  //! \brief Return the norm of this instance.
   T norm() const
   {
     T l = maths::zero<T>();
@@ -170,6 +176,8 @@ public:
     return maths::sqrt(l);
   }
 
+  //! \brief Make this instance be a unit vector.
+  //! \note undefined behavior is the norm of the vector is 0.
   void normalize()
   {
     T const l = maths::one<T>() / norm();
@@ -183,17 +191,21 @@ public:
 
 protected:
 
-  T m_data[n]; // TODO: std::array to avoid segfaut in huge dimension
+  //! \brief static array holdind values.
+  //! \note be careful to not produce a stack overflow with a huge size.
+  //! \todo std::array to avoid segfaut in huge dimension ?
+  T m_data[n];
 };
 
-// *************************************************************************************************
-//! \brief Specialization for n = 2
-// *************************************************************************************************
+// *****************************************************************************
+//! \brief Specialization for vector of dimension 2
+// *****************************************************************************
 template <typename T>
 class Vector<T, 2_z>
 {
 public:
 
+  //! \brief Constructor.
   Vector(const T scalar_x, const T scalar_y)
   {
     x = scalar_x;
@@ -202,11 +214,14 @@ public:
 
   VECTOR_DIM(2_z);
 
+  //! \brief Return the norm of this instance.
   inline T norm() const
   {
     return maths::sqrt(x * x + y * y);
   }
 
+  //! \brief Make this instance be a unit vector.
+  //! \note undefined behavior is the norm of the vector is 0.
   void normalize()
   {
     T const l = maths::one<T>() / norm();
@@ -216,8 +231,10 @@ public:
 
 public:
 
+  //! \brief static array holdind values.
   union
   {
+    //! \brief static array holdind values.
     T m_data[2_z];
 
 #pragma GCC diagnostic push
@@ -227,13 +244,21 @@ public:
 #pragma GCC diagnostic pop
   };
 
+  //! \brief Create a vector filled with NaN (for float and double only).
   const static Vector<T, 2_z> DUMMY;
+  //! \brief Create a vector filled with zero<T>().
   const static Vector<T, 2_z> ZERO;
+  //! \brief Create the vector filled with one<T>().
   const static Vector<T, 2_z> UNIT_SCALE;
+  //! \brief Create the vector filled with negative one<T>().
   const static Vector<T, 2_z> NEGATIVE_UNIT_SCALE;
+  //! \brief Create the vector [one<T>() zero<T>()].
   const static Vector<T, 2_z> UNIT_X;
+  //! \brief Create the vector [zero<T>() one<T>()].
   const static Vector<T, 2_z> UNIT_Y;
+  //! \brief Create the vector [-one<T>() zero<T>()].
   const static Vector<T, 2_z> NEGATIVE_UNIT_X;
+  //! \brief Create the vector [zero<T>() -one<T>()].
   const static Vector<T, 2_z> NEGATIVE_UNIT_Y;
 };
 
@@ -247,14 +272,15 @@ template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::UNIT_Y(maths::zero<T>
 template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::NEGATIVE_UNIT_X(-maths::one<T>(), maths::zero<T>());
 template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>());
 
-// *************************************************************************************************
-//! \brief Specialization for n = 3
-// *************************************************************************************************
+// *****************************************************************************
+//! \brief Specialization for vector of dimension 3
+// *****************************************************************************
 template <typename T>
 class Vector<T, 3_z>
 {
 public:
 
+  //! \brief Constructor.
   Vector(Vector<T, 2_z> const& v, const T scalar_z = maths::zero<T>())
   {
     x = v.x;
@@ -262,6 +288,7 @@ public:
     z = scalar_z;
   }
 
+  //! \brief Constructor.
   Vector(const T scalar_x, const T scalar_y, const T scalar_z = maths::zero<T>())
   {
     x = scalar_x;
@@ -271,11 +298,14 @@ public:
 
   VECTOR_DIM(3_z);
 
+   //! \brief Return the norm of this instance.
   inline T norm() const
   {
     return maths::sqrt(x * x + y * y + z * z);
   }
 
+  //! \brief Make this instance be a unit vector.
+  //! \note undefined behavior is the norm of the vector is 0.
   void normalize()
   {
     T const l = maths::one<T>() / norm();
@@ -286,6 +316,7 @@ public:
 
 public:
 
+  //! \brief static array holdind values.
   union
   {
     T m_data[3_z];
@@ -297,15 +328,25 @@ public:
 #pragma GCC diagnostic pop
   };
 
+  //! \brief Create a vector filled with NaN (for float and double only).
   const static Vector<T, 3_z> DUMMY;
+  //! \brief Create a vector filled with zero<T>().
   const static Vector<T, 3_z> ZERO;
+  //! \brief Create the vector filled with one<T>().
   const static Vector<T, 3_z> UNIT_SCALE;
+  //! \brief Create the vector filled with negative one<T>().
   const static Vector<T, 3_z> NEGATIVE_UNIT_SCALE;
+  //! \brief Create the vector [one<T>() zero<T>() zero<T>()].
   const static Vector<T, 3_z> UNIT_X;
+  //! \brief Create the vector [zero<T>() one<T>() zero<T>()].
   const static Vector<T, 3_z> UNIT_Y;
+  //! \brief Create the vector [zero<T>() zero<T>() one<T>()].
   const static Vector<T, 3_z> UNIT_Z;
+  //! \brief Create the vector [-one<T>() zero<T>() zero<T>()].
   const static Vector<T, 3_z> NEGATIVE_UNIT_X;
+  //! \brief Create the vector [zero<T>() -one<T>() zero<T>()].
   const static Vector<T, 3_z> NEGATIVE_UNIT_Y;
+  //! \brief Create the vector [zero<T>() zero<T>() -one<T>()].
   const static Vector<T, 3_z> NEGATIVE_UNIT_Z;
 };
 
@@ -320,14 +361,15 @@ template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_X(-math
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_Z(maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
 
-// *************************************************************************************************
-// Specializations for n = 4
-// *************************************************************************************************
+// *****************************************************************************
+//! \brief Specialization for vector of dimension 4
+// *****************************************************************************
 template <typename T>
 class Vector<T, 4_z>
 {
 public:
 
+  //! \brief Constructor.
   Vector(Vector<T, 3_z> const& v, const T scalar_w = maths::zero<T>())
   {
     x = v.x;
@@ -336,6 +378,7 @@ public:
     w = scalar_w;
   }
 
+  //! \brief Constructor.
   Vector(const T scalar_x, const T scalar_y, const T scalar_z, const T scalar_w)
   {
     x = scalar_x;
@@ -346,11 +389,14 @@ public:
 
   VECTOR_DIM(4_z);
 
+  //! \brief Return the norm of this instance.
   inline T norm() const
   {
     return maths::sqrt(x * x + y * y + z * z + w * w);
   }
 
+  //! \brief Make this instance be a unit vector.
+  //! \note undefined behavior is the norm of the vector is 0.
   void normalize()
   {
     T const l = maths::one<T>() / norm();
@@ -362,6 +408,7 @@ public:
 
 public:
 
+  //! \brief static array holdind values.
   union
   {
     T m_data[4_z];
@@ -373,17 +420,29 @@ public:
 #pragma GCC diagnostic pop
   };
 
+  //! \brief Create a vector filled with NaN (for float and double only).
   const static Vector<T, 4_z> DUMMY;
+  //! \brief Create a vector filled with zero<T>().
   const static Vector<T, 4_z> ZERO;
+  //! \brief Create the vector filled with one<T>().
   const static Vector<T, 4_z> UNIT_SCALE;
+  //! \brief Create the vector filled with negative one<T>().
   const static Vector<T, 4_z> NEGATIVE_UNIT_SCALE;
+  //! \brief Create the vector [one<T>() zero<T>() zero<T>() zero<T>()].
   const static Vector<T, 4_z> UNIT_X;
+  //! \brief Create the vector [zero<T>() one<T>() zero<T>() zero<T>()].
   const static Vector<T, 4_z> UNIT_Y;
+  //! \brief Create the vector [zero<T>() zero<T>() one<T>() zero<T>()].
   const static Vector<T, 4_z> UNIT_Z;
+  //! \brief Create the vector [zero<T>() zero<T>() zero<T>() one<T>()].
   const static Vector<T, 4_z> UNIT_W;
+  //! \brief Create the vector [-one<T>() zero<T>() zero<T>() zero<T>()].
   const static Vector<T, 4_z> NEGATIVE_UNIT_X;
+  //! \brief Create the vector [zero<T>() -one<T>() zero<T>() zero<T>()].
   const static Vector<T, 4_z> NEGATIVE_UNIT_Y;
+  //! \brief Create the vector [zero<T>() zero<T>() -one<T>() zero<T>()].
   const static Vector<T, 4_z> NEGATIVE_UNIT_Z;
+  //! \brief Create the vector [zero<T>() zero<T>() zero<T>() -one<T>()].
   const static Vector<T, 4_z> NEGATIVE_UNIT_W;
 };
 
@@ -400,9 +459,9 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_Y(maths
 template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_Z(maths::zero<T>(), maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
 template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths::zero<T>(), maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
 
-// *************************************************************************************************
+// *****************************************************************************
 // Overloaded math operators
-// *************************************************************************************************
+// *****************************************************************************
 
 #define DEFINE_UNARY_OPERATOR(op)                       \
   template <typename T, size_t n>                       \
@@ -1010,9 +1069,9 @@ std::ostream& operator<<(std::ostream& os, Vector<T, 4_z> const& v)
   return os << "Vector(" << v[0] << ", " << v[1] << ", " << v[2]  << ", " << v[3] << ')';
 }
 
-// *************************************************************************************************
+// *****************************************************************************
 // Typedefs for the most common types and dimensions
-// *************************************************************************************************
+// *****************************************************************************
 
 typedef Vector<bool, 2_z> Vector2b;
 typedef Vector<bool, 3_z> Vector3b;

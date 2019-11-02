@@ -34,6 +34,7 @@ static const float PI2 = static_cast<float>(2.0 * maths::PI);
 // *****************************************************************************
 //! \brief Class holding list of vertice positions, normals, texture coordinate
 //! and vertice index.
+//! \defgroup Geometry Geometry
 // *****************************************************************************
 class Shape
 {
@@ -89,12 +90,18 @@ protected:
 };
 
 // *****************************************************************************
-//! \brief Create a tube shape
+//! \brief Create a Z-axis aligned circle shape (with 3d coordinates).
+//! \ingroup Geometry
 // *****************************************************************************
 class Circle: public Shape
 {
 public:
 
+  //----------------------------------------------------------------------------
+  //! \brief Constructor. Z-axis aligned tube centered at origin.
+  //! \param radius The radius of the circle.
+  //! \param slices The number of subdivisions around the Z axis.
+  //----------------------------------------------------------------------------
   Circle(float const radius, uint32_t const slices/*, bool const inversed*/)
   {
     std::vector<float> angle;
@@ -138,7 +145,9 @@ public:
 };
 
 // *****************************************************************************
-//! \brief Create a tube shape
+//! \brief Create a tube shape. Tube is a generic shape that can create Cylinder
+//! Cone and Pyramid.
+//! \ingroup Geometry
 // *****************************************************************************
 class Tube: public Shape
 {
@@ -146,9 +155,9 @@ public:
 
   //----------------------------------------------------------------------------
   //! \brief Constructor. Z-axis aligned tube centered at origin.
-  //! \param top_radius The radius at the top of the cylinder
-  //! \param base_radius The radius at the base of the cylinder
-  //! \param height The height of the cylinder
+  //! \param top_radius The radius at the top of the tube.
+  //! \param base_radius The radius at the base of the tube.
+  //! \param height The height of the tube.
   //! \param slices The number of subdivisions around the Z axis.
   //----------------------------------------------------------------------------
   Tube(float const top_radius, float const base_radius, float const height, uint32_t const slices)
@@ -206,37 +215,57 @@ public:
   }
 };
 
-//----------------------------------------------------------------------------
-//! \brief
-//----------------------------------------------------------------------------
+// *****************************************************************************
+//! \brief Class holding meshes of a cylinder. A cylinder is a Tube where top
+//! radius is equal to the the base radius.
+//! \ingroup Geometry
+// *****************************************************************************
 class Cylinder: public Tube
 {
 public:
 
+  //----------------------------------------------------------------------------
+  //! \brief Constructor. Z-axis aligned tube centered at origin.
+  //! \param radius The radius of the cylinder
+  //! \param height The height of the cylinder
+  //! \param slices The number of subdivisions around the Z axis.
+  //----------------------------------------------------------------------------
   Cylinder(float const radius, float const height, uint32_t const slices)
     : Tube(radius, radius, height, slices)
   {}
 };
 
-//----------------------------------------------------------------------------
-//! \brief
-//----------------------------------------------------------------------------
+// *****************************************************************************
+//! \brief Class holding meshes of a cone. A cone is a Tube with no top radius.
+//! \ingroup Geometry
+// *****************************************************************************
 class Cone: public Tube
 {
 public:
 
+  //----------------------------------------------------------------------------
+  //! \brief Constructor. Z-axis aligned tube centered at origin.
+  //! \param radius The radius of the cone.
+  //! \param height The height of the cone.
+  //----------------------------------------------------------------------------
   Cone(float const radius, float const height, uint32_t const slices)
     : Tube(0.0f, radius, height, slices)
   {}
 };
 
-//----------------------------------------------------------------------------
-//! \brief
-//----------------------------------------------------------------------------
+// *****************************************************************************
+//! \brief Class holding meshes of a pyramid. A pyramid is a cone with 4 slices.
+//! \ingroup Geometry
+// *****************************************************************************
 class Pyramid: public Cone
 {
 public:
 
+  //----------------------------------------------------------------------------
+  //! \brief Constructor. Z-axis aligned tube centered at origin.
+  //! \param radius The radius of the pyramid.
+  //! \param height The height of the pyramid.
+  //----------------------------------------------------------------------------
   Pyramid(float const radius, float const height)
     : Cone(radius, height, 4)
   {}

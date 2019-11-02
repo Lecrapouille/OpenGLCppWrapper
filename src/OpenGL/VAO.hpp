@@ -45,14 +45,8 @@ namespace glwrap
 DECLARE_CLASS(GLVAO)
 
 // *****************************************************************************
-//! \class GLVAO VAO.hpp
-//!
-//! \brief GLVAO is a class handling the OpenGL representation of a 3D model: it
-//! holds a list of VBOs and a list of textures. Theses lists are populated by a
-//! GLProgram once the GLVAO has been bound to the GLProgram. Note that once
-//! bound a GLVAO cannot be bound to another GLProgram. Finally, for rendering
-//! the 3D model, just get the GLVAO be drawn by the bound GLProgram.
-
+//! \brief Handle the OpenGL representation of 3D models. Hold a list of VBO and
+//! textures created by a GLProgram.
 // *****************************************************************************
 class GLVAO: public GLObject<GLenum>
 {
@@ -70,8 +64,9 @@ class GLVAO: public GLObject<GLenum>
 public:
 
   //----------------------------------------------------------------------------
-  //! \brief Constructor. Give a name to the instance. This constructor makes no
-  //! other actions. This name is mainly used for logs as debug purpose.
+
+  //! \brief Constructor. Give a name to the instance. This name is mainly used
+  //! for logs as debug purpose. This constructor makes no other actions.
   //!
   //! \param[in] name the name of the VAO instance.
   //----------------------------------------------------------------------------
@@ -90,9 +85,9 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the list of VBO names. VBO names come from names od
-  //! attributes used in GLSL shaders. This is method is mainly used for debug
-  //! purpose.
+  //! \brief Return the list of VBO names. VBO names come from names of
+  //! attributes variables used inside GLSL shaders. This method is mainly
+  //! used for debug purpose.
   //!
   //! \note if the VAO has never been bound to a GLProgram this method will
   //! return an empty list.
@@ -114,9 +109,9 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the list of sampler names which come from names of uniform
-  //! variables used in GLSL shaders. This is method is mainly used for debug
-  //! purpose.
+  //! \brief Return the list of sampler names. Samplers come from names of
+  //! uniform variables used in GLSL shaders. This is method is mainly used for
+  //! debug purpose.
   //!
   //! \note if the VAO has never been bound to a GLProgram this method will
   //! return an empty list.
@@ -706,6 +701,36 @@ private:
   //! \brief boolean avoiding to make uncessary checks on VBO size.
   bool m_vbo_size_verified = false;
 };
+
+//----------------------------------------------------------------------------
+//! \class GLVAO VAO.hpp
+//! \ingroup OpenGL
+//!
+//! GLVAO is a class handling the OpenGL representation of a 3D model: it holds
+//! a list of Vertex Buffer Objects (GLVBO) and textures (GLTexture1D,
+//! GLTexture2D, GLTexture3D, GLTextureCube). Theses lists are created by a
+//! GLProgram once a GLVAO has been bound to it. Note that once bound, a GLVAO
+//! cannot be bound to another GLProgram. Finally, for rendering the 3D model,
+//! just get the GLVAO be drawn by the associated GLProgram.
+//! Usage example (beware, this example does not show shaders initialization or VAO
+//! initialization!)
+//!
+//! Usage example (beware, this example does not show GLProgram initialization)
+//!
+//! \code
+//! GLProgram prog("prog");
+//! GLVAO vao("VAO");
+//! prog.bind(vao);
+//! vao.vector3f("position") = { Vector3f(1.0, 2.0, 3.0); ... }
+//! vao.vector2f("UV") = { Vector2f(1.0, 2.0); ... }
+//! GLTexture2D& texture = vao.texture2D("texID");
+//! texture.load("foobar.jpg");
+//! prog.draw(vao, Mode::TRIANGLES, 0, 36);
+//! prog.draw(vao, Mode::TRIANGLES);
+//! vao.vector2f("UV") *= 4.0f;
+//! prog.draw(vao);
+//! \endcode
+//----------------------------------------------------------------------------
 
 } // namespace glwrap
 
