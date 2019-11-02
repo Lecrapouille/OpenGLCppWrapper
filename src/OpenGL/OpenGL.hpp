@@ -41,6 +41,7 @@ DECLARE_EXCEPTION(OpenGLException, Exception)
 //----------------------------------------------------------------------------
 //! \brief Return if the OpenGL has been created or has not been
 //! created or has failed creating.
+//! \defgroup OpenGL OpenGL wrapper
 //!
 //! \return true if the OpenGL context has been created
 //! else return false (not yet created or failed during

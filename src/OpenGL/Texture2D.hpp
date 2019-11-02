@@ -156,7 +156,7 @@ public:
   //!
   //! \return true if texture data have been loaded.
   //----------------------------------------------------------------------------
-  inline bool load(std::string const& filename)
+  inline bool load(std::string const& filename) // TODO hold the filename. name == filename
   {
     return load(filename.c_str());
   }

@@ -119,6 +119,8 @@ private:
 
 // *****************************************************************************
 //! \brief GLUniform represents a program uniform variable.
+//! \tparam T float or int or VectorXf or VectorXi or MatrixXXf with X = [2 .. 4]
+//! or GLSamplerXD with X = [1 .. 3] or GLSamplerCube.
 // *****************************************************************************
 template<class T>
 class GLUniform: public IGLUniform
@@ -157,7 +159,7 @@ public:
   inline T& data()
   {
     // FIXME always modified ?
-    forceUpdate();
+    redoUpdate();
 
     return m_data;
   }

@@ -53,7 +53,7 @@ namespace glwrap
 //! code for processing the code (like code inclusion) and allow to
 //! compile code source.
 // *****************************************************************************
-class GLShader: public GLObject<GLuint>
+class GLShader: public GLObject<GLenum>
 {
 public:
 
@@ -103,8 +103,8 @@ public:
       {
         std::string msg = "Failed loading shader code '"
           + filename + "'";
+        concatError(msg);
         ERROR("%s", msg.c_str());
-        m_error_msg += '\n' + msg;
       }
     return loaded;
   }
@@ -202,7 +202,6 @@ private:
     infile.open(path, std::ifstream::in);
     if (infile.fail())
       {
-        //TODO m_error_msg += '\n' + msg;
         ERROR("Failed open file '%s'. Reason is '%s'", path.c_str(), strerror(errno));
         return false;
       }
@@ -259,7 +258,7 @@ private:
         std::string msg =
           "Cannot compile the shader %s. Reason is "
           "'already compiled or no shader code attached'";
-        m_error_msg += '\n' + msg;
+        concatError(msg);
         ERROR("%s", msg.c_str());
       }
     DEBUG("  Shader '%s' compiled? %d", cname(), m_compiled);
@@ -310,10 +309,9 @@ private:
         GLint length;
         glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &length));
         std::vector<char> log(static_cast<size_t>(length));
-        glCheck(glGetShaderInfoLog(obj, length, &length, &log[0U]));
-        std::string msg = &log[0U];
-        m_error_msg += '\n' + msg;
-        ERROR("%s", msg.c_str());
+        glCheck(glGetShaderInfoLog(obj, length - 1, &length, &log[0U]));
+        concatError(&log[0U]);
+        ERROR("Failed compiling '%s'. Reason was '%s'", cname(), m_error_msg.c_str());
       }
     else
       {
@@ -336,6 +334,18 @@ private:
       {
         throw OpenGLException("Failed Shader already compiled");
       }
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Concat the last error to the list of errors
+  //----------------------------------------------------------------------------
+  void concatError(std::string const& msg)
+  {
+    if (!m_error_msg.empty())
+      {
+        m_error_msg += "Q\n";
+      }
+    m_error_msg += msg;
   }
 
   virtual const char* type() const = 0;

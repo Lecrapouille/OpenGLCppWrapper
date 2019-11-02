@@ -41,35 +41,39 @@
 namespace glwrap
 {
 
-//! \brief Used by SceneGraph
+// Used by SceneGraph
 DECLARE_CLASS(GLVAO)
 
 // *****************************************************************************
-//! \class GLVAO GLVAO.hpp
+//! \class GLVAO VAO.hpp
 //!
-//! \brief Class handling the OpenGL representation of a 3D model.
-//!
-//! GLVAO has its list of VBOs and textures populated by a GLProgram once
-//! bind. GLVAO is drawn by a GLProgram.
+//! \brief GLVAO is a class handling the OpenGL representation of a 3D model: it
+//! holds a list of VBOs and a list of textures. Theses lists are populated by a
+//! GLProgram once the GLVAO has been bound to the GLProgram. Note that once
+//! bound a GLVAO cannot be bound to another GLProgram. Finally, for rendering
+//! the 3D model, just get the GLVAO be drawn by the bound GLProgram.
+
 // *****************************************************************************
 class GLVAO: public GLObject<GLenum>
 {
   //! \brief GLProgram directly modifies GLVAO states.
   friend class GLProgram;
 
-  // Unordered map = hash table = O(1) access time.
+  //! \brief Memorize Vertex Buffer Objects (VBOs).
+  //! \note Unordered map = hash table = O(1) access time.
   using mapGLBuffer = std::unordered_map<std::string, IGLBuffer_UP>;
+
+  //! \brief Memorize Textures.
+  //! \note Unordered map = hash table = O(1) access time.
   using mapGLTexture = std::unordered_map<std::string, IGLTexture_UP>;
 
 public:
 
   //----------------------------------------------------------------------------
-  //! \brief Constructor.
+  //! \brief Constructor. Give a name to the instance. This constructor makes no
+  //! other actions. This name is mainly used for logs as debug purpose.
   //!
-  //! Give a name to the instance. This constructor makes no other
-  //! actions.
-  //!
-  //! \param name the name of this instance (used for debug and traces).
+  //! \param[in] name the name of the VAO instance.
   //----------------------------------------------------------------------------
   GLVAO(std::string const& name)
     : GLObject(name)
@@ -86,49 +90,66 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the list of VBO names. This is method is mainly
-  //! used for debug purpose.
+  //! \brief Return the list of VBO names. VBO names come from names od
+  //! attributes used in GLSL shaders. This is method is mainly used for debug
+  //! purpose.
   //!
-  //! \note if the VAO has never been bound to a GLProgram the return
-  //! lit will be empty.
+  //! \note if the VAO has never been bound to a GLProgram this method will
+  //! return an empty list.
+  //!
+  //! \param[in,out] list the list where to insert VBO names.
+  //! \param[in] if the list has to be cleared before being filled.
+  //!
+  //! \return the number of inserted elements.
   //----------------------------------------------------------------------------
-  std::vector<std::string> VBONames()
+  size_t getVBONames(std::vector<std::string> &list, bool const clear = true)
   {
-    std::vector<std::string> list;
+    if (clear) { list.clear(); }
     list.reserve(m_vbos.size());
     for (auto& it: m_vbos)
       {
         list.push_back(it.first);
       }
-    return list;
+    return m_vbos.size();
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the list of textures names. This is method is mainly
-  //! used for debug purpose.
+  //! \brief Return the list of sampler names which come from names of uniform
+  //! variables used in GLSL shaders. This is method is mainly used for debug
+  //! purpose.
   //!
-  //! \note if the VAO has never been bound to a GLProgram the return
-  //! lit will be empty.
+  //! \note if the VAO has never been bound to a GLProgram this method will
+  //! return an empty list.
   //!
-  //! \note Do not be confused with meaning of texture name. We do not
-  //! refer to the jpeg, png or bmp file name but to the shader
-  //! uniform name (used in shaders).
+  //! \param[in,out] list the list where to insert sampler names.
+  //! \param[in] if the list has to be cleared before being filled.
+  //!
+  //! \note Do not be confused with the sense of 'sampler name'. We do not refer
+  //! to the name of the jpeg, png or bmp file. We refer to the shader sampler
+  //! name (GLSL code). The GLTexture holds the acces of the file. To access to
+  //! it do this VAO.texture2D["sampler_name"].name().
+  //!
+  //! \todo: get the tuple sampler name and texture name ?
+  //! \return the number of inserted elements.
   //----------------------------------------------------------------------------
-  std::vector<std::string> TextureNames()
+  size_t getSamplerNames(std::vector<std::string>& list, bool const clear = true)
   {
-    std::vector<std::string> list;
+    if (clear) { list.clear(); }
     list.reserve(m_textures.size());
     for (auto& it: m_textures)
       {
         list.push_back(it.first);
       }
-    return list;
+    return m_textures.size();
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Check if this instance holds a GLIndexBuffer.
+  //! \brief Check if this instance holds a GLIndexBuffer. GLIndexBuffer is an
+  //! and index of vertices. Indeed vertices are usually shared by several
+  //! meshes of the 3D model. Indexing them allows to mimize the size of the GPU
+  //! memory.
   //!
-  //! \return true if the .
+  //! \return true if the instance holds a GLIndexBuffer.
   //----------------------------------------------------------------------------
   inline bool hasIndex()
   {
@@ -136,7 +157,8 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Get the index type of uint32_t.
+  //! \brief Get the index of type GL_UNSIGNED_INT.
+  //! \throw OpenGLException if the index is not of type GL_UNSIGNED_INT.
   //!
   //! This method wraps the \a index() method hidding the misery of the
   //! template.
@@ -147,7 +169,8 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Get the index type of uint16_t.
+  //! \brief Get the index of type GL_UNSIGNED_SHORT.
+  //! \throw OpenGLException if the index is not of type GL_UNSIGNED_SHORT.
   //!
   //! This method wraps the \a index() method hidding the misery of the
   //! template.
@@ -158,7 +181,9 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Get the index type of uint8_t.
+  //! \brief Get the index type of GL_UNSIGNED_BYTE.
+  //!
+  //! \throw OpenGLException if the index is not of type GL_UNSIGNED_BYTE.
   //!
   //! This method wraps the \a index() method hidding the misery of the
   //! template.
@@ -169,9 +194,12 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Check if this instance has a non empty list of VBOs.
+  //! \brief Check if this instance has VBOs.
   //!
-  //! \return true if the list is non empty.
+  //! \note Having no VBO generally means that this instance of VAO have not yet
+  //! been bound to a GLProgram. See the bind() method.
+  //!
+  //! \return true if this instance has VBOs.
   //----------------------------------------------------------------------------
   inline bool hasVBOs() const
   {
@@ -179,10 +207,10 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Check if the name passed as parameter matches the name of
-  //! a VBO.
+  //! \brief Check if this instance holds a VBO named with the name passed as
+  //! parameter.
   //!
-  //! \return true if contains it, else return false.
+  //! \return true if contains the named VBO, else return false.
   //----------------------------------------------------------------------------
   inline bool hasVBO(const char *name) const
   {
@@ -190,9 +218,13 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Check if this instance has a non empty list of textures.
+  //! \brief Check if this instance has textures.
   //!
-  //! \return true if the list is non empty.
+  //! \note Having no textures generally means that the shader has no sampler or
+  //! this instance of VAO have not yet been bound to a GLProgram. See the bind()
+  //! method.
+  //!
+  //! \return true if this instance has textures.
   //----------------------------------------------------------------------------
   inline bool hasTextures() const
   {
@@ -200,42 +232,32 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Check if the name passed as parameter matches the name of
-  //! a texture.
-  //!
-  //! \return true if contains it, else return false.
+  //! \brief Alias for hasTextures()
   //----------------------------------------------------------------------------
-  inline bool hasTexture(const char *name) const
+  inline bool hasSamplers() const
+  {
+    return 0_z != m_textures.size();
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Check if this instance holds a sampler named with the name passed
+  //! as parameter.
+  //!
+  //! \return true if contains the named sampler, else return false.
+  //----------------------------------------------------------------------------
+  inline bool hasSampler(const char *name) const
   {
     return m_textures.end() != m_textures.find(name);
   }
 
   //----------------------------------------------------------------------------
-  //! \brief
+  //! \brief Return the reference of the named VBO holding a 4D vector of type
+  //! float.
   //!
-  //! \note: name duplicata is not managed because this case should
-  //! never happen.
-  //----------------------------------------------------------------------------
-  template<typename T>
-  bool createVBO(const char *name, size_t const vbo_init_size, BufferUsage const usage)
-  {
-    if (unlikely(hasVBO(name)))
-      {
-        ERROR("VAO '%s' Tried to create a VBO with name '%s' already used",
-              cname(), name);
-        return false;
-      }
-    DEBUG("VAO '%s' creating a new VBO '%s' of %zu elements of %zu bytes",
-          cname(), name, vbo_init_size, sizeof (T));
-    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
-    return true;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Get the VBO float 4D vector.
+  //! This method wraps the \a VBO() method hidding the misery of the template.
   //!
-  //! This method wraps the \a VBO() method hidding the misery of the
-  //! template.
+  //! \throw OpenGLException if the VBO does not exist or does not have the
+  //! correct type.
   //----------------------------------------------------------------------------
   inline GLVertexBuffer<Vector4f>& vector4f(const char *name)
   {
@@ -243,10 +265,13 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Get the VBO float 3D vector.
+  //! \brief Return the reference of the named VBO holding a 3D vector of type
+  //! float.
   //!
-  //! This method wraps the \a VBO() method hidding the misery of the
-  //! template.
+  //! This method wraps the \a VBO() method hidding the misery of the template.
+  //!
+  //! \throw OpenGLException if the VBO does not exist or does not have the
+  //! correct type.
   //----------------------------------------------------------------------------
   inline GLVertexBuffer<Vector3f>& vector3f(const char *name)
   {
@@ -254,10 +279,13 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Get the VBO float 2D vector.
+  //! \brief Return the reference of the named VBO holding a 2D vector of type
+  //! float.
   //!
-  //! This method wraps the \a VBO() method hidding the misery of the
-  //! template.
+  //! This method wraps the \a VBO() method hidding the misery of the template.
+  //!
+  //! \throw OpenGLException if the VBO does not exist or does not have the
+  //! correct type.
   //----------------------------------------------------------------------------
   inline GLVertexBuffer<Vector2f>& vector2f(const char *name)
   {
@@ -265,21 +293,83 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Get the VBO float scalar.
+  //! \brief Return the reference of the named VBO holding a float scalar.
   //!
-  //! This method wraps the \a VBO() method hidding the misery of the
-  //! template.
+  //! This method wraps the \a VBO() method hidding the misery of the template.
+  //!
+  //! \throw OpenGLException if the VBO does not exist or does not have the
+  //! correct type.
   //----------------------------------------------------------------------------
   inline GLVertexBuffer<float>& scalarf(const char *name)
   {
     return VBO<float>(name);
   }
 
+#if 0
   //----------------------------------------------------------------------------
-  //! \brief Get the 1D texture.
+  //! \brief Return the reference of the named VBO holding a 4D vector of type
+  //! int.
+  //!
+  //! This method wraps the \a VBO() method hidding the misery of the template.
+  //!
+  //! \throw OpenGLException if the VBO does not exist or does not have the
+  //! correct type.
+  //----------------------------------------------------------------------------
+  inline GLVertexBuffer<Vector4f>& vector4i(const char *name)
+  {
+    return VBO<Vector4i>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the named VBO holding a 3D vector of type
+  //! int.
+  //!
+  //! This method wraps the \a VBO() method hidding the misery of the template.
+  //!
+  //! \throw OpenGLException if the VBO does not exist or does not have the
+  //! correct type.
+  //----------------------------------------------------------------------------
+  inline GLVertexBuffer<Vector3f>& vector3i(const char *name)
+  {
+    return VBO<Vector3i>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the named VBO holding a 2D vector of type
+  //! int.
+  //!
+  //! This method wraps the \a VBO() method hidding the misery of the template.
+  //!
+  //! \throw OpenGLException if the VBO does not exist or does not have the
+  //! correct type.
+  //----------------------------------------------------------------------------
+  inline GLVertexBuffer<Vector2f>& vector2i(const char *name)
+  {
+    return VBO<Vector2i>(name);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the named VBO holding a int scalar.
+  //!
+  //! This method wraps the \a VBO() method hidding the misery of the template.
+  //!
+  //! \throw OpenGLException if the VBO does not exist or does not have the
+  //! correct type.
+  //----------------------------------------------------------------------------
+  inline GLVertexBuffer<int>& scalari(const char *name)
+  {
+    return VBO<int>(name);
+  }
+#endif
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the named VBO holding a 1D texture.
   //!
   //! This method wraps the \a texture() method hidding the misery of the
   //! template.
+  //!
+  //! \throw OpenGLException if the texture does not exist or does not have the
+  //! correct type.
   //----------------------------------------------------------------------------
   inline GLTexture1D& texture1D(const char *name)
   {
@@ -287,10 +377,13 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Get the 2D texture.
+  //! \brief Return the reference of the named VBO holding a 2D texture.
   //!
   //! This method wraps the \a texture() method hidding the misery of the
   //! template.
+  //!
+  //! \throw OpenGLException if the texture does not exist or does not have the
+  //! correct type.
   //----------------------------------------------------------------------------
   inline GLTexture2D& texture2D(const char *name)
   {
@@ -298,10 +391,13 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Get the 3D texture.
+  //! \brief Return the reference of the named VBO holding a 3D texture.
   //!
   //! This method wraps the \a texture() method hidding the misery of the
   //! template.
+  //!
+  //! \throw OpenGLException if the texture does not exist or does not have the
+  //! correct type.
   //----------------------------------------------------------------------------
   inline GLTexture3D& texture3D(const char *name)
   {
@@ -309,20 +405,27 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Get the cubic texture.
+  //! \brief Return the reference of the named VBO holding a cubic texture.
   //!
   //! This method wraps the \a texture() method hidding the misery of the
   //! template.
+  //!
+  //! \throw OpenGLException if the texture does not exist or does not have the
+  //! correct type.
   //----------------------------------------------------------------------------
   inline GLTextureCube& textureCube(const char *name)
   {
     return texture<GLTextureCube>(name);
   }
 
-  //------------------------------------------------------------------
-  //! \brief Check if all VBOs have the same size.
+  //----------------------------------------------------------------------------
+  //! \brief Check if all VBOs have the same size (same number of elements). The
+  //! purpose of this method is purely for security and/or debugging. You can
+  //! call it after filling a VBO or after the GLWindow::setup() to check if all
+  //! VBOs have been init and you did not forget one.
+  //!
   //! \return true if all VBO have the same size, else return false.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   bool checkVBOSizes()
   {
     DEBUG("VAO '%s' check VBO sizes", cname());
@@ -358,12 +461,14 @@ public:
 private:
 
   //----------------------------------------------------------------------------
-  //! \brief Locate and get the VBO refered by the name and its type T.
+  //! \brief Locate and get the reference of the VBO refered by the name and by
+  //! its type T. If possible cache your VBO reference because this function is
+  //! not fast.
   //!
   //! \return the reference of the VBO if it exists.
   //!
-  //! \throw OpenGLException if the VBO is not in the list
-  //! (probably due to a typo in the name) or if the type T does not match.
+  //! \throw OpenGLException if the VBO is not in the list (probably due to a
+  //! typo in the name) or if the type T does not match.
   //----------------------------------------------------------------------------
   template<typename T>
   GLVertexBuffer<T>& VBO(const char *name)
@@ -402,8 +507,11 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Get the GLIndexBuffer.
-  //! \note if the GLIndexBuffer does not exist it is created.
+  //! \brief Get the reference of GLIndexBuffer refered by its type T. If the
+  //! GLIndexBuffer did not exist then it is created before returning its
+  //! reference.
+  //!
+  //! \throw OpenGLException if the type T is not correct.
   //----------------------------------------------------------------------------
   template<typename T>
   GLIndexBuffer<T>& index(BufferUsage const usage)
@@ -426,12 +534,13 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Locate and get the texture refered by the name and its type T.
+  //! \brief Locate and get the reference of ther texture refered by its type T
+  //! and by the given the sampler name used in GLSL code.
   //!
   //! \return the reference of the texture if it exists.
   //!
-  //! \throw OpenGLException if the VBO is not in the list
-  //! (probably due to a typo in the name) or if the type T does not match.
+  //! \throw OpenGLException if the texture is not in the list or if the type T
+  //! does not match or by a typo in the name of the sampler.
   //----------------------------------------------------------------------------
   template<typename T>
   T& texture(const char *name)
@@ -469,15 +578,53 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief
+  //! \brief Create a Vertex Buffer Object. Called by GLProgram when populating
+  //! the bound VAO with VBOs from attribute names used in shader GLSL code.
   //!
-  //! \note: name duplicata is not managed because this case should
-  //! never happen.
+  //! \param[in] name the attribute name for the VBO.
+  //! \param[in] vbo_init_size reserve number of elements for the VBO.
+  //! \param[in] usage type of VBO (stream, static or dynamic).
+  //! \tparam T float or Vector2f or Vector3f or Vector4f or
+  //!             int or Vector2i or Vector3i or Vector4i.
+  //!
+  //! \note \a name duplicata is not managed because this case should never happen
+  //! (meaning two attribute names are used for different type which is not
+  //! allowed and detected by the GLSL compiler).
+  //!
+  //! \return true if the VBO has been created, else return false.
+  //----------------------------------------------------------------------------
+  template<typename T>
+  bool createVBO(const char *name, size_t const vbo_init_size, BufferUsage const usage)
+  {
+    if (unlikely(hasVBO(name)))
+      {
+        ERROR("VAO '%s' Tried to create a VBO with name '%s' already used",
+              cname(), name);
+        return false;
+      }
+    DEBUG("VAO '%s' creating a new VBO '%s' of %zu elements of %zu bytes",
+          cname(), name, vbo_init_size, sizeof (T));
+    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
+    return true;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Create a texture. Called by GLProgram when populating the bound VAO
+  //! with textures frome sampler names used in shader GLSL code.
+  //!
+  //! \param[in] name the sampler name for the texture.
+  //! \tparam T GLTexture1D or GLTexture2D or GLTexture3D or GLTextureCube.
+  //!
+  //! \note name duplicata is not managed because this case should never happen
+  //! (meaning two attribute names are used for different type which is not
+  //! allowed and detected by the GLSL compiler).
+  //!
+  //! \return true if the texture has been created, else return false.
   //----------------------------------------------------------------------------
   template<typename T>
   bool createTexture(const char *name)
   {
-    if (unlikely(hasTexture(name)))
+    if (unlikely(hasSampler(name)))
       {
         ERROR("VAO '%s' Tried to create a texture with name '%s' already used",
               cname(), name);
@@ -543,17 +690,18 @@ private:
 
 private:
 
-  //! \brief Hold VBOs.
-  // FIXME instead of hold IGLBuffer we should hold GLBuffer<T>
-  // but this is not possible in C++. So I have no idea.
+  //! \brief Hold VBOs populated by the a bound GLProgram form attributes in
+  //! GLSL shader code.
+  //! \note ideally, instead of holding IGLBuffer we should hold GLBuffer<T> but
+  //! this is not possible in C++. So I have no idea how to make it correctly.
   mapGLBuffer m_vbos;
-  //! \brief Hold textures.
+  //! \brief Hold textures populated by the a bound GLProgram form samplers in
+  //! GLSL shader code.
   mapGLTexture m_textures;
   //! \brief Optionally hold vertex indices.
   IGLBuffer_UP m_index;
-  //! \brief Hold the ID of the bound GLProgam.
-  //! \note this varibale is modified durectly
-  //! by the GLProgam.
+  //! \brief Hold the ID of the bound GLProgam. Note this varibale is modified
+  //! directly by the GLProgam.
   GLenum prog = 0;
   //! \brief boolean avoiding to make uncessary checks on VBO size.
   bool m_vbo_size_verified = false;

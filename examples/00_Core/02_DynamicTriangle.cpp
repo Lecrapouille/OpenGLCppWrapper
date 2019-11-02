@@ -47,10 +47,11 @@ void GLExample02::debug()
 {
   // VBOs of the VAO
   {
-    std::vector<std::string> vbos = m_triangle.VBONames();
+    std::vector<std::string> vbo_names;
+    size_t count = m_triangle.getVBONames(vbo_names);
     std::cout << "VAO '" << m_triangle.name() << "' has "
-              << vbos.size() << " VBO: " << std::endl;
-    for (auto& it: vbos)
+              << count << " VBO: " << std::endl;
+    for (auto& it: vbo_names)
       {
         std::cout << "  '" << it << "'" << std::endl;
       }
@@ -58,10 +59,11 @@ void GLExample02::debug()
 
   // Uniforms of the program
   {
-    std::vector<std::string> uniforms = m_prog.getUniformNames();
+    std::vector<std::string> uniform_names;
+    size_t count = m_prog.getUniformNames(uniform_names);
     std::cout << "Prog '" << m_prog.name() << "' has "
-              << uniforms.size() << " uniforms: " << std::endl;
-    for (auto& it: uniforms)
+              << count << " uniforms: " << std::endl;
+    for (auto& it: uniform_names)
       {
         std::cout << "  '" << it << "'" << std::endl;
       }
@@ -82,7 +84,7 @@ bool GLExample02::setup()
                              "void main() {                            \n"
                              "  gl_Position = vec4(position, 0.0, 1.0);\n"
                              "}");
-  m_fragment_shader.fromString("#version 330 core                      \n"
+  m_fragment_shader.fromString("#vversion 330 core                      \n"
                                "uniform vec3 color;                    \n"
                                "out vec4 fragColor;                    \n"
                                "void main() {                          \n"
@@ -92,8 +94,7 @@ bool GLExample02::setup()
   // Compile the shader program
   if (!m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
     {
-      std::cerr << "failed compiling OpenGL program. Reason was '"
-                << m_prog.getError() << "'" << std::endl;
+      std::cerr << m_prog.getError() << std::endl;
       return false;
     }
 

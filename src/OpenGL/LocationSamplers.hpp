@@ -37,7 +37,6 @@
 // *****************************************************************************
 
 #  include "OpenGL/LocationUniform.hpp"
-#  include "Math/Matrix.hpp"
 
 namespace glwrap
 {
@@ -64,7 +63,7 @@ public:
     : IGLUniform(name, 0, gltype, prog),
       m_texture_id(texture_id)
   {
-    forceUpdate();
+    redoUpdate();
   }
 
   //----------------------------------------------------------------------------
