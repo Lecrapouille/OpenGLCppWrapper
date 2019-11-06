@@ -27,40 +27,55 @@
 //! graph.
 //------------------------------------------------------------------------------
 
-CubicRobot::CubicRobot(GLVAO_SP cube, const char *name)
-  : SceneNode(nullptr, name)
+CubicRobot::CubicRobot(const char *name)
+  : Node3D(name)
 {
-  DEBUG("%s", "Cstr CubicRobot");
+  DEBUG("Create CubicRobot %s", name);
 
   // Body
-  m_body = attach(cube, "Body");
+  m_body = Cube::create("Body");
   m_body->localScale(Vector3f(10.0f, 15.0f, 5.0f));
   m_body->position(Vector3f(0.0f, 35.0f, 0.0f));
 
   // Head
-  m_head = m_body->attach(cube, "Head");
+  m_head = Cube::create("Head");
   m_head->localScale(Vector3f(5.0f));
   m_head->position(Vector3f(0.0f, 30.0f, 0.0f));
 
   // Left arm
-  m_leftArm = m_body->attach(cube, "Left Arm");
+  m_leftArm = Cube::create("LeftArm");
   m_leftArm->localScale(Vector3f(3.0f, -18.0f, 3.0f));
   m_leftArm->position(Vector3f(-12.0f, 30.0f, -1.0f));
 
   // Right arm
-  m_rightArm = m_body->attach(cube, "Right Arm");
+  m_rightArm = Cube::create("RightArm");
   m_rightArm->localScale(Vector3f(3.0f, -18.0f, 3.0f));
   m_rightArm->position(Vector3f(12.0f, 30.0f, -1.0f));
 
   // Left leg
-  m_leftLeg = m_body->attach(cube, "Left Leg");
+  m_leftLeg = Cube::create("LeftLeg");
   m_leftLeg->localScale(Vector3f(3.0f, -17.5f, 3.0f));
   m_leftLeg->position(Vector3f(-8.0f, 0.0f, 0.0f));
 
   // Right leg
-  m_rightLeg = m_body->attach(cube, "Right Leg");
+  m_rightLeg = Cube::create("RightLeg");
   m_rightLeg->localScale(Vector3f(3.0f, -17.5f, 3.0f));
   m_rightLeg->position(Vector3f(8.0f, 0.0f, 0.0f));
+
+  // Robot
+  m_body->add(m_head);
+  m_body->add(m_leftArm);
+  m_body->add(m_rightArm);
+  m_body->add(m_leftLeg);
+  m_body->add(m_rightLeg);
+  this->add(m_body);
+
+  //m_body->debug();
+}
+
+CubicRobot::~CubicRobot()
+{
+  DEBUG("Destroy CubicRobot %s", name().c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -71,7 +86,7 @@ void CubicRobot::update(float const dt)
   DEBUG("%s", "Robot::update");
 
   // Speed: 36 degrees per second
-  const GLfloat radiansPerSecond = maths::toRadian(36.0f);
+  const float radiansPerSecond = maths::toRadian(36.0f);
   radiansRotated = dt * radiansPerSecond;
   radiansRotated = maths::wrapToPI(radiansRotated);
 
@@ -79,22 +94,25 @@ void CubicRobot::update(float const dt)
   m_head->rotateY(-radiansRotated);
   m_leftArm->rotateX(-radiansRotated);
   m_rightArm->rotateX(radiansRotated);
-  SceneNode::update(dt);
+
+  // Update world transform matrices
+  Node3D::update(dt);
 }
 
 //------------------------------------------------------------------------------
 //! \brief Paint the GUI
 //------------------------------------------------------------------------------
-void GLImGUI::observeNode(SceneNode const& node) const
+void GLImGUI::observeNode(Node3D const& node) //const
 {
-  std::string nodename("Node '" + node.id() + "'");
+  std::string nodename("Node '" + node.name() + "'");
   ImGui::SetNextTreeNodeOpen(true);
   if (ImGui::TreeNode(nodename.c_str()))
     {
-      GLVAO_SP const& mesh = node.renderable();
-      if (nullptr != mesh)
-        {
-          std::string name("Meshes '" + mesh->name() + "'");
+      //VAO const& mesh = node.renderable();
+      //if (nullptr != mesh)
+      if (node.renderable())
+      {
+        std::string name("Meshes");// '" + mesh->name() + "'");
           ImGui::TextUnformatted(name.c_str());
         }
       else
@@ -108,7 +126,7 @@ void GLImGUI::observeNode(SceneNode const& node) const
       ImGui::TextUnformatted(ss.str().c_str());
 
       ss.str("");
-      ss << "Has child " << node.nbChildren() << " Nodes:";
+      ss << "Has child " << node.children().size() << " Nodes:";
       ImGui::SetNextTreeNodeOpen(true);
       if (ImGui::TreeNode(ss.str().c_str()))
         {
@@ -132,14 +150,7 @@ bool GLImGUI::render()
 
   if (ImGui::TreeNode("Scene graph"))
     {
-      if (nullptr != m_graph)
-        {
-          auto const& root = m_graph->root();
-          if (nullptr != root)
-            {
-              observeNode(*root);
-            }
-        }
+      observeNode(*m_scene);
       ImGui::TreePop();
     }
   ImGui::Separator();
@@ -157,45 +168,10 @@ void GLExample09::onWindowSizeChanged()
   const float ratio =  width<float>() / height<float>();
 
   // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, width<int>(), height<int>()));
+  //glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
-  m_prog.matrix44f("u_projection") =
-    matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10.0f);
-}
-
-//------------------------------------------------------------------------------
-//! \brief Create a cube constituing parts of robots.
-//------------------------------------------------------------------------------
-bool GLExample09::CreateCube()
-{
-  m_cube = std::make_shared<GLVAO>("VAO_cube");
-
-  // Mandatory: bind VAO to program to get
-  // it populated of VBOs.
-  m_prog.bind(*m_cube);
-
-  // Fill the VBO for vertices
-  m_cube->vector3f("position") =
-    {
-      #include "../geometry/cube_position.txt"
-    };
-
-  // We do not want a cube centered to (0,0,0).
-  m_cube->vector3f("position") += Vector3f(0.0f, 1.0f, 0.0f);
-
-  // Fill the VBO for texture coordiantes
-  m_cube->vector2f("UV") =
-    {
-      #include "../geometry/cube_texture.txt"
-    };
-
-  // Create the texture
-  m_cube->texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_cube->texture2D("texID").wrap(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_cube->texture2D("texID").load("../textures/wooden-crate.jpg"))
-    return false;
-
-  return true;
+  //m_prog.matrix44f("u_projection") =
+    //  matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10.0f);
 }
 
 //------------------------------------------------------------------------------
@@ -213,68 +189,38 @@ bool GLExample09::setup()
   glCheck(glDisable(GL_BLEND));
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-  // Load from ASCII file the vertex sahder (vs) as well the fragment shader
-  m_vertex_shader.fromFile("shaders/09_SceneGraph.vs");
-  m_fragment_shader.fromFile("shaders/09_SceneGraph.fs");
-
-  // Compile shader as OpenGL program. This one will instanciate all OpenGL objects for you.
-  if (!m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
-    {
-      std::cerr << "failed compiling OpenGL program. Reason was '"
-                << m_prog.getError() << "'" << std::endl;
-      return false;
-    }
-
-  // Init shader uniforms
-  m_prog.scalarf("scale") = 1.0f;
-  m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
-  float ratio = width<float>() / height<float>();
-  m_prog.matrix44f("projection") =
-    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10000.0f);
-  m_prog.matrix44f("view") =
-    matrix::lookAt(Vector3f(0.0f, 10.0f, 100.0f), Vector3f(30), Vector3f(0,1,0));
-
   // Attach 3 robots in the scene graph. Each robot is a scene node.
   DEBUG("%s", "Create graph scene");
 
-  // Init VAO and its VBOs.
-  if (!CreateCube())
-    return false;
-
-  // Create 3 robots
-  SceneNode_SP root = std::make_shared<SceneNode>(nullptr, "root");
-  SceneNode_SP robot1 = std::make_shared<CubicRobot>(m_cube, "CubicRobot1");
-  SceneNode_SP robot2 = std::make_shared<CubicRobot>(m_cube, "CubicRobot2");
-  SceneNode_SP robot3 = std::make_shared<CubicRobot>(m_cube, "CubicRobot3");
-
-  // Link nodes of the scene graph
-  m_scenegraph.attach(root);
-  root->attach(robot1);
-  root->attach(robot2);
-  root->attach(robot3);
+  // Create 3 Scene nodes (robots)
+  Node3D_SP robot1 = std::make_shared<CubicRobot>("CubicRobot1");
+  Node3D_SP robot2 = std::make_shared<CubicRobot>("CubicRobot2");
+  Node3D_SP robot3 = std::make_shared<CubicRobot>("CubicRobot3");
 
   // Place robots on the scene
   robot2->position(Vector3f(30.0f, 0.0f, 0.0f));
   robot3->position(Vector3f(60.0f, 0.0f, 0.0f));
 
-  // Show the scene graph in the GUI. Note: this method is not safe
-  // against tree reorganisation. This is just for the example !
-  m_imgui.observeGraph(m_scenegraph);
+  // Create the scene
+  m_scene = Node3D::create("Root");
+  m_scene->add(robot1);
+  m_scene->add(robot2);
+  m_scene->add(robot3);
 
   // This is an example for searching a node.
   // Be careful: this is not a robust method: this function does not
   // manage nodes with duplicated identifier: it will halt on the
   // first id.
-  std::string key("CubicRobot2");
-  SceneNode_SP node = m_scenegraph.findNode(key);
-  if (nullptr == node)
-    {
-      std::cout << "I did not found '" << key << "'" << std::endl;
-    }
-  else
-    {
-      std::cout << "I found node " << node << " " << node->id() << std::endl;
-    }
+  {
+    if (m_scene->getSibling("fdf") == nullptr)
+      std::cout << "nullptr" << std::endl;
+    m_scene->getSibling("CubicRobot1")->debug();
+    Node3D::get(m_scene, "Body")->debug();
+  }
+
+  // Show the scene graph in the GUI. Note: this method is not safe
+  // against tree reorganisation. This is just for the example !
+  m_imgui.observeGraph(m_scene);
 
   return true;
 }
@@ -291,26 +237,14 @@ bool GLExample09::draw()
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
   // Traverse the scene graph for moving robots
-  m_scenegraph.update(dt());
+  m_scene->update(dt());
 
   // Traverse the scene graph for drawing robots.
-  // drawScene() will be called for each node.
-  m_scenegraph.drawnBy(*this);
+  m_scene->renderer(/*m_camera*/);
 
   // Paint the GUI
   if (false == m_imgui.draw())
     return false;
 
   return true;
-}
-
-//------------------------------------------------------------------------------
-//! Draw the current Scene node (= draw a part of robots)
-//------------------------------------------------------------------------------
-void GLExample09::drawSceneNode(GLVAO& vao, Matrix44f const& transform)
-{
-  m_prog.matrix44f("model") = transform;
-
-  // Draw the 3D model
-  m_prog.draw(vao, Mode::TRIANGLES, 0, 36);
 }

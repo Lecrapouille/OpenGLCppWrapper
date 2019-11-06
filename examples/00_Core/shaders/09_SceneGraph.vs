@@ -1,6 +1,5 @@
 #version 330 core
 
-uniform float  scale;         // Global scaling
 uniform mat4   model;         // Model matrix
 uniform mat4   view;          // View matrix
 uniform mat4   projection;    // Projection matrix
@@ -17,5 +16,5 @@ void main()
     texColor = color;
 
     // Final position
-    gl_Position = projection * view * model * vec4(scale * position, 1.0);
+    gl_Position = projection * view * model * vec4(position, 1.0);
 }

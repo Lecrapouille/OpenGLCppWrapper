@@ -21,417 +21,255 @@
 #ifndef OPENGLCPPWRAPPER_SCENEGRAPH_HPP
 #  define OPENGLCPPWRAPPER_SCENEGRAPH_HPP
 
-// The code source of this file has been inspired by the following document
-// New Castle University, Tutorial 6: Scene Graphs
-// https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/scenegraphs/Tutorial%206%20-%20Scene%20Graphs.pdf
-
 #  include "Scene/Transformable.hpp"
-#  include <memory>
-#  include <vector>
+#  include <iostream>
 
 namespace glwrap
 {
+  DECLARE_CLASS(Node3D)
 
-template <typename R, typename T, size_t D>
-class ISceneGraphRenderer
-{
-public:
-
-  virtual ~ISceneGraphRenderer() {}
-  // FIXME should ideally be a const method with a const renderable
-  virtual void drawSceneNode(R& renderable, Matrix<T, D + 1_z, D + 1_z> const& transformation) = 0;
-};
-
-// *************************************************************************************************
-//! \brief A Scene Graph is a spatial representation of a graphical
-//! scene. Instead of storing entities in an array and where entities
-//! have its position related to the world origin, a scene graph
-//! classifies entities as a tree whith a parent-children relation (we
-//! do not manage graph here). Each children has a relative position
-//! from its parent. The relative position is given by a transform
-//! matrix (scaling, translation and rotation). The aim of the scene
-//! graph is to simplify placement and movement of entities. Moving a
-//! node will automaticaly affect child nodes.
-//!
-//! I = node identifier (for searching a particuliar node).
-//! R = renderable class( VAO, Mesh ...)
-//! T, D = transformation matrix of type T and D its dimension (ie a 4x4 matrix of floats).
-// *************************************************************************************************
-template <typename I, typename R, typename T, size_t D>
-class SceneGraph_t
-{
-  using Obj_SP = std::shared_ptr<R>;
-
-public:
-
-  // ***********************************************************************************************
-  //! \brief A Scene Node is made of a transformation matrix (defined by its type T and dimension D
-  //! mostly: T = float and D = 4) and an optional renderable object (implementing a draw() method).
-  // ***********************************************************************************************
-  class Node : public Transformable<T, D>
+  class Node3D
+    : public Transformable3D
   {
-    friend SceneGraph_t;
-    using Node_SP = std::shared_ptr<Node>;
-
   public:
 
-    //-----------------------------------------------------------------
-    //! \brief Constructor for named scene node with a renderable attached to
-    //! it. The transform matrix is the identity matrix. nullptr is
-    //! accepted. renderable shall inherite from the Renderable class.
-    //-----------------------------------------------------------------
-    Node(Obj_SP renderable, I const& id)
+    Node3D(std::string const& name)
+      : m_name(name)
     {
-      m_renderable = renderable;
-      m_id = id;
+      DEBUG("Create Node3D named '%s'", name.c_str());
     }
 
-    //-----------------------------------------------------------------
-    //! \brief Constructor anonymous scene node with a renderable attached to
-    //! it. The transform matrix is the identity matrix. nullptr is
-    //! accepted. renderable shall inherite from the Renderable class.
-    //-----------------------------------------------------------------
-    Node(Obj_SP renderable = nullptr)
+    Node3D(const char* name)
+      : m_name(name)
     {
-      m_renderable = renderable;
+      DEBUG("Create Node3D named '%s'", name);
     }
 
-    //-----------------------------------------------------------------
-    //! \brief Constructor for named scene node with no renderable attached to
-    //! it. The transform matrix is the identity matrix.
-    //-----------------------------------------------------------------
-    Node(I const& id)
-    {
-      m_id = id;
-    }
-
-    //-----------------------------------------------------------------
-    //! \brief Destructor. Smart pointers will free automaticaly stuffs.
-    //-----------------------------------------------------------------
-    virtual ~Node()
+    virtual ~Node3D()
     {
       m_children.clear();
     }
 
-    //-----------------------------------------------------------------
-    //! \brief Replace the renderable attached to the scene node. Smart
-    //! pointers will do their job if needed. nullptr is accepted.
-    //-----------------------------------------------------------------
-    inline void renderable(Obj_SP renderable)
+    static std::shared_ptr<Node3D> create(std::string const& name)
     {
-      m_renderable = renderable;
+      return std::make_shared<Node3D>(name);
     }
 
-    //-----------------------------------------------------------------
-    //! \brief Get the renderable attached to the scene node. nullptr can be
-    //! returned.
-    //-----------------------------------------------------------------
-    inline Obj_SP renderable()
+    static std::shared_ptr<Node3D> create(const char* name)
     {
-      return m_renderable;
+      return std::make_shared<Node3D>(name);
     }
 
-    //-----------------------------------------------------------------
-    //! \brief Get the renderable attached to the scene node. nullptr can be
-    //! returned.
-    //-----------------------------------------------------------------
-    inline Obj_SP const renderable() const
+    std::string const& name() const
     {
-      return m_renderable;
+      return m_name;
     }
 
-    //-----------------------------------------------------------------
-    //! \brief Create an anonymous scene node, attach it on the scene
-    //! graph as a child of this class.
-    //! \return the created smart pointer of the scene node.
-    //-----------------------------------------------------------------
-    Node_SP attach()
-    {
-      Node_SP node = std::make_shared<Node>();
-      node->m_parent = this;
-      m_children.push_back(node);
-      return node;
-    }
-
-    //-----------------------------------------------------------------
-    //! \brief Create a named scene node, attach it on the scene graph
-    //! as a child of this class. Attach a renderable element given by
-    //! its smart pointer.
-    //! \return the created smart pointer of the scene node.
-    //-----------------------------------------------------------------
-    Node_SP attach(Obj_SP renderable, I const& id)
-    {
-      Node_SP node = attach();
-      node->renderable(renderable);
-      node->m_id = id;
-      return node;
-    }
-
-    //-----------------------------------------------------------------
-    //! \brief Attach on the scene graph a created node refered by its
-    //! smart pointer.
-    //-----------------------------------------------------------------
-    void attach(Node_SP node)
-    {
-      m_children.push_back(node);
-    }
-
-    //-----------------------------------------------------------------
-    //! \brief Return the world transform matrix.
-    //! \note the local transform matrix is given by Transformable::transform().
-    //-----------------------------------------------------------------
-    inline Matrix<T, D + 1_z, D + 1_z> const& worldTransform() const
-    {
-      return m_world_transform;
-    }
-
-    //-----------------------------------------------------------------
-    //! \brief Compute recursively transformation matrices of all
-    //! children.
-    //! \param dt: is the delta time (the FPS) that can be used by
-    //! classes that override this method.
-    //-----------------------------------------------------------------
     virtual void update(float const dt)
     {
-      m_world_transform = Transformable<T, D>::transform();
-      if (nullptr != m_parent)
+      m_world_transform = Transformable3D::transform();
+      if (unlikely(nullptr != m_parent))
         {
           m_world_transform *= m_parent->m_world_transform;
         }
 
-      // Update all children
       for (auto& i: m_children)
         {
           i->update(dt);
         }
     }
 
-    //-----------------------------------------------------------------
-    //! \brief Draw the whole scene graph. Each nodes shall implement
-    //! a draw() method.
-    //-----------------------------------------------------------------
-    virtual void draw(ISceneGraphRenderer<R, T, D>& renderer) //const
-    {
-      // Sheets are optional, so do not forget to check against nullptr
-      if (nullptr != m_renderable)
-        {
-          Matrix<T, D + 1_z, D + 1_z> transform =
-            matrix::scale(m_world_transform, Transformable<T, D>::localScale());
-          renderer.drawSceneNode(*m_renderable, transform);
-        }
+    virtual bool renderable() const { return false; }
 
-      // Recursive iteration of the graph for drawing other node
-      for (auto const& i: m_children)
+    virtual void renderer(/* RendererState */)
+    {
+      if (unlikely(!isTraversable()))
+        return;
+
+      for (auto& c: m_children)
         {
-          i->draw(renderer);
+          c->renderer();
         }
     }
 
-    //-----------------------------------------------------------------
-    //! \brief Return the number of children
-    //-----------------------------------------------------------------
-    inline size_t nbChildren() const
+    void debug() const
     {
-      return m_children.size();
+      std::cout << "Scene Node '" << m_name << "':" << std::endl;
+      if (hasParent())
+        std::cout << "  Parent '" << static_cast<Node3D*>(m_parent)->name() << std::endl;
+      else
+        std::cout << "  is root" << std::endl;
+      std::cout << "  " << m_children.size() << " Child:";
+      for (auto it: m_children)
+        {
+          std::cout << " " << static_cast<Node3D*>(it.get())->name();
+        }
+      std::cout << std::endl;
     }
 
-    //-----------------------------------------------------------------
-    //! \brief Get the list of child nodes.
-    //-----------------------------------------------------------------
-    inline std::vector<Node_SP> const &children() const
+    Matrix44f const& localTransform()
+    {
+      return Transformable3D::transform();
+    }
+
+    Matrix44f const& worldTransform() const
+    {
+      return m_world_transform;
+    }
+
+    Matrix44f& worldTransform()
+    {
+      return m_world_transform;
+    }
+
+    inline bool isTraversable() const
+    {
+      return m_traversable;
+    }
+
+    inline void setTraversable(bool const traversable = true)
+    {
+      m_traversable = traversable;
+    }
+
+    Node3D& add(Node3D_SP node)
+    {
+      if (likely(this == node.get())) {
+        ERROR("Cannot attach a node to itself");
+        return *this;
+      }
+
+      if (unlikely(node->m_attached)) {
+        ERROR("Node already attached");
+        return *this;
+      }
+
+      node->m_parent = this;
+      m_children.push_back(node);
+      return *this;
+    }
+
+    Node3D& remove(Node3D_SP node)
+    {
+      auto it = std::find_if(m_children.begin(), m_children.end(),
+        [node](Node3D_SP i){ return i.get() == node.get(); });
+
+      if (it != m_children.end())
+        m_children.erase(it);
+
+      return *this;
+    }
+
+    template<typename Functor>
+    static Node3D_SP find(Node3D_SP root, Functor predicate, bool const forceTraverse)
+    {
+      //if ((!forceTraverse) && (unlikely(!root->isTraversable())))
+      //  return m_children.end();
+
+      if (predicate(root))
+        return root;
+
+      for (auto& c: root->m_children)
+        {
+          return find(c, predicate, forceTraverse);
+        }
+
+      return nullptr;
+    }
+
+    // TODO get("/node1/subnode/etc");
+    static Node3D_SP get(Node3D_SP root, std::string const& name, bool const forceTraverse = false)
+    {
+      return find(root, [name](Node3D_SP i){ return name == i->name(); }, forceTraverse);
+    }
+
+    template<typename Functor>
+    Node3D_SP findSibling(Functor predicate)
+    {
+      auto it = std::find_if(m_children.begin(), m_children.end(), predicate);
+      return (it != m_children.end()) ? *it : nullptr;
+    }
+
+    Node3D_SP getSibling(std::string const& name)
+    {
+      return findSibling([name](Node3D_SP i){ return name == i->name(); });
+      //auto it = std::find_if(m_children.begin(), m_children.end(),
+      //   [name](Node3D_SP i){ return name == i->name(); });
+      //return (it != m_children.end()) ? *it : nullptr;
+    }
+
+    template<typename Functor>
+    void traverse(Functor functor)
+    {
+      if (unlikely(!isTraversable()))
+        return;
+
+      functor(/**this*/);
+      for (auto& c: m_children)
+        {
+          c->traverse(functor);
+        }
+    }
+
+    template<typename Functor>
+    void traverseAncestors(Functor functor)
+    {
+      if (likely(hasParent()))
+        {
+          functor(m_parent);
+          m_parent->traverseAncestors(functor);
+        }
+    }
+
+    inline bool hasChildren() const
+    {
+      return m_children.size() != 0_z;
+    }
+
+    inline std::vector<Node3D_SP> const& children() const
     {
       return m_children;
     }
 
-    //-----------------------------------------------------------------
-    //! \brief Return the scene node identifer
-    //-----------------------------------------------------------------
-    inline I const& id() const
+    inline std::vector<Node3D_SP>& children()
     {
-      return m_id;
+      return m_children;
     }
 
-  private:
+    std::vector<Node3D_SP>::iterator begin()
+    {
+      return m_children.begin();
+    }
 
-    //! \brief Identifier for searching elements.
-    I                      m_id;
-    //! \brief holds a 3D entity. If no entity has to be hold set it to nullptr.
-    Obj_SP                 m_renderable;
-    //! \brief Pointer on the parent : nullptr for the root, for children it's never nullptr.
-    /*Node_SP */ Node*     m_parent = nullptr;
-    //! \brief World transformation matrix. Stored faor avoiding to compute it every times when
-    //! traversing the scene graph.
-    Matrix<T, D + 1_z, D + 1_z>  m_world_transform;
-    //! List of Node as children. Pointers are never nullptr.
-    std::vector<Node_SP>   m_children;
+    std::vector<Node3D_SP>::iterator end()
+    {
+      return m_children.end();
+    }
+
+    inline bool hasParent() const
+    {
+      return m_parent != nullptr;
+    }
+
+    inline Node3D const& parent() const
+    {
+      return *m_parent;
+    }
+
+    inline Node3D& parent()
+    {
+      return *m_parent;
+    }
+
+  protected:
+
+    std::vector<Node3D_SP> m_children;
+    Node3D*  m_parent = nullptr;
+    Matrix44f   m_world_transform;
+    std::string m_name;
+    bool m_traversable = true;
+    bool m_attached = false;
   };
-
-private:
-
-  using Node_SP = std::shared_ptr<Node>;
-
-public:
-
-  //-----------------------------------------------------------------
-  //! \brief
-  //-----------------------------------------------------------------
-  ~SceneGraph_t()
-  {
-    reset();
-  }
-
-  //-----------------------------------------------------------------
-  //! \brief
-  //-----------------------------------------------------------------
-  void drawnBy(ISceneGraphRenderer<R, T, D>& renderer) // const
-  {
-    if (nullptr != m_root)
-      m_root->draw(renderer);
-  }
-
-  //-----------------------------------------------------------------
-  //! \brief
-  //-----------------------------------------------------------------
-  void update(float const dt)
-  {
-    if (nullptr != m_root)
-      m_root->update(dt);
-  }
-
-  //-----------------------------------------------------------------
-  //! \brief Search for a node from the given identifier. Algorithm
-  //! complexity is O(n) iterations because nodes are not organized
-  //! for beeing indexed by index but have a parent-child world
-  //! transformation.
-  //-----------------------------------------------------------------
-  Node_SP findNode(I const& id)
-  {
-    return findNode(id, m_root);
-  }
-
-  //-----------------------------------------------------------------
-  //! \brief Wrapper for findNode but return the renderable object.
-  //-----------------------------------------------------------------
-  Obj_SP findRenderable(I const& id)
-  {
-    Node_SP o = findNode(id, m_root);
-    if (nullptr != o)
-      return o->renderable();
-    return nullptr;
-  }
-
-  //-----------------------------------------------------------------
-  //! \brief Attach a scene node to te
-  //-----------------------------------------------------------------
-  void attach(Node_SP node)
-  {
-    if (nullptr == m_root)
-      {
-        m_root = node;
-        m_root->m_parent = nullptr;
-      }
-    else
-      {
-        m_root->attach(node);
-        node->m_parent = &(*m_root);
-      }
-  }
-
-  //-----------------------------------------------------------------
-  //! \brief
-  //-----------------------------------------------------------------
-  Node_SP attach()
-  {
-    if (nullptr == m_root)
-      {
-        createRoot();
-        return m_root;
-      }
-
-    return m_root->attach();
-  }
-
-  //-----------------------------------------------------------------
-  //! \brief
-  //-----------------------------------------------------------------
-  Node_SP attach(Obj_SP renderable, I const& id)
-  {
-    if (nullptr == m_root)
-      {
-        createRoot();
-        m_root->renderable(renderable);
-        m_root->m_id = id;
-        return m_root;
-      }
-
-    return m_root->attach(renderable, id);
-  }
-
-  //-----------------------------------------------------------------
-  //! \brief Return the root of the scene graph.
-  //-----------------------------------------------------------------
-  inline Node_SP root()
-  {
-    return m_root;
-  }
-
-  //-----------------------------------------------------------------
-  //! \brief Delete all Scene graph nodes.
-  //-----------------------------------------------------------------
-  inline void reset()
-  {
-    m_root = nullptr;
-  }
-
-  // TODO: void debug()
-  // https://stackoverflow.com/questions/36311991/c-sharp-display-a-binary-search-tree-in-console/36313190
-  //
-
-private:
-
-  //-----------------------------------------------------------------
-  //! \brief
-  //-----------------------------------------------------------------
-  void createRoot()
-  {
-    m_root = std::make_shared<Node>();
-    m_root->m_parent = nullptr;
-  }
-
-  //-----------------------------------------------------------------
-  //! \brief Find recursively a node by its id.
-  //! \note this method has been placed here and not in the scene node
-  //! class because to avoid inherting from std::enable_shared_from_this.
-  //-----------------------------------------------------------------
-  Node_SP findNode(I const& id, Node_SP res)
-  {
-    // This case is suppose to never happen
-    if (nullptr == res)
-      {
-        ERROR("%s", "nullptr error");
-        return nullptr;
-      }
-
-    if (res->m_id == id)
-      {
-        return res;
-      }
-
-    for (auto i: res->m_children)
-      {
-        Node_SP n = findNode(id, i);
-        if (nullptr != n)
-          return n;
-      }
-
-    return nullptr;
-  }
-
-private:
-
-  //! \brief the root node of the tree.
-  Node_SP m_root = nullptr;
-};
 
 } // namespace glwrap
 

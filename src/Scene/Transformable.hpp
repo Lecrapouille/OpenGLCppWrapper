@@ -318,6 +318,8 @@ protected:
   bool m_inverse_trans_needs_update;
 };
 
+using Transformable3D = Transformable<float, 3u>;
+
 } // namespace glwrap
 
 #endif // OPENGLCPPWRAPPER_TRANSFORMABLE_HPP

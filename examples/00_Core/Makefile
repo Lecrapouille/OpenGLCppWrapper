@@ -33,6 +33,8 @@ BUILD_TYPE = debug
 
 include $(P)/Makefile.common
 
+DEFINES += -DCHECK_OPENGL -UENABLE_DEBUG
+
 ###################################################
 # List of files to compile.
 #
