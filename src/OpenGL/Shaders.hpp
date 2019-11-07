@@ -90,23 +90,43 @@ public:
   //! \brief Read the whole shader code from the given ascii file.
   //! Note: the shader code compilation is delayed. The code is only
   //! store in the member variable.
-  //! \param filename the path of the shader code.
+  //! \param[in] path the path of the shader code.
   //! \return true if the whole file has been read, else return false.
   //! An error message is set and can be read through getError().
   //----------------------------------------------------------------------------
-  bool fromFile(std::string const& filename)
+  bool fromFile(std::string const& path)
   {
     throw_if_already_compiled();
-    bool loaded = load(filename, m_shader_code);
-    DEBUG("From file '%s' %s: '%s'", cname(), type(), m_shader_code.c_str());
-    if (false == loaded)
+
+    std::string msg;
+    std::ifstream infile;
+
+    infile.open(path, std::ifstream::in);
+    if (infile.fail())
       {
-        std::string msg = "Failed loading shader code '"
-          + filename + "'";
-        concatError(msg);
-        ERROR("%s", msg.c_str());
+        msg = "Failed opening file '" + path + "'. Reason was '" + strerror(errno) + "'";
+        goto l_error;
       }
-    return loaded;
+
+    if (!GLShader::resize(infile, m_shader_code))
+      {
+        msg = "Failed reading file '" + path + "'. Reason was 'cannot get the file size'";
+        goto l_error;
+      }
+
+    if (!infile.read(&m_shader_code[0U], static_cast<std::streamsize>(m_shader_code.size())))
+      {
+        msg = "Failed reading file '" + path + "'. Reason was '" + strerror(errno) + "'";
+        goto l_error;
+      }
+
+    DEBUG("From file '%s' %s: '%s'", cname(), type(), m_shader_code.c_str());
+    return true;
+
+l_error:
+    concatError(msg);
+    ERROR("%s", msg.c_str());
+    return false;
   }
 
   //----------------------------------------------------------------------------
@@ -162,7 +182,7 @@ private:
 
   //----------------------------------------------------------------------------
   //! \brief Remove the file name and store the path to this folder.
-  //! \param fullPath
+  //! \param[in] fullPath
   //----------------------------------------------------------------------------
   static std::string getFilePath(const std::string& fullPath)
   {
@@ -172,8 +192,8 @@ private:
 
   //----------------------------------------------------------------------------
   //! \brief Increase the buffer size of the size of the full file.
-  //! \param infile
-  //! \param buffer
+  //! \param[in,out] infile
+  //! \param[in,out] buffer
   //----------------------------------------------------------------------------
   static bool resize(std::ifstream& infile, std::string& buffer)
   {
@@ -187,38 +207,6 @@ private:
       }
 
     return false;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Read the shader code from the given file
-  //! \param path the file path to read.
-  //! \param fullSourceCode the buffer receiving the content of the file.
-  //! \return true if success, else false.
-  //----------------------------------------------------------------------------
-  static bool load(std::string const& path, std::string& fullSourceCode)
-  {
-    std::ifstream infile;
-
-    infile.open(path, std::ifstream::in);
-    if (infile.fail())
-      {
-        ERROR("Failed open file '%s'. Reason is '%s'", path.c_str(), strerror(errno));
-        return false;
-      }
-
-    if (!GLShader::resize(infile, fullSourceCode))
-      {
-        ERROR("Failed reading file '%s'. Reason is 'cannot get the file size'", path.c_str());
-        return false;
-      }
-
-    if (!infile.read(&fullSourceCode[0U], static_cast<std::streamsize>(fullSourceCode.size())))
-      {
-        ERROR("Failed reading file '%s'. Reason is '%s'", path.c_str(), strerror(errno));
-        return false;
-      }
-
-    return true;
   }
 
   //----------------------------------------------------------------------------
@@ -245,7 +233,7 @@ private:
   virtual bool setup() override
   {
     DEBUG("  Shader '%s' setup", cname());
-    if (loaded() && !isCompiled())
+    if (likely((loaded() && !isCompiled())))
       {
         char const *source = m_shader_code.c_str();
         GLint length = static_cast<GLint>(m_shader_code.size());
@@ -256,8 +244,8 @@ private:
     else
       {
         std::string msg =
-          "Cannot compile the shader %s. Reason is "
-          "'already compiled or no shader code attached'";
+          "   Could not compile the shader named '" + name() + "'. Reason was ";
+        msg += (loaded()) ? "'already compiled'" : "'compilation errored'";
         concatError(msg);
         ERROR("%s", msg.c_str());
       }
@@ -295,9 +283,13 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \param obj the identifer of the loaded shader.
-  //! \return true if case of success, else return false.
-  //! An error message is set and can be read through getError().
+  //! \brief Check if a shader script has been correctly compiled.
+  //!
+  //! An error message is set in m_error_msg and which can be read through
+  //! getError().
+  //!
+  //! \param[in] obj the identifer of the loaded shader.
+  //! \return true if the shader has been compiled with success else return false.
   //----------------------------------------------------------------------------
   bool checkCompilationStatus(GLuint obj)
   {
@@ -343,7 +335,7 @@ private:
   {
     if (!m_error_msg.empty())
       {
-        m_error_msg += "Q\n";
+        m_error_msg += '\n';
       }
     m_error_msg += msg;
   }

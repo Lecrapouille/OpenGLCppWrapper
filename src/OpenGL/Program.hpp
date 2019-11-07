@@ -997,8 +997,7 @@ private:
         it->begin();
         if (it->hasErrored())
           {
-            std::string msg = it->name() + ':' + it->getError();
-            //QQ ERROR("%s", msg.c_str());
+            std::string msg = " " + it->name() + ":\n   " + it->getError();
             concatError(msg);
             failure = true;
           }
@@ -1308,7 +1307,7 @@ private:
   {
     if (!m_error_msg.empty())
       {
-        m_error_msg += "AAA\n";
+        m_error_msg += '\n';
       }
     m_error_msg += msg;
   }
