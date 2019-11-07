@@ -619,7 +619,7 @@ DEFINE_RELATIONAL_OPERATORS(>)
 DEFINE_RELATIONAL_OPERATORS(<=)
 DEFINE_RELATIONAL_OPERATORS(>=)
 
-/* Scalar-Vector op */
+//! \brief Scalar-Vector op
 template <typename T, size_t n>
 Vector<T, n> operator*(T const a, Vector<T, n> const& b)
 {
@@ -630,7 +630,7 @@ Vector<T, n> operator*(T const a, Vector<T, n> const& b)
   return result;
 }
 
-/* Vector-scalar op */
+//! \brief Vector-scalar op
 template <typename T, size_t n>
 Vector<T, n> operator*(Vector<T, n> const& a, T const b)
 {
@@ -643,7 +643,6 @@ Vector<T, n> operator*(Vector<T, n> const& a, T const b)
 
 namespace vector
 {
-
   //! \brief Calculates and returns a component-wise product of this vector with
   //! the given vector.
   template <typename T, size_t n>
@@ -668,7 +667,6 @@ namespace vector
     return result;
   }
 
-  //! \brief Return a matrix where each e
   DEFINE_FUN2_OPERATOR(min, std::min)
   DEFINE_FUN2_OPERATOR(max, std::max)
   DEFINE_FUN1_OPERATOR(abs, maths::abs)
@@ -802,14 +800,14 @@ namespace vector
     return result;
   }
 
-  //! \brief Vector Product (aka for cross product). Specialization for 2D vectors.
+  //! \brief Vector product, aka for cross product (specialization for 2D vectors).
   template <typename T>
   T cross(Vector<T, 2_z> const& a, Vector<T, 2_z> const& b)
   {
     return a.x * b.y - a.y * b.x;
   }
 
-  //! \briefVector Product (aka for cross product). Specialization for 3D vectors.
+  //! \brief Vector product, aka for cross product (specialization for 3D vectors).
   template <typename T>
   Vector<T, 3_z> cross(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
   {
@@ -821,7 +819,7 @@ namespace vector
       };
   }
 
-  //! \brief Dot product (general algorithm).
+  //! \brief Dot product, aka scalar product (general algorithm).
   template <typename T, size_t n>
   T dot(Vector<T, n> const& a, Vector<T, n> const& b)
   {
@@ -833,7 +831,7 @@ namespace vector
     return result;
   }
 
-  //! \brief Dot product (specialization for 3D vectors).
+  //! \brief Dot product, aka scalar product (specialization for 3D vectors).
   template <typename T, size_t n>
   T dot(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
   {
@@ -1022,7 +1020,7 @@ namespace vector
 
 } // namespace vector
 
-//! \brief Scalar product.
+//! \brief Scalar product (aka dot product).
 template <typename T, size_t n>
 T operator*(Vector<T, n> const& a, Vector<T, n> const& b)
 {

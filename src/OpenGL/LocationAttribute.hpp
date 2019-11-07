@@ -138,7 +138,7 @@ protected:
   //----------------------------------------------------------------------------
   //! \brief Release the memory allocated on CPU and GPU. By default do nothing.
   //----------------------------------------------------------------------------
-  virtual void onReset()
+  virtual void onReset() override
   {
     m_index = 0;
     m_stride = 0;
