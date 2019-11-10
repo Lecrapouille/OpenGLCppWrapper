@@ -69,7 +69,8 @@ static bool doload2D(const char *const filename, const PixelLoadFormat format,
     }
   else
     {
-      ERROR("Failed loading picture file '%s'", filename);
+      ERROR("Failed loading picture file '%s'. Reason was '%s'",
+            filename, SOIL_last_result());
       width = height = 0;
       data.clear();
       return false;
