@@ -90,6 +90,19 @@ public:
   }
 
   //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  inline bool isBound() const
+  {
+    return 0 != prog;
+  }
+
+  //inline bool bind(GLProgram& p)
+  //{
+  //  return p.bind(*this);
+  //}
+
+  //----------------------------------------------------------------------------
   //! \brief Return the list of VBO names. VBO names come from names of
   //! attributes variables used inside GLSL shaders. This method is mainly
   //! used for debug purpose.
@@ -249,6 +262,13 @@ public:
   {
     return m_textures.end() != m_textures.find(name);
   }
+
+  // TODO: getTextureFromFilename(const char *name) const
+  // TODO bool hasTexture(const char *name) const
+  //{
+  //  return std_find_if(m_textures.begin(), m_textures.end(),
+  //            [](IGLTexture_UP texture) { return name == texture.filename()} );
+  //}
 
   //----------------------------------------------------------------------------
   //! \brief Return the reference of the named VBO holding a 4D vector of type
@@ -434,7 +454,7 @@ public:
         return true;
       }
 
-    if (unlikely(prog == 0 || m_vbos.empty()))
+    if (unlikely(!isBound() || m_vbos.empty()))
       {
         ERROR("VAO '%s' is not yet bound to a GLProgram", cname());
         return false;
@@ -459,52 +479,6 @@ public:
   }
 
 private:
-
-  //----------------------------------------------------------------------------
-  //! \brief Locate and get the reference of the VBO refered by the name and by
-  //! its type T. If possible cache your VBO reference because this function is
-  //! not fast.
-  //!
-  //! \return the reference of the VBO if it exists.
-  //!
-  //! \throw OpenGLException if the VBO is not in the list (probably due to a
-  //! typo in the name) or if the type T does not match.
-  //----------------------------------------------------------------------------
-  template<typename T>
-  GLVertexBuffer<T>& VBO(const char *name)
-  {
-    DEBUG("VAO '%s' get VBO '%s'", cname(), name);
-    if (unlikely(nullptr == name))
-      {
-        throw OpenGLException("nullptr passed to VBO()");
-      }
-
-    auto ptr = m_vbos[name].get();
-    if (unlikely(nullptr == ptr))
-      {
-        if (prog == 0 || m_vbos.empty())
-          {
-            throw OpenGLException("GLVertexBuffer '" + std::string(name) +
-                                  "' does not exist because VAO '" + cname()
-                                  + "' is not bound to a GLProgram");
-          }
-        else
-          {
-            throw OpenGLException("GLVertexBuffer '" + std::string(name) +
-                                  "' does not exist");
-          }
-      }
-
-    GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(ptr);
-    if (unlikely(nullptr == vbo))
-      {
-        throw OpenGLException("GLVertexBuffer '" + std::string(name) +
-                              "' exists but has wrong template type");
-      }
-
-    m_vbo_size_verified = false;
-    return *vbo;
-  }
 
   //----------------------------------------------------------------------------
   //! \brief Get the reference of GLIndexBuffer refered by its type T. If the
@@ -534,8 +508,50 @@ private:
   }
 
   //----------------------------------------------------------------------------
+  //! \brief Locate and get the reference of the VBO refered by the name and by
+  //! its type T. If possible cache your VBO reference because this function is
+  //! not fast.
+  //!
+  //! \return the reference of the VBO if it exists.
+  //!
+  //! \throw OpenGLException if the VBO is not in the list (probably due to a
+  //! typo in the name) or if the type T does not match.
+  //----------------------------------------------------------------------------
+  template<typename T> // FIXME: m_vbo_size_verified = false; shall be called by PendingContainer
+  GLVertexBuffer<T>& VBO(const char *name)
+  {
+    if (unlikely(nullptr == name))
+      throw OpenGLException("nullptr passed to VBO()");
+
+    DEBUG("VAO '%s' get VBO '%s'", cname(), name);
+    if (likely(isBound()))
+      {
+        auto it = m_vbos.find(name);
+        if (likely(m_vbos.end() != it))
+          {
+            GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(it->second.get());
+            if (likely(nullptr != vbo))
+              return *vbo;
+
+            throw OpenGLException("GLVertexBuffer '" + std::string(name) +
+                                  "' exists but has wrong template type");
+          }
+        throw OpenGLException("GLVertexBuffer '" + std::string(name) + "' does not exist");
+      }
+
+    // VAO has never been bound to program: allow anyway to create a VBO
+    auto ptr = std::make_unique<GLVertexBuffer<T>>(name, 3_z, BufferUsage::STATIC_DRAW);
+    GLVertexBuffer<T>& vbo = *ptr;
+    m_vbos[name] = std::move(ptr);
+    return vbo;
+  }
+
+  //----------------------------------------------------------------------------
   //! \brief Locate and get the reference of ther texture refered by its type T
   //! and by the given the sampler name used in GLSL code.
+  //!
+  //! \note Do not confuse sampler name with texture filename. \param name is
+  //! the GLSL sampler name.
   //!
   //! \return the reference of the texture if it exists.
   //!
@@ -545,36 +561,30 @@ private:
   template<typename T>
   T& texture(const char *name)
   {
-    DEBUG("VAO '%s' get texture '%s'", cname(), name);
     if (unlikely(nullptr == name))
-      {
-        throw OpenGLException("nullptr passed to texture()");
-      }
+      throw OpenGLException("nullptr passed to texture()");
 
-    auto ptr = m_textures[name].get();
-    if (unlikely(nullptr == ptr))
+    DEBUG("VAO '%s' get texture '%s'", cname(), name);
+    if (likely(isBound()))
       {
-        if (prog == 0 || m_vbos.empty())
+        auto it = m_textures.find(name);
+        if (likely(m_textures.end() != it))
           {
+            T* tex = dynamic_cast<T*>(it->second.get());
+            if (likely(nullptr != tex))
+              return *tex;
+
             throw OpenGLException("GLTexture '" + std::string(name) +
-                                  "' does not exist because VAO '" + cname()
-                                  + "' is not bound to a GLProgram");
+                                  "' exists but has wrong template type");
           }
-        else
-          {
-            throw OpenGLException("GLTexture '" + std::string(name) +
-                                  "' does not exist");
-          }
+        throw OpenGLException("GLTexture '" + std::string(name) + "' does not exist");
       }
 
-    T* tex = dynamic_cast<T*>(ptr);
-    if (unlikely(nullptr == tex))
-      {
-        throw OpenGLException("GLTexture '" + std::string(name) +
-                              "' exists but has wrong template type");
-      }
-
-    return *tex;
+    // VAO has never been bound to program: allow anyway to create a texture
+    auto ptr = std::make_unique<T>(name);
+    T& tex = *ptr;
+    m_textures[name] = std::move(ptr);
+    return tex;
   }
 
   //----------------------------------------------------------------------------
@@ -596,16 +606,16 @@ private:
   template<typename T>
   bool createVBO(const char *name, size_t const vbo_init_size, BufferUsage const usage)
   {
-    if (unlikely(hasVBO(name)))
+    if (likely(!hasVBO(name)))
       {
-        ERROR("VAO '%s' Tried to create a VBO with name '%s' already used",
-              cname(), name);
-        return false;
+        DEBUG("    VAO '%s' creating a new VBO '%s' of %zu elements of %zu bytes",
+              cname(), name, vbo_init_size, sizeof (T));
+        m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
+        return true;
       }
-    DEBUG("VAO '%s' creating a new VBO '%s' of %zu elements of %zu bytes",
-          cname(), name, vbo_init_size, sizeof (T));
-    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, vbo_init_size, usage);
-    return true;
+
+    DEBUG("    VAO '%s' Tried to create a VBO with name '%s' already used", cname(), name);
+    return false;
   }
 
   //----------------------------------------------------------------------------
@@ -624,15 +634,16 @@ private:
   template<typename T>
   bool createTexture(const char *name)
   {
-    if (unlikely(hasSampler(name)))
+    if (likely(!hasSampler(name)))
       {
-        ERROR("VAO '%s' Tried to create a texture with name '%s' already used",
-              cname(), name);
-        return false;
+        m_textures[name] = std::make_unique<T>(name);
+        DEBUG("    VAO '%s' has a new texture '%s'", cname(), name);
+        return true;
       }
-    m_textures[name] = std::make_unique<T>(name);
-    DEBUG("VAO '%s' has a new texture '%s'", cname(), name);
-    return true;
+
+    DEBUG("    VAO '%s' Tried to create a texture with name '%s' already used",
+          cname(), name);
+    return false;
   }
 
   //----------------------------------------------------------------------------

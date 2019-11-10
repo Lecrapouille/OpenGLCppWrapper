@@ -178,14 +178,14 @@ public:
   //----------------------------------------------------------------------------
   inline bool bind(GLVAO& vao)
   {
-    DEBUG("Binding VAO '%s' to Prog '%s'", vao.cname(), cname());
+    DEBUG("Binding VAO '%s' to Prog '%s':", vao.cname(), cname());
 
     // Try compile the GLProgram
     if (unlikely(!isCompiled()))
       {
         if (!compile())
           {
-            ERROR("Tried to bind VAO '%s' on a non compilable GLProgram '%s'",
+            ERROR("  Tried to bind VAO '%s' on a non compilable GLProgram '%s'",
                   vao.cname(), cname());
             return false;
           }
@@ -203,7 +203,7 @@ public:
       {
         // Check if VAO has been previously bind by this GLProgram. If not
         // This is probably an error of the developper.
-        ERROR("Tried to bind VAO '%s' already bound to another Prog than '%s'",
+        ERROR("  Tried to bind VAO '%s' already bound to another Prog than '%s'",
               vao.cname(), cname());
         return false;
       }
@@ -1220,41 +1220,33 @@ private:
   template<class T>
   GLUniform<T>& getUniform(const char *name)
   {
+    if (unlikely(nullptr == name))
+      throw OpenGLException("nullptr passed to getUniform");
+
+    DEBUG("GLProgram '%s' get Uniform '%s'", cname(), name);
     if (unlikely(!isCompiled()))
       {
-        begin();
-        // TODO: check if now isCompiled() == true
+        if (unlikely(!compile()))
+          throw OpenGLException("Failed compiling GLProgram");
       }
 
-    if (unlikely(nullptr == name))
-      {
-        throw OpenGLException("nullptr passed to getUniform");
-      }
+    //if (unlikely(!isBound()))
+    //  throw OpenGLException("GLUniform '" + std::string(name) +
+    //                        "' does not exist because no VAO has been bound");
 
-    if (unlikely(false == hasUniform(name)))
+    auto it = m_uniforms.find(name);
+    if (likely(m_uniforms.end() != it))
       {
-        // TODO: create the variable: call addNewUniform
-        // TODO: http://www.cplusplus.com/forum/general/21246/#msg112085
-        if (isBound())
-          {
-            throw OpenGLException("GLUniform '" + std::string(name) +
-                                  "' does not exist");
-          }
-        else
-          {
-            throw OpenGLException("GLUniform '" + std::string(name) +
-                                  "' does not exist because no VAO has been bound");
-          }
-      }
+        GLUniform<T> *uniform = dynamic_cast<GLUniform<T>*>(it->second.get());
+        if (likely(nullptr != uniform))
+          return *uniform;
 
-    auto ptr = m_uniforms[name].get();
-    GLUniform<T> *uniform_ptr = dynamic_cast<GLUniform<T>*>(ptr);
-    if (unlikely(nullptr == uniform_ptr))
-      {
         throw std::invalid_argument("GLUniform '" + std::string(name) +
                                     "' exists but has wrong template type");
       }
-    return *uniform_ptr;
+
+    // TODO: shall be allowed
+    throw OpenGLException("GLUniform '" + std::string(name) + "' does not exist");
   }
 
 private:

@@ -173,16 +173,9 @@ class GLVertexBuffer: public GLBuffer<T>
 {
 public:
 
-  //! \brief Constructor with the object name
-  explicit GLVertexBuffer(std::string const& name,
-                          BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
-    : GLBuffer<T>(name, GL_ARRAY_BUFFER, usage)
-  {
-  }
-
   //! \brief Constructor with the object name and reserved number of
   //! elements.
-  explicit GLVertexBuffer(std::string const& name, size_t const init_size,
+  explicit GLVertexBuffer(std::string const& name, size_t const init_size = 3_z,
                           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ARRAY_BUFFER, init_size, usage)
   {
