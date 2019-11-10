@@ -52,7 +52,7 @@ public:
   }
 
   //! \brief Restore states to default.
-  inline void reset()
+  inline Transformable<T,n>& reset()
   {
     const Vector<T, n> Vz(maths::zero<T>());
     const Vector<T, n> Vo(maths::one<T>());
@@ -68,13 +68,17 @@ public:
     matrix::identity(m_inverse_transform);
     m_transform_needs_update = false;
     m_inverse_trans_needs_update = false;
+
+    return *this;
   }
 
   //! \brief Set the origin of the object (relative to word origin).
-  inline void origin(Vector<T, n> const& origin)
+  inline Transformable<T,n>& origin(Vector<T, n> const& origin)
   {
     m_origin = origin;
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //! \brief Get the origin of the object (relative to word origin).
@@ -84,10 +88,12 @@ public:
   }
 
   //! \brief Set the relative position of the object from its own origin.
-  inline void position(Vector<T, n> const& position)
+  inline Transformable<T,n>& position(Vector<T, n> const& position)
   {
     m_position = position;
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //! \brief Get the absolute position of the object from its own origin.
@@ -98,30 +104,36 @@ public:
 
   //! \brief Move the object by a given offset.
   //! Do the same job than translate() or displace().
-  inline void move(Vector<T, n> const& offset)
+  inline Transformable<T,n>& move(Vector<T, n> const& offset)
   {
     m_position += offset;
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //! \brief Move the object by a given offset.
   //! Do the same job than move() or displace().
-  inline void translate(Vector<T, n> const& offset)
+  inline Transformable<T,n>& translate(Vector<T, n> const& offset)
   {
     m_position += offset;
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //! \brief Move the object by a given offset.
   //! Do the same job than translate() or move().
-  inline void displace(Vector<T, n> const& offset)
+  inline Transformable<T,n>& displace(Vector<T, n> const& offset)
   {
     m_position += offset;
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //! \brief Set the absolute scale factor of the object.
-  inline void scaling(Vector<T, n> const& scale)
+  inline Transformable<T,n>& scaling(Vector<T, n> const& scale)
   {
     m_scale = scale;
     m_transform_needs_update = true;
@@ -134,10 +146,12 @@ public:
   }
 
   //! \brief Relative scaling of the object.
-  inline void scale(Vector<T, n> const& factor)
+  inline Transformable<T,n>& scale(Vector<T, n> const& factor)
   {
     m_scale *= factor;
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //-----------------------------------------------------------------
@@ -146,9 +160,11 @@ public:
   //! \note for scaling children use methods Transformable::scale or
   //! Transformable::scaleFactor.
   //-----------------------------------------------------------------
-  inline void localScale(Vector<T, n> const &scale)
+  inline Transformable<T,n>& localScale(Vector<T, n> const &scale)
   {
     m_local_scaling = scale;
+
+    return *this;
   }
 
   //-----------------------------------------------------------------
@@ -161,18 +177,22 @@ public:
 
   //! \brief Set the absolute orientation of the object.
   //! \param angle in radian.
-  inline void rotation(T const angle, Vector<T, n> const& axis)
+  inline Transformable<T,n>& rotation(T const angle, Vector<T, n> const& axis)
   {
     m_angle = angle;
     m_axis = axis;
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //! \brief Set the absolute orientation of the object.
-  inline void rotation(Vector<T, n> const& axis)
+  inline Transformable<T,n>& rotation(Vector<T, n> const& axis)
   {
     m_axis = axis;
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //! \brief Set the absolute orientation of the object.
@@ -183,42 +203,46 @@ public:
 
   //! \brief Set the relative orientation of the object.
   //! \param angle in radian.
-  inline void rotate(T const angle)
+  inline Transformable<T,n>& rotate(T const angle)
   {
     m_angle += angle;
     m_angle = maths::wrapTo2PI(m_angle);
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //! \brief Set the relative orientation of the object.
   //! \param angle in radian.
-  inline void rotate(T const angle, Vector<T, n> const& axis)
+  inline Transformable<T,n>& rotate(T const angle, Vector<T, n> const& axis)
   {
     m_angle += angle;
     m_angle = maths::wrapTo2PI(m_angle);
     m_axis = axis;
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //! \brief Set the relative orientation of the object.
   //! \param angle in radian.
-  inline void rotateX(T const angle)
+  inline Transformable<T,n>& rotateX(T const angle)
   {
-    rotate(angle, Vector<T, n>::UNIT_X);
+    return rotate(angle, Vector<T, n>::UNIT_X);
   }
 
   //! \brief Set the relative orientation of the object.
   //! \param angle in radian.
-  inline void rotateY(T const angle)
+  inline Transformable<T,n>& rotateY(T const angle)
   {
-    rotate(angle, Vector<T, n>::UNIT_Y);
+    return rotate(angle, Vector<T, n>::UNIT_Y);
   }
 
   //! \brief Set the relative orientation of the object.
   //! \param angle in radian.
-  inline void rotateZ(T const angle)
+  inline Transformable<T,n>& rotateZ(T const angle)
   {
-    rotate(angle, Vector<T, n>::UNIT_Z);
+    return rotate(angle, Vector<T, n>::UNIT_Z);
   }
 
   //! \brief Set the absolute orientation angle (in radian).
