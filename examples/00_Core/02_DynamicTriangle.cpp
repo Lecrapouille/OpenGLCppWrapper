@@ -84,7 +84,7 @@ bool GLExample02::setup()
                              "void main() {                            \n"
                              "  gl_Position = vec4(position, 0.0, 1.0);\n"
                              "}");
-  m_fragment_shader.fromString("#vversion 330 core                      \n"
+  m_fragment_shader.fromString("#version 330 core                      \n"
                                "uniform vec3 color;                    \n"
                                "out vec4 fragColor;                    \n"
                                "void main() {                          \n"
