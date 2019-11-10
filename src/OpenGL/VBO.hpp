@@ -176,7 +176,7 @@ public:
   //! \brief Constructor with the object name and reserved number of
   //! elements.
   explicit GLVertexBuffer(std::string const& name, size_t const init_size = 3_z,
-                          BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+                          BufferUsage const usage = BufferUsage::STATIC_DRAW)
     : GLBuffer<T>(name, GL_ARRAY_BUFFER, init_size, usage)
   {
   }
@@ -210,7 +210,7 @@ public:
 
   //! \brief Constructor with the object name
   explicit GLIndexBuffer(std::string const& name,
-                         BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+                         BufferUsage const usage = BufferUsage::STATIC_DRAW)
     : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
   {
   }
@@ -218,7 +218,7 @@ public:
   //! \brief Constructor with the object name and reserved number of
   //! elements.
   explicit GLIndexBuffer(std::string const& name, const size_t init_size,
-                         BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+                         BufferUsage const usage = BufferUsage::STATIC_DRAW)
     : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, init_size, usage)
   {
   }

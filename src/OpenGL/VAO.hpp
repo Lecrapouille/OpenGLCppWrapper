@@ -176,7 +176,7 @@ public:
   //! This method wraps the \a index() method hidding the misery of the
   //! template.
   //----------------------------------------------------------------------------
-  inline GLIndexBuffer<uint32_t>& index32(BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  inline GLIndexBuffer<uint32_t>& index32(BufferUsage const usage = BufferUsage::STATIC_DRAW)
   {
     return index<uint32_t>(usage);
   }
@@ -188,7 +188,7 @@ public:
   //! This method wraps the \a index() method hidding the misery of the
   //! template.
   //----------------------------------------------------------------------------
-  inline GLIndexBuffer<uint16_t>& index16(BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  inline GLIndexBuffer<uint16_t>& index16(BufferUsage const usage = BufferUsage::STATIC_DRAW)
   {
     return index<uint16_t>(usage);
   }
@@ -201,7 +201,7 @@ public:
   //! This method wraps the \a index() method hidding the misery of the
   //! template.
   //----------------------------------------------------------------------------
-  inline GLIndexBuffer<uint8_t>& index8(BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  inline GLIndexBuffer<uint8_t>& index8(BufferUsage const usage = BufferUsage::STATIC_DRAW)
   {
     return index<uint8_t>(usage);
   }
