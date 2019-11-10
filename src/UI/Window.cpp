@@ -292,6 +292,9 @@ l_runtime:
       res = setup();
       if (likely(res))
         {
+          // Force refreshing computation made when window changed
+          onWindowSizeChanged();
+
           // Show the estimated GPU mempry usage
           display_gpu_memory();
 
