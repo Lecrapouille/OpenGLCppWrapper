@@ -25,6 +25,7 @@
 #  include <iostream>
 
 using namespace glwrap;
+using namespace glwrap::window;
 
 class GLExample07: public IGLWindow
 {
@@ -35,7 +36,7 @@ public:
       m_skybox("SkyBox"),
       m_progShape("progShape"),
       m_progSkyBox("progSkyBox"),
-      m_camera(Vector3f(0.0f, 0.0f, 3.0f))
+      m_cameraController(Camera3D::Type::PERSPECTIVE)
   {}
 
   ~GLExample07()
@@ -47,7 +48,8 @@ private:
   void drawShape();
   bool createSkyBox();
   void drawSkyBox();
-  virtual void onMouseMoved(window::Mouse const& mouse) override;
+  virtual void onMouseScrolled(Mouse const& mouse) override;
+  virtual void onMouseMoved(Mouse const& mouse) override;
   virtual void onWindowSizeChanged() override;
   virtual bool setup() override;
   virtual bool draw() override;
@@ -58,7 +60,7 @@ private:
   GLFragmentShader   fs1, fs2;
   GLVAO              m_shape, m_skybox;
   GLProgram          m_progShape, m_progSkyBox;
-  Camera             m_camera;
+  CameraController   m_cameraController;
 };
 
 #endif // EXAMPLE_07_SKYBOX_TEXTURECUBE_HPP

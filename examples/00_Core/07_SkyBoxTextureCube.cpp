@@ -33,25 +33,34 @@
 //------------------------------------------------------------------
 void GLExample07::onWindowSizeChanged()
 {
-  // Note: height is never zero !
-  float ratio = width<float>() / height<float>();
-
   // Make sure the viewport matches the new window dimensions.
   glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
-  m_progShape.matrix44f("projection") =
-    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
-  m_progSkyBox.matrix44f("projection") = m_progShape.matrix44f("projection");
+  Matrix44f const& proj =
+    m_cameraController.camera().updateProjectionMatrix();
+  m_progShape.matrix44f("projection") = proj;
+  m_progSkyBox.matrix44f("projection") = proj;
 }
 
 // --------------------------------------------------------------
 //! \brief Mouse event
 // --------------------------------------------------------------
-void GLExample07::onMouseMoved(window::Mouse const& mouse)
+void GLExample07::onMouseMoved(Mouse const& mouse)
 {
   float const dx = static_cast<float>(mouse.displacement.x);
   float const dy = static_cast<float>(mouse.displacement.y);
-  m_camera.ProcessMouseMovement(dx, dy);
+  m_cameraController.processMouseMovement(dx, dy, dt());
+}
+
+// --------------------------------------------------------------
+//! \brief Mouse event
+// --------------------------------------------------------------
+void GLExample07::onMouseScrolled(Mouse const& mouse)
+{
+  float const z = static_cast<float>(mouse.scroll.y);
+  Matrix44f const& proj = m_cameraController.zoom(z);
+  m_progShape.matrix44f("projection") = proj;
+  m_progSkyBox.matrix44f("projection") = proj;
 }
 
 //------------------------------------------------------------------
@@ -66,15 +75,10 @@ bool GLExample07::createSkyBox()
   // Compile shader as OpenGL program. This one will instanciate all OpenGL objects for you.
   if (!m_progSkyBox.attachShaders(vs1, fs1).compile())
     {
-      std::cerr << "failed compiling OpenGL program. Reason was '"
+      std::cerr << "Failed compiling OpenGL program. Reason was '"
                 << m_progSkyBox.getError() << "'" << std::endl;
       return false;
     }
-
-  // Init uniforms.
-  float ratio = width<float>() / height<float>();
-  m_progSkyBox.matrix44f("projection") =
-    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
 
   // Binding empty VAO to OpenGL program will make it be populated
   // with all VBOs needed.
@@ -116,13 +120,6 @@ bool GLExample07::createShape()
       return false;
     }
 
-  // Init uniforms. Set the Z-clipping of the camera to a high value
-  // in the aim to create an effect of deep when objects are far away
-  // (in contrast of the skybox which never changes its size).
-  float ratio = width<float>() / height<float>();
-  m_progShape.matrix44f("projection") =
-    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
-
   // Binding empty VAO to OpenGL program will make it be populated
   // with all VBOs needed.
   m_progShape.bind(m_shape);
@@ -130,9 +127,9 @@ bool GLExample07::createShape()
   // Uncomment to debug triangles
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  const uint32_t slices = 32u;
-  const float radius = 1.0f;
-  const float height = 1.0f;
+  uint32_t const slices = 32u;
+  float const radius = 1.0f;
+  float const height = 1.0f;
 
   // Create a cylinder with two caps (bottom & top). Merge them into a
   // single VAO.
@@ -177,6 +174,11 @@ bool GLExample07::setup()
 
   hideMouseCursor();
 
+  // Place a camera controlled by the user
+  PerspectiveCamera3D& camera = m_cameraController.camera();
+  camera.lookAt(Vector3f(-5.0f, 1.0f, 4.0f),
+                Vector3f(-4.5f, 1.0f, 3.5f));
+
   return createShape() && createSkyBox();
 }
 
@@ -186,7 +188,7 @@ bool GLExample07::setup()
 void GLExample07::drawShape()
 {
   m_progShape.matrix44f("model") = Matrix44f(matrix::Identity);
-  m_progShape.matrix44f("view") = m_camera.GetViewMatrix();
+  m_progShape.matrix44f("view") = m_cameraController.camera().viewMatrix();
 
   // Set depth function back to default
   glCheck(glDepthFunc(GL_LESS));
@@ -199,7 +201,7 @@ void GLExample07::drawShape()
 void GLExample07::drawSkyBox()
 {
   // Remove translation from the view matrix
-  Matrix44f view = m_camera.GetViewMatrix();
+  Matrix44f view = m_cameraController.camera().viewMatrix();
   m_progSkyBox.matrix44f("view") = Matrix44f(Matrix33f(view));
 
   // Change depth function so depth test passes when values are equal
@@ -223,14 +225,14 @@ bool GLExample07::draw()
   drawSkyBox();
 
   // Key pressed
-  if (keyPressed(GLFW_KEY_W))
-    m_camera.ProcessKeyboard(Camera_Movement::FORWARD, dt());
-  if (keyPressed(GLFW_KEY_S))
-    m_camera.ProcessKeyboard(Camera_Movement::BACKWARD, dt());
-  if (keyPressed(GLFW_KEY_A))
-    m_camera.ProcessKeyboard(Camera_Movement::LEFT, dt());
-  if (keyPressed(GLFW_KEY_D))
-    m_camera.ProcessKeyboard(Camera_Movement::RIGHT, dt());
+  if (keyPressed(GLFW_KEY_W) || keyPressed(GLFW_KEY_UP))
+    m_cameraController.processKeyboard(CameraController::Movement::FORWARD, dt());
+  if (keyPressed(GLFW_KEY_S) || keyPressed(GLFW_KEY_DOWN))
+    m_cameraController.processKeyboard(CameraController::Movement::BACKWARD, dt());
+  if (keyPressed(GLFW_KEY_A) || keyPressed(GLFW_KEY_LEFT))
+    m_cameraController.processKeyboard(CameraController::Movement::LEFT, dt());
+  if (keyPressed(GLFW_KEY_D) || keyPressed(GLFW_KEY_RIGHT))
+    m_cameraController.processKeyboard(CameraController::Movement::RIGHT, dt());
 
   return true;
 }

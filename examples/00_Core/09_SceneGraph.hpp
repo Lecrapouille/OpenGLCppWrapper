@@ -207,6 +207,7 @@ class GLExample09
 public:
 
   GLExample09()
+    : m_camera(Camera3D::Type::PERSPECTIVE)
   {}
 
   ~GLExample09()
@@ -220,9 +221,9 @@ private:
 
 private:
 
-  Camera    m_camera;
-  Node3D_SP m_scene;
-  GLImGUI   m_imgui;
+  CameraController m_camera;
+  Node3D_SP        m_scene;
+  GLImGUI          m_imgui;
 };
 
 #endif // EXAMPLE_09_SCENEGRAPH_HPP

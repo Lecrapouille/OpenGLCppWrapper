@@ -58,9 +58,8 @@ namespace matrix
   template<typename T>
   Matrix<T, 4_z, 4_z> rotate(Matrix<T, 4_z, 4_z> const &m, T const angle, Vector<T, 3_z> const &v)
   {
-    T const a = angle;
-    T const c = std::cos(a);
-    T const s = std::sin(a);
+    T const c = std::cos(angle);
+    T const s = std::sin(angle);
 
     Vector<T, 3_z> axis(vector::normalize(v));
     Vector<T, 3_z> temp((maths::one<T>() - c) * axis);
@@ -103,7 +102,7 @@ namespace matrix
 
   // *************************************************************************************************
   //! \brief Replace gluPerspective(). Set the frustum to perspective mode.
-  //! \param fovY     - Field of vision in degrees in the y direction.
+  //! \param fovY     - Field of vision in radians in the y direction.
   //! \param aspect   - Aspect ratio of the viewport.
   //! \param zNear    - The near clipping distance.
   //! \param zFar     - The far clipping distance.

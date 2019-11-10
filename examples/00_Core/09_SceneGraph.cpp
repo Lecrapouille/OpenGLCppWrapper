@@ -164,21 +164,21 @@ bool GLImGUI::render()
 //------------------------------------------------------------------------------
 void GLExample09::onWindowSizeChanged()
 {
-  // Note: height is never zero !
-  const float ratio =  width<float>() / height<float>();
-
   // Make sure the viewport matches the new window dimensions.
-  //glCheck(glViewport(0, 0, width<int>(), height<int>()));
+  glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
-  //m_prog.matrix44f("u_projection") =
-    //  matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10.0f);
+  //TODO
+  //m_prog.matrix44f("projection") =
+  //  m_camera.camera().updateProjectionMatrix();
 }
 
 //------------------------------------------------------------------------------
-//! Create the cene graph: 3 robots
+//! Create the cene graph made of 3 robots. Each robot is a scene node.
 //------------------------------------------------------------------------------
 bool GLExample09::setup()
 {
+  DEBUG("%s", "Create graph scene");
+
   // Init the context of the DearIMgui library
   if (false == m_imgui.setup(*this))
     return false;
@@ -188,9 +188,6 @@ bool GLExample09::setup()
   glCheck(glDepthFunc(GL_LESS));
   glCheck(glDisable(GL_BLEND));
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
-  // Attach 3 robots in the scene graph. Each robot is a scene node.
-  DEBUG("%s", "Create graph scene");
 
   // Create 3 Scene nodes (robots)
   Node3D_SP robot1 = std::make_shared<CubicRobot>("CubicRobot1");
@@ -240,6 +237,8 @@ bool GLExample09::draw()
   m_scene->update(dt());
 
   // Traverse the scene graph for drawing robots.
+  //Matrix44f view = m_camera.camera().viewMatrix();
+  //m_progSkyBox.matrix44f("view") = Matrix44f(Matrix33f(view));
   m_scene->renderer(/*m_camera*/);
 
   // Paint the GUI

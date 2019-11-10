@@ -21,7 +21,7 @@
 #ifndef OPENGLCPPWRAPPER_TRANSFORMABLE_HPP
 #  define OPENGLCPPWRAPPER_TRANSFORMABLE_HPP
 
-#  include "Scene/Transformation.hpp"
+#  include "Math/Transformation.hpp"
 
 namespace glwrap
 {

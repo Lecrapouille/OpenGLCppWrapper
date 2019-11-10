@@ -167,6 +167,15 @@ public:
   virtual void onMouseButtonPressed(window::Mouse const& /*mouse*/)
   {}
 
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  inline bool isFullscreen() const
+  {
+    return (m_main_window != nullptr) &&
+      (glfwGetWindowMonitor(m_main_window) != nullptr);
+  }
+
 private:
 
   //----------------------------------------------------------------------------

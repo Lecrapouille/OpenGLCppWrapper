@@ -25,6 +25,7 @@
 #  include <iostream>
 
 using namespace glwrap;
+using namespace glwrap::window;
 
 // *****************************************************************
 //! \brief
@@ -38,13 +39,8 @@ public:
       m_lamp("VAO_lamp"),
       m_prog_cube("Prog_cube"),
       m_prog_lamp("Prog_lamp"),
-      m_camera(Vector3f(4.1f, 0.7f, 6.8f))
-  {
-    // Center the camera
-    m_camera.Yaw = -121.9f;
-    m_camera.Pitch = -5.8f;
-    m_camera.ProcessMouseMovement(0.0f, 0.0f);
-  }
+      m_cameraController(Camera3D::Type::PERSPECTIVE)
+  {}
 
   ~GLExample13()
   {}
@@ -54,7 +50,8 @@ protected:
   bool createCube();
   bool createLamp();
   void changeLightProperties(float const time);
-  virtual void onMouseMoved(window::Mouse const& mouse) override;
+  virtual void onMouseScrolled(Mouse const& mouse) override;
+  virtual void onMouseMoved(Mouse const& mouse) override;
   virtual void onWindowSizeChanged() override;
   virtual bool setup() override;
   virtual bool draw() override;
@@ -67,7 +64,7 @@ private:
   GLVAO              m_lamp;
   GLProgram          m_prog_cube;
   GLProgram          m_prog_lamp;
-  Camera             m_camera;
+  CameraController   m_cameraController;
 };
 
 #endif // EXAMPLE_13_LIGHTING_HPP

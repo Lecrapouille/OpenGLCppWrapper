@@ -24,25 +24,42 @@
 static Vector3f lightPos(1.2f, 1.0f, 2.0f);
 
 // --------------------------------------------------------------
-//! \brief Mouse event
+//! \brief Window event
 // --------------------------------------------------------------
-void GLExample13::onMouseMoved(window::Mouse const& mouse)
-{
-  float const dx = static_cast<float>(mouse.displacement.x);
-  float const dy = static_cast<float>(mouse.displacement.y);
-  m_camera.ProcessMouseMovement(dx, dy);
-}
-
 void GLExample13::onWindowSizeChanged()
 {
-  // Note: height is never zero !
-  float ratio = width<float>() / height<float>();
-
   // Make sure the viewport matches the new window dimensions.
   glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
-  m_prog_lamp.matrix44f("projection") =
-    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 100.0f);
+  Matrix44f const& proj =
+    m_cameraController.camera().updateProjectionMatrix();
+  m_prog_cube.matrix44f("projection") = proj;
+  m_prog_lamp.matrix44f("projection") = proj;
+}
+
+// --------------------------------------------------------------
+//! \brief Mouse event
+// --------------------------------------------------------------
+void GLExample13::onMouseMoved(Mouse const& mouse)
+{
+  float const dx = static_cast<float>(mouse.displacement.x);
+  float const dy = static_cast<float>(mouse.displacement.y);
+  m_cameraController.processMouseMovement(dx, dy, dt());
+  //PerspectiveCamera3D& camera = m_cameraController.camera();
+  //m_prog_lamp.matrix44f("view") = camera.viewMatrix();
+  //m_prog_cube.matrix44f("view") = camera.viewMatrix();
+  //m_prog_cube.vector3f("viewPos") = camera.position();
+}
+
+// --------------------------------------------------------------
+//! \brief Mouse event
+// --------------------------------------------------------------
+void GLExample13::onMouseScrolled(Mouse const& mouse)
+{
+  float const z = static_cast<float>(mouse.scroll.y);
+  Matrix44f const& proj = m_cameraController.zoom(z);
+  m_prog_cube.matrix44f("projection") = proj;
+  m_prog_lamp.matrix44f("projection") = proj;
 }
 
 //------------------------------------------------------------------
@@ -77,6 +94,7 @@ bool GLExample13::createLamp()
   transformable.position(lightPos);
   transformable.scale(Vector3f(0.05f)); // a smaller cube
   m_prog_lamp.matrix44f("model") = transformable.transform();
+  m_prog_lamp.matrix44f("view") = m_cameraController.camera().viewMatrix();
 
   return true;
 }
@@ -155,6 +173,8 @@ bool GLExample13::createCube()
 
   Transformable<float, 3U> transformable;
   m_prog_cube.matrix44f("model") = transformable.transform();
+  m_prog_cube.matrix44f("view") = m_cameraController.camera().viewMatrix();
+  m_prog_cube.vector3f("viewPos") = m_cameraController.camera().position();
 
   // Material properties
   // Note: specular lighting doesn't have full effect on this object's material
@@ -194,6 +214,10 @@ bool GLExample13::setup()
 
   hideMouseCursor();
 
+  // Place a camera controlled by the user
+  PerspectiveCamera3D& camera = m_cameraController.camera();
+  camera.lookAt(Vector3f(10.0f), Vector3f::ZERO, Vector3f::UNIT_Y);
+
   if (!createLamp()) return false;
   if (!createCube()) return false;
 
@@ -211,23 +235,25 @@ bool GLExample13::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  m_prog_lamp.matrix44f("view") = m_camera.GetViewMatrix();
-  m_prog_cube.matrix44f("view") = m_camera.GetViewMatrix();
-  m_prog_cube.vector3f("viewPos") = m_camera.Position;
+  PerspectiveCamera3D& camera = m_cameraController.camera();
+  m_prog_lamp.matrix44f("view") = camera.viewMatrix();
+  m_prog_cube.matrix44f("view") = camera.viewMatrix();
+  m_prog_cube.vector3f("viewPos") = camera.position();
+
   changeLightProperties(time);
 
   m_prog_cube.draw(m_cube, Mode::TRIANGLES);
   m_prog_lamp.draw(m_lamp, Mode::TRIANGLES);
 
   // Key pressed
-  if (keyPressed(GLFW_KEY_W))
-    m_camera.ProcessKeyboard(Camera_Movement::FORWARD, dt());
-  if (keyPressed(GLFW_KEY_S))
-    m_camera.ProcessKeyboard(Camera_Movement::BACKWARD, dt());
-  if (keyPressed(GLFW_KEY_A))
-    m_camera.ProcessKeyboard(Camera_Movement::LEFT, dt());
-  if (keyPressed(GLFW_KEY_D))
-    m_camera.ProcessKeyboard(Camera_Movement::RIGHT, dt());
+  if (keyPressed(GLFW_KEY_W) || keyPressed(GLFW_KEY_UP))
+    m_cameraController.processKeyboard(CameraController::Movement::FORWARD, dt());
+  if (keyPressed(GLFW_KEY_S) || keyPressed(GLFW_KEY_DOWN))
+    m_cameraController.processKeyboard(CameraController::Movement::BACKWARD, dt());
+  if (keyPressed(GLFW_KEY_A) || keyPressed(GLFW_KEY_LEFT))
+    m_cameraController.processKeyboard(CameraController::Movement::LEFT, dt());
+  if (keyPressed(GLFW_KEY_D) || keyPressed(GLFW_KEY_RIGHT))
+    m_cameraController.processKeyboard(CameraController::Movement::RIGHT, dt());
 
   return true;
 }

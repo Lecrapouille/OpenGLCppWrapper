@@ -23,7 +23,7 @@
 
 #  include "OpenGL/Program.hpp"
 #  include "OpenGL/FrameBuffers.hpp"
-#  include "Camera/Camera.hpp"
+#  include "Camera/Controller.hpp"
 #  include "UI/ImGUI.hpp"
 #  include "Scene/SceneGraph.hpp"
 #  include "Geometry/Geometry.hpp"
