@@ -212,6 +212,7 @@ void IGLWindow::computeFPS()
 //------------------------------------------------------------------------------
 bool IGLWindow::start()
 {
+  DEBUG("%s", "IGLWindow::start");
   if (hasCreatedContext())
     {
       ERROR("Warning you called twice start(). "
@@ -289,6 +290,7 @@ l_runtime:
   try
     {
       // Init OpenGL states of the user application
+      DEBUG("%s", "============= SETUP ============================================================");
       res = setup();
       if (likely(res))
         {
@@ -328,7 +330,7 @@ bool IGLWindow::loop()
 {
   do
     {
-      DEBUG("%s", "************* LOOP");
+      DEBUG("%s", "============= LOOP =============================================================");
       display_gpu_memory();
       computeFPS();
       if (likely(false == draw()))

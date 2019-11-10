@@ -39,7 +39,7 @@ void errout(FILE *stream, const char* type, const char* file, const uint32_t lin
   va_list args;
   va_start(args, format);
 
-  fprintf(stream, "%s:%s:%u ", type, file_name(file).c_str(), line);
+  fprintf(stream, "%s%24s:%5u: ", type, file_name(file).c_str(), line);
   vfprintf(stream, format, args);
   fprintf(stream, "\n");
 
