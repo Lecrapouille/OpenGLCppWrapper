@@ -156,6 +156,20 @@ public:
     return m_textures.size();
   }
 
+  size_t getFailedTextures(std::vector<std::string>& list, bool const clear = true)
+  {
+    if (clear) { list.clear(); }
+    list.reserve(m_textures.size());
+    for (auto& it: m_textures)
+      {
+        if (!it.second->loaded())
+          {
+            list.push_back(it.second->name()); // TODO filename()
+          }
+      }
+    return m_textures.size();
+  }
+
   //----------------------------------------------------------------------------
   //! \brief Check if this instance holds a GLIndexBuffer. GLIndexBuffer is an
   //! and index of vertices. Indeed vertices are usually shared by several

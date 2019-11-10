@@ -50,7 +50,7 @@ bool GLExample11::firstProgram()
   m_fs_scene.fromFile("shaders/11_RenderFrameBuffer_cube.fs");
   if (!m_prog_scene.attachShaders(m_vs_scene, m_fs_scene).compile())
     {
-      std::cerr << "failed compiling OpenGL program. Reason was '"
+      std::cerr << "Failed compiling OpenGL program. Reason was '"
                 << m_prog_scene.getError() << "'" << std::endl;
       return false;
     }

@@ -93,9 +93,11 @@ enum class PixelType : GLenum
   };
 
 // **************************************************************
-//! GLBuffer
+// GLBuffer
 // **************************************************************
 
+//! \brief Specifies the expected usage pattern of the data store for
+//! glBufferData.
 enum class BufferUsage : GLenum
   {
     /* 0x88E0 */ STREAM_DRAW = GL_STREAM_DRAW,
@@ -103,6 +105,7 @@ enum class BufferUsage : GLenum
     /* 0x88E8 */ DYNAMIC_DRAW = GL_DYNAMIC_DRAW,
   };
 
+//! \brief Type of buffer used by frame buffers.
 enum class FrameBuffer : GLenum
   {
     /* 0x1800 */ COLOR = GL_COLOR_BUFFER_BIT,
@@ -110,6 +113,7 @@ enum class FrameBuffer : GLenum
     /* 0x1802 */ STENCIL = GL_STENCIL_BUFFER_BIT,
   };
 
+//! \brief Mode for drawing primitives (points, lines, triangles ...)
 enum class Mode : GLenum
   {
     /* 0x0000 */ POINTS = GL_POINTS,

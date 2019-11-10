@@ -51,31 +51,36 @@ bool GLExample00::setup()
   std::cout << "Add your OpenGL code here for initializing your scene." << std::endl;
 
   // Do not show the mouse cursor
-  // hideMouseCursor();
+  hideMouseCursor();
 
   // Success
   return true;
 }
 
 //------------------------------------------------------------------
-//! \brief Paint our scene. Here we are using the delta time to
-//! change the color of the window.
+//! \brief Callback for painting our scene.
+//!
+//! In this example, we are using the delta time between the previous
+//! rendering frame for changing dynamically the background color of
+//! the window.
 //------------------------------------------------------------------
 bool GLExample00::draw()
 {
+  // Cumulate the time
   static float time = 0.0f;
   time += dt();
 
+  // the FPS information is automatically computed by GLWindow
   std::cout << time << "ms. OpenGL is painting at " << fps() << " FPS."
             << std::endl;
 
+  // Change the background color
   const float ct = cosf(time) * 0.5f + 0.5f;
   const float st = sinf(time) * 0.5f + 0.5f;
   glCheck(glClearColor(st, ct, 0.0f, 1.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-  // Key pressed event (Note Escape key is already map to kill the
-  // application).
+  // Key pressed event (Note Escape key is already map to kill the application).
   if (keyPressed(GLFW_KEY_W)) { std::cout << std::endl << "Key pressed 'W'" << std::endl; }
   if (keyPressed(GLFW_KEY_F1)) { std::cout << std::endl << "Key pressed 'F1'" << std::endl; }
 
@@ -83,18 +88,27 @@ bool GLExample00::draw()
   return true;
 }
 
+  // QQ TODO: a separer dans une nouvelle callback
+
 // --------------------------------------------------------------
-//! \brief Mouse event
+//! \brief Callback on mouse pressed or release event.
+//!
+//! This example display the mouse status and hide/show the mouse
+//! cursor.
 // --------------------------------------------------------------
 void GLExample00::onMouseButtonPressed(Mouse const& mouse)
 {
   std::cout << "Mouse button " << static_cast<int>(mouse.button)
             << " was " << (mouse.pressed ? "pressed" : "released")
             << std::endl;
+
+  static bool state = true;
+  state ^= true;
+  (false == state) ? hideMouseCursor() : showMouseCursor();
 }
 
 // --------------------------------------------------------------
-//! \brief Mouse event
+//! \brief Callback on mouse scroll event.
 // --------------------------------------------------------------
 void GLExample00::onMouseScrolled(Mouse const& mouse)
 {
@@ -102,7 +116,7 @@ void GLExample00::onMouseScrolled(Mouse const& mouse)
 }
 
 // --------------------------------------------------------------
-//! \brief Mouse event
+//! \brief Callback on mouse movement event.
 // --------------------------------------------------------------
 void GLExample00::onMouseMoved(Mouse const& mouse)
 {
@@ -111,6 +125,6 @@ void GLExample00::onMouseMoved(Mouse const& mouse)
     << static_cast<int>(mouse.position.y) << std::endl;
 
   std::cout << "Mouse delta movement "
-            << mouse.displacement.x << " x "
+            << mouse.displacement.x << " -- "
             << mouse.displacement.y << std::endl;
 }

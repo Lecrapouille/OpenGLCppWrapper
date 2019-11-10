@@ -37,18 +37,21 @@ IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
 //----------------------------------------------------------------------------
 static std::atomic<bool> OpenGLContextCreated{false};
 
+//----------------------------------------------------------------------------
 bool isContextCreated()
 {
   DEBUG("OpenGL Context >>>>>>>>>>>>>>>>>>>>>>>>>>>>> %u", OpenGLContextCreated.load());
   return OpenGLContextCreated;
 }
 
+//----------------------------------------------------------------------------
 void setContextCreated(bool const v)
 {
   OpenGLContextCreated.store(v);
   DEBUG("OpenGL Context <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< %u", OpenGLContextCreated.load());
 }
 
+//----------------------------------------------------------------------------
 void checkError(const char* filename, const uint32_t line, const char* expression)
 {
   GLenum id;

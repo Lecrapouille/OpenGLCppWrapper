@@ -44,6 +44,7 @@ public:
 protected:
 
   void debug();
+  bool loadTextures();
   virtual void onWindowSizeChanged() override;
   virtual bool setup() override;
   virtual bool draw() override;

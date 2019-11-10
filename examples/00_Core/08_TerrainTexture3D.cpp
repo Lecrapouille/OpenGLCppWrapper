@@ -66,10 +66,9 @@ bool GLExample08::setup()
       return false;
     }
 
-  // Init uniforms.
-  float ratio = width<float>() / height<float>();
-  m_prog.matrix44f("projection") =
-    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
+  // Init Model-View matrices (shader uniforms). Note that projection
+  // matrix is init inside onWindowSizeChanged() which is called just
+  // after this method.
   m_prog.matrix44f("model") = Matrix44f(matrix::Identity);;
   m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(0.75, -0.75, 0.75), Vector3f(0.0, 0.0, 0.0), Vector3f(0.0, 0.0, 1.0));

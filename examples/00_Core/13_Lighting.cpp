@@ -74,7 +74,7 @@ bool GLExample13::createLamp()
   // Compile the shader program
   if (!m_prog_lamp.attachShaders(m_vs1, m_fs1).compile())
     {
-      std::cerr << "failed compiling OpenGL program. Reason was '"
+      std::cerr << "Failed compiling OpenGL program. Reason was '"
                 << m_prog_lamp.getError() << "'" << std::endl;
       return false;
     }

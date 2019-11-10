@@ -41,11 +41,12 @@ void GLExample02::onWindowSizeChanged()
 }
 
 //------------------------------------------------------------------
-//! \brief Make the instropection of VAO and program shader
+//! \brief Make the instropection of VAO and program shader.
+//! \note more methods are avalaible in next examples.
 //------------------------------------------------------------------
 void GLExample02::debug()
 {
-  // VBOs of the VAO
+  // Display the list of VBOs hold by the VAO
   {
     std::vector<std::string> vbo_names;
     size_t count = m_triangle.getVBONames(vbo_names);
@@ -57,7 +58,7 @@ void GLExample02::debug()
       }
   }
 
-  // Uniforms of the program
+  // Display the list of Uniforms hold by the program
   {
     std::vector<std::string> uniform_names;
     size_t count = m_prog.getUniformNames(uniform_names);
@@ -94,7 +95,8 @@ bool GLExample02::setup()
   // Compile the shader program
   if (!m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
     {
-      std::cerr << m_prog.getError() << std::endl;
+      std::cerr << "Failed compiling OpenGL program. Reason was '"
+                << m_prog.getError() << "'" << std::endl;
       return false;
     }
 
@@ -103,10 +105,12 @@ bool GLExample02::setup()
 
   // Create VBOs of the VAO.
   m_prog.bind(m_triangle);
-  debug();
 
   // Fill VBOs of the VAO: init triangle vertex positions.
   m_triangle.vector2f("position") = initial_position;
+
+  // Helper for debugging states of your program
+  debug();
 
   return true;
 }

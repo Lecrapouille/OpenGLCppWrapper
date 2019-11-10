@@ -65,11 +65,3 @@ bool GLExample01::draw()
   // Then DearIMgui
   return m_imgui.draw();
 }
-
-// --------------------------------------------------------------
-//! \brief Mouse event
-// --------------------------------------------------------------
-void GLExample01::onMouseMoved(Mouse const& mouse)
-{
-  GLExample00::onMouseMoved(mouse);
-}

@@ -56,7 +56,6 @@ public:
 protected:
 
   virtual void onWindowSizeChanged() override;
-  virtual void onMouseMoved(Mouse const& mouse) override;
   virtual bool setup() override;
   virtual bool draw() override;
 

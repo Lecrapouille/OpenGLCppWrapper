@@ -52,7 +52,7 @@ bool GLExample14::setup()
   // Compile the shader program
   if (!m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
     {
-      std::cerr << "failed compiling OpenGL program. Reason was '"
+      std::cerr << "Failed compiling OpenGL program. Reason was '"
                 << m_prog.getError() << "'" << std::endl;
       return false;
     }

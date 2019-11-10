@@ -110,15 +110,14 @@ bool GLExample06::setup()
   // Compile the shader program
   if (!m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
     {
-      std::cerr << "failed compiling OpenGL program. Reason was '"
+      std::cerr << "Failed compiling OpenGL program. Reason was '"
                 << m_prog.getError() << "'" << std::endl;
       return false;
     }
 
-  // Init shader uniforms
-  float ratio = width<float>() / height<float>();
-  m_prog.matrix44f("projection") =
-    matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
+  // Init Model-View matrices (shader uniforms). Note that projection
+  // matrix is init inside onWindowSizeChanged() which is called just
+  // after this method.
   m_prog.matrix44f("model") = m_transformable.transform();
   m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(1,1,1), Vector3f(0,1,0));

@@ -39,7 +39,12 @@ namespace glwrap
 // ***********************************************************************************************
 DECLARE_EXCEPTION(OpenGLException, Exception)
 
+//! \brief Return true if the OpenGL context has been created else false.
 bool isContextCreated();
+
+//! \brief Set the state of the OpenGL context creation.
+//! \param[in] v the new state: true for a created OpenGL context, false else.
+//! \fixme Make this function private.
 void setContextCreated(bool const v = true);
 
 //----------------------------------------------------------------------------
