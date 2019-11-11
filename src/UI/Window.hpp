@@ -226,7 +226,7 @@ private:
   //! \brief Windows current height
   uint32_t m_height;
   //! \brief Windows title
-  const char *m_title;
+  const char *m_title = nullptr;
   //! \brief window::Mouse states
   window::Mouse m_mouse;
   //! \brief GLF window context

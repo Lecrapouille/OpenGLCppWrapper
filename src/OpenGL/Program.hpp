@@ -247,7 +247,10 @@ public:
   inline bool compile()
   {
     begin();
-    return isCompiled();
+    bool res = isCompiled();
+    if (!isContextCreated())
+      concatError(" OpenGL context is not yet created");
+    return res;
   }
 
   //----------------------------------------------------------------------------
@@ -287,7 +290,7 @@ public:
           }
         msg += "\nReason was:\n";
         msg += m_error_msg;
-        msg += '\n';
+        //msg += '\n';
       }
 
     m_error_msg.clear();

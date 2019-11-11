@@ -170,15 +170,15 @@ namespace glwrap
     //----------------------------------------------------------------------------
     void begin()
     {
-      /* FIXME if (unlikely(!hasCreatedContext()))
-         {
-         DEBUG("O::begin perdu");
-         return ;
-         }
-      */
-
       if (likely(needCreate()))
         {
+          // OpenGL context shall be present
+          if (unlikely(!isContextCreated()))
+            {
+              ERROR("OpenGL context is not yet created");
+              return ;
+            }
+
           m_need_create = create();
         }
 
@@ -207,7 +207,7 @@ namespace glwrap
     //----------------------------------------------------------------------------
     inline void end()
     {
-      /*if (unlikely(!hasCreatedContext()))
+      /*if (unlikely(!isContextCreated()))
         return ;*/
 
       deactivate();
@@ -261,7 +261,7 @@ namespace glwrap
     //----------------------------------------------------------------------------
     void destroy()
     {
-      if (likely(hasCreatedContext()))
+      if (likely(isContextCreated()))
         {
           if (likely(isValid()))
             {
