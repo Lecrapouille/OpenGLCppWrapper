@@ -34,6 +34,7 @@
 #  include "OpenGL/LocationUniform.hpp"
 #  include "OpenGL/LocationSamplers.hpp"
 #  include "OpenGL/VAO.hpp"
+#  include <unordered_map>
 
 namespace glwrap
 {
@@ -735,7 +736,7 @@ public:
   void draw(GLVAO& vao, Mode const mode, GLIndexBuffer<T>& index)
   {
     throw_if_vao_cannot_be_bound(vao);
-    draw(mode, index);
+    likely(0_z != index.size()) ? draw(mode, index) : draw(mode);
   }
 
   //----------------------------------------------------------------------------

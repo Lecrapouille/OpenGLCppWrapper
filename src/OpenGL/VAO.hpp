@@ -36,7 +36,7 @@
 #  include "OpenGL/Texture1D.hpp"
 #  include "OpenGL/Texture2D.hpp"
 #  include "OpenGL/Texture3D.hpp"
-#  include <unordered_map>
+#  include <map>
 
 namespace glwrap
 {
@@ -54,12 +54,17 @@ class GLVAO: public GLObject<GLenum>
   friend class GLProgram;
 
   //! \brief Memorize Vertex Buffer Objects (VBOs).
-  //! \note Unordered map = hash table = O(1) access time.
-  using mapGLBuffer = std::unordered_map<std::string, IGLBuffer_UP>;
+
+  //! \note Unordered map = hash table = O(1) access time but the last does not
+  //! invalidate references and iterator when inserting, which is needed by
+  //! Shape3D.
+  using mapGLBuffer = std::map<std::string, IGLBuffer_UP>;
 
   //! \brief Memorize Textures.
-  //! \note Unordered map = hash table = O(1) access time.
-  using mapGLTexture = std::unordered_map<std::string, IGLTexture_UP>;
+  //! \note Unordered map = hash table = O(1) access time but the last does not
+  //! invalidate references and iterator when inserting, which is needed by
+  //! Shape3D.
+  using mapGLTexture = std::map<std::string, IGLTexture_UP>;
 
 public:
 
@@ -148,7 +153,7 @@ public:
   //----------------------------------------------------------------------------
   inline bool hasIndex()
   {
-    return nullptr != m_index.get();
+    return nullptr != m_index.get(); // TODO? && (0_z != m_index->size());
   }
 
   //----------------------------------------------------------------------------
@@ -694,7 +699,7 @@ private:
   //! GLSL shader code.
   mapGLTexture m_textures;
   //! \brief Optionally hold vertex indices.
-  IGLBuffer_UP m_index;
+  IGLBuffer_UP m_index = nullptr;
   //! \brief Hold the ID of the bound GLProgam. Note this varibale is modified
   //! directly by the GLProgam.
   GLenum prog = 0;
