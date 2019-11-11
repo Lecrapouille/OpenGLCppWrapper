@@ -38,7 +38,8 @@ namespace glwrap
     template<typename T> T zero() { return T(0); }
 
     //! \brief PI number
-    static double PI = 3.14159265358979323846;
+    static double const PI = 3.14159265358979323846;
+    static double const TWO_PI = 2.0 * PI;
 
     //! \brief
     static uint32_t maxUlps = 4U;

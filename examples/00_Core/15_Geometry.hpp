@@ -18,49 +18,47 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_07_SKYBOX_TEXTURECUBE_HPP
-#  define EXAMPLE_07_SKYBOX_TEXTURECUBE_HPP
+#ifndef EXAMPLE_15_GEOMETRY_HPP
+#  define EXAMPLE_15_GEOMETRY_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include <iostream>
+#  include <map>
 
 using namespace glwrap;
 using namespace glwrap::window;
 
-class GLExample07: public IGLWindow
+class GLExample15: public IGLWindow
 {
 public:
 
-  GLExample07()
-    : m_shape("Shape"),
-      m_skybox("SkyBox"),
-      m_progSkyBox("progSkyBox"),
-      m_cameraController(Camera3D::Type::PERSPECTIVE)
+  GLExample15()
+    : m_cameraController(Camera3D::Type::PERSPECTIVE)
   {}
 
-  ~GLExample07()
+  ~GLExample15()
   {}
 
-private:
+protected:
 
-  bool createShape();
-  void drawShape();
-  bool createSkyBox();
-  void drawSkyBox();
-  virtual void onMouseScrolled(Mouse const& mouse) override;
-  virtual void onMouseMoved(Mouse const& mouse) override;
+  bool pimpShape(Shape3D_SP shape);
   virtual void onWindowSizeChanged() override;
+  virtual void onMouseMoved(Mouse const& mouse) override;
   virtual bool setup() override;
   virtual bool draw() override;
 
 private:
 
-  GLVertexShader     vs1;
-  GLFragmentShader   fs1;
-  Shape3D            m_shape;
-  GLVAO              m_skybox;
-  GLProgram          m_progSkyBox;
-  CameraController   m_cameraController;
+  Tube_SP          m_tube1;
+  Tube_SP          m_tube2;
+  Cone_SP          m_cone1;
+  Cone_SP          m_cone2;
+  Pyramid_SP       m_pyra1;
+  Pyramid_SP       m_pyra2;
+  Shape3D_SP       m_shape;
+  CameraController m_cameraController;
+  uint32_t         m_slices = 8u;
+  float            m_base_radius = 1.0f;
 };
 
-#endif // EXAMPLE_07_SKYBOX_TEXTURECUBE_HPP
+#endif // EXAMPLE_15_GEOMETRY_HPP

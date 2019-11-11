@@ -38,7 +38,7 @@ void GLExample07::onWindowSizeChanged()
 
   Matrix44f const& proj =
     m_cameraController.camera().updateProjectionMatrix();
-  m_progShape.matrix44f("projection") = proj;
+  m_shape.projection() = proj;
   m_progSkyBox.matrix44f("projection") = proj;
 }
 
@@ -59,7 +59,7 @@ void GLExample07::onMouseScrolled(Mouse const& mouse)
 {
   float const z = static_cast<float>(mouse.scroll.y);
   Matrix44f const& proj = m_cameraController.zoom(z);
-  m_progShape.matrix44f("projection") = proj;
+  m_shape.projection() = proj;
   m_progSkyBox.matrix44f("projection") = proj;
 }
 
@@ -108,55 +108,37 @@ bool GLExample07::createSkyBox()
 //------------------------------------------------------------------
 bool GLExample07::createShape()
 {
-  // Load from ASCII file the vertex sahder (vs) as well the fragment shader
-  vs2.fromFile("shaders/07_SkyBoxTextureCube_shape.vs");
-  fs2.fromFile("shaders/07_SkyBoxTextureCube_shape.fs");
-
-  // Compile shader as OpenGL program. This one will instanciate all OpenGL objects for you.
-  if (!m_progShape.attachShaders(vs2, fs2).compile())
-    {
-      std::cerr << "failed compiling OpenGL program. Reason was '"
-                << m_progShape.getError() << "'" << std::endl;
-      return false;
-    }
-
-  // Binding empty VAO to OpenGL program will make it be populated
-  // with all VBOs needed.
-  m_progShape.bind(m_shape);
-
-  // Uncomment to debug triangles
-  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  // Add a texture to the cube
+  if (!m_shape.texture().load("../textures/path.png"))
+    return false;
 
   uint32_t const slices = 32u;
   float const radius = 1.0f;
   float const height = 1.0f;
 
+  // FIXME Pure Geometry classes
   // Create a cylinder with two caps (bottom & top). Merge them into a
   // single VAO.
-  Cylinder cylinder(radius, height, slices);
-  Circle circle1(radius, slices); circle1.vertices() += Vector3f(0.0f, 0.0f, 0.5f);
-  Circle circle2(radius, slices); circle2.vertices() -= Vector3f(0.0f, 0.0f, 0.5f);
+  Cylinder cylinder("", radius, height, slices);
+  Circle circle1("", radius, slices); circle1.vertices() += Vector3f(0.0f, 0.0f, 0.5f);
+  Circle circle2("", radius, slices); circle2.vertices() -= Vector3f(0.0f, 0.0f, 0.5f);
 
-  m_shape.vector3f("aPos")
+  m_shape.vertices()
     .append(circle1.vertices())
     .append(circle2.vertices())
     .append(cylinder.vertices());
 
-  m_shape.vector2f("aTexCoords")
-    .append(circle1.textures())
-    .append(circle2.textures())
-    .append(cylinder.textures());
+  m_shape.uv()
+    .append(circle1.uv())
+    .append(circle2.uv())
+    .append(cylinder.uv());
 
-  m_shape.index32()
-    .appendIndex(circle1.indices())   // Starting index: 0
-    .appendIndex(circle2.indices())   // Starting index: 34
-    .appendIndex(cylinder.indices()); // Starting index: 68
+  m_shape.uv() *= 2.0f; // Repeat the texture motif
 
-  // Repeat the texture motif
-  m_shape.vector2f("aTexCoords") *= 2.0f;
-
-  // Add a texture to the cube
-  if (!m_shape.texture2D("texture1").load("../textures/path.png")) return false;
+  m_shape.index()
+    .appendIndex(circle1.index())   // Starting index: 0
+    .appendIndex(circle2.index())   // Starting index: 34
+    .appendIndex(cylinder.index()); // Starting index: 68
 
   return true;
 }
@@ -187,12 +169,12 @@ bool GLExample07::setup()
 // --------------------------------------------------------------
 void GLExample07::drawShape()
 {
-  m_progShape.matrix44f("model") = Matrix44f(matrix::Identity);
-  m_progShape.matrix44f("view") = m_cameraController.camera().viewMatrix();
+  m_shape.model() = Matrix44f(matrix::Identity);
+  m_shape.view() = m_cameraController.camera().viewMatrix();
 
   // Set depth function back to default
   glCheck(glDepthFunc(GL_LESS));
-  m_progShape.draw(m_shape, Mode::TRIANGLES, m_shape.index32());
+  m_shape.draw();
 }
 
 // --------------------------------------------------------------

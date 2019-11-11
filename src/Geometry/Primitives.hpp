@@ -18,14 +18,14 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
-#  define OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
+#ifndef OPENGLCPPWRAPPER_GEOMETRY_PRIMITIVES_HPP
+# define OPENGLCPPWRAPPER_GEOMETRY_PRIMITIVES_HPP
 
-#  include "OpenGL/Program.hpp"
-#  include "OpenGL/FrameBuffers.hpp"
-#  include "Camera/Controller.hpp"
-#  include "UI/ImGUI.hpp"
-#  include "Scene/SceneGraph.hpp"
-#  include "Geometry/Primitives.hpp"
+# include "Geometry/Cube.hpp"
+# include "Geometry/Circle.hpp"
+# include "Geometry/Tube.hpp"
+# include "Geometry/Cone.hpp"
+# include "Geometry/Cylinder.hpp"
+# include "Geometry/Pyramid.hpp"
 
-#endif // OPENGLCPPWRAPPER_OPENGLCPPWRAPPER_HPP
+#endif // OPENGLCPPWRAPPER_GEOMETRY_PRIMITIVES_HPP

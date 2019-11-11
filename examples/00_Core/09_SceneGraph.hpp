@@ -64,11 +64,11 @@ private:
 // *****************************************************************
 //! \brief
 // *****************************************************************
-class Cube: public Node3D
+class MyCube: public Node3D
 {
 public:
 
-  Cube(const char *name)
+  MyCube(const char *name)
     : Node3D(name),
       m_prog("GLProgram"),
       m_vao("VAO_cube")
@@ -141,9 +141,9 @@ public:
     Node3D::update(dt);
   }
 
-  static std::shared_ptr<Cube> create(const char* name)
+  static std::shared_ptr<MyCube> create(const char* name)
   {
-    return std::make_shared<Cube>(name);
+    return std::make_shared<MyCube>(name);
   }
 
 private:

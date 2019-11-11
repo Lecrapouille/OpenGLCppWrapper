@@ -21,254 +21,271 @@
 #ifndef OPENGLCPPWRAPPER_GEOMETRY_HPP
 #  define OPENGLCPPWRAPPER_GEOMETRY_HPP
 
-#  include <vector>
-#  include <limits>
-#  include "Common/PendingContainer.hpp"
-#  include "Math/Vector.hpp"
+#  include "Scene/SceneGraph.hpp"
+#  include "OpenGL/Program.hpp"
 
 namespace glwrap
 {
 
-static const float PI2 = static_cast<float>(2.0 * maths::PI);
+DECLARE_CLASS(Shape3D)
 
 // *****************************************************************************
-//! \brief Class holding list of vertice positions, normals, texture coordinate
-//! and vertice index.
-//! \defgroup Geometry Geometry
+//! \brief Class having predefined GLProgram, GLVBO for holding data of a 3D
+//! model.
+//! \ingroup OpenGL.
+//! \fixme Uuse the idea of GLObject begin() to create the Shape only when
+//! OpenGL context is created ?
 // *****************************************************************************
-class Shape
+class Shape3D: public Node3D
 {
 public:
 
-  Shape()
+  //----------------------------------------------------------------------------
+  //! \brief Constructor. Compile the internal GLSL shader.
+  //!
+  //! \throw OpenGLException is the OpenGL context is not created or if the
+  //! GLProgram could not be compiled.
+  //!
+  //! \note Make sure the OpenGL is created before (from the constructor of
+  //! IGLWindow) else an OpenGLException is thrown.
+  //!
+  //! \note we init reference on VAO not yet existing, this is fine because map
+  //!       does not invalidate iterator and references.
+  //!
+  //! \fixme Attach Material
+  //----------------------------------------------------------------------------
+  Shape3D(std::string const& name) // TODO Material, std::function<onUpdate>)
+    : Node3D(name),
+      m_prog("prog_" + name),
+      m_vao("VAO_" + name),
+      m_vertices(m_vao.vector3f("position")),
+      m_normals(m_vao.vector3f("normals")),
+      m_uv(m_vao.vector2f("UV")),
+      m_texture(m_vao.texture2D("texID")),
+      m_indices(m_vao.index32())
+  {
+    if (unlikely(!isContextCreated()))
+      throw OpenGLException("OpenGL Context is not yet created. "
+                            "Make this instance called after GLWindow constructor");
+
+    DEBUG("%s", "<<<---------- NewGeometry ------------------------------------------------------");
+    m_vs.fromFile("shaders/Shape3D.m_vs");
+    m_fs.fromFile("shaders/Shape3D.m_fs");
+
+    if (unlikely(!m_prog.attachShaders(m_vs, m_fs).compile()))
+      throw OpenGLException(m_prog.getError());
+
+    m_prog.bind(m_vao);
+
+    model() = Matrix44f(matrix::Identity);
+    color() = Vector4f(1.0f);
+
+    DEBUG("%s", "------------- NewGeometry --------------------------------------------------->>>");
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Destructor. Release VBOs.
+  //----------------------------------------------------------------------------
+  virtual ~Shape3D()
   {}
 
-  ~Shape()
-  {}
-
   //----------------------------------------------------------------------------
-  //! \brief Return the list of vertice positions.
+  //! \brief Tell if the instance is valid: the OpenGL Program has been compiled
+  //! VAO has all its VBOs filled and textures loaded.
+  //! \return true if everything is ok, else return false and check logs for
+  //! knowing which elements have not been initialized.
+  //! \note Use this function for debug purpose.
   //----------------------------------------------------------------------------
-  inline PendingContainer<Vector3f>& vertices()
+  inline bool isValid()
   {
-    // FIXME: use leazy method ? return positon();
-    // position() { if (!done) { create position list; done; } return { list } }
-    // this avoid creating other list like normals ...
-    return m_positions;
+    return m_prog.isValid() && m_vao.checkVBOSizes() &&
+      m_vao.checkLoadTextures();
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the list of vertice index.
+  //! \brief Return the reference of the VBO holding vertices positions.
+  //! \return VBO holding vertex positions of the model.
   //----------------------------------------------------------------------------
-  inline PendingContainer<uint32_t>& indices()
+  inline GLVertexBuffer<Vector3f>& vertices()
   {
-    return m_indices;
+    return m_vertices;
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the list of texture coordinate.
+  //! \brief Return the reference of the nth vertex position. If not present and
+  //! the VBO can be resized, the VBO size is updated. The nth element is set
+  //! pending to be transfered to the GPU memory.
+  //! \param[in] nth the desired vertex.
+  //! \return the nth vertex positions of the model.
   //----------------------------------------------------------------------------
-  inline PendingContainer<Vector2f>& textures()
+  inline Vector3f& vertices(size_t const nth)
   {
-    return m_textures;
+    return m_vertices.set(nth);
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the list of vertices normals.
+  //! \brief Return the reference of the VBO holding face normals.
+  //! \return VBO holding face normals of the model.
+  //! \fixme rename to faceNormals() and implement vertexNormals()
   //----------------------------------------------------------------------------
-  inline PendingContainer<Vector3f>& normals()
+  inline GLVertexBuffer<Vector3f>& normals()
   {
     return m_normals;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the nth face normal. If not present and the
+  //! VBO can be resized, the VBO size is updated. The nth element is set
+  //! pending to be transfered to the GPU memory.
+  //! \param[in] nth the desired normal.
+  //! \return the nth face normal of the model.
+  //----------------------------------------------------------------------------
+  inline Vector3f& normals(size_t const nth)
+  {
+    return m_normals.set(nth);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the VBO holding texture positions.
+  //! \return VBO holding texture position of the model.
+  //----------------------------------------------------------------------------
+  inline GLVertexBuffer<Vector2f>& uv()
+  {
+    return m_uv;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the nth texture position. If not present
+  //! and the VBO can be resized, the VBO size is updated. The nth element is
+  //! set pending to be transfered to the GPU memory.
+  //! \param[in] nth the desired texture position.
+  //! \return the nth texture position of the model.
+  //----------------------------------------------------------------------------
+  inline Vector2f& uv(size_t const nth)
+  {
+    return m_uv.set(nth);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the matrix transformation of the model.
+  //! \return the reference of the matrix.
+  //----------------------------------------------------------------------------
+  inline Matrix44f& model()
+  {
+    return m_prog.matrix44f("model");
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the matrix transformation of the view.
+  //! \return the reference of the matrix.
+  //----------------------------------------------------------------------------
+  inline Matrix44f& view()
+  {
+    return m_prog.matrix44f("view");
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the matrix projection.
+  //! \return the reference of the matrix.
+  //----------------------------------------------------------------------------
+  inline Matrix44f& projection()
+  {
+    return m_prog.matrix44f("projection");
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the color of the Material.
+  //! \return the reference of the color.
+  //----------------------------------------------------------------------------
+  inline Vector4f& color()
+  {
+    return m_prog.vector4f("color");
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the texture (Material).
+  //! \return the reference of the texture.
+  //----------------------------------------------------------------------------
+  inline GLTexture2D& texture()
+  {
+    return m_texture;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the reference of the index of VBOs (EBO).
+  //! \return the reference of the EBO.
+  //----------------------------------------------------------------------------
+  inline GLIndexBuffer32& index()
+  {
+    return m_indices;
+  }
+
+  // TODO
+  // void computeFaceNormals()
+  // void computeVertexNormals()
+  // void buildIndex()
+
+  //----------------------------------------------------------------------------
+  //! \brief Renderer the instance.
+  //! \param[in] matrix the transformation matrix of the model.
+  //! \note This method is functional if and only if isValid() returns true.
+  //----------------------------------------------------------------------------
+  inline void draw(Matrix44f const& matrix)
+  {
+    model() = matrix;
+    draw();
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Renderer the instance.
+  //! \note This method is functional if and only if isValid() returns true.
+  //----------------------------------------------------------------------------
+  inline void draw()
+  {
+    m_prog.draw(m_vao, Mode::TRIANGLES, index());
+  }
+
 protected:
 
-  PendingContainer<Vector3f>   m_positions;
-  PendingContainer<Vector3f>   m_normals;
-  PendingContainer<Vector2f>   m_textures;
-  PendingContainer<uint32_t>   m_indices; // TODO uint8_t ?
-};
-
-// *****************************************************************************
-//! \brief Create a Z-axis aligned circle shape (with 3d coordinates).
-//! \ingroup Geometry
-// *****************************************************************************
-class Circle: public Shape
-{
-public:
-
   //----------------------------------------------------------------------------
-  //! \brief Constructor. Z-axis aligned tube centered at origin.
-  //! \param radius The radius of the circle.
-  //! \param slices The number of subdivisions around the Z axis.
+  //! \brief Update the transformation matrix of the model.
+  //!
+  //! Callback triggered by inherited class Transformable when the
+  //! transformation matrix of the model has been changed.
+  //!
+  //! \param[in] matrix the transformation matrix of the model.
   //----------------------------------------------------------------------------
-  Circle(float const radius, uint32_t const slices/*, bool const inversed*/)
+  virtual void onMatrixTransformUpdated(Matrix44f const& matrix)
   {
-    std::vector<float> angle;
-    maths::linspace(0.0f, PI2, slices + 1u, angle, true);
-
-    // Reserve memory
-    m_positions.reserve(slices);
-    m_normals.reserve(slices);
-    m_textures.reserve(slices);
-
-    // Constants
-    const float hypothenus = std::sqrt(2.0f * radius * radius);
-    const float hh = radius / hypothenus;
-
-    // Center
-    m_positions.append(Vector3f(0.0f, 0.0f, 0.0f));
-    m_normals.append(Vector3f(0.0f, 0.0f, 1.0f));
-    m_textures.append(Vector2f(0.5f, 0.5f));
-
-    // Arc
-    for (uint32_t i = 0; i <= slices; ++i)
-      {
-        float c = std::cos(angle[i]);
-        float s = std::sin(angle[i]);
-
-        m_positions.append(Vector3f(radius * c, radius * s, 0.0f));
-        m_normals.append(Vector3f(hh * c, hh * s, -hh));
-        m_textures.append(Vector2f((1.0f + c) / 2.0f, (1.0f + s) / 2.0f));
-      }
-
-    const uint32_t c0 = 0u;
-    const uint32_t i0 = 1u;
-
-    // Indices for the top cap
-    m_indices.reserve(slices);
-    for (uint32_t i = 0u; i < slices; ++i)
-      {
-        m_indices.append(c0); m_indices.append(i0 + i); m_indices.append(i0 + i + 1u);
-      }
+    DEBUG("Updating Transform Matrix for '%s'", name().c_str());
+    model() = matrix;
   }
-};
 
-// *****************************************************************************
-//! \brief Create a tube shape. Tube is a generic shape that can create Cylinder
-//! Cone and Pyramid.
-//! \ingroup Geometry
-// *****************************************************************************
-class Tube: public Shape
-{
-public:
+private:
 
-  //----------------------------------------------------------------------------
-  //! \brief Constructor. Z-axis aligned tube centered at origin.
-  //! \param top_radius The radius at the top of the tube.
-  //! \param base_radius The radius at the base of the tube.
-  //! \param height The height of the tube.
-  //! \param slices The number of subdivisions around the Z axis.
-  //----------------------------------------------------------------------------
-  Tube(float const top_radius, float const base_radius, float const height, uint32_t const slices)
-  {
-    std::vector<float> angle;
-    maths::linspace(0.0f, PI2, slices + 1u, angle, true);
-
-    std::vector<float> texture;
-    maths::linspace(0.0f, 1.0f, slices, texture, true);
-
-    // Reserve memory
-    m_positions.reserve(2u * slices);
-    m_normals.reserve(2u * slices);
-    m_textures.reserve(2u * slices);
-
-    // Constants
-    const float h2 = height / 2.0f;
-    const float r = top_radius - base_radius;
-    const float hypothenus = std::sqrt(r * r + height * height);
-    const float hh = height / hypothenus;
-    const float rh = -r / hypothenus;
-
-    // Top of the tube
-    for (uint32_t i = 0; i < slices; ++i)
-      {
-        float c = std::cos(angle[i]);
-        float s = std::sin(angle[i]);
-
-        m_positions.append(Vector3f(top_radius * c, top_radius * s, h2));
-        m_normals.append(Vector3f(hh * c, hh * s, rh));
-        m_textures.append(Vector2f(texture[i], 0.0f));
-      }
-
-    // Bottom of the tube
-    for (uint32_t i = 0; i < slices; ++i)
-      {
-        float c = std::cos(angle[i]);
-        float s = std::sin(angle[i]);
-
-        m_positions.append(Vector3f(base_radius * c, base_radius * s, -h2));
-        m_normals.append(Vector3f(hh * c, hh * s, rh));
-        m_textures.append(Vector2f(texture[i], 1.0f));
-      }
-
-    const uint32_t i0 = 0u;
-    const uint32_t i1 = i0 + slices;
-
-    // Indices for the tube
-    m_indices.reserve(3u * slices);
-    for (uint32_t i = 0u; i < slices; ++i)
-      {
-        m_indices.append(i0 + i); m_indices.append(i0 + i + 1u); m_indices.append(i1 + i);
-        m_indices.append(i1 + i); m_indices.append(i1 + i + 1u); m_indices.append(i0 + i + 1u);
-      }
-  }
-};
-
-// *****************************************************************************
-//! \brief Class holding meshes of a cylinder. A cylinder is a Tube where top
-//! radius is equal to the the base radius.
-//! \ingroup Geometry
-// *****************************************************************************
-class Cylinder: public Tube
-{
-public:
-
-  //----------------------------------------------------------------------------
-  //! \brief Constructor. Z-axis aligned tube centered at origin.
-  //! \param radius The radius of the cylinder
-  //! \param height The height of the cylinder
-  //! \param slices The number of subdivisions around the Z axis.
-  //----------------------------------------------------------------------------
-  Cylinder(float const radius, float const height, uint32_t const slices)
-    : Tube(radius, radius, height, slices)
-  {}
-};
-
-// *****************************************************************************
-//! \brief Class holding meshes of a cone. A cone is a Tube with no top radius.
-//! \ingroup Geometry
-// *****************************************************************************
-class Cone: public Tube
-{
-public:
-
-  //----------------------------------------------------------------------------
-  //! \brief Constructor. Z-axis aligned tube centered at origin.
-  //! \param radius The radius of the cone.
-  //! \param height The height of the cone.
-  //----------------------------------------------------------------------------
-  Cone(float const radius, float const height, uint32_t const slices)
-    : Tube(0.0f, radius, height, slices)
-  {}
-};
-
-// *****************************************************************************
-//! \brief Class holding meshes of a pyramid. A pyramid is a cone with 4 slices.
-//! \ingroup Geometry
-// *****************************************************************************
-class Pyramid: public Cone
-{
-public:
-
-  //----------------------------------------------------------------------------
-  //! \brief Constructor. Z-axis aligned tube centered at origin.
-  //! \param radius The radius of the pyramid.
-  //! \param height The height of the pyramid.
-  //----------------------------------------------------------------------------
-  Pyramid(float const radius, float const height)
-    : Cone(radius, height, 4)
-  {}
+  //! \brief GLSL code Vertex shader.
+  //! \fixme set it static ?
+  GLVertexShader            m_vs;
+  //! \brief GLSL code Fragment shader.
+  //! \fixme set it static ?
+  GLFragmentShader          m_fs;
+  //! \brief GLSL Program.
+  //! \fixme set it static ?
+  /*static*/ GLProgram      m_prog;
+  //! \brief Holds all VBOs.
+  GLVAO                     m_vao;
+  //! \brief Reference on the VBO holding vertice positions.
+  GLVertexBuffer<Vector3f>& m_vertices;
+  //! \brief Reference on the VBO holding face normals.
+  GLVertexBuffer<Vector3f>& m_normals;
+  //! \brief Reference on the VBO holding texture positions.
+  GLVertexBuffer<Vector2f>& m_uv;
+  //! \brief Texture.
+  //! \fixme multitexture and move this to Material class.
+  GLTexture2D&              m_texture;
+  //! \brief EBO
+  //! \fixme is uint8_t enough ?
+  GLIndexBuffer32&          m_indices;
 };
 
 } // namespace glwrap

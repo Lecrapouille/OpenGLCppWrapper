@@ -47,6 +47,7 @@ namespace glwrap
 
     virtual ~Node3D()
     {
+      DEBUG("Destroy Node3D %s", name().c_str());
       m_children.clear();
     }
 

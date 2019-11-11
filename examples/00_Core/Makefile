@@ -53,6 +53,7 @@ OBJS += \
   12_ComplexShader.o \
   13_Lighting.o \
   14_MapEditor.o \
+  15_Geometry.o \
   main.o
 
 ###################################################

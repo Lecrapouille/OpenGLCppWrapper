@@ -33,32 +33,32 @@ CubicRobot::CubicRobot(const char *name)
   DEBUG("Create CubicRobot %s", name);
 
   // Body
-  m_body = Cube::create("Body");
+  m_body = MyCube::create("Body");
   m_body->localScale(Vector3f(10.0f, 15.0f, 5.0f));
   m_body->position(Vector3f(0.0f, 35.0f, 0.0f));
 
   // Head
-  m_head = Cube::create("Head");
+  m_head = MyCube::create("Head");
   m_head->localScale(Vector3f(5.0f));
   m_head->position(Vector3f(0.0f, 30.0f, 0.0f));
 
   // Left arm
-  m_leftArm = Cube::create("LeftArm");
+  m_leftArm = MyCube::create("LeftArm");
   m_leftArm->localScale(Vector3f(3.0f, -18.0f, 3.0f));
   m_leftArm->position(Vector3f(-12.0f, 30.0f, -1.0f));
 
   // Right arm
-  m_rightArm = Cube::create("RightArm");
+  m_rightArm = MyCube::create("RightArm");
   m_rightArm->localScale(Vector3f(3.0f, -18.0f, 3.0f));
   m_rightArm->position(Vector3f(12.0f, 30.0f, -1.0f));
 
   // Left leg
-  m_leftLeg = Cube::create("LeftLeg");
+  m_leftLeg = MyCube::create("LeftLeg");
   m_leftLeg->localScale(Vector3f(3.0f, -17.5f, 3.0f));
   m_leftLeg->position(Vector3f(-8.0f, 0.0f, 0.0f));
 
   // Right leg
-  m_rightLeg = Cube::create("RightLeg");
+  m_rightLeg = MyCube::create("RightLeg");
   m_rightLeg->localScale(Vector3f(3.0f, -17.5f, 3.0f));
   m_rightLeg->position(Vector3f(8.0f, 0.0f, 0.0f));
 
@@ -237,8 +237,6 @@ bool GLExample09::draw()
   m_scene->update(dt());
 
   // Traverse the scene graph for drawing robots.
-  //Matrix44f view = m_camera.camera().viewMatrix();
-  //m_progSkyBox.matrix44f("view") = Matrix44f(Matrix33f(view));
   m_scene->renderer(/*m_camera*/);
 
   // Paint the GUI

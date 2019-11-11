@@ -32,12 +32,13 @@
 #include "12_ComplexShader.hpp"
 #include "13_Lighting.hpp"
 #include "14_MapEditor.hpp"
+#include "15_Geometry.hpp"
 #include <iostream>
 #include <map>
 #include <stdlib.h>
 #include <limits.h>
 
-#define MAX_EXAMPLES 14
+#define MAX_EXAMPLES 15
 
 //------------------------------------------------------------------------------
 __attribute__((__noreturn__))
@@ -61,6 +62,7 @@ static void usage(char *argv[])
   std::cout << " 12: Universe Nursery" << std::endl;
   std::cout << " 13: Light + material" << std::endl;
   std::cout << " 14: Basic Map editor" << std::endl;
+  std::cout << " 15: Geometry and SceneGraph" << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -133,6 +135,9 @@ int main(int argc, char *argv[])
       break;
     case 14:
       win = std::make_unique<GLExample14>();
+      break;
+    case 15:
+      win = std::make_unique<GLExample15>();
       break;
     default:
       std::cerr << "Incorrect example id !" << std::endl;
