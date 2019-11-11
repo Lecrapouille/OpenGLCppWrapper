@@ -614,7 +614,7 @@ private:
         return true;
       }
 
-    DEBUG("    VAO '%s' Tried to create a VBO with name '%s' already used", cname(), name);
+    DEBUG("    VAO '%s' Tried to create a VBO with name '%s' already created", cname(), name);
     return false;
   }
 

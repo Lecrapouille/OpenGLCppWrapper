@@ -290,7 +290,7 @@ private:
     const GLsizei width = (stop / m_width) - x;
     const GLsizei height = (stop % m_width) - y;
 
-    DEBUG("Texture '%s' update (%zu,%zu) --> ((%d,%d), (%d,%d))",
+    DEBUG("=== FLUSH Texture2D '%s' to GPU: (%zu,%zu) --> ((%d,%d), (%d,%d))",
           cname(), start, stop, x, y, width, height);
 
     // FIXME: not working if width and height are not the txture size
