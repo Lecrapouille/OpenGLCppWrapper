@@ -146,7 +146,7 @@ private:
                             static_cast<GLsizeiptr>(nbytes),
                             PendingContainer<T>::to_array()));
 
-    DEBUG("=== FLUSH VBO '%s' to GPU: %zu bytes (%zu -> %zu)",
+    DEBUG("=== FLUSH VBO '%s' to GPU: %zu bytes [%zu .. %zu[",
           cname(), nbytes, pos_start, pos_end);
     return false;
   }
