@@ -65,7 +65,7 @@ static void on_mouse_moved(GLFWwindow* obj, double xpos, double ypos)
   static double m_lastY = 0.0;
   static bool m_firstMouse = true;
 
-  assert(nullptr != window);
+  assert(nullptr != obj);
   IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
   window::Mouse& mouse = window->mouse();
 
@@ -94,7 +94,7 @@ static void on_mouse_moved(GLFWwindow* obj, double xpos, double ypos)
 //------------------------------------------------------------------------------
 static void on_mouse_scrolled(GLFWwindow* obj, double xoffset, double yoffset)
 {
-  assert(nullptr != window);
+  assert(nullptr != obj);
   IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
   window::Mouse& mouse = window->mouse();
 
@@ -108,7 +108,7 @@ static void on_mouse_scrolled(GLFWwindow* obj, double xoffset, double yoffset)
 //------------------------------------------------------------------------------
 static void on_mouse_button_pressed(GLFWwindow* obj, int button, int action, int /*mods*/)
 {
-  assert(nullptr != window);
+  assert(nullptr != obj);
   IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
   window::Mouse& mouse = window->mouse();
 
@@ -124,7 +124,7 @@ static void on_mouse_button_pressed(GLFWwindow* obj, int button, int action, int
 //------------------------------------------------------------------------------
 static void on_window_resized(GLFWwindow* obj, int width, int height)
 {
-  assert(nullptr != window);
+  assert(nullptr != obj);
   IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
   if (unlikely(0 >= width)) { width = 1; }
   if (unlikely(0 >= height)) { height = 1; }
