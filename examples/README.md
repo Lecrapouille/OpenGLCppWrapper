@@ -1,3 +1,7 @@
+# Tutorial and Examples
+
+## 00_Core
+
 This folder contains several examples of concrete OpenGL applications using this API.
 These examples are inspired by several tutorials and academic examples. See associated credits.
 
@@ -105,3 +109,13 @@ Example 12:
 This example shows a complex shader example picked from https://shaderfrog.com just for testing my API.
 
 The shader code comes from Universe Nursery by andrewray https://shaderfrog.com/app/view/47
+
+Example 13:
+===========
+
+Test light + material. Inspired by example given by http://www.opengl-tutorial.org
+
+Example 14:
+===========
+
+(Work in progress) Basic map editor (GIS). Mouse click allows to create nodes, segments (arcs) and polylines (soon zones). Press 'A' for creating arcs, 'N' for creating nodes, 'Z' for zones.

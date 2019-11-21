@@ -1,3 +1,10 @@
+version 0.9:
+
+    Rework workspace.
+    Add zero() and one() for linear algebra.
+    Simplify GLWindow mouse et resize callbacks.
+    Update Makefile.
+
 version 0.8:
 
     Add unit tests and fix classes PendingData and Pending Container.

@@ -19,29 +19,25 @@
 ##=====================================================================
 
 ###################################################
+# Location of the project directory and Makefiles
+#
+P := .
+M := $(P)/.makefile
+
+###################################################
 # Executable name
-PROJECT = OpenGLCppWrapper
+#
 TARGET = $(PROJECT)
 DESCRIPTION = C++11 API wrapping Core Profile OpenGL routines and allowing to write applications in few lines of code
-
-###################################################
-# Debug mode or Release mode
 BUILD_TYPE = debug
 
-###################################################
-# Location from the project root directory.
-P=.
-
-###################################################
-# Sharable informations between all Makefiles
-M=$(P)/.makefile
-include $(M)/Makefile.header
 include $(P)/Makefile.common
 
 ###################################################
 # Make the list of compiled files
-OBJ_CORE = Verbose.o Exception.o OpenGL.o GLWindow.o
-OBJ_IMGUI = GLImGUI.o
+#
+OBJ_CORE = Verbose.o Exception.o OpenGL.o Window.o
+OBJ_IMGUI = ImGUI.o
 OBJS += $(OBJ_CORE) $(OBJ_IMGUI)
 ifeq ($(ARCHI),Darwin)
 THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/*.o)
@@ -54,18 +50,16 @@ endif
 all: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
 
 ###################################################
-# Download textures and other resources needed by examples
-.PHONY: download-resources
-download-resources:
-	@(cd external && ./download-resources.sh)
+# Compile and launch unit tests and generate the code coverage html report.
+.PHONY: unit-tests
+unit-tests:
+	@$(call print-simple,"Compiling unit tests")
+	@$(MAKE) -C tests coverage
 
 ###################################################
 # Compile and launch unit tests and generate the code coverage html report.
-.PHONY: unit-tests
 .PHONY: check
-unit-tests check:
-	@$(call print-simple,"Compiling unit tests")
-	@$(MAKE) -C tests coverage
+check: unit-tests
 
 ###################################################
 # Install project. You need to be root.

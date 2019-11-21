@@ -19,23 +19,9 @@
 ## along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
-###################################################
-# Modify this file will force compiling whole project
-MYMAKEFILES += $(P)/Makefile.common
+PROJECT = OpenGLCppWrapper
 
-###################################################
-# Compilation options.
-CXXFLAGS += $(CXX_WHOLE_FLAGS)
-LDFLAGS  +=
-
-###################################################
-# Disable some compilation flags depending on the
-# compiler version
-ifeq ("$(COMPILER_NAME)","g++")
-ifeq ($(shell test $(COMPILER_VERSION) -lt 40905; echo $$?),0)
-CXXFLAGS += -Wno-shadow -Wno-undef
-endif
-endif
+include $(M)/Makefile.header
 
 ###################################################
 # Project defines.
@@ -43,22 +29,27 @@ endif
 #   passed to OpenGL routines. Produce an error message
 #   in the console but does not abort the program.
 # ENABLE_DEBUG activate logs on the console.
+#
 DEFINES += -DCHECK_OPENGL -UENABLE_DEBUG
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
+#
 THIRDPART_LIBS +=
 
 ###################################################
 # Set Libraries. For knowing which libraries
 # is needed please read the external/README.md file.
-
+#
 ifeq ($(ARCHI),Darwin)
-LDFLAGS += -I/usr/local/include -I/opt/local/include -framework \
-OpenGL -framework Cocoa -framework IOKit -framework CoreVideo   \
--L/usr/local/lib -L/opt/local/lib -lGLEW -lglfw
+INCLUDES += -I/usr/local/include -I/opt/local/include
+LINKER_FLAGS += \
+  -framework OpenGL -framework Cocoa                                    \
+  -framework IOKit -framework CoreVideo                                 \
+  -L/usr/local/lib -L/opt/local/lib
+LINKER_FLAGS += -lGLEW -lglfw
 else ifeq ($(ARCHI),Linux)
 PKG_LIBS += glew --static glfw3
 else
@@ -67,8 +58,13 @@ endif
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES += -I$(P)/include -I$(P)/src -I$(P)/$(THIRDPART) -I$(P)/$(THIRDPART)/imgui
+#
+INCLUDES += -I$(P)/include -I$(P)/. -I$(P)/src -I$(THIRDPART)
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
-VPATH += $(P)/src:$(P)/src/private:$(P)/$(THIRDPART):$(P)/$(THIRDPART)/imgui:$(P)/$(THIRDPART)/SOIL/obj
+#
+VPATH += $(P)/src $(P)/src/Common $(P)/src/Math \
+         $(P)/src/Camera $(P)/src/OpenGL \
+         $(P)/src/Geometry $(P)/src/Scene $(P)/src/UI \
+         $(THIRDPART) $(THIRDPART)/imgui $(THIRDPART)/SOIL/obj

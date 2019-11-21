@@ -19,32 +19,25 @@
 ##=====================================================================
 
 ###################################################
-# Executable name
-PROJECT = OpenGLCppWrapper
-TARGET = $(PROJECT)-UnitTest
+# Location of the project directory and Makefiles
+#
+P=..
+M=$(P)/.makefile
 
 ###################################################
-# Debug mode or Release mode
+# Project definition
+#
+TARGET = $(PROJECT)-UnitTest
+DESCRIPTION = Unit tests for $(PROJECT)
 BUILD_TYPE = debug
 
-###################################################
-# Location from the project root directory.
-P=..
-
-###################################################
-# Sharable informations between all Makefiles
-M=$(P)/.makefile
-include $(M)/Makefile.header
 include $(P)/Makefile.common
 
 ###################################################
-# Allow to hide protected and private keyword
-CXXFLAGS += -Wno-keyword-macro
-
-###################################################
 # List of files to compile.
+#
 OBJS  = VectorTests.o MatrixTests.o
-OBJS += IGLObjectTests.o GLVAOTests.o GLVBOTests.o
+OBJS += GLObjectTests.o GLVAOTests.o GLVBOTests.o
 OBJS += GLShadersTests.o GLProgramTests.o
 OBJS += PendingDataTests.o PendingContainerTests.o
 OBJS += UnitTests.o
@@ -52,24 +45,22 @@ OBJS += UnitTests.o
 ###################################################
 # Link against the crpcut unit test lib.
 # Note: that crpcut does not provide pkg-config file.
+#
 NOT_PKG_LIBS += -lcrpcut -ldl
 
 ###################################################
 # Code coverage. Comment these lines if coveraging
 # is not desired.
-CXXFLAGS += --coverage
-LDFLAGS += --coverage
-
-###################################################
 #
-CXXFLAGS += \
-  -Wno-inline -Wno-suggest-attribute=noreturn -Wno-stack-protector
+COMPIL_FLAGS += --coverage
+LINKER_FLAGS += --coverage
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
 #FIXME: the static lib name shall be extracted from root makefile
+#
 THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.$(shell cat $(P)/VERSION))
 
 ###################################################
@@ -78,6 +69,7 @@ all: $(THIRDPART_LIBS) $(TARGET)
 
 ###################################################
 # Be sure the main project have been compiled
+#
 $(OBJS): | $(THIRDPART_LIBS)
 $(THIRDPART_LIBS):
 	@$(call print-to,"Compiling","$(THIRDPART_LIBS)","$@","$(VERSION)")

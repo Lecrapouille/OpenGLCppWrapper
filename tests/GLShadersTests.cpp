@@ -20,7 +20,9 @@
 
 #define protected public
 #define private public
-#include "GLShaders.hpp"
+#  include "OpenGL/ShaderVertex.hpp"
+#  include "OpenGL/ShaderFragment.hpp"
+#  include "OpenGL/ShaderGeometry.hpp"
 #undef protected
 #undef private
 #include <crpcut.hpp>

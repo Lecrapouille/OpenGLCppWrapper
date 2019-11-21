@@ -17,8 +17,8 @@ end() {
 }
 end note
 
-NoteBegin .. IGLObject
-class IGLObject<T> {
+NoteBegin .. GLObject
+class GLObject<T> {
 + gpuID(): T
 + name(): string
 + handleIsValid(): bool
@@ -305,20 +305,20 @@ GLSampler  <|-- GLSampler3D
 GLSampler  <|-- GLSamplerCube
 
 PendingContainer "1" <--* IGLTexture
-IGLObject <|-- IGLTexture
-IGLObject <|-- GLVBO
+GLObject <|-- IGLTexture
+GLObject <|-- GLVBO
 PendingContainer <|-- GLVBO
-IGLObject <|-- GLVAO
+GLObject <|-- GLVAO
 GLVAO o-> "*" GLVBO
 IGLTexture "*" <-o GLVAO
-IGLObject <|-- GLShaders
+GLObject <|-- GLShaders
 GLProgram -> "*" GLShaders
-IGLObject <|-- GLProgram
+GLObject <|-- GLProgram
 GLLocation "*" <-o GLProgram
-IGLObject <|-- GLLocation
+GLObject <|-- GLLocation
 
-IGLObject <|-- GLFrameBuffer
-IGLObject <|-- GLRenderBuffer
+GLObject <|-- GLFrameBuffer
+GLObject <|-- GLRenderBuffer
 GLRenderBuffer "*" <- GLFrameBuffer
 GLRenderBuffer <|-- GLColorBuffer
 GLRenderBuffer <|-- GLDepthBuffer

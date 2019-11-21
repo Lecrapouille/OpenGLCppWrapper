@@ -1,0 +1,238 @@
+//=====================================================================
+// OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of OpenGLCppWrapper.
+//
+// OpenGLCppWrapper is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
+#ifndef OPENGLCPPWRAPPER_GLWINDOW_HPP
+#  define OPENGLCPPWRAPPER_GLWINDOW_HPP
+
+// *****************************************************************************
+//! \file GLWindow.hpp manages a window and its i/o for drawing OpenGL scenes.
+// *****************************************************************************
+
+#  include "OpenGL/OpenGL.hpp"
+#  include "Math/Vector.hpp"
+#  include <GLFW/glfw3.h>
+
+namespace glwrap
+{
+namespace window
+{
+
+  //! \brief Button type
+  enum ButtonType
+    {
+     LEFT = GLFW_MOUSE_BUTTON_LEFT,
+     RIGHT = GLFW_MOUSE_BUTTON_RIGHT,
+     MIDDLE = GLFW_MOUSE_BUTTON_MIDDLE,
+     ONE = GLFW_MOUSE_BUTTON_1,
+     TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT
+    };
+
+  //! \brief Structure holding mouse states
+  struct Mouse
+  {
+    //! \brief position (x and y coordinate)
+    Vector2g position;
+    //! \brief displacement (delta position)
+    Vector2g displacement;
+    //! \brief scrolling
+    Vector2g scroll;
+    //! \brief is cursor visible ?
+    bool visible;
+    //! \brief button pressed or released ?
+    bool pressed;
+    //! \brief which button was pressed or released.
+    ButtonType button;
+  };
+
+} // namespace window
+
+// *****************************************************************************
+//! \class GLWindow GLWindow.hpp
+//!
+//! \brief GLWindow manages a window for OpenGL. This class is not copyable.
+// *****************************************************************************
+class IGLWindow : private NonCopyable
+{
+public:
+
+  //----------------------------------------------------------------------------
+  //! \brief Dummy constructor. Does not start the OpenGL context by
+  //! security. To do it call start()
+  //----------------------------------------------------------------------------
+  IGLWindow(uint32_t const width = 1024u, uint32_t const height = 768u,
+            const char *title = "");
+
+  //----------------------------------------------------------------------------
+  //! \brief Destructor. Release the OpenGL context.
+  //----------------------------------------------------------------------------
+  virtual ~IGLWindow();
+
+  //----------------------------------------------------------------------------
+  //! \brief Start the OpenGL context and starts the rendering loop.
+  //----------------------------------------------------------------------------
+  bool start();
+
+  //----------------------------------------------------------------------------
+  //! \brief Hide and grab the mouse cursor.
+  //----------------------------------------------------------------------------
+  void hideMouseCursor();
+
+  //----------------------------------------------------------------------------
+  //! \brief Make the cursor visible.
+  //----------------------------------------------------------------------------
+  void showMouseCursor();
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the delta time (in ms) with.
+  //----------------------------------------------------------------------------
+  inline float dt() const { return m_deltaTime; }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the number of frame per seconds.
+  //----------------------------------------------------------------------------
+  inline uint32_t fps() const { return m_fps; }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the address of the GLFW window.
+  //----------------------------------------------------------------------------
+  inline GLFWwindow *window() { return m_main_window; }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the structure holding mouse states.
+  //! \note this method shall not be called directly.
+  //----------------------------------------------------------------------------
+  inline window::Mouse& mouse() { return m_mouse; }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the current width of the window.
+  //----------------------------------------------------------------------------
+  template<typename T>
+  inline T width() const { return static_cast<T>(m_width); }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the current height of the window.
+  //----------------------------------------------------------------------------
+  template<typename T>
+  inline T height() const { return static_cast<T>(m_height); }
+
+  //----------------------------------------------------------------------------
+  //! \brief Change the position of the window.
+  //----------------------------------------------------------------------------
+  void setWindowSize(uint32_t const width, uint32_t const height);
+
+  //----------------------------------------------------------------------------
+  //! \brief Check if the keyboard has been pressed.
+  //! \note we suppose nullptr != m_main_window.
+  //----------------------------------------------------------------------------
+  inline bool keyPressed(const int key) const
+  {
+    return GLFW_PRESS == glfwGetKey(m_main_window, key);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Callback when the mouse has been moved. Default behavior
+  //! is to do nothing.
+  //----------------------------------------------------------------------------
+  virtual void onMouseMoved(window::Mouse const& /*mouse*/)
+  {}
+
+  //----------------------------------------------------------------------------
+  //! \brief Callback when the mouse has been scrolled. Default behavior
+  //! is to do nothing.
+  //----------------------------------------------------------------------------
+  virtual void onMouseScrolled(window::Mouse const& /*mouse*/)
+  {}
+
+  //----------------------------------------------------------------------------
+  //! \brief Callback when the mouse has been pressed. Default behavior
+  //! is to do nothing.
+  //----------------------------------------------------------------------------
+  virtual void onMouseButtonPressed(window::Mouse const& /*mouse*/)
+  {}
+
+private:
+
+  //----------------------------------------------------------------------------
+  //! \brief Compute and display in in the window title the number of
+  //! frame per seconds (FPS). Needed for knowing the delta time between
+  //! two draw cycles.
+  //----------------------------------------------------------------------------
+  void computeFPS();
+
+  //----------------------------------------------------------------------------
+  //! \brief Callback when the window has its size changed
+  //! \param width is never <= 0
+  //! \param height is never <= 0
+  //----------------------------------------------------------------------------
+  virtual void onWindowSizeChanged()
+  {}
+
+  //----------------------------------------------------------------------------
+  //! \brief Add here all stuffs concerning the init of your 3D game.
+  //! \return false for aborting start(), else true for continuing.
+  //----------------------------------------------------------------------------
+  virtual bool setup() = 0;
+
+  //----------------------------------------------------------------------------
+  //! \brief Add here all stuffs painting your 3D world to be
+  //! displayed. This method is called by the start() method.
+  //! \return false for halting start(), else return true for continuing.
+  //----------------------------------------------------------------------------
+  virtual bool draw() = 0;
+
+  //----------------------------------------------------------------------------
+  //! \brief Main loop for displaying the 3D world. Call draw().
+  //----------------------------------------------------------------------------
+  virtual bool loop();
+
+  //----------------------------------------------------------------------------
+  //! \brief Release your 3D models from memory created by setup().
+  //! This method is not called by the destructor because of it's virtual.
+  //----------------------------------------------------------------------------
+  virtual void release()
+  {
+    /* By default no 3D resources has to released */
+  }
+
+private:
+
+  //! \brief
+  double m_lastTime = 0.0;
+  //! \brief
+  double m_lastFrameTime = 0.0;
+  //! \brief Frames Per Seconds
+  uint32_t m_fps = 0;
+  //! \brief
+  float m_deltaTime = 0.0f;
+  //! \brief Windows current width
+  uint32_t m_width;
+  //! \brief Windows current height
+  uint32_t m_height;
+  //! \brief Windows title
+  const char *m_title;
+  //! \brief window::Mouse states
+  window::Mouse m_mouse;
+  //! \brief GLF window context
+  GLFWwindow *m_main_window = nullptr;
+};
+
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GLWINDOW_HPP

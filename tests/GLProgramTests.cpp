@@ -20,7 +20,7 @@
 
 #define protected public
 #define private public
-#include "GLProgram.hpp"
+#include "OpenGL/Program.hpp"
 #undef protected
 #undef private
 #include <crpcut.hpp>

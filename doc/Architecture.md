@@ -116,7 +116,7 @@ below).
   identifiers.
 
 These routines are pure virtual methods in the interface class named
-IGLObject. Any OpenGL Object is a class inheriting from IGLObject has
+GLObject. Any OpenGL Object is a class inheriting from GLObject has
 to implement all of these methods.
 
 The following picture shows the inheritance of OpenGL classes.
@@ -129,7 +129,7 @@ needs to call different OpenGL functions (for our API).
 
 If we think well (GLumpy did it for me ;-) we can hide the presence of
 these methods to the developer: indeed they are private methods in
-IGLObject: they are acceded by two public method: begin() and end()
+GLObject: they are acceded by two public method: begin() and end()
 which call them inside a predefined order. It's the [template method
 pattern](https://www.amazon.com/First-Design-Patterns-Elisabeth-Freeman/dp/0596007124)
 permitting to encapsulate algorithms.
@@ -154,7 +154,7 @@ end()
 example if a method fails (for example OpenGL context is not yet
 created) it can be redone later.
 
-need_create, need_setup, need_update are private states of IGLObject:
+need_create, need_setup, need_update are private states of GLObject:
 they remember what method to call or not to call anymore (for example
 creation is made once and setup is usually made once, except if the
 developer desire to change its behavior).
