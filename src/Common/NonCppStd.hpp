@@ -39,15 +39,43 @@ constexpr std::size_t operator "" _z (unsigned long long const n)
 // *****************************************************************************
 // Enable for C++11 and Visual Studio
 // *****************************************************************************
-#  if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900)
+#if !((defined(_MSC_VER) && (_MSC_VER >= 1800)) ||                                    \
+      (defined(__clang__) && defined(__APPLE__) && (COMPILER_VERSION >= 60000)) ||    \
+      (defined(__clang__) && (!defined(__APPLE__)) && (COMPILER_VERSION >= 30400)) && (__cplusplus > 201103L) || \
+      (defined(__GNUC__) && (COMPILER_VERSION >= 40900) && (__cplusplus > 201103L)))
+
+// These compilers do not support make_unique so redefine it
 namespace std
 {
-  //! \brief Implement the C++14 std::make_unique for C++11
-  template<typename T, typename... Args>
-    std::unique_ptr<T> make_unique(Args&&... args)
-  {
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-  }
+    template<class T> struct _Unique_if {
+        typedef unique_ptr<T> _Single_object;
+    };
+
+    template<class T> struct _Unique_if<T[]> {
+        typedef unique_ptr<T[]> _Unknown_bound;
+    };
+
+    template<class T, size_t N> struct _Unique_if<T[N]> {
+        typedef void _Known_bound;
+    };
+
+    template<class T, class... Args>
+        typename _Unique_if<T>::_Single_object
+        make_unique(Args&&... args) {
+            return unique_ptr<T>(new T(std::forward<Args>(args)...));
+        }
+
+    template<class T>
+        typename _Unique_if<T>::_Unknown_bound
+        make_unique(size_t n) {
+            typedef typename remove_extent<T>::type U;
+            return unique_ptr<T>(new U[n]());
+        }
+
+    //! \brief Implement the C++14 std::make_unique for C++11
+    template<class T, class... Args>
+        typename _Unique_if<T>::_Known_bound
+        make_unique(Args&&...) = delete;
 }
 #  endif
 
