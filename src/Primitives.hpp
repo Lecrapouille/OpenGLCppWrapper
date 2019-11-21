@@ -23,6 +23,7 @@
 
 #  include <vector>
 #  include <limits>
+#  include "PendingContainer.hpp"
 #  include "Vector.hpp"
 
 namespace glwrap

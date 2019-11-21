@@ -131,6 +131,13 @@ public:
   virtual void onMouseScrolled(const double /*xoffset*/, const double /*yoffset*/)
   {}
 
+  //----------------------------------------------------------------------------
+  //! \brief Callback when the mouse has been pressed. Default behavior
+  //! is to do nothing.
+  //----------------------------------------------------------------------------
+  virtual void onMouseButtonPressed(const int /*button*/, const int /*action*/)
+  {}
+
 private:
 
   //----------------------------------------------------------------------------

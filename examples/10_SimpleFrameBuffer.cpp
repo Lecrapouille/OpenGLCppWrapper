@@ -43,7 +43,7 @@ bool GLExample10::setup()
 {
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  // First program
+  // First program. Note use '"' and '\n' chars.
   m_vs_plane.fromString("#version 330 core                       \n"
                         "in vec2 position;                       \n"
                         "void main() {                           \n"
@@ -61,22 +61,23 @@ bool GLExample10::setup()
       return false;
     }
 
-  // Second program
-  m_vs_screen.fromString("#version 330 core                            \n"
-                         "in vec2 position;                            \n"
-                         "out vec2 v_texcoord;                         \n"
-                         "void main() {                                \n"
-                         "  gl_Position = vec4(0.85*position,0.0,1.0); \n"
-                         "  v_texcoord = 0.85*position;                \n"
-                         "}");
-  m_fs_screen.fromString("#version 330 core                            \n"
-                         "uniform sampler2D screenTexture;             \n"
-                         "in vec2 v_texcoord;                          \n"
-                         "out vec4 fragColor;                          \n"
-                         "void main() {                                \n"
-                         "  vec4 color = texture(screenTexture, v_texcoord);\n"
-                         "  fragColor = color / vec4(20,20,20,1);      \n"
-                         "}");
+  // Second program. Note, here, we use C++11 raw string litterals
+  // instead of concatening '"' and '\n' chars.
+  m_vs_screen.fromString(R"GLSL(#version 330 core
+                         in vec2 position;
+                         out vec2 v_texcoord;
+                         void main() {
+                           gl_Position = vec4(0.85*position,0.0,1.0);
+                           v_texcoord = 0.85*position;
+                         })GLSL");
+  m_fs_screen.fromString(R"GLSL(#version 330 core
+                         uniform sampler2D screenTexture;
+                         in vec2 v_texcoord;
+                         out vec4 fragColor;
+                         void main() {
+                           vec4 color = texture(screenTexture, v_texcoord);
+                           fragColor = color / vec4(20,20,20,1);
+                         })GLSL");
   if (!m_prog_screen.attachShaders(m_vs_screen, m_fs_screen).compile())
     {
       std::cerr << "Failed compiling OpenGL program. Reason was '"

@@ -45,7 +45,7 @@ class IGLBuffer
 {
 public:
 
-  IGLBuffer(std::string const& name)
+  explicit IGLBuffer(std::string const& name)
     : IGLObject(name)
   {}
 
@@ -66,7 +66,7 @@ class GLBuffer
 public:
 
   //! \brief Constructor with the object name
-  GLBuffer(std::string const& name, const GLenum target, BufferUsage const usage)
+  explicit GLBuffer(std::string const& name, GLenum const target, BufferUsage const usage)
     : IGLBuffer(name)
   {
     IGLObject::m_target = target;
@@ -75,7 +75,7 @@ public:
 
   //! \brief Constructor with the object name and reserved number of
   //! elements.
-  GLBuffer(std::string const& name, const GLenum target, const size_t init_size, BufferUsage const usage)
+  explicit GLBuffer(std::string const& name, GLenum const target, size_t const init_size, BufferUsage const usage)
     : IGLBuffer(name),
       PendingContainer<T>(init_size)
   {
@@ -137,7 +137,7 @@ private:
          cname(), pos_start, pos_end);
 
     size_t offset = sizeof (T) * pos_start;
-    size_t nbytes = sizeof (T) * (pos_end - pos_start + 1_z);
+    size_t nbytes = sizeof (T) * (pos_end - pos_start);
     glCheck(glBufferSubData(m_target,
                             static_cast<GLintptr>(offset),
                             static_cast<GLsizeiptr>(nbytes),
@@ -171,52 +171,35 @@ class GLVertexBuffer: public GLBuffer<T>
 public:
 
   //! \brief Constructor with the object name
-  GLVertexBuffer(std::string const& name,
-                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  explicit GLVertexBuffer(std::string const& name,
+                          BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ARRAY_BUFFER, usage)
   {
   }
 
   //! \brief Constructor with the object name and reserved number of
   //! elements.
-  GLVertexBuffer(std::string const& name, const size_t init_size,
-                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  explicit GLVertexBuffer(std::string const& name, size_t const init_size,
+                          BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ARRAY_BUFFER, init_size, usage)
   {
   }
 
-  // FIXME: why cannot be placed inside PendingContainer ????
   inline GLVertexBuffer<T>& operator=(std::initializer_list<T> il)
   {
-    DEBUG("VBO '%s' operator=(initializer_list)", this->cname());
-    const size_t my_size = this->m_container.size();
-    const size_t other_size = il.size();
-
-    if (other_size > my_size)
-      this->throw_if_cannot_expand();
-
-    this->m_container = il;
-    this->tagAsPending(0_z, other_size - 1_z);
+    PendingContainer<T>::operator=(il);
     return *this;
   }
 
   inline GLVertexBuffer<T>& operator=(GLVertexBuffer<T> const& other)
   {
-    DEBUG("VBO '%s' copy from '%s'", this->cname(), other.cname());
-    return this->operator=(other.m_container);
+    PendingContainer<T>::operator=(other);
+    return *this;
   }
 
   inline GLVertexBuffer<T>& operator=(std::vector<T> const& other)
   {
-    DEBUG("VBO '%s' operator=(vector)", this->cname());
-    const size_t my_size = this->m_container.size();
-    const size_t other_size = other.size();
-
-    if (other_size > my_size)
-      this->throw_if_cannot_expand();
-
-    this->m_container = other;
-    this->tagAsPending(0_z, other_size - 1_z);
+    PendingContainer<T>::operator=(other);
     return *this;
   }
 };
@@ -230,52 +213,35 @@ class GLIndexBuffer: public GLBuffer<T>
 public:
 
   //! \brief Constructor with the object name
-  GLIndexBuffer(std::string const& name,
-                BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  explicit GLIndexBuffer(std::string const& name,
+                         BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
   {
   }
 
   //! \brief Constructor with the object name and reserved number of
   //! elements.
-  GLIndexBuffer(std::string const& name, const size_t init_size,
-                BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  explicit GLIndexBuffer(std::string const& name, const size_t init_size,
+                         BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, init_size, usage)
   {
   }
 
-  // FIXME: why cannot be placed inside PendingContainer ????
   inline GLIndexBuffer<T>& operator=(std::initializer_list<T> il)
   {
-    DEBUG("EBO '%s' operator=(initializer_list)", this->cname());
-    const size_t my_size = this->m_container.size();
-    const size_t other_size = il.size();
-
-    if (other_size > my_size)
-      this->throw_if_cannot_expand();
-
-    this->m_container = il;
-    this->tagAsPending(0_z, other_size - 1_z);
+    PendingContainer<T>::operator=(il);
     return *this;
   }
 
   inline GLIndexBuffer<T>& operator=(GLIndexBuffer<T> const& other)
   {
-    DEBUG("EBO '%s' copy from '%s'", this->cname(), other.cname());
-    return this->operator=(other.m_container);
+    PendingContainer<T>::operator=(other);
+    return *this;
   }
 
   inline GLIndexBuffer<T>& operator=(std::vector<T> const& other)
   {
-    DEBUG("EBO '%s' operator=(vector)", this->cname());
-    const size_t my_size = this->m_container.size();
-    const size_t other_size = other.size();
-
-    if (other_size > my_size)
-      this->throw_if_cannot_expand();
-
-    this->m_container = other;
-    this->tagAsPending(0_z, other_size - 1_z);
+    PendingContainer<T>::operator=(other);
     return *this;
   }
 

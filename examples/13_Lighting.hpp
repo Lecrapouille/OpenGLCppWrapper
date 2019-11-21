@@ -18,35 +18,57 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
-#  define EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
+#ifndef EXAMPLE_13_LIGHTING_HPP
+#define EXAMPLE_13_LIGHTING_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "Camera.hpp"
 #  include <iostream>
 
 using namespace glwrap;
 
-class GLExample00: public IGLWindow
+// *****************************************************************
+//! \brief
+// *****************************************************************
+class GLExample13: public IGLWindow
 {
 public:
 
-  GLExample00()
+  GLExample13()
+    : m_cube("VAO_cube"),
+      m_lamp("VAO_lamp"),
+      m_prog_cube("Prog_cube"),
+      m_prog_lamp("Prog_lamp"),
+      m_camera(Vector3f(4.1f, 0.7f, 6.8f))
   {
-    std::cout << "Hello" << std::endl;
+    // Center the camera
+    m_camera.Yaw = -121.9f;
+    m_camera.Pitch = -5.8f;
+    m_camera.ProcessMouseMovement(0.0f, 0.0f);
   }
 
-  ~GLExample00()
-  {
-    std::cout << "Bye" << std::endl;
-  }
+  ~GLExample13()
+  {}
 
 protected:
 
-  virtual void onWindowSizeChanged(const float width, const float height) override;
-  virtual void onMouseButtonPressed(const int button, const int action) override;
+  bool createCube();
+  bool createLamp();
+  void changeLightProperties(float const time);
   virtual void onMouseMoved(const double xpos, const double ypos) override;
+  virtual void onWindowSizeChanged(const float width, const float height) override;
   virtual bool setup() override;
   virtual bool draw() override;
+
+private:
+
+  GLVertexShader     m_vs1, m_vs2;
+  GLFragmentShader   m_fs1, m_fs2;
+  GLVAO              m_cube;
+  GLVAO              m_lamp;
+  GLProgram          m_prog_cube;
+  GLProgram          m_prog_lamp;
+  Camera             m_camera;
 };
 
-#endif // EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
+#endif // EXAMPLE_13_LIGHTING_HPP

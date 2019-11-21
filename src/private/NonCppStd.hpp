@@ -34,7 +34,7 @@ constexpr std::size_t operator "" _z (unsigned long long const n)
 // **************************************************************
 // Enable for C++11 and Visual Studio
 // **************************************************************
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900)
+#  if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900)
 namespace std
 {
   //! \brief std::make_unique is for C++14 enable it for C++11
@@ -44,13 +44,14 @@ namespace std
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
   }
 }
-#endif
+#  endif
 
 // **************************************************************
-//! \brief Return the number of elements in an array
+//! \brief Return the number of elements in an array.
+//! S for size and T for the type.
 // **************************************************************
-template<int S, typename T>
-inline int ARRAY_SIZE(T (&)[S])
+template<size_t S, typename T>
+inline size_t ARRAY_SIZE(T (&)[S])
 {
   return S;
 }

@@ -18,35 +18,23 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
-#  define EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
+#ifndef OPENGLCPPWRAPPER_MEMORY_HPP
+#  define OPENGLCPPWRAPPER_MEMORY_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include <iostream>
+#  include "NonCppStd.hpp"
+#  include <atomic>
 
-using namespace glwrap;
-
-class GLExample00: public IGLWindow
+namespace glwrap
 {
-public:
-
-  GLExample00()
+  //----------------------------------------------------------------------------
+  //! \brief Track the usage of the estimated GPU memory.
+  //! \return The estimated GPU used by this program in kilo bytes.
+  //----------------------------------------------------------------------------
+  inline std::atomic<size_t>& GPUMemory()
   {
-    std::cout << "Hello" << std::endl;
+    static std::atomic<size_t> mem_gpu{0_z};
+    return mem_gpu;
   }
+} // namespace glwrap
 
-  ~GLExample00()
-  {
-    std::cout << "Bye" << std::endl;
-  }
-
-protected:
-
-  virtual void onWindowSizeChanged(const float width, const float height) override;
-  virtual void onMouseButtonPressed(const int button, const int action) override;
-  virtual void onMouseMoved(const double xpos, const double ypos) override;
-  virtual bool setup() override;
-  virtual bool draw() override;
-};
-
-#endif // EXAMPLE_00_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
+#endif // OPENGLCPPWRAPPER_MEMORY_HPP

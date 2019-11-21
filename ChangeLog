@@ -1,3 +1,13 @@
+version 0.8:
+
+    Add unit tests and fix classes PendingData and Pending Container.
+    Compute estimated GPU memory.
+    Simplify code for VBO.
+    Add more text in some exception when accessing to VBO when VAO and prog are not bound.
+    Add mouse click event.
+    Fix compilation warnings. Update Makefile.
+    Add more examples. Minor updates.
+
 version 0.7.1:
 
     Fix some errors found on Darwin architecture.

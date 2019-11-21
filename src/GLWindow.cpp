@@ -37,6 +37,24 @@ static void on_GLFW_error(int /*errorCode*/, const char* msg)
 }
 
 //------------------------------------------------------------------------------
+//! \brief Display the GPU memory consumption in human readable format
+//------------------------------------------------------------------------------
+static void display_gpu_memory()
+{
+  static size_t previous_gpu_mem = 0_z;
+  size_t current_gpu_mem = GPUMemory();
+
+  if (previous_gpu_mem != current_gpu_mem)
+    {
+      previous_gpu_mem = current_gpu_mem;
+
+      std::cout << "Estimated GPU memory usage: "
+                << current_gpu_mem << " bytes"
+                << std::endl;
+    }
+}
+
+//------------------------------------------------------------------------------
 //! \brief Static function allowing to "cast" a function pointer to a
 //! method pointer. This function is triggered when the mouse is
 //! moved.
@@ -58,6 +76,17 @@ static void on_mouse_scrolled(GLFWwindow* window, double xoffset, double yoffset
   assert(nullptr != window);
   IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
   obj->onMouseScrolled(xoffset, yoffset);
+}
+
+//------------------------------------------------------------------------------
+//! \brief Static function allowing to "cast" a function pointer to a
+//! method pointer. This function is triggered when the mouse has been pressed.
+//------------------------------------------------------------------------------
+static void on_mouse_button_pressed(GLFWwindow* window, int button, int action, int /*mods*/)
+{
+  assert(nullptr != window);
+  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
+  obj->onMouseButtonPressed(button, action);
 }
 
 //------------------------------------------------------------------------------
@@ -198,6 +227,7 @@ bool IGLWindow::start()
   glfwSetFramebufferSizeCallback(m_main_window, on_window_resized);
   glfwSetCursorPosCallback(m_main_window, on_mouse_moved);
   glfwSetScrollCallback(m_main_window, on_mouse_scrolled);
+  glfwSetMouseButtonCallback(m_main_window, on_mouse_button_pressed);
   // Ensure we can capture keyboard being pressed below
   glfwSetInputMode(m_main_window, GLFW_STICKY_KEYS, GL_TRUE);
 
@@ -215,6 +245,9 @@ l_runtime:
       res = setup();
       if (likely(res))
         {
+          // Show the estimated GPU mempry usage
+          display_gpu_memory();
+
           // init FPS
           m_lastTime = glfwGetTime();
           m_lastFrameTime = m_lastTime;
@@ -246,6 +279,7 @@ bool IGLWindow::loop()
   do
     {
       DEBUG("%s", "************* LOOP");
+      display_gpu_memory();
       computeFPS();
       if (likely(false == draw()))
         {

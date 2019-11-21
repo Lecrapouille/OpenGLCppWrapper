@@ -155,11 +155,13 @@ static T clamp(T const value, T const lower, T const upper)
   }                                                                     \
                                                                         \
   /*! \brief Return the dimension */                                    \
-  size_t size() const { return N; }                              \
+  size_t size() const { return N; }                                     \
                                                                         \
   /* Accessors */                                                       \
-  T& operator[](size_t const i)             { return m_data[i]; }             \
-  const T& operator[](size_t const i) const { return m_data[i]; }             \
+  T& operator[](size_t const i)          { return m_data[i]; }          \
+  const T& operator[](size_t const i) const { return m_data[i]; }       \
+  T& operator[](int const i)             { return m_data[i]; }          \
+  const T& operator[](int const i) const { return m_data[i]; }          \
                                                                         \
   /* C array conversions */                                             \
   typedef T(&array_t)[N];                                               \

@@ -42,17 +42,11 @@ void GLExample11::onWindowSizeChanged(const float width, const float height)
 }
 
 //------------------------------------------------------------------
-//! \brief Init your scene.
+//! \brief Shader for drawing the scene
 //------------------------------------------------------------------
-bool GLExample11::setup()
+bool GLExample11::firstProgram()
 {
-  // Enable some OpenGL states
-  glCheck(glEnable(GL_DEPTH_TEST));
-  glCheck(glDisable(GL_BLEND));
-  glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-  //glCheck(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-
-  // First program
+  // Compile the shader for the scene
   m_vs_scene.fromFile("shaders/11_RenderFrameBuffer_cube.vs");
   m_fs_scene.fromFile("shaders/11_RenderFrameBuffer_cube.fs");
   if (!m_prog_scene.attachShaders(m_vs_scene, m_fs_scene).compile())
@@ -62,6 +56,7 @@ bool GLExample11::setup()
       return false;
     }
 
+  // Create the cube
   m_prog_scene.bind(m_cube);
   m_cube.vector3f("aPos") =
     {
@@ -73,6 +68,7 @@ bool GLExample11::setup()
        #include "geometry/cube_texture.txt"
     };
 
+  // Create the floor
   m_prog_scene.bind(m_floor);
   m_floor.vector3f("aPos") =
     {
@@ -95,7 +91,15 @@ bool GLExample11::setup()
   m_prog_scene.matrix44f("view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
 
-  // Second program
+  return true;
+}
+
+//------------------------------------------------------------------
+//! \brief Shader for drawing the screen
+//------------------------------------------------------------------
+bool GLExample11::secondProgram()
+{
+  // Compile the shader for the screen
   m_vs_screen.fromFile("shaders/11_RenderFrameBuffer_screen.vs");
   m_fs_screen.fromFile("shaders/11_RenderFrameBuffer_screen.fs");
   if (!m_prog_screen.attachShaders(m_vs_screen, m_fs_screen).compile())
@@ -105,6 +109,7 @@ bool GLExample11::setup()
       return false;
     }
 
+  // Create a quad
   m_prog_screen.bind(m_screen);
   m_screen.vector2f("aPos") =
     {
@@ -117,9 +122,23 @@ bool GLExample11::setup()
       Vector2f(0.0f, 1.0f), Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f)
     };
 
+  return true;
+}
+
+//------------------------------------------------------------------
+//! \brief Init your scene.
+//------------------------------------------------------------------
+bool GLExample11::setup()
+{
+  glCheck(glEnable(GL_DEPTH_TEST));
+  glCheck(glDisable(GL_BLEND));
+  glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+  if (!firstProgram()) return false;
+  if (!secondProgram()) return false;
+
   // Framebuffer
   m_fbo.resize(width(), height());
- // m_screen.texture2D("screenTexture") = m_fbo.createColorTexture();
   m_fbo.createColorTexture(m_screen.texture2D("screenTexture"));
   m_fbo.createDepthBuffer();
 
@@ -131,6 +150,9 @@ bool GLExample11::setup()
 //------------------------------------------------------------------
 bool GLExample11::draw()
 {
+  static float time = 0.0f;
+  time += dt();
+
   // First pass: draw to the framebuffer texture
   m_fbo.render(0, 0, width(), height(), [this]() {
       glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
@@ -144,7 +166,7 @@ bool GLExample11::draw()
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
   glDisable(GL_DEPTH_TEST);
-  m_prog_screen.scalarf("time") = dt();
+  m_prog_screen.scalarf("time") = time;
   m_prog_screen.draw(m_screen, Mode::TRIANGLES, 0, 6);
 
   return true;

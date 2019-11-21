@@ -29,12 +29,15 @@
 #include "09_SceneGraph.hpp"
 #include "10_SimpleFrameBuffer.hpp"
 #include "11_PostProdFrameBuffer.hpp"
+#include "12_ComplexShader.hpp"
+#include "13_Lighting.hpp"
+#include "14_MapEditor.hpp"
 #include <iostream>
 #include <map>
 #include <stdlib.h>
 #include <limits.h>
 
-#define MAX_EXAMPLES 11
+#define MAX_EXAMPLES 12
 
 //------------------------------------------------------------------------------
 __attribute__((__noreturn__))
@@ -55,6 +58,9 @@ static void usage(char *argv[])
   std::cout << "  9: Draw 3 moving robots using a scene graph." << std::endl;
   std::cout << " 10: Draw a 2D square in a framebuffer." << std::endl;
   std::cout << " 11: Draw a cube in a framebuffer." << std::endl;
+  std::cout << " 12: Universe Nursery" << std::endl;
+  std::cout << " 13: Light + material" << std::endl;
+  std::cout << " 14: Basic Map editor" << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -118,6 +124,15 @@ int main(int argc, char *argv[])
       break;
     case 11:
       win = std::make_unique<GLExample11>();
+      break;
+    case 12:
+      win = std::make_unique<GLExample12>();
+      break;
+    case 13:
+      win = std::make_unique<GLExample13>();
+      break;
+    case 14:
+      win = std::make_unique<GLExample14>();
       break;
     default:
       std::cerr << "Incorrect example id !" << std::endl;

@@ -225,6 +225,7 @@ With this method, for this example, you will save GPU memory by avoiding storing
 
 Not shown in this readme but this API can manage framebuffer and cubic, 3D or 1D texture. It also includes features that are not directly in relation to wrapping OpenGL routines. It allows:
 
+* to estimate the GPU memory usage.
 * to use Matrix and Vector classes (like glm library).
 * to create movable objects allowing to combine transformations like rotation, translation, projection on a model.
 * to create a 'scene graph' of objects: a graph where nodes contain a transformation matrix relative to the current node and its parent. Note that the matrix is mandatory for each node of the scene graph while the 3d model is optional: this allows us to add invisible transformations.
@@ -260,7 +261,7 @@ This project depends on my GitHub Makefile project (used for compiling all my Gi
 ##### Ubuntu, Debian:
 
 ```sh
-sudo apt-get update && apt-get install libglew-dev libglfw3-dev
+sudo apt-get update && apt-get install libglew-dev libglfw3-dev libbz2-dev
 ```
 
 ##### Mac OS X:

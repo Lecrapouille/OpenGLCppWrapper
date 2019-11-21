@@ -26,7 +26,9 @@
 // *****************************************************************************
 
 #  include "GLEnum.hpp"
+#  include "private/Memory.hpp"
 #  include "private/Exception.hpp"
+#  include <atomic>
 
 namespace glwrap
 {

@@ -1176,8 +1176,16 @@ private:
       {
         // TODO: create the variable: call addNewUniform
         // TODO: http://www.cplusplus.com/forum/general/21246/#msg112085
-        throw OpenGLException("GLUniform '" + std::string(name) +
-                              "' does not exist");
+        if (isBound())
+          {
+            throw OpenGLException("GLUniform '" + std::string(name) +
+                                  "' does not exist");
+          }
+        else
+          {
+            throw OpenGLException("GLUniform '" + std::string(name) +
+                                  "' does not exist because no VAO has been bound");
+          }
       }
 
     auto ptr = m_uniforms[name].get();

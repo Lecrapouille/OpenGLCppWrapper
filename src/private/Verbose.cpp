@@ -33,15 +33,15 @@ std::string file_name(std::string const& path)
 }
 
 //------------------------------------------------------------------------------
-PRINTFLIKE(4, 5)
-void errout(const char* type, const char* file, const uint32_t line, const char* format, ...)
+PRINTFLIKE(5, 6)
+void errout(FILE *stream, const char* type, const char* file, const uint32_t line, const char* format, ...)
 {
   va_list args;
   va_start(args, format);
 
-  fprintf(stderr, "%s:%s:%u ", type, file_name(file).c_str(), line);
-  vfprintf(stderr, format, args);
-  fprintf(stderr, "\n");
+  fprintf(stream, "%s:%s:%u ", type, file_name(file).c_str(), line);
+  vfprintf(stream, format, args);
+  fprintf(stream, "\n");
 
   va_end(args);
 }

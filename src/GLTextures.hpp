@@ -454,38 +454,38 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Set to the nth byte of the texture (write access).
   //----------------------------------------------------------------------------
-  inline unsigned char& operator[](std::size_t nth)
+  inline unsigned char& set(std::size_t const nth)
   {
     //TBD ?
     //if (nth > m_width * m_height)
     //  {
     //    reserve(nth);
     //  }
-    return m_buffer[nth];
+    return m_buffer.set(nth);
   }
 
   //----------------------------------------------------------------------------
   //! \brief Get to the nth byte of the texture (read only access).
   //----------------------------------------------------------------------------
-  inline const unsigned char& operator[](std::size_t nth) const
+  inline const unsigned char& get(std::size_t const nth) const
   {
-    return m_buffer[nth];
+    return m_buffer.get(nth);
   }
 
   //----------------------------------------------------------------------------
   //! \brief Set to the nth byte of the texture (write access).
   //----------------------------------------------------------------------------
-  inline unsigned char& at(const size_t u, const size_t v, const size_t off)
+  inline unsigned char& set(const size_t u, const size_t v, const size_t off)
   {
-    return GLTexture2D::operator[]((u * m_width + v) * 4 + off); //TODO 4 because RGBA
+    return GLTexture2D::set((u * m_width + v) * 4 + off); //TODO 4 because RGBA
   }
 
   //----------------------------------------------------------------------------
   //! \brief Get to the nth byte of the texture (read only access.
   //----------------------------------------------------------------------------
-  inline const unsigned char& at(const size_t u, const size_t v, const size_t off) const
+  inline const unsigned char& get(const size_t u, const size_t v, const size_t off) const
   {
-    return GLTexture2D::operator[]((u * m_width + v) * 4 + off);
+    return GLTexture2D::get((u * m_width + v) * 4 + off);
   }
 
   //----------------------------------------------------------------------------
@@ -543,8 +543,8 @@ public:
     stop = stop / 4;
     const GLint x = start / m_width;
     const GLint y = start % m_width;
-    const GLsizei width = (stop / m_width) - x + 1;
-    const GLsizei height = (stop % m_width) - y + 1;
+    const GLsizei width = (stop / m_width) - x;
+    const GLsizei height = (stop % m_width) - y;
 
     DEBUG("Texture '%s' update (%zu,%zu) --> ((%d,%d), (%d,%d))",
           cname(), start, stop, x, y, width, height);
@@ -915,7 +915,7 @@ private:
                          0,
                          static_cast<GLenum>(m_options.cpuPixelFormat),
                          static_cast<GLenum>(m_options.pixelType),
-                         &m_buffer[0]));
+                         m_buffer.to_array()));
   }
 
   //----------------------------------------------------------------------------
