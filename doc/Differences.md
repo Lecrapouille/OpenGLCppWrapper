@@ -1,4 +1,4 @@
-# Code divergences with Glumpy
+# Code divergences with Glumpy/gloo
 
 OpenGLCppWrapper is not a C++ portage of gloo part of Glumpy (written in Python) while OpenGLCppWrapper is largely inspired by Glumpy, there are internal differences shown by this page.
 

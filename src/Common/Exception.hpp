@@ -22,8 +22,7 @@ namespace glwrap
 {
 
 class Exception: public std::exception
-/// This is the base class for all exceptions defined
-/// in the Poco class library.
+/// Base class for all exceptions defined in this project.
 {
 public:
 

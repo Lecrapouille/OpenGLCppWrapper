@@ -65,7 +65,7 @@ static void on_mouse_moved(GLFWwindow* obj, double xpos, double ypos)
   static double m_lastY = 0.0;
   static bool m_firstMouse = true;
 
-  assert(nullptr != window);
+  assert(nullptr != obj);
   IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
   window::Mouse& mouse = window->mouse();
 
@@ -94,7 +94,7 @@ static void on_mouse_moved(GLFWwindow* obj, double xpos, double ypos)
 //------------------------------------------------------------------------------
 static void on_mouse_scrolled(GLFWwindow* obj, double xoffset, double yoffset)
 {
-  assert(nullptr != window);
+  assert(nullptr != obj);
   IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
   window::Mouse& mouse = window->mouse();
 
@@ -108,7 +108,7 @@ static void on_mouse_scrolled(GLFWwindow* obj, double xoffset, double yoffset)
 //------------------------------------------------------------------------------
 static void on_mouse_button_pressed(GLFWwindow* obj, int button, int action, int /*mods*/)
 {
-  assert(nullptr != window);
+  assert(nullptr != obj);
   IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
   window::Mouse& mouse = window->mouse();
 
@@ -124,7 +124,7 @@ static void on_mouse_button_pressed(GLFWwindow* obj, int button, int action, int
 //------------------------------------------------------------------------------
 static void on_window_resized(GLFWwindow* obj, int width, int height)
 {
-  assert(nullptr != window);
+  assert(nullptr != obj);
   IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
   if (unlikely(0 >= width)) { width = 1; }
   if (unlikely(0 >= height)) { height = 1; }
@@ -137,11 +137,50 @@ IGLWindow::IGLWindow(uint32_t const width, uint32_t const height, const char *ti
     m_height(height),
     m_title(title)
 {
-  hasCreatedContext() = false;
+  DEBUG("%s", "============= OpenGL Context creation ==========================================");
 
   if (unlikely(nullptr == m_title)) { m_title = ""; }
   if (unlikely(0u == m_width)) { m_width = 1u; }
   if (unlikely(0u == m_height)) { m_height = 1u; }
+
+    // Initialise GLFW
+  glfwSetErrorCallback(on_GLFW_error);
+  if (!glfwInit())
+    throw OpenGLException("Failed to initialize GLFW");
+
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+  // Open a window and create its OpenGL context
+  m_main_window = glfwCreateWindow(static_cast<int>(m_width),
+                                   static_cast<int>(m_height),
+                                   m_title, nullptr, nullptr);
+  if (nullptr == m_main_window)
+    throw OpenGLException("Failed to open GLFW window");
+
+  glfwMakeContextCurrent(m_main_window);
+  glfwSwapInterval(1); // Enable vsync
+
+  // Initialize GLEW
+  glewExperimental = GL_TRUE; // stops glew crashing on OSX :-/
+  if (GLEW_OK != glewInit())
+    throw OpenGLException("Failed to initialize GLFW");
+
+  // Print out some info about the graphics drivers
+  std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+  std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+  std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+  std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+
+  // Make sure OpenGL version 3.2 API is available
+  if (!GLEW_VERSION_3_2)
+    throw OpenGLException("OpenGL 3.2 API is not available!");
+
+  setContextCreated();
+
+  DEBUG("%s", "============= OpenGL Context created ===========================================");
 }
 
 //------------------------------------------------------------------------------
@@ -212,60 +251,6 @@ void IGLWindow::computeFPS()
 //------------------------------------------------------------------------------
 bool IGLWindow::start()
 {
-  if (hasCreatedContext())
-    {
-      ERROR("Warning you called twice start(). "
-            "OpenGL context already created");
-      goto l_runtime;
-    }
-
-  // Initialise GLFW
-  glfwSetErrorCallback(on_GLFW_error);
-  if (!glfwInit())
-    {
-      ERROR("Failed to initialize GLFW");
-      return false;
-    }
-
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  hasCreatedContext() = true;
-
-  // Open a window and create its OpenGL context
-  m_main_window = glfwCreateWindow(static_cast<int>(m_width),
-                                   static_cast<int>(m_height),
-                                   m_title, nullptr, nullptr);
-  if (nullptr == m_main_window)
-    {
-      ERROR("Failed to open GLFW window");
-      return false;
-    }
-  glfwMakeContextCurrent(m_main_window);
-  glfwSwapInterval(1); // Enable vsync
-
-  // Initialize GLEW
-  glewExperimental = GL_TRUE; // stops glew crashing on OSX :-/
-  if (GLEW_OK != glewInit())
-    {
-      ERROR("Failed to initialize GLFW");
-      return false;
-    }
-
-  // Print out some info about the graphics drivers
-  std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-  std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-  std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-  std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-
-  // Make sure OpenGL version 3.2 API is available
-  if (!GLEW_VERSION_3_2)
-    {
-      ERROR("OpenGL 3.2 API is not available!");
-      return false;
-    }
-
   // Save the class address to "cast" function callback into a method
   // callback
   glfwSetWindowUserPointer(m_main_window, this);
@@ -278,8 +263,6 @@ bool IGLWindow::start()
   // Ensure we can capture keyboard being pressed below
   glfwSetInputMode(m_main_window, GLFW_STICKY_KEYS, GL_TRUE);
 
-l_runtime:
-
   // Flush OpenGL errors before using this function on real OpenGL
   // routines else a fake error is returned on the first OpenGL
   // routines while valid.
@@ -289,9 +272,13 @@ l_runtime:
   try
     {
       // Init OpenGL states of the user application
+      DEBUG("%s", "============= SETUP ============================================================");
       res = setup();
       if (likely(res))
         {
+          // Force refreshing computation made when window changed
+          onWindowSizeChanged();
+
           // Show the estimated GPU mempry usage
           display_gpu_memory();
 
@@ -325,7 +312,7 @@ bool IGLWindow::loop()
 {
   do
     {
-      DEBUG("%s", "************* LOOP");
+      DEBUG("%s", "============= LOOP =============================================================");
       display_gpu_memory();
       computeFPS();
       if (likely(false == draw()))

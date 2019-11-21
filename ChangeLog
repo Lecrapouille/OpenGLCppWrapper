@@ -1,3 +1,17 @@
+version 0.9.1:
+
+    OpenGL context created sooner.
+    Cleaning API: Allow to fill VBOs before VAO is bound to GLProgram.
+    Fix several bugs: PendingContainer segfault, bad resizing.
+    Cleaning API: PendingContainer operator[] now either a getter or setter
+    Cleaning API: Error msg when loading textures.
+    Cleaning API: Cleaning GLWindows callbacks.
+    Cleaning API: Transformable return *this for composing transforms.
+    Cleaning API: GLProgram/Shaders error messages.
+    Cleaning API: Update vector utility functions.
+    Cleaning Doxygen doc and log (formatting, PendingContainer names)
+    Minor fixes.
+
 version 0.9:
 
     Rework workspace.

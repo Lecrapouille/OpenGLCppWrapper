@@ -29,6 +29,7 @@
 #  include "Common/GPUMemory.hpp"
 #  include "Common/Exception.hpp"
 #  include "Math/Maths.hpp"
+#  include <atomic>
 
 namespace glwrap
 {
@@ -38,19 +39,8 @@ namespace glwrap
 // ***********************************************************************************************
 DECLARE_EXCEPTION(OpenGLException, Exception)
 
-//----------------------------------------------------------------------------
-//! \brief Return if the OpenGL has been created or has not been
-//! created or has failed creating.
-//!
-//! \return true if the OpenGL context has been created
-//! else return false (not yet created or failed during
-//! its creation).
-//----------------------------------------------------------------------------
-inline static bool& hasCreatedContext()
-{
-  static bool s_context_started = false;
-  return s_context_started;
-}
+bool isContextCreated();
+void setContextCreated(bool const v = true);
 
 //----------------------------------------------------------------------------
 //! \brief Allow to detect if the last OpenGL command succeeded or failed.

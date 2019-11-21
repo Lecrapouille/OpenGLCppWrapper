@@ -74,6 +74,7 @@ public:
   {
     GLObject::m_target = target;
     m_usage = static_cast<GLenum>(usage);
+    PendingContainer<T>::setDebugName(name);
   }
 
   //! \brief Constructor with the object name and reserved number of
@@ -84,6 +85,7 @@ public:
   {
     GLObject::m_target = target;
     m_usage = static_cast<GLenum>(usage);
+    PendingContainer<T>::setDebugName(name);
   }
 
   virtual ~GLBuffer() override
@@ -136,8 +138,6 @@ private:
     size_t pos_start, pos_end;
     PendingContainer<T>::getPendingData(pos_start, pos_end);
     PendingContainer<T>::clearPending();
-    DEBUG("VBO '%s' update %zu -> %zu",
-         cname(), pos_start, pos_end);
 
     size_t offset = sizeof (T) * pos_start;
     size_t nbytes = sizeof (T) * (pos_end - pos_start);
@@ -145,6 +145,9 @@ private:
                             static_cast<GLintptr>(offset),
                             static_cast<GLsizeiptr>(nbytes),
                             PendingContainer<T>::to_array()));
+
+    DEBUG("=== FLUSH VBO '%s' to GPU: %zu bytes [%zu .. %zu[",
+          cname(), nbytes, pos_start, pos_end);
     return false;
   }
 
@@ -173,17 +176,10 @@ class GLVertexBuffer: public GLBuffer<T>
 {
 public:
 
-  //! \brief Constructor with the object name
-  explicit GLVertexBuffer(std::string const& name,
-                          BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
-    : GLBuffer<T>(name, GL_ARRAY_BUFFER, usage)
-  {
-  }
-
   //! \brief Constructor with the object name and reserved number of
   //! elements.
-  explicit GLVertexBuffer(std::string const& name, size_t const init_size,
-                          BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+  explicit GLVertexBuffer(std::string const& name, size_t const init_size = 3_z,
+                          BufferUsage const usage = BufferUsage::STATIC_DRAW)
     : GLBuffer<T>(name, GL_ARRAY_BUFFER, init_size, usage)
   {
   }
@@ -217,7 +213,7 @@ public:
 
   //! \brief Constructor with the object name
   explicit GLIndexBuffer(std::string const& name,
-                         BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+                         BufferUsage const usage = BufferUsage::STATIC_DRAW)
     : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
   {
   }
@@ -225,7 +221,7 @@ public:
   //! \brief Constructor with the object name and reserved number of
   //! elements.
   explicit GLIndexBuffer(std::string const& name, const size_t init_size,
-                         BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
+                         BufferUsage const usage = BufferUsage::STATIC_DRAW)
     : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, init_size, usage)
   {
   }

@@ -26,6 +26,29 @@ namespace glwrap
 //! This macro will generate code for members.
 IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
 
+//----------------------------------------------------------------------------
+//! \brief Return if the OpenGL has been created or has not been
+//! created or has failed creating.
+//! \defgroup OpenGL OpenGL wrapper
+//!
+//! \return true if the OpenGL context has been created
+//! else return false (not yet created or failed during
+//! its creation).
+//----------------------------------------------------------------------------
+static std::atomic<bool> OpenGLContextCreated{false};
+
+bool isContextCreated()
+{
+  DEBUG("OpenGL Context >>>>>>>>>>>>>>>>>>>>>>>>>>>>> %u", OpenGLContextCreated.load());
+  return OpenGLContextCreated;
+}
+
+void setContextCreated(bool const v)
+{
+  OpenGLContextCreated.store(v);
+  DEBUG("OpenGL Context <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< %u", OpenGLContextCreated.load());
+}
+
 void checkError(const char* filename, const uint32_t line, const char* expression)
 {
   GLenum id;

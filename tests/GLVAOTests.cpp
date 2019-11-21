@@ -94,7 +94,7 @@ TESTSUITE(VAOs)
         std::cout << vboi.name() << std::endl;
         ASSERT_FALSE("Unknown VBO Exception not caught");
       }
-      catch (OpenGLException) { }
+      catch (OpenGLException&) { }
 
       // Nullptr exception
       try
@@ -103,7 +103,7 @@ TESTSUITE(VAOs)
           std::cout << vbo.name() << std::endl;
           ASSERT_FALSE("Nullptr Exception not caught");
         }
-      catch (OpenGLException) { }
+      catch (OpenGLException&) { }
 
       // Unknown VBO
       try
@@ -112,7 +112,7 @@ TESTSUITE(VAOs)
           std::cout << vbo.name() << std::endl;
           ASSERT_FALSE("Unknown VBO Exception not caught");
         }
-      catch (OpenGLException) { }
+      catch (OpenGLException&) { }
 
       // Bad cast VBO
        try
@@ -121,6 +121,6 @@ TESTSUITE(VAOs)
           std::cout << vbo.name() << std::endl;
           ASSERT_FALSE("Bad casted VBO Exception not caught");
         }
-        catch (OpenGLException) { }
+        catch (OpenGLException&) { }
     }
 }

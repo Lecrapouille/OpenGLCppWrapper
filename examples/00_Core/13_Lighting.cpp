@@ -176,8 +176,8 @@ void GLExample13::changeLightProperties(float const time)
   lightColor.y = std::sin(time * 0.7f);
   lightColor.z = std::sin(time * 1.3f);
 
-  Vector3f diffuseColor = lightColor   * Vector3f(0.5f); // decrease the influence
-  Vector3f ambientColor = diffuseColor * Vector3f(0.2f); // low influence
+  Vector3f diffuseColor = vector::componentProduct(lightColor, Vector3f(0.5f)); // decrease the influence
+  Vector3f ambientColor = vector::componentProduct(diffuseColor, Vector3f(0.2f)); // low influence
   m_prog_cube.vector3f("light.ambient") = ambientColor;
   m_prog_cube.vector3f("light.diffuse") = diffuseColor;
   m_prog_cube.vector3f("light.specular") = Vector3f(1.0f, 1.0f, 1.0f);

@@ -213,7 +213,7 @@ public:
   virtual void attach() override
   {
     glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, m_attachment,
-                                   m_texture.target(), m_texture.gpuID(), 0));
+                                   m_texture.target(), m_texture.handle(), 0));
   }
 
 private:
@@ -595,7 +595,7 @@ private:
             it->end();
           }
         m_pending_attachments.clear();
-        forceUpdate();
+        redoUpdate();
         return false;
       }
     else

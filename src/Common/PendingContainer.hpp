@@ -32,40 +32,103 @@
 namespace glwrap
 {
 
-// **************************************************************
-//! \brief PendingContainer is a std::valarray memorizing elements
-// which have been changed and has to updated.
-// **************************************************************
+// *****************************************************************************
+//! \brief PendingContainer is a class over std::vector for memorizing elements
+//! and knowing which elements have been modified (pending data).
+//!
+//! This class is used as buffer between CPU and GPU where pending elements are
+//! flushed to the GPU memory. Mostly method impacting on the container size
+//! have a side effect: they modify the estimator on the GPU memory usage for
+//! the current running application.
+// *****************************************************************************
 template<class T>
 class PendingContainer: public PendingData
 {
+  // ***************************************************************************
+  //! \brief Allow to PendingContainer to set or get an element in the container
+  //! when using the operator[].
+  //!
+  //! operator[] when not const will always be used as a setter even when it is
+  //! supposed to call a getter. For example a = std::container[0] will call the
+  //! std::container::set() method while desired to call the get() method (in
+  //! the same way than (PendingContainer[0] = a).
+  //!
+  //! For PendingContainer this is not a desirable behavior because this will
+  //! set the nth element as dirty (pending data) and imply a flush to the GPU
+  //! memory in the case of VBO.
+  //!
+  //! To allow C++ to understand to correctly select setter getter to use this
+  //! class is needed.
+  // ***************************************************************************
+  struct Deref
+  {
+    PendingContainer& m_ref;
+    size_t m_index;
+
+    //! \brief Constructor takes a reference of PendingContainer and the nth
+    //! element of the container.
+    explicit Deref(PendingContainer& container, size_t const nth)
+      : m_ref(container), m_index(nth)
+    {}
+
+    //! \brief Getter method.
+    inline operator T()
+    {
+      return m_ref.get(m_index);
+    }
+
+    //! \brief Setter method.
+    inline T& operator=(T const& other)
+    {
+      return m_ref.set(m_index) = other;
+    }
+
+    //! \brief This method allow to write std::cout << PendingContainer[0]
+    inline friend std::ostream& operator<<(std::ostream& os, const Deref& d)
+    {
+      return os << d.m_ref.get(d.m_index);
+    }
+  };
+
 public:
 
+  //----------------------------------------------------------------------------
+  //! \brief Constructor. Do nothing.
+  //----------------------------------------------------------------------------
   PendingContainer()
-    : PendingData()
   {}
 
-  //! \note: we call .reserve(count) and not .resize(count) or pass
-  //! count to the std::vector constructor (which called resize)
-  //! because we do not want, for VBOs, to transfer invalid dummy data
-  //! to the GPU.
+  //----------------------------------------------------------------------------
+  //! \brief Constructor and reserve the correct amount of elements.
+  //!
+  //! \note: hack! We call std::vector::reserve(count) but
+  //! not :std::vector:resize(count) or pass count to the std::vector
+  //! constructor (which called resize) because we do not want, for VBOs, to
+  //! transfer invalid dummy data to the GPU.
+  //----------------------------------------------------------------------------
   explicit PendingContainer(size_t const count)
   {
     m_container.reserve(count);
     GPUMemory() += memory();
-    DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
-          count, sizeof (T), GPUMemory().load());
+    DEBUG("'%s': Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
+          cdebug(), count, sizeof (T), GPUMemory().load());
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
   explicit PendingContainer(size_t const count, T const& val)
     : PendingData(count),
       m_container(count, val)
   {
     GPUMemory() += memory();
-    DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
-          count, sizeof (T), GPUMemory().load());
+    DEBUG("'%s': Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
+          cdebug(), count, sizeof (T), GPUMemory().load());
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
   explicit PendingContainer(PendingContainer<T> const& other)
     : PendingData()
   {
@@ -78,68 +141,97 @@ public:
     tagAsPending(bound.first, bound.second);
 
     GPUMemory() += memory();
-    DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
-          other.size(), sizeof (T), GPUMemory().load());
+    DEBUG("'%s': Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
+          cdebug(), other.size(), sizeof (T), GPUMemory().load());
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
   explicit PendingContainer(std::vector<T> const& other)
     : PendingData(other.size()),
       m_container(other)
   {
     GPUMemory() += memory();
-    DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
-          other.size(), sizeof (T), GPUMemory().load());
+    DEBUG("'%s': Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
+          cdebug(), other.size(), sizeof (T), GPUMemory().load());
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
   explicit PendingContainer(std::initializer_list<T> il)
     : PendingData(il.size()),
       m_container(il)
   {
     GPUMemory() += memory();
-    DEBUG("Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
-          il.size(), sizeof (T), GPUMemory().load());
+    DEBUG("'%s': Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
+          cdebug(), il.size(), sizeof (T), GPUMemory().load());
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Destructor.
+  //----------------------------------------------------------------------------
   ~PendingContainer()
   {
     GPUMemory() -= memory();
-    DEBUG("Removing %zu bytes. GPU memory: %zu bytes",
-          memory(), GPUMemory().load());
+    DEBUG("'%s': Removing %zu bytes. GPU memory: %zu bytes",
+          cdebug(), memory(), GPUMemory().load());
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the container current capacity.
+  //----------------------------------------------------------------------------
   inline size_t capacity() const
   {
     return m_container.capacity();
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the number of elements inside the container.
+  //----------------------------------------------------------------------------
   inline size_t size() const
   {
     return m_container.size();
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief return the container size in bytes.
+  //----------------------------------------------------------------------------
   inline size_t memory() const
   {
-    DEBUG("Internal GPU memory: %zu bytes", sizeof (T) * m_container.size());
+    DEBUG("'%s': Internal GPU memory: %zu bytes",
+          cdebug(), sizeof (T) * m_container.size());
     return sizeof (T) * m_container.size();
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Reserve the container when this is possible.
+  //! \throw std::out_of_range if the container cannot be resized.
+  //----------------------------------------------------------------------------
   inline void reserve(size_t const count)
   {
     throw_if_cannot_expand();
     m_container.reserve(count);
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Resize the container when this is possible.
+  //! \throw std::out_of_range if the container cannot be resized.
+  //----------------------------------------------------------------------------
   inline void resize(size_t const count)
   {
     size_t old_count = size();
 
     // Same size: ignore!
-    if (unlikely(count == old_count))
+    if (unlikely((0_z == count) || (count == old_count)))
       return ;
 
     // Resize the container
     throw_if_cannot_expand();
     m_container.resize(count);
+    // FIXME not optimized concerning m_pending_start
+    tagAsPending(0_z, m_container.size());
 
     // Case of container is reduced: update pending data
     if (unlikely(count < old_count))
@@ -158,37 +250,77 @@ public:
           }
       }
 
-    GPUMemory() -= memory();
-    GPUMemory() += count * sizeof (T);
-    DEBUG("Resizing %zu elements of size %zu bytes. GPU memory: %zu bytes",
-          count, sizeof (T), GPUMemory().load());
+    GPUMemory() += (count * sizeof (T) - memory());
+    DEBUG("'%s': Resizing %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          cdebug(), count, sizeof (T), GPUMemory().load());
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Call either the set() or the get() methods.
+  //!
+  //! \code
+  //! container[0] = a; will call set()
+  //! a = container[0]; will call get()
+  //! \endcode
+  //----------------------------------------------------------------------------
+  Deref operator[](size_t const index)
+  {
+    return Deref(*this, index);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Setter of the nth element. Resize the container to nth + 1 elements
+  //! when needed.
+  //! \throw std::out_of_range if the container cannot be resized.
+  //----------------------------------------------------------------------------
   inline T& set(size_t const nth)
   {
-    if (unlikely(nth > m_container.capacity()))
+    if (unlikely(nth >= m_container.size()))
       {
-        resize(nth);
+        throw_if_cannot_expand();
+        m_container.capacity();
+        m_container.resize(nth + 1_z);
+        // FIXME not optimized concerning m_pending_start
+        tagAsPending(0_z, m_container.size());
+
+        GPUMemory() += sizeof (T);
+        DEBUG("'%s': Resizing %zu elements of size %zu bytes. GPU memory: %zu bytes",
+              cdebug(), 1_z, sizeof (T), GPUMemory().load());
       }
-    tagAsPending(nth);
-    return m_container.operator[](nth);
+    else
+      {
+        tagAsPending(nth);
+      }
+    return m_container[nth];
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Getter of the nth element.
+  //! \throw std::out_of_range when trying to access out of bound index.
+  //----------------------------------------------------------------------------
   inline T const& get(size_t const nth) const
   {
     return m_container.at(nth);
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Remove all elements of the container.
+  //! \throw std::out_of_range if the container cannot be resized.
+  //----------------------------------------------------------------------------
   void clear()
   {
     throw_if_cannot_expand();
     GPUMemory() -= memory();
-    DEBUG("Clearing %zu elements of size %zu bytes. GPU memory: %zu bytes",
-          size(), sizeof (T), GPUMemory().load());
+    DEBUG("'%s': Clearing %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          cdebug(), size(), sizeof (T), GPUMemory().load());
     m_container.clear();
     clearPending(0_z);
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Concat two containers.
+  //! \throw std::out_of_range if the container cannot be resized.
+  //----------------------------------------------------------------------------
   PendingContainer<T>&
   append(std::initializer_list<T> il)
   {
@@ -197,11 +329,15 @@ public:
     m_container.insert(m_container.end(), il);
     tagAsPending(start, m_container.size());
     GPUMemory() += il.size() * sizeof (T);
-    DEBUG("Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
-          il.size(), sizeof (T), GPUMemory().load());
+    DEBUG("'%s': Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          cdebug(), il.size(), sizeof (T), GPUMemory().load());
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Concat two containers.
+  //! \throw std::out_of_range if the container cannot be resized.
+  //----------------------------------------------------------------------------
   PendingContainer<T>&
   append(const T* other, size_t const size)
   {
@@ -212,11 +348,15 @@ public:
                        other + size);
     tagAsPending(start, m_container.size());
     GPUMemory() += size * sizeof (T);
-    DEBUG("Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
-          size, sizeof (T), GPUMemory().load());
+    DEBUG("'%s': Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          cdebug(), size, sizeof (T), GPUMemory().load());
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Concat two containers.
+  //! \throw std::out_of_range if the container cannot be resized.
+  //----------------------------------------------------------------------------
   PendingContainer<T>&
   append(std::vector<T> const& other)
   {
@@ -227,17 +367,25 @@ public:
                        other.end());
     tagAsPending(start, m_container.size());
     GPUMemory() += other.size() * sizeof (T);
-    DEBUG("Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
-          other.size(), sizeof (T), GPUMemory().load());
+    DEBUG("'%s': Appending %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          cdebug(), other.size(), sizeof (T), GPUMemory().load());
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Concat two containers.
+  //! \throw std::out_of_range if the container cannot be resized.
+  //----------------------------------------------------------------------------
   PendingContainer<T>&
   append(PendingContainer const& other)
   {
     return PendingContainer<T>::append(other.m_container);
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Concat two containers.
+  //! \throw std::out_of_range if the container cannot be resized.
+  //----------------------------------------------------------------------------
   PendingContainer<T>&
   append(T const& val)
   {
@@ -246,12 +394,17 @@ public:
     m_container.push_back(val);
     tagAsPending(0_z, m_container.size());
     GPUMemory() += sizeof (T);
-    DEBUG("Appending 1 element of size %zu bytes. GPU memory: %zu bytes",
-          sizeof (T), GPUMemory().load());
+    DEBUG("'%s': Appending 1 element of size %zu bytes. GPU memory: %zu bytes",
+          cdebug(), sizeof (T), GPUMemory().load());
     return *this;
   }
 
-  //! \brief Append EBO
+  //----------------------------------------------------------------------------
+  //! \brief Concat two containers holding indexes of VBOs. This method shall
+  //! only called for EBOs.
+  //!
+  //! \throw std::out_of_range if the container cannot be resized.
+  //----------------------------------------------------------------------------
   PendingContainer<T>&
   appendIndex(std::vector<T> const& other)
   {
@@ -264,7 +417,8 @@ public:
         older_index += T(1);
       }
 
-    DEBUG("appendIndex => older_index %zu", static_cast<size_t>(older_index));
+    DEBUG("'%s': AppendIndex => older_index %zu",
+          cdebug(), static_cast<size_t>(older_index));
 
     m_container.reserve(other.size());
     for (auto it: other)
@@ -273,22 +427,32 @@ public:
       }
     tagAsPending(m_container.size());
     GPUMemory() += other.size() * sizeof (T);
-    DEBUG("AppendingIndex %zu elements of size %zu bytes. GPU memory: %zu bytes",
-          other.size(), sizeof (T), GPUMemory().load());
+    DEBUG("'%s': AppendingIndex %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          cdebug(), other.size(), sizeof (T), GPUMemory().load());
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Concat two containers holding indexes of VBOs. This method shall
+  //! only called for EBOs.
+  //!
+  //! \throw std::out_of_range if the container cannot be resized.
+  //----------------------------------------------------------------------------
   PendingContainer<T>&
   appendIndex(PendingContainer const& other)
   {
     return PendingContainer<T>::appendIndex(other.m_container);
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Compute the summation of all elements in the container.
+  //! \throw std::out_of_range if the container has no elements.
+  //----------------------------------------------------------------------------
   inline T sum() const
   {
     if (unlikely(0_z == m_container.size()))
       {
-        throw std::out_of_range("Cannot compute the summation of an empty container");
+        mythrow("Cannot compute the summation of an empty container");
       }
 
     T sum_of_elems = 0;
@@ -300,11 +464,15 @@ public:
     return sum_of_elems;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Compute the product of all elements in the container.
+  //! \throw std::out_of_range if the container has no elements.
+  //----------------------------------------------------------------------------
   inline T prod() const
   {
     if (unlikely(0_z == m_container.size()))
       {
-        throw std::out_of_range("Cannot compute the product of an empty container");
+        mythrow("Cannot compute the product of an empty container");
       }
 
     T prod_of_elems = 1;
@@ -316,24 +484,36 @@ public:
     return prod_of_elems;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the lower element of the container.
+  //! \throw std::out_of_range if the container has no elements.
+  //----------------------------------------------------------------------------
   inline T min() const
   {
     if (unlikely(0_z == m_container.size()))
       {
-        throw std::out_of_range("Cannot compute the min of an empty container");
+        mythrow("Cannot compute the min of an empty container");
       }
     return *std::min_element(m_container.begin(), m_container.end());
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the greater element of the container.
+  //! \throw std::out_of_range if the container has no elements.
+  //----------------------------------------------------------------------------
   inline T max() const
   {
     if (unlikely(0_z == m_container.size()))
       {
-        throw std::out_of_range("Cannot compute the max of an empty container");
+        mythrow("Cannot compute the max of an empty container");
       }
     return *std::max_element(m_container.begin(), m_container.end());
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Compute the functor \p f for each element of the container. The
+  //! whole container is set a dirty.
+  //----------------------------------------------------------------------------
   template<class Function>
   inline PendingContainer<T>& apply(Function f)
   {
@@ -342,36 +522,68 @@ public:
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Compute absolute value for each element of the container. The whole
+  //! container is set a dirty.
+  //----------------------------------------------------------------------------
   inline PendingContainer<T>& abs()
   {
     return apply([](T& x){ x = maths::abs(x); });
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Compute square root for each element of the container. The whole
+  //! container is set a dirty.
+  //----------------------------------------------------------------------------
   inline PendingContainer<T>& sqrt()
   {
     return apply([](T& x){ x = std::sqrt(x); });
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Compute ^2 for each element of the container. The whole container
+  //! is set a dirty.
+  //----------------------------------------------------------------------------
   inline PendingContainer<T>& squared()
   {
     return apply([](T& x){ x = x * x; });
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Compute sinus for each element of the container. The whole container
+  //! is set a dirty.
+  //----------------------------------------------------------------------------
   inline PendingContainer<T>& sin()
   {
     return apply([](T& x){ x = std::sin(x); });
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Compute cosinus for each element of the container. The whole container
+  //! is set a dirty.
+  //----------------------------------------------------------------------------
   inline PendingContainer<T>& cos()
   {
     return apply([](T& x){ x = std::cos(x); });
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Copy operator.
+  //!
+  //! \throw std::out_of_range if \p other has more elements and the container
+  //! cannot be resized.
+  //----------------------------------------------------------------------------
   inline PendingContainer<T>& operator=(PendingContainer<T> const& other)
   {
     return this->operator=(other.m_container);
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Copy operator from a std::vector. Impacted elements are set dirty.
+  //!
+  //! \throw std::out_of_range if the vector has more elements and the container
+  //! cannot be resized.
+  //----------------------------------------------------------------------------
   template<class U>
   PendingContainer<T>& operator=(std::vector<U> const& other)
   {
@@ -382,8 +594,7 @@ public:
       throw_if_cannot_expand();
     }
 
-    GPUMemory() -= memory();
-    GPUMemory() += other.size() * sizeof (T);
+    GPUMemory() += (other.size() * sizeof (T) - memory());
     DEBUG("Affecting %zu elements of size %zu bytes. GPU memory: %zu bytes",
           other.size(), sizeof (T), GPUMemory().load());
 
@@ -392,6 +603,13 @@ public:
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Copy operator from an initializer list. Impacted elements are set
+  //! dirty.
+  //!
+  //! \throw std::out_of_range if initializer list has more elements and the
+  //! container cannot be resized.
+  //----------------------------------------------------------------------------
   template<class U>
   PendingContainer<T>& operator=(std::initializer_list<U> il)
   {
@@ -402,16 +620,19 @@ public:
       throw_if_cannot_expand();
     }
 
-    GPUMemory() -= memory();
-    GPUMemory() += il.size() * sizeof (T);
-    DEBUG("Affecting %zu elements of size %zu bytes. GPU memory: %zu bytes",
-          il.size(), sizeof (T), GPUMemory().load());
+    GPUMemory() += (il.size() * sizeof (T) - memory());
+    DEBUG("'%s': Affecting %zu elements of size %zu bytes. GPU memory: %zu bytes",
+          cdebug(), il.size(), sizeof (T), GPUMemory().load());
 
     m_container = il;
     tagAsPending(0_z, other_size);
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Compute * val for each element of the container. The whole container
+  //! is set a dirty.
+  //----------------------------------------------------------------------------
   template<class U>
   inline PendingContainer<T>& operator*=(U const& val)
   {
@@ -423,6 +644,9 @@ public:
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
   template<class U>
   inline PendingContainer<T>& operator+=(U const& val)
   {
@@ -434,6 +658,10 @@ public:
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Compute - val for each element of the container. The whole container
+  //! is set a dirty.
+  //----------------------------------------------------------------------------
   template<class U>
   inline PendingContainer<T>& operator-=(U const& val)
   {
@@ -445,16 +673,25 @@ public:
     return *this;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Compute / val for each element of the container. The whole container
+  //! is set a dirty.
+  //----------------------------------------------------------------------------
   template<class U>
   inline PendingContainer<T>& operator/=(U const& val)
   {
     return PendingContainer<T>::operator*=(U(1) / val);
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Display the content of the container on the console.
+  //----------------------------------------------------------------------------
   friend std::ostream& operator<<(std::ostream& stream, const PendingContainer& cont)
   {
-    stream << "PendingContainer: ";
-    if (0_z != cont.size())
+    stream << "PendingContainer:" << cont.size()
+           << ':' << cont.cdebug() << ": ";
+
+    if (likely(0_z != cont.size()))
       {
         stream << cont.m_container[0];
         for (size_t i = 1_z; i < cont.size(); ++i) {
@@ -464,6 +701,9 @@ public:
     return stream;
   };
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the container as read-write array.
+  //----------------------------------------------------------------------------
   inline T* to_array()
   {
     if (likely(0_z != m_container.size()))
@@ -476,6 +716,9 @@ public:
       }
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the container as read only array.
+  //----------------------------------------------------------------------------
   inline const T* to_array() const
   {
     if (likely(0_z != m_container.size()))
@@ -488,27 +731,71 @@ public:
       }
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Return the container in read write access. FIXME should not be const ?
+  //----------------------------------------------------------------------------
   inline std::vector<T>& data()
   {
     return m_container;
   }
 
+  void setDebugName(std::string const& n)
+  {
+    m_debug = n;
+  }
+
 protected:
 
+  //----------------------------------------------------------------------------
+  //! \brief Throw std::out_of_range if the container cannot be resied and the
+  //! user tried to resize it.
+  //----------------------------------------------------------------------------
   inline void throw_if_cannot_expand()
   {
     if (likely(!m_can_expand)) {
-      throw std::out_of_range("Cannot change buffer size once loaded on GPU");
+      mythrow("Cannot change buffer size once loaded on GPU");
     }
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Forbidding resizing the container. For example once the associated
+  //! VBOs (GPU memory) is allocated and cannot be resized.
+  //----------------------------------------------------------------------------
   inline void set_cannot_expand()
   {
     m_can_expand = false;
   }
 
+  //! \brief The container holding elements.
   std::vector<T> m_container;
+
+  //! \brief When set to true the m_container can increase its size, else not
+  //! which produce an exception. Forbidding resizing the container is needed
+  //! because VBOs cannot be resized.
   bool m_can_expand = true;
+
+private:
+
+  //----------------------------------------------------------------------------
+  //! \brief Wrapper method on throw std::out_of_range for logging more information.
+  //----------------------------------------------------------------------------
+  void mythrow(std::string const& msg) const
+  {
+    ERROR("'%s': throw %s", cdebug(), msg.c_str());
+
+    std::string full_msg(m_debug + ": " + msg);
+    throw std::out_of_range(full_msg.c_str());
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Return the degun name as char* for logs.
+  //----------------------------------------------------------------------------
+  inline const char* cdebug() const
+  {
+    return m_debug.c_str();
+  }
+
+  std::string m_debug = "PC";
 };
 
 } // namespace glwrap

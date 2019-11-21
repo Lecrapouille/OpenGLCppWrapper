@@ -69,7 +69,8 @@ static bool doload2D(const char *const filename, const PixelLoadFormat format,
     }
   else
     {
-      ERROR("Failed loading picture file '%s'", filename);
+      ERROR("Failed loading picture file '%s'. Reason was '%s'",
+            filename, SOIL_last_result());
       width = height = 0;
       data.clear();
       return false;
@@ -156,7 +157,7 @@ public:
   //!
   //! \return true if texture data have been loaded.
   //----------------------------------------------------------------------------
-  inline bool load(std::string const& filename)
+  inline bool load(std::string const& filename) // TODO hold the filename. name == filename
   {
     return load(filename.c_str());
   }
@@ -289,7 +290,7 @@ private:
     const GLsizei width = (stop / m_width) - x;
     const GLsizei height = (stop % m_width) - y;
 
-    DEBUG("Texture '%s' update (%zu,%zu) --> ((%d,%d), (%d,%d))",
+    DEBUG("=== FLUSH Texture2D '%s' to GPU: (%zu,%zu) --> ((%d,%d), (%d,%d))",
           cname(), start, stop, x, y, width, height);
 
     // FIXME: not working if width and height are not the txture size

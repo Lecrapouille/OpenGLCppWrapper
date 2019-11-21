@@ -44,7 +44,7 @@ namespace window
      TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT
     };
 
-  //! \brief Structure holding mouse states
+  //! \brief Structure holding mouse states used by IGLWindow callbacks.
   struct Mouse
   {
     //! \brief position (x and y coordinate)
@@ -226,7 +226,7 @@ private:
   //! \brief Windows current height
   uint32_t m_height;
   //! \brief Windows title
-  const char *m_title;
+  const char *m_title = nullptr;
   //! \brief window::Mouse states
   window::Mouse m_mouse;
   //! \brief GLF window context

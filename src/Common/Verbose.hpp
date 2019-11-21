@@ -30,14 +30,14 @@ PRINTFLIKE(5, 6)
 void errout(FILE *stream, const char* type, const char* file, const uint32_t line, const char* format, ...);
 
 #  ifdef ENABLE_DEBUG
-#    define DEBUG_HELPER(format, ...) errout(stdout, "DEBUG", __FILE__, __LINE__, format "%s", __VA_ARGS__)
+#    define DEBUG_HELPER(format, ...) errout(stderr, "DEBUG:", __FILE__, __LINE__, format "%s", __VA_ARGS__)
 #    define DEBUG(...) DEBUG_HELPER(__VA_ARGS__, "")
 #  else
 #    define DEBUG(format, ...)
 #  endif
 
 #  ifndef ERROR
-#    define ERROR_HELPER(format, ...) errout(stderr, "ERROR", __FILE__, __LINE__, format "%s", __VA_ARGS__)
+#    define ERROR_HELPER(format, ...) errout(stderr, "ERROR:", __FILE__, __LINE__, format "%s", __VA_ARGS__)
 #    define ERROR(...) ERROR_HELPER(__VA_ARGS__, "")
 #  endif
 

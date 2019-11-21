@@ -24,4 +24,4 @@ make compile-external-libs
 make -j8
 
 # Compil Examples
-(make download-resources; cd examples && make -j8)
+(cd examples/00_Core && make -j8)

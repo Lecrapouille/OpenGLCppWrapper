@@ -45,10 +45,11 @@ void GLExample03::debug()
 {
   // VBOs of the VAO
   {
-    std::vector<std::string> vbos = m_triangle.VBONames();
+    std::vector<std::string> vbo_names;
+    size_t count = m_triangle.getVBONames(vbo_names);
     std::cout << "VAO '" << m_triangle.name() << "' has "
-              << vbos.size() << " VBO: " << std::endl;
-    for (auto& it: vbos)
+              << count << " VBO: " << std::endl;
+    for (auto& it: vbo_names)
       {
         std::cout << "  '" << it << "'" << std::endl;
       }
@@ -56,10 +57,11 @@ void GLExample03::debug()
 
   // Uniforms of the program
   {
-    std::vector<std::string> uniforms = m_prog.getUniformNames();
+    std::vector<std::string> uniform_names;
+    size_t count = m_prog.getUniformNames(uniform_names);
     std::cout << "Prog '" << m_prog.name() << "' has "
-              << uniforms.size() << " uniforms: " << std::endl;
-    for (auto& it: uniforms)
+              << count << " uniforms: " << std::endl;
+    for (auto& it: uniform_names)
       {
         std::cout << "  '" << it << "'" << std::endl;
       }
@@ -67,10 +69,11 @@ void GLExample03::debug()
 
   // Textures samplers
   {
-    std::vector<std::string> samplers = m_prog.getSamplersNames();
+    std::vector<std::string> sampler_names;
+    size_t count = m_prog.getSamplersNames(sampler_names);
     std::cout << "Prog '" << m_prog.name() << "' has "
-              << samplers.size() << " samplers: " << std::endl;
-    for (auto& it: samplers)
+              << count << " samplers: " << std::endl;
+    for (auto& it: sampler_names)
       {
         std::cout << "  '" << it << "'" << std::endl;
       }

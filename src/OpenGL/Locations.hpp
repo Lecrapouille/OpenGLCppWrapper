@@ -37,12 +37,15 @@
 namespace glwrap
 {
 
-//! \brief Used by GLProgram
+// Used by GLProgram
 DECLARE_CLASS(GLLocation)
 
 // *****************************************************************************
-//! \brief GLLocation makes the interface between a shader variable and your
-//! c++ code. It allows to upload CPU data to the GPU.
+//! \class GLLocation Locations.hpp
+//! \ingroup OpenGL
+//!
+//! \brief Serve as interface between a shader variable and your C++ code. It
+//! allows to upload CPU data to the GPU.
 //!
 //! \note this class shall stay private and not be used directly by the
 //! developper. Indeed this class is only managed by GLProgram.
@@ -54,10 +57,13 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Constructor. This constructor makes no other actions.
   //!
-  //! \param name Give a name to the instance. GLProgram uses names in their hash table.
-  //! \param dim set the dimension of variable (1 for scalar else the dimension for vector)
-  //! \param gltype set the OpenGL type of data (GL_FLOAT ...)
-  //! \param prog set the GLProgram identifier (owner of this instance).
+  //! \param[in] name Give a name to the instance. GLProgram uses these names in their
+  //! internal hash table.
+  //! \param[in] dim set the dimension of variable (1 for scalar else the
+  //! dimension for vector)
+  //! \param[in] gltype set the OpenGL type of data (GL_FLOAT ...)
+  //! \param[in] prog set the GLProgram identifier (which is the owner of this
+  //! instance).
   //----------------------------------------------------------------------------
   GLLocation(const char *name, const GLint dim, const GLenum gltype, const GLuint prog)
     : GLObject(name),
@@ -68,11 +74,11 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Alias for GLObject::getID() but in a more explicit way.
+  //! \brief Alias for GLObject::handle() but in a more explicit way.
   //----------------------------------------------------------------------------
   inline GLint location() const
   {
-    return m_handle;
+    return handle();
   }
 
   //----------------------------------------------------------------------------
@@ -93,7 +99,9 @@ public:
 
 protected:
 
+  //! \brief Dimension of the attribute variable (scalar, vector, matrix).
   const GLint  m_dim;
+  //! \brief The handle of the GLProgram owning this instance.
   const GLuint m_program;
 };
 

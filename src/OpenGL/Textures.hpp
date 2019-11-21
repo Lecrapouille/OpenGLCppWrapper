@@ -102,6 +102,7 @@ public:
       m_dimension(dimension)
   {
     m_target = target;
+    m_buffer.setDebugName(name);
   }
 
   //----------------------------------------------------------------------------
