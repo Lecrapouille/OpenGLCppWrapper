@@ -847,6 +847,10 @@ private:
       {
         throw OpenGLException("Failed OpenGL attributes have not the same size");
       }
+    if (!m_vao->checkLoadTextures())
+      {
+        throw OpenGLException("Failed OpenGL textures have not all been loaded");
+      }
   }
 
   //----------------------------------------------------------------------------

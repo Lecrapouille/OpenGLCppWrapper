@@ -439,6 +439,35 @@ public:
   }
 
   //----------------------------------------------------------------------------
+  //! \brief Check if all textures have been loaded with picture file.
+  //----------------------------------------------------------------------------
+  bool checkLoadTextures()
+  {
+    if (likely(m_textures_verified))
+      {
+        return true;
+      }
+
+    if (unlikely(!isBound() || m_vbos.empty()))
+      {
+        ERROR("VAO '%s' is not yet bound to a GLProgram", cname());
+        return false;
+      }
+
+    m_textures_verified = true;
+    for (auto& it: m_textures)
+      {
+        if (unlikely(!it.second->loaded()))
+         {
+           m_textures_verified = false;
+           ERROR("Texture '%s' has not been loaded", it.second->cname());
+         }
+      }
+
+    return m_textures_verified;
+  }
+
+  //----------------------------------------------------------------------------
   //! \brief Check if all VBOs have the same size (same number of elements). The
   //! purpose of this method is purely for security and/or debugging. You can
   //! call it after filling a VBO or after the GLWindow::setup() to check if all
@@ -460,6 +489,7 @@ public:
         return false;
       }
 
+    m_vbo_size_verified = true;
     size_t size = m_vbos.begin()->second->size();
     for (auto& it: m_vbos)
       {
@@ -471,11 +501,10 @@ public:
               {
                 ERROR("=> VBO '%s' size is %zu", itt.first.c_str(), itt.second->size());
               }
-            return false;
+            m_vbo_size_verified = false;
           }
       }
-    m_vbo_size_verified = true;
-    return true;
+    return m_vbo_size_verified;
   }
 
 private:
@@ -512,16 +541,22 @@ private:
   //! its type T. If possible cache your VBO reference because this function is
   //! not fast.
   //!
+  //! \fixme m_vbo_size_verified is always changed to false but shall be only
+  //! bed modified when PendingContainer has been changed.
+  //!
   //! \return the reference of the VBO if it exists.
   //!
   //! \throw OpenGLException if the VBO is not in the list (probably due to a
   //! typo in the name) or if the type T does not match.
   //----------------------------------------------------------------------------
-  template<typename T> // FIXME: m_vbo_size_verified = false; shall be called by PendingContainer
+  template<typename T>
   GLVertexBuffer<T>& VBO(const char *name)
   {
     if (unlikely(nullptr == name))
       throw OpenGLException("nullptr passed to VBO()");
+
+    // FIXME: shall be called by PendingContainer
+    m_vbo_size_verified = false;
 
     DEBUG("VAO '%s' get VBO '%s'", cname(), name);
     if (likely(isBound()))
@@ -550,6 +585,9 @@ private:
   //! \brief Locate and get the reference of ther texture refered by its type T
   //! and by the given the sampler name used in GLSL code.
   //!
+  //! \fixme m_textures_verified is always changed to false but shall be only
+  //! bed modified when PendingContainer has been changed.
+  //!
   //! \note Do not confuse sampler name with texture filename. \param name is
   //! the GLSL sampler name.
   //!
@@ -563,6 +601,9 @@ private:
   {
     if (unlikely(nullptr == name))
       throw OpenGLException("nullptr passed to texture()");
+
+    // FIXME: shall be called by PendingContainer
+    m_textures_verified = false;
 
     DEBUG("VAO '%s' get texture '%s'", cname(), name);
     if (likely(isBound()))
@@ -716,6 +757,8 @@ private:
   GLenum prog = 0;
   //! \brief boolean avoiding to make uncessary checks on VBO size.
   bool m_vbo_size_verified = false;
+  //! \brief boolean avoiding to make uncessary checks on textures.
+  bool m_textures_verified = false;
 };
 
 //----------------------------------------------------------------------------
