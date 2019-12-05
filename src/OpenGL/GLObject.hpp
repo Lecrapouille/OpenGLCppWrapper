@@ -170,7 +170,7 @@ namespace glwrap
     //----------------------------------------------------------------------------
     void begin()
     {
-      if (likely(needCreate()))
+      if (unlikely(needCreate()))
         {
           // OpenGL context shall be present
           if (unlikely(!isContextCreated()))
