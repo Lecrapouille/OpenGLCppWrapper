@@ -474,7 +474,8 @@ public:
         if (unlikely(!it.second->loaded()))
          {
            m_textures_verified = false;
-           ERROR("Texture '%s' has not been loaded", it.second->cname());
+           ERROR("VAO '%s': texture '%s' has not been loaded",
+                 cname(), it.second->cname());
          }
       }
 
