@@ -119,9 +119,10 @@ bool GLExample07::createShape()
   // FIXME Pure Geometry classes
   // Create a cylinder with two caps (bottom & top). Merge them into a
   // single VAO.
-  Cylinder cylinder("", radius, height, slices);
-  Circle circle1("", radius, slices); circle1.vertices() += Vector3f(0.0f, 0.0f, 0.5f);
-  Circle circle2("", radius, slices); circle2.vertices() -= Vector3f(0.0f, 0.0f, 0.5f);
+  MaterialBasic_SP material = MaterialBasic::create();
+  Cylinder cylinder("", material, radius, height, slices);
+  Circle circle1("", material, radius, slices); circle1.vertices() += Vector3f(0.0f, 0.0f, 0.5f);
+  Circle circle2("", material, radius, slices); circle2.vertices() -= Vector3f(0.0f, 0.0f, 0.5f);
 
   m_shape.vertices()
     .append(circle1.vertices())

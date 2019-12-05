@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_15_GEOMETRY_HPP
-#  define EXAMPLE_15_GEOMETRY_HPP
+#ifndef EXAMPLE_16_MATERIAL_DEPTH_HPP
+#  define EXAMPLE_16_MATERIAL_DEPTH_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include <iostream>
@@ -28,15 +28,16 @@
 using namespace glwrap;
 using namespace glwrap::window;
 
-class GLExample15: public IGLWindow
+class GLExample16: public IGLWindow
 {
 public:
 
-  GLExample15()
-    : m_cameraController(Camera3D::Type::PERSPECTIVE)
+  GLExample16()
+    : m_material(MaterialDepth::create()),
+      m_cameraController(Camera3D::Type::PERSPECTIVE)
   {}
 
-  ~GLExample15()
+  ~GLExample16()
   {}
 
 protected:
@@ -49,6 +50,7 @@ protected:
 
 private:
 
+  MaterialDepth_SP m_material;
   Tube_SP          m_tube1;
   Tube_SP          m_tube2;
   Cone_SP          m_cone1;
@@ -61,4 +63,4 @@ private:
   float            m_base_radius = 1.0f;
 };
 
-#endif // EXAMPLE_15_GEOMETRY_HPP
+#endif // EXAMPLE_16_MATERIAL_DEPTH_HPP

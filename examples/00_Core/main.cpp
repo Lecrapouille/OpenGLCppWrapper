@@ -32,7 +32,9 @@
 #include "12_ComplexShader.hpp"
 #include "13_Lighting.hpp"
 #include "14_MapEditor.hpp"
-#include "15_Geometry.hpp"
+#include "15_MaterialBasic.hpp"
+#include "16_MaterialDepth.hpp"
+#include "17_MaterialNormal.hpp"
 #include <iostream>
 #include <map>
 #include <stdlib.h>
@@ -62,7 +64,9 @@ static void usage(char *argv[])
   std::cout << " 12: Universe Nursery" << std::endl;
   std::cout << " 13: Light + material" << std::endl;
   std::cout << " 14: Basic Map editor" << std::endl;
-  std::cout << " 15: Geometry and SceneGraph" << std::endl;
+  std::cout << " 15: Geometry and basic material" << std::endl;
+  std::cout << " 16: Geometry and normal material" << std::endl;
+  std::cout << " 17: Geometry and depth material" << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -87,64 +91,77 @@ int main(int argc, char *argv[])
     }
 
   std::unique_ptr<IGLWindow> win;
-  switch (id)
+  try
     {
-    case 0:
-      win = std::make_unique<GLExample00>();
-      break;
-    case 1:
-      win = std::make_unique<GLExample01>();
-      break;
-    case 2:
-      win = std::make_unique<GLExample02>();
-      break;
-    case 3:
-      win = std::make_unique<GLExample03>();
-      break;
-    case 4:
-      std::cerr << "Coming soon" << std::endl;
-      //win = std::make_unique<GLExample04>();
-      return EXIT_FAILURE;
-      //break;
-    case 5:
-      win = std::make_unique<GLExample05>();
-      break;
-    case 6:
-      win = std::make_unique<GLExample06>();
-      break;
-    case 7:
-      win = std::make_unique<GLExample07>();
-      break;
-    case 8:
-      win = std::make_unique<GLExample08>();
-      break;
-    case 9:
-      win = std::make_unique<GLExample09>();
-      break;
-    case 10:
-      win = std::make_unique<GLExample10>();
-      break;
-    case 11:
-      win = std::make_unique<GLExample11>();
-      break;
-    case 12:
-      win = std::make_unique<GLExample12>();
-      break;
-    case 13:
-      win = std::make_unique<GLExample13>();
-      break;
-    case 14:
-      win = std::make_unique<GLExample14>();
-      break;
-    case 15:
-      win = std::make_unique<GLExample15>();
-      break;
-    default:
-      std::cerr << "Incorrect example id !" << std::endl;
-      std::cerr << "'" << argv[1] << "' is not a valid example id !" << std::endl;
-      usage(argv);
+      switch (id)
+        {
+        case 0:
+          win = std::make_unique<GLExample00>();
+          break;
+        case 1:
+          win = std::make_unique<GLExample01>();
+          break;
+        case 2:
+          win = std::make_unique<GLExample02>();
+          break;
+        case 3:
+          win = std::make_unique<GLExample03>();
+          break;
+        case 4:
+          std::cerr << "Coming soon" << std::endl;
+          //win = std::make_unique<GLExample04>();
+          return EXIT_FAILURE;
+          //break;
+        case 5:
+          win = std::make_unique<GLExample05>();
+          break;
+        case 6:
+          win = std::make_unique<GLExample06>();
+          break;
+        case 7:
+          win = std::make_unique<GLExample07>();
+          break;
+        case 8:
+          win = std::make_unique<GLExample08>();
+          break;
+        case 9:
+          win = std::make_unique<GLExample09>();
+          break;
+        case 10:
+          win = std::make_unique<GLExample10>();
+          break;
+        case 11:
+          win = std::make_unique<GLExample11>();
+          break;
+        case 12:
+          win = std::make_unique<GLExample12>();
+          break;
+        case 13:
+          win = std::make_unique<GLExample13>();
+          break;
+        case 14:
+          win = std::make_unique<GLExample14>();
+          break;
+        case 15:
+          win = std::make_unique<GLExample15>();
+          break;
+        case 16:
+          win = std::make_unique<GLExample16>();
+          break;
+        case 17:
+          win = std::make_unique<GLExample17>();
+          break;
+        default:
+          std::cerr << "Incorrect example id !" << std::endl;
+          std::cerr << "'" << argv[1] << "' is not a valid example id !" << std::endl;
+          usage(argv);
+          return EXIT_FAILURE;
+        }
+      return win->start() ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+  catch (const OpenGLException& e)
+    {
+      ERROR("Caught exception: '%s'", e.message().c_str());
       return EXIT_FAILURE;
     }
-
-  return win->start() ? EXIT_SUCCESS : EXIT_FAILURE;
 }

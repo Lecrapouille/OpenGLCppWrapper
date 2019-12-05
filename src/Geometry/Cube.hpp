@@ -25,6 +25,7 @@
 
 namespace glwrap
 {
+  DECLARE_CLASS(Cube)
 
 // *****************************************************************************
 //! \brief Create an unity-size cube centered at 0
@@ -33,8 +34,8 @@ class Cube: public Shape3D
 {
 public:
 
-  Cube(std::string const& name)
-    : Shape3D(name)
+  Cube(std::string const& name, Material_SP material)
+    : Shape3D(name, material)
   {
     DEBUG("%s", "<<<---------- Fill Cube ------------------------------------------------------");
 
@@ -50,9 +51,14 @@ public:
        #include "Geometry/CubeUV.incl"
     };
 
-    color() = Vector4f(1.0f, 0.0f, 0.0f, 1.0f);
-
     DEBUG("%s", "------------- Fill Cube --------------------------------------------------->>>");
+  }
+
+public:
+
+  static Cube_SP create(std::string const& name, Material_SP material)
+  {
+    return std::make_shared<Cube>(name, material);
   }
 };
 

@@ -23,6 +23,7 @@
 
 #  include "Scene/SceneGraph.hpp"
 #  include "OpenGL/Program.hpp"
+#  include "Material/Material.hpp"
 
 namespace glwrap
 {
@@ -38,7 +39,7 @@ DECLARE_CLASS(Shape3D)
 // *****************************************************************************
 class Shape3D: public Node3D
 {
-public:
+public: // TODO BoundingBox, BoundingSphere
 
   //----------------------------------------------------------------------------
   //! \brief Constructor. Compile the internal GLSL shader.
@@ -52,42 +53,52 @@ public:
   //! \note we init reference on VAO not yet existing, this is fine because map
   //!       does not invalidate iterator and references.
   //!
-  //! \fixme Attach Material
+  //! \fixme Attach Material, attach std::function<onUpdate>
   //----------------------------------------------------------------------------
-  Shape3D(std::string const& name) // TODO Material, std::function<onUpdate>)
+  Shape3D(std::string const& name, Material_SP material = MaterialBasic::create())
     : Node3D(name),
-      m_prog("prog_" + name),
+      m_material(material),
+      m_program(m_material->program()),
       m_vao("VAO_" + name),
       m_vertices(m_vao.vector3f("position")),
-      m_normals(m_vao.vector3f("normals")),
+      m_normals(m_vao.vector3f("normal")),
       m_uv(m_vao.vector2f("UV")),
-      m_texture(m_vao.texture2D("texID")),
+      m_texture(m_vao.texture2D("texture")),
       m_indices(m_vao.index32())
   {
-    if (unlikely(!isContextCreated()))
-      throw OpenGLException("OpenGL Context is not yet created. "
-                            "Make this instance called after GLWindow constructor");
+    throwIfOpenGLClassCalledBeforeContext();
 
-    DEBUG("%s", "<<<---------- NewGeometry ------------------------------------------------------");
-    m_vs.fromFile("shaders/Shape3D.m_vs");
-    m_fs.fromFile("shaders/Shape3D.m_fs");
+    DEBUG("%s", "<<<---------- NewGeometry+Material ---------------------------------------------");
 
-    if (unlikely(!m_prog.attachShaders(m_vs, m_fs).compile()))
-      throw OpenGLException(m_prog.getError());
+    if (unlikely(!m_program.compile()))
+      throw OpenGLException(m_program.getError());
 
-    m_prog.bind(m_vao);
+    m_program.bind(m_vao);
+    m_material->init(); // FIXME: ugly code
 
     model() = Matrix44f(matrix::Identity);
-    color() = Vector4f(1.0f);
 
-    DEBUG("%s", "------------- NewGeometry --------------------------------------------------->>>");
+    DEBUG("%s", "------------- NewGeometry+Material ------------------------------------------>>>");
   }
+
+  // TODO
+  //Shape3D(std::string const& name)
+  //  : Shape3D(name, Material::create(Material::Type::Basic))
+  //{}
 
   //----------------------------------------------------------------------------
   //! \brief Destructor. Release VBOs.
   //----------------------------------------------------------------------------
   virtual ~Shape3D()
   {}
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  inline Material& material()
+  {
+    return *m_material;
+  }
 
   //----------------------------------------------------------------------------
   //! \brief Tell if the instance is valid: the OpenGL Program has been compiled
@@ -98,7 +109,7 @@ public:
   //----------------------------------------------------------------------------
   inline bool isValid()
   {
-    return m_prog.isValid() && m_vao.checkVBOSizes() &&
+    return m_program.isValid() && m_vao.checkVBOSizes() &&
       m_vao.checkLoadTextures();
   }
 
@@ -172,7 +183,7 @@ public:
   //----------------------------------------------------------------------------
   inline Matrix44f& model()
   {
-    return m_prog.matrix44f("model");
+    return m_program.matrix44f("modelMatrix");
   }
 
   //----------------------------------------------------------------------------
@@ -181,7 +192,7 @@ public:
   //----------------------------------------------------------------------------
   inline Matrix44f& view()
   {
-    return m_prog.matrix44f("view");
+    return m_program.matrix44f("viewMatrix");
   }
 
   //----------------------------------------------------------------------------
@@ -190,16 +201,15 @@ public:
   //----------------------------------------------------------------------------
   inline Matrix44f& projection()
   {
-    return m_prog.matrix44f("projection");
+    return m_program.matrix44f("projectionMatrix");
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the reference of the color of the Material.
-  //! \return the reference of the color.
+  //! \brief
   //----------------------------------------------------------------------------
-  inline Vector4f& color()
+  inline Vector3f& cameraPosition()
   {
-    return m_prog.vector4f("color");
+    return m_program.vector3f("cameraPosition");
   }
 
   //----------------------------------------------------------------------------
@@ -242,7 +252,7 @@ public:
   //----------------------------------------------------------------------------
   inline void draw()
   {
-    m_prog.draw(m_vao, Mode::TRIANGLES, index());
+    m_program.draw(m_vao, Mode::TRIANGLES, index());
   }
 
 protected:
@@ -263,15 +273,8 @@ protected:
 
 private:
 
-  //! \brief GLSL code Vertex shader.
-  //! \fixme set it static ?
-  GLVertexShader            m_vs;
-  //! \brief GLSL code Fragment shader.
-  //! \fixme set it static ?
-  GLFragmentShader          m_fs;
-  //! \brief GLSL Program.
-  //! \fixme set it static ?
-  /*static*/ GLProgram      m_prog;
+  Material_SP               m_material;
+  GLProgram&                m_program;
   //! \brief Holds all VBOs.
   GLVAO                     m_vao;
   //! \brief Reference on the VBO holding vertice positions.

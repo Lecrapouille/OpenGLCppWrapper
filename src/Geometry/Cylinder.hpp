@@ -43,16 +43,16 @@ public:
   //! \param height The height of the cylinder
   //! \param slices The number of subdivisions around the Z axis.
   //----------------------------------------------------------------------------
-  Cylinder(std::string const& name, float const radius, float const height, uint32_t const slices)
-    : Tube(name, radius, radius, height, slices)
+  Cylinder(std::string const& name, Material_SP material, float const radius, float const height, uint32_t const slices)
+    : Tube(name, material, radius, radius, height, slices)
   {}
 
-  static Cylinder_SP create(std::string const& name,
+  static Cylinder_SP create(std::string const& name, Material_SP material,
                             float const radius,
                             float const height,
                             uint32_t const slices)
   {
-    return std::make_shared<Cylinder>(name, radius, height, slices);
+    return std::make_shared<Cylinder>(name, material, radius, height, slices);
   }
 };
 

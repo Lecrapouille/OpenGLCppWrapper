@@ -44,9 +44,9 @@ public:
   //! \param[in] height The height of the tube.
   //! \param[in] slices The number of subdivisions around the Z axis.
   //----------------------------------------------------------------------------
-  Tube(std::string const& name, float const top_radius, float const base_radius,
+  Tube(std::string const& name, Material_SP material, float const top_radius, float const base_radius,
        float const height, uint32_t const slices)
-    : Shape3D(name)
+    : Shape3D(name, material)
   {
     // Create caps ?
     const bool base_caps = base_radius > 0.0f;
@@ -137,13 +137,13 @@ public:
       }
   }
 
-  static Tube_SP create(std::string const& name,
+  static Tube_SP create(std::string const& name, Material_SP material,
                         float const top_radius,
                         float const base_radius,
                         float const height,
                         uint32_t const slices)
   {
-    return std::make_shared<Tube>(name, top_radius, base_radius, height, slices);
+    return std::make_shared<Tube>(name,  material, top_radius, base_radius, height, slices);
   }
 };
 

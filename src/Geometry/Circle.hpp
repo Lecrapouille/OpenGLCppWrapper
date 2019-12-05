@@ -26,6 +26,8 @@
 namespace glwrap
 {
 
+DECLARE_CLASS(Circle)
+
 // *****************************************************************************
 //! \brief Create a Z-axis aligned circle shape (with 3d coordinates).
 //! \ingroup Geometry
@@ -39,8 +41,8 @@ public:
   //! \param radius The radius of the circle.
   //! \param slices The number of subdivisions around the Z axis.
   //----------------------------------------------------------------------------
-  Circle(std::string const& name, float const radius, uint32_t const slices/*, bool const inversed*/)
-    : Shape3D(name)
+  Circle(std::string const& name, Material_SP material, float const radius, uint32_t const slices/*, bool const inversed*/)
+    : Shape3D(name, material)
   {
     std::vector<float> angle;
     maths::linspace(0.0f, float(maths::TWO_PI), slices + 1u, angle, true);
@@ -81,6 +83,11 @@ public:
         index().append(i0 + i);
         index().append(i0 + i + 1u);
       }
+  }
+
+  static Circle_SP create(std::string const& name, Material_SP material, float const radius, uint32_t const slices/*, bool const inversed*/)
+  {
+    return std::make_shared<Circle>(name, material, radius, slices);
   }
 };
 

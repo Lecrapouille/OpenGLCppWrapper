@@ -41,16 +41,16 @@ public:
   //! \param radius The radius of the cone.
   //! \param height The height of the cone.
   //----------------------------------------------------------------------------
-  Cone(std::string const& name, float const radius, float const height, uint32_t const slices)
-    : Tube(name, 0.0f, radius, height, slices)
+  Cone(std::string const& name, Material_SP material, float const radius, float const height, uint32_t const slices)
+    : Tube(name, material, 0.0f, radius, height, slices)
   {}
 
-  static Cone_SP create(std::string const& name,
+  static Cone_SP create(std::string const& name, Material_SP material,
                         float const radius,
                         float const height,
                         uint32_t const slices)
   {
-    return std::make_shared<Cone>(name, radius, height, slices);
+    return std::make_shared<Cone>(name, material, radius, height, slices);
   }
 };
 

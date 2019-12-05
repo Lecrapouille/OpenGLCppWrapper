@@ -18,7 +18,7 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "15_Geometry.hpp"
+#include "15_MaterialBasic.hpp"
 
 //------------------------------------------------------------------
 //! \file
@@ -60,19 +60,19 @@ bool GLExample15::setup()
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
   //glCheck(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 
-  //hideMouseCursor();
+  hideMouseCursor();
 
   // Place a camera controlled by the user
   PerspectiveCamera3D& camera = m_cameraController.camera();
   camera.lookAt(Vector3f(0.3f, 0.3f, 3.0f), Vector3f(0.0f, 0.0f, -1.0f));
 
   // Create shapes
-  m_tube1 = Tube::create("Tube1", 1.0f, m_base_radius, 1.0f, 128u);
-  m_tube2 = Tube::create("Tube2", 1.0f, -m_base_radius, 1.0f, 128u);
-  m_cone1 = Cone::create("Cone1", m_base_radius, 1.0f, 128u);
-  m_cone2 = Cone::create("Cone2", -m_base_radius, 1.0f, 128u);
-  m_pyra1 = Pyramid::create("Pyramid1", m_base_radius, 1.0f);
-  m_pyra2 = Pyramid::create("Pyramid2", -m_base_radius, 1.0f);
+  m_tube1 = Tube::create("Tube1", m_material, 1.0f, m_base_radius, 1.0f, 128u);
+  m_tube2 = Tube::create("Tube2", m_material, 1.0f, -m_base_radius, 1.0f, 128u);
+  m_cone1 = Cone::create("Cone1", m_material, m_base_radius, 1.0f, 128u);
+  m_cone2 = Cone::create("Cone2", m_material, -m_base_radius, 1.0f, 128u);
+  m_pyra1 = Pyramid::create("Pyramid1", m_material, m_base_radius, 1.0f);
+  m_pyra2 = Pyramid::create("Pyramid2", m_material, -m_base_radius, 1.0f);
 
   pimpShape(m_tube1);
   pimpShape(m_tube2);
@@ -119,7 +119,9 @@ bool GLExample15::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  m_shape->color() = Vector4f(st, ct, 0.0f, 1.0f);
+  m_material->opacity() = 1.0f;
+  m_material->diffuse() = Vector3f(st, ct, 0.0f);
+  m_material->color() = m_material->diffuse();
 
   if (keyPressed(GLFW_KEY_UP))
     m_cameraController.processKeyboard(CameraController::Movement::FORWARD, dt());

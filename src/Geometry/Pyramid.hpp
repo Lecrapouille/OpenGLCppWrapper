@@ -41,15 +41,15 @@ public:
   //! \param radius The radius of the pyramid.
   //! \param height The height of the pyramid.
   //----------------------------------------------------------------------------
-  Pyramid(std::string const& name, float const radius, float const height)
-    : Cone(name, radius, height, 4)
+  Pyramid(std::string const& name, Material_SP material, float const radius, float const height)
+    : Cone(name, material, radius, height, 4)
   {}
 
-  static Pyramid_SP create(std::string const& name,
+  static Pyramid_SP create(std::string const& name, Material_SP material,
                            float const radius,
                            float const height)
   {
-    return std::make_shared<Pyramid>(name, radius, height);
+    return std::make_shared<Pyramid>(name, material, radius, height);
   }
 };
 
