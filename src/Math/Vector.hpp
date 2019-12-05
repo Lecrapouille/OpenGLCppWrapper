@@ -184,9 +184,15 @@ public:
     size_t i = n;
 
     while (i--)
-      {
-        m_data[i] *= l;
-      }
+      m_data[i] *= l;
+  }
+
+  void lerpSelf(Vector<T,n> const& uv, T const alpha)
+  {
+    size_t i = n;
+
+    while (i--)
+      m_data[i] += (uv.m_data[i] - m_data[i]) * alpha;
   }
 
 protected:

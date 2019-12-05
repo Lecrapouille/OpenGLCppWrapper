@@ -32,7 +32,7 @@ namespace matrix
 {
 
   template<typename T>
-  Matrix<T, 4_z, 4_z> translate(Matrix<T, 4_z, 4_z> const &m, Vector<T, 3_z> const &v)
+  Matrix<T, 4_z, 4_z> translate(Matrix<T, 4_z, 4_z> const& m, Vector<T, 3_z> const& v)
   {
     Matrix<T, 4_z, 4_z> M(m);
 
@@ -42,7 +42,7 @@ namespace matrix
   }
 
   template<typename T>
-  Matrix<T, 4_z, 4_z> scale(Matrix<T, 4_z, 4_z> const &m, Vector<T, 3_z> const &v)
+  Matrix<T, 4_z, 4_z> scale(Matrix<T, 4_z, 4_z> const& m, Vector<T, 3_z> const& v)
   {
     Matrix<T, 4_z, 4_z> M;
 
@@ -56,7 +56,7 @@ namespace matrix
 
   //! \brief angle in radian
   template<typename T>
-  Matrix<T, 4_z, 4_z> rotate(Matrix<T, 4_z, 4_z> const &m, T const angle, Vector<T, 3_z> const &v)
+  Matrix<T, 4_z, 4_z> rotate(Matrix<T, 4_z, 4_z> const& m, T const angle, Vector<T, 3_z> const& v)
   {
     T const c = std::cos(angle);
     T const s = std::sin(angle);
@@ -65,22 +65,22 @@ namespace matrix
     Vector<T, 3_z> temp((maths::one<T>() - c) * axis);
     Matrix<T, 4_z, 4_z> rotate;
 
-    rotate[0][0] = c + temp[0] * axis[0];
-    rotate[0][1] = temp[0] * axis[1] + s * axis[2];
-    rotate[0][2] = temp[0] * axis[2] - s * axis[1];
+    rotate(0, 0) = c + temp[0] * axis[0];
+    rotate(0, 1) = temp[0] * axis[1] + s * axis[2];
+    rotate(0, 2) = temp[0] * axis[2] - s * axis[1];
 
-    rotate[1][0] = temp[1] * axis[0] - s * axis[2];
-    rotate[1][1] = c + temp[1] * axis[1];
-    rotate[1][2] = temp[1] * axis[2] + s * axis[0];
+    rotate(1, 0) = temp[1] * axis[0] - s * axis[2];
+    rotate(1, 1) = c + temp[1] * axis[1];
+    rotate(1, 2) = temp[1] * axis[2] + s * axis[0];
 
-    rotate[2][0] = temp[2] * axis[0] + s * axis[1];
-    rotate[2][1] = temp[2] * axis[1] - s * axis[0];
-    rotate[2][2] = c + temp[2] * axis[2];
+    rotate(2, 0) = temp[2] * axis[0] + s * axis[1];
+    rotate(2, 1) = temp[2] * axis[1] - s * axis[0];
+    rotate(2, 2) = c + temp[2] * axis[2];
 
     Matrix<T, 4_z, 4_z> M;
-    M[0] = m[0] * rotate[0][0] + m[1] * rotate[0][1] + m[2] * rotate[0][2];
-    M[1] = m[0] * rotate[1][0] + m[1] * rotate[1][1] + m[2] * rotate[1][2];
-    M[2] = m[0] * rotate[2][0] + m[1] * rotate[2][1] + m[2] * rotate[2][2];
+    M[0] = m[0] * rotate(0, 0) + m[1] * rotate(0, 1) + m[2] * rotate(0, 2);
+    M[1] = m[0] * rotate(1, 0) + m[1] * rotate(1, 1) + m[2] * rotate(1, 2);
+    M[2] = m[0] * rotate(2, 0) + m[1] * rotate(2, 1) + m[2] * rotate(2, 2);
     M[3] = m[3];
 
     return M;
@@ -91,11 +91,11 @@ namespace matrix
   {
     Matrix<T, 4_z, 4_z> M(matrix::Identity);
 
-    M[0][0] = T(2) / (right - left);
-    M[1][1] = T(2) / (top - bottom);
-    M[2][2] = -maths::one<T>();
-    M[3][0] = -(right + left) / (right - left);
-    M[3][1] = -(top + bottom) / (top - bottom);
+    M(0, 0) = T(2) / (right - left);
+    M(1, 1) = T(2) / (top - bottom);
+    M(2, 2) = -maths::one<T>();
+    M(3, 0) = -(right + left) / (right - left);
+    M(3, 1) = -(top + bottom) / (top - bottom);
 
     return M;
   }
@@ -115,11 +115,11 @@ namespace matrix
     T const tanHalfFovY = std::tan(fovY / T(2));
     Matrix<T, 4_z, 4_z> M(0);
 
-    M[0][0] = maths::one<T>() / (aspect * tanHalfFovY);
-    M[1][1] = maths::one<T>() / (tanHalfFovY);
-    M[2][3] = -maths::one<T>();
-    M[2][2] = -(zFar + zNear) / (zFar - zNear);
-    M[3][2] = -(T(2) * zFar * zNear) / (zFar - zNear);
+    M(0, 0) = maths::one<T>() / (aspect * tanHalfFovY);
+    M(1, 1) = maths::one<T>() / (tanHalfFovY);
+    M(2, 3) = -maths::one<T>();
+    M(2, 2) = -(zFar + zNear) / (zFar - zNear);
+    M(3, 2) = -(T(2) * zFar * zNear) / (zFar - zNear);
 
     return M;
   }
@@ -139,30 +139,44 @@ namespace matrix
   //! position vector and R is the right vector (= cross product between U and D).
   // *************************************************************************************************
   template<typename T>
-  Matrix<T, 4_z, 4_z> lookAt(Vector<T, 3_z> const &position,
-                             Vector<T, 3_z> const &target,
-                             Vector<T, 3_z> const &upwards)
+  Matrix<T, 4_z, 4_z> lookAt(Vector<T, 3_z> const& position,
+                             Vector<T, 3_z> const& target,
+                             Vector<T, 3_z> const& upwards)
   {
     Vector<T, 3_z> const direction(vector::normalize(target - position));
     Vector<T, 3_z> const right(vector::normalize(vector::cross(direction, upwards)));
     Vector<T, 3_z> const up(vector::cross(right, direction));
     Matrix<T, 4_z, 4_z> M(matrix::Identity);
 
-    M[0][0] = right.x;
-    M[1][0] = right.y;
-    M[2][0] = right.z;
-    M[0][1] = up.x;
-    M[1][1] = up.y;
-    M[2][1] = up.z;
-    M[0][2] = -direction.x;
-    M[1][2] = -direction.y;
-    M[2][2] = -direction.z;
-    M[3][0] = -(vector::dot(right, position));
-    M[3][1] = -(vector::dot(up, position));
-    M[3][2] = vector::dot(direction, position);
+    M(0, 0) = right.x;
+    M(1, 0) = right.y;
+    M(2, 0) = right.z;
+    M(0, 1) = up.x;
+    M(1, 1) = up.y;
+    M(2, 1) = up.z;
+    M(0, 2) = -direction.x;
+    M(1, 2) = -direction.y;
+    M(2, 2) = -direction.z;
+    M(3, 0) = -(vector::dot(right, position));
+    M(3, 1) = -(vector::dot(up, position));
+    M(3, 2) = vector::dot(direction, position);
 
     return M;
   }
+
+  template<typename T>
+  Matrix<T, 3_z, 3_z> normalMatrix(Matrix<T, 4_z, 4_z> const& modelViewMatrix)
+  {
+    return Matrix<T, 3_z, 3_z>(transpose(inverse(modelViewMatrix)));
+  }
+
+  template<typename T>
+  Matrix<T, 3_z, 3_z> normalMatrix(Matrix<T, 4_z, 4_z> const& modelMatrix,
+                                   Matrix<T, 4_z, 4_z> const& viewMatrix)
+  {
+    return normalMatrix(modelMatrix * viewMatrix);
+  }
+
 } // namespace matrix
 } // namespace glwrap
 
