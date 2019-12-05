@@ -47,6 +47,10 @@ bool isContextCreated();
 //! \fixme Make this function private.
 void setContextCreated(bool const v = true);
 
+void throwIfNoOpenGLContext(std::string const& msg);
+void throwIfNoOpenGLContext();
+void throwIfOpenGLClassCalledBeforeContext();
+
 //----------------------------------------------------------------------------
 //! \brief Allow to detect if the last OpenGL command succeeded or failed.
 //! In the case of failure an error is displayed on console and/or logged.

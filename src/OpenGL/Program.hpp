@@ -799,6 +799,38 @@ private:
     }*/
 
   //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  void throw_if_incompatible_number_of_shaders()
+  {
+    size_t no_vertex_shaders = 0_z;
+    size_t no_fragment_shaders = 0_z;
+
+    for (auto const& it: m_shaders)
+      {
+        switch (it->target())
+          {
+          case GL_VERTEX_SHADER:
+            ++no_vertex_shaders;
+            if (no_vertex_shaders > 1_z)
+              throw OpenGLException("has too many vertex shaders. One is needed");
+            if (!it->loaded())
+              throw OpenGLException("Vertex shader has empty GLSL code");
+            break;
+          case GL_FRAGMENT_SHADER:
+            ++no_fragment_shaders;
+            if (no_fragment_shaders > 1_z)
+              throw OpenGLException("Prog '%s' has too many fragment shaders. One is needed");
+            if (!it->loaded())
+              throw OpenGLException("Fragment shader has empty GLSL code");
+            break;
+          case GL_GEOMETRY_SHADER:
+            break;
+          }
+      }
+  }
+
+  //----------------------------------------------------------------------------
   //! \brief Throw OpenGLException if GLProgram cannot be compiled (due to
   //! errors in shaders code source).
   //----------------------------------------------------------------------------
@@ -998,19 +1030,32 @@ private:
     DEBUG("Prog '%s' setup {", cname());
     bool failure = false;
 
-    // Compile shaders if they have not yet compiled
-    DEBUG("Prog '%s' compile shaders {", cname());
-    for (auto& it: m_shaders)
+    if (likely(m_shaders.size() >= 2_z))
       {
-        it->begin();
-        if (it->hasErrored())
+        throw_if_incompatible_number_of_shaders();
+
+        // Compile shaders if they have not yet compiled
+        DEBUG("Prog '%s' compile shaders {", cname());
+        for (auto& it: m_shaders)
           {
-            std::string msg = " " + it->name() + ":\n   " + it->getError();
-            concatError(msg);
-            failure = true;
+            DEBUG("Prog '%s' compile shader '%s'", cname(), it->cname());
+            it->begin();
+            if (it->hasErrored())
+              {
+                std::string msg = " " + it->name() + ":\n   " + it->getError();
+                concatError(msg);
+                failure = true;
+              }
           }
+        DEBUG("} Prog '%s' compile shaders. Failure? %u", cname(), failure);
       }
-    DEBUG("} Prog '%s' compile shaders. Failure? %u", cname(), failure);
+    else
+      {
+        ERROR("Prog '%s' has not enough shaders. Need >= 2 but got %zu",
+              cname(), m_shaders.size());
+        DEBUG("} Prog '%s' setup. Linked? %u", cname(), m_compiled);
+        failure = true;
+      }
 
     if (!failure)
       {
@@ -1272,6 +1317,7 @@ private:
             it->attachProg(0);
           }
       }
+    m_shaders.clear();
   }
 
   //----------------------------------------------------------------------------

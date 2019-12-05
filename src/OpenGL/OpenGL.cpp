@@ -52,6 +52,26 @@ void setContextCreated(bool const v)
 }
 
 //----------------------------------------------------------------------------
+void throwIfNoOpenGLContext(std::string const& msg)
+{
+  if (unlikely(!isContextCreated()))
+    throw OpenGLException("OpenGL Context is not yet created. " + msg);
+}
+
+//----------------------------------------------------------------------------
+void throwIfNoOpenGLContext()
+{
+  if (unlikely(!isContextCreated()))
+    throw OpenGLException("OpenGL Context is not yet created");
+}
+
+//----------------------------------------------------------------------------
+void throwIfOpenGLClassCalledBeforeContext()
+{
+  throwIfNoOpenGLContext("Make this instance called after GLWindow constructor");
+}
+
+//----------------------------------------------------------------------------
 void checkError(const char* filename, const uint32_t line, const char* expression)
 {
   GLenum id;
