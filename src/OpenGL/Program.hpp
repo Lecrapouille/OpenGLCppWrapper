@@ -454,7 +454,7 @@ public:
   inline T& uniform(const char *name)
   {
     DEBUG("Prog '%s' get uniform '%s'", cname(), name);
-    return getUniform<T>(name).data();
+    return getUniform<T>(name);
   }
 
   //----------------------------------------------------------------------------
@@ -470,7 +470,7 @@ public:
   inline const T& uniform(const char *name) const
   {
     DEBUG("Prog '%s' const get uniform '%s'", cname(), name);
-    return getUniform<T>(name).data();
+    return getUniform<T>(name);
   }
 
   //----------------------------------------------------------------------------

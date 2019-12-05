@@ -69,9 +69,9 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Return the texture identifier.
   //----------------------------------------------------------------------------
-  inline GLenum textureID() const
+  inline GLint textureID() const
   {
-    return m_texture_id;
+    return static_cast<GLint>(m_texture_id);
   }
 
 private:
@@ -91,7 +91,7 @@ private:
   virtual bool update() override
   {
     DEBUG("Sampler '%s' update", cname());
-    glCheck(glUniform1i(m_handle, static_cast<GLint>(m_texture_id)));
+    glCheck(glUniform1i(m_handle, textureID()));
     return false;
   }
 

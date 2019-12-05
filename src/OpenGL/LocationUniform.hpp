@@ -141,26 +141,24 @@ public:
   GLUniform<T>& operator=(const U& val)
   {
     GLUniform<T>::data() = T(val);
+    DEBUG("Uniform '%s' operator=", cname());
+    redoUpdate();
     return *this;
   }
 
   //----------------------------------------------------------------------------
   //! \brief Return the CPU data.
-  //TODO a deplacer dans GLUniform car on distingue GLSampler::texture
   //----------------------------------------------------------------------------
-  inline T const& data() const
+  inline operator const T&() const
   {
+    DEBUG("Uniform '%s' get data", cname());
     return m_data;
   }
 
-  //----------------------------------------------------------------------------
-  //! \brief Return the CPU data.
-  //----------------------------------------------------------------------------
-  inline T& data()
+  inline operator T&()
   {
-    // FIXME always modified ?
+    DEBUG("Uniform '%s' set data", cname());
     redoUpdate();
-
     return m_data;
   }
 
@@ -235,21 +233,21 @@ inline void GLUniform<Vector4i>::setValue(const Vector4i& value) const
 }
 
 template<>
-inline void GLUniform<Matrix22f>::setValue(const Matrix22f& value) const
+inline void GLUniform<Matrix22f>::setValue(const Matrix22f& m) const
 {
-  glCheck(glUniformMatrix2fv(m_handle, 1, GL_FALSE, &value[0][0]));
+  glCheck(glUniformMatrix2fv(m_handle, 1, GL_FALSE, m));
 }
 
 template<>
-inline void GLUniform<Matrix33f>::setValue(const Matrix33f& value) const
+inline void GLUniform<Matrix33f>::setValue(const Matrix33f& m) const
 {
-  glCheck(glUniformMatrix3fv(m_handle, 1, GL_FALSE, &value[0][0]));
+  glCheck(glUniformMatrix3fv(m_handle, 1, GL_FALSE, m));
 }
 
 template<>
-inline void GLUniform<Matrix44f>::setValue(const Matrix44f& value) const
+inline void GLUniform<Matrix44f>::setValue(const Matrix44f& m) const
 {
-  glCheck(glUniformMatrix4fv(m_handle, 1, GL_FALSE, &value[0][0]));
+  glCheck(glUniformMatrix4fv(m_handle, 1, GL_FALSE, m));
 }
 
 } // namespace glwrap

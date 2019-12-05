@@ -72,7 +72,7 @@ class PendingContainer: public PendingData
     {}
 
     //! \brief Getter method.
-    inline operator T()
+    inline operator T() const
     {
       return m_ref.get(m_index);
     }
