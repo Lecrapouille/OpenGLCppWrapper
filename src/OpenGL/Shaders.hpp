@@ -42,6 +42,8 @@
 #  include "OpenGL/GLObject.hpp"
 #  include <vector>
 #  include <fstream>
+#  include <iostream>
+#  include <sstream>
 
 namespace glwrap
 {
@@ -55,6 +57,9 @@ namespace glwrap
 // *****************************************************************************
 class GLShader: public GLObject<GLenum>
 {
+  friend std::ostream& operator<<(std::ostream& os, GLShader const& shader);
+  template<typename T> friend GLShader& operator>>(T const& s, GLShader& shader);
+
 public:
 
   //----------------------------------------------------------------------------
@@ -84,6 +89,29 @@ public:
     m_shader_code = script;
     DEBUG("From script '%s' %s: '%s'", cname(), type(), m_shader_code.c_str());
     return true;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Append code to the shader.
+  //----------------------------------------------------------------------------
+  template<typename T>
+  GLShader& operator<<(T const& code)
+  {
+    throw_if_already_compiled();
+    m_shader_code += code;
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief For accepting std::endl to the sahder
+  //----------------------------------------------------------------------------
+  GLShader& operator<<(std::ostream& (*os)(std::ostream&))
+  {
+    throw_if_already_compiled();
+    std::stringstream ss;
+    ss << os;
+    m_shader_code += ss.str();
+    return *this;
   }
 
   //----------------------------------------------------------------------------
@@ -176,6 +204,15 @@ l_error:
   inline GLenum attached() const
   {
     return m_attached;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Check if a shader script has been loaded.
+  //! \return false if no shader script is present.
+  //----------------------------------------------------------------------------
+  inline bool loaded() const
+  {
+    return !m_shader_code.empty();
   }
 
 private:
@@ -274,15 +311,6 @@ private:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Check if a shader script has been loaded.
-  //! \return false if no shader script is present.
-  //----------------------------------------------------------------------------
-  inline bool loaded() const
-  {
-    return !m_shader_code.empty();
-  }
-
-  //----------------------------------------------------------------------------
   //! \brief Check if a shader script has been correctly compiled.
   //!
   //! An error message is set in m_error_msg and which can be read through
@@ -349,6 +377,24 @@ private:
   bool m_compiled = false;
   GLenum m_attached = 0;
 };
+
+//----------------------------------------------------------------------------
+//! \brief Display on stream the shader code.
+//----------------------------------------------------------------------------
+inline std::ostream& operator<<(std::ostream& os, GLShader const& shader)
+{
+  return os << shader.m_shader_code;
+}
+
+//----------------------------------------------------------------------------
+//! \brief Prepend the shader code to the shader.
+//----------------------------------------------------------------------------
+template<typename T>
+static inline GLShader& operator>>(T const& code, GLShader& shader)
+{
+  shader.m_shader_code = code + shader.m_shader_code;
+  return shader;
+}
 
 } // namespace glwrap
 
