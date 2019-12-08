@@ -27,8 +27,71 @@
 //! graph.
 //------------------------------------------------------------------------------
 
+MyCube::MyCube(const char *name)
+  : Node3D(name, true),
+    m_prog("GLProgram"),
+    m_vao("VAO_cube")
+{
+  // Load from ASCII file the vertex sahder (vs) as well the fragment shader
+  m_vertex_shader.fromFile("shaders/09_SceneGraph.vs");
+  m_fragment_shader.fromFile("shaders/09_SceneGraph.fs");
+
+  // Compile shader as OpenGL program. This one will instanciate all OpenGL
+  // objects for you.
+  if (m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
+    {
+      // Init shader uniforms
+      m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
+
+      // Mandatory: bind VAO to program to get
+      // it populated of VBOs.
+      m_prog.bind(m_vao);
+
+      // Fill the VBO for vertices
+      m_vao.vector3f("position") =
+      {
+         #include "../geometry/cube_position.txt"
+      };
+
+      // We do not want a cube centered to (0,0,0).
+      m_vao.vector3f("position") += Vector3f(0.0f, 1.0f, 0.0f);
+
+      // Fill the VBO for texture coordiantes
+      m_vao.vector2f("UV") =
+      {
+         #include "../geometry/cube_texture.txt"
+      };
+
+      // Create the texture
+      m_vao.texture2D("texID").interpolation(TextureMinFilter::LINEAR,
+                                             TextureMagFilter::LINEAR);
+      m_vao.texture2D("texID").wrap(TextureWrap::CLAMP_TO_EDGE);
+      m_vao.texture2D("texID").load("../textures/wooden-crate.jpg");
+
+      float ratio = 1024.0f/728.0f; // FIXME width<float>() / height<float>();
+      m_prog.matrix44f("projection") =
+        matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10000.0f);
+      m_prog.matrix44f("view") =
+        matrix::lookAt(Vector3f(0.0f, 10.0f, 100.0f), Vector3f(30), Vector3f(0,1,0));
+    }
+  else
+    {
+      std::cerr << "failed compiling OpenGL program. Reason was '"
+                << m_prog.getError() << "'" << std::endl;
+    }
+}
+
+//------------------------------------------------------------------------------
+void MyCube::draw(Matrix44f const& modelMatrix)
+{
+  m_prog.matrix44f("model") = modelMatrix;
+  m_prog.draw(m_vao, Mode::TRIANGLES, 0, 36);
+}
+
+
+//------------------------------------------------------------------------------
 CubicRobot::CubicRobot(const char *name)
-  : Node3D(name)
+  : Node3D(name, true)
 {
   DEBUG("Create CubicRobot %s", name);
 
@@ -81,7 +144,7 @@ CubicRobot::~CubicRobot()
 //------------------------------------------------------------------------------
 //! \brief Move element of the robot body
 //------------------------------------------------------------------------------
-void CubicRobot::update(float const dt)
+void CubicRobot::doUpdate(float const dt)
 {
   DEBUG("%s", "Robot::update");
 
@@ -94,9 +157,6 @@ void CubicRobot::update(float const dt)
   m_head->rotateY(-radiansRotated);
   m_leftArm->rotateX(-radiansRotated);
   m_rightArm->rotateX(radiansRotated);
-
-  // Update world transform matrices
-  Node3D::update(dt);
 }
 
 //------------------------------------------------------------------------------
@@ -108,16 +168,15 @@ void GLImGUI::observeNode(Node3D const& node) //const
   ImGui::SetNextTreeNodeOpen(true);
   if (ImGui::TreeNode(nodename.c_str()))
     {
-      //VAO const& mesh = node.renderable();
-      //if (nullptr != mesh)
-      if (node.renderable())
+      // Renderable = contains a mesh to be rendered.
+      if (node.isRenderable())
       {
-        std::string name("Meshes");// '" + mesh->name() + "'");
+        std::string name("Not for rendering");
           ImGui::TextUnformatted(name.c_str());
         }
       else
         {
-          ImGui::Text("Has no meshes");
+          ImGui::Text("Renderable");
         }
 
       ImGui::Text("Transf. Matrix:");
@@ -199,20 +258,26 @@ bool GLExample09::setup()
   robot3->position(Vector3f(60.0f, 0.0f, 0.0f));
 
   // Create the scene
-  m_scene = Node3D::create("Root");
+#if PREFERED_SWITCH_NODE
+  m_scene = SwitchNode3D::create("Root");
+  m_scene->select(0);
+#else
+  // Change of robot every 2 seconds
+  m_scene = BlinkerNode3D::create("Root", 2000_z);
+#endif
   m_scene->add(robot1);
   m_scene->add(robot2);
   m_scene->add(robot3);
+
+  m_scene->debug();
 
   // This is an example for searching a node.
   // Be careful: this is not a robust method: this function does not
   // manage nodes with duplicated identifier: it will halt on the
   // first id.
   {
-    if (m_scene->getSibling("fdf") == nullptr)
-      std::cout << "nullptr" << std::endl;
-    m_scene->getSibling("CubicRobot1")->debug();
-    Node3D::get(m_scene, "Body")->debug();
+    Node3D::getNodeFromPath(m_scene, "CubicRobot1/Body/LeftLeg")->debug();
+    //TODO m_scene["CubicRobot1/Body/LeftLeg"]->debug();
   }
 
   // Show the scene graph in the GUI. Note: this method is not safe
@@ -242,6 +307,15 @@ bool GLExample09::draw()
   // Paint the GUI
   if (false == m_imgui.draw())
     return false;
+
+#if PREFERED_SWITCH_NODE
+  if (keyPressed(GLFW_KEY_A))
+    m_scene->select(0);
+  if (keyPressed(GLFW_KEY_Z))
+    m_scene->select(1);
+  if (keyPressed(GLFW_KEY_E))
+    m_scene->select(2);
+#endif
 
   return true;
 }

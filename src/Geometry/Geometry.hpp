@@ -56,7 +56,7 @@ public: // TODO BoundingBox, BoundingSphere
   //! \fixme Attach Material, attach std::function<onUpdate>
   //----------------------------------------------------------------------------
   Shape3D(std::string const& name, Material_SP material = MaterialBasic::create())
-    : Node3D(name),
+    : Node3D(name, true),
       m_material(material),
       m_program(m_material->program()),
       m_vao("VAO_" + name),

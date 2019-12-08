@@ -23,6 +23,8 @@
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
+#  define PREFERED_SWITCH_NODE 0
+
 using namespace glwrap;
 
 // *****************************************************************
@@ -68,83 +70,16 @@ class MyCube: public Node3D
 {
 public:
 
-  MyCube(const char *name)
-    : Node3D(name),
-      m_prog("GLProgram"),
-      m_vao("VAO_cube")
-  {
-    // Load from ASCII file the vertex sahder (vs) as well the fragment shader
-    m_vertex_shader.fromFile("shaders/09_SceneGraph.vs");
-    m_fragment_shader.fromFile("shaders/09_SceneGraph.fs");
+  MyCube(const char *name);
 
-    // Compile shader as OpenGL program. This one will instanciate all OpenGL
-    // objects for you.
-    if (m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
-      {
-        // Init shader uniforms
-        m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
-
-        // Mandatory: bind VAO to program to get
-        // it populated of VBOs.
-        m_prog.bind(m_vao);
-
-        // Fill the VBO for vertices
-        m_vao.vector3f("position") =
-          {
-             #include "../geometry/cube_position.txt"
-          };
-
-        // We do not want a cube centered to (0,0,0).
-        m_vao.vector3f("position") += Vector3f(0.0f, 1.0f, 0.0f);
-
-        // Fill the VBO for texture coordiantes
-        m_vao.vector2f("UV") =
-          {
-             #include "../geometry/cube_texture.txt"
-          };
-
-        // Create the texture
-        m_vao.texture2D("texID").interpolation(TextureMinFilter::LINEAR,
-                                               TextureMagFilter::LINEAR);
-        m_vao.texture2D("texID").wrap(TextureWrap::CLAMP_TO_EDGE);
-        m_vao.texture2D("texID").load("../textures/wooden-crate.jpg");
-
-        float ratio = 1024.0f/728.0f;//width<float>() / height<float>();
-        m_prog.matrix44f("projection") =
-          matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10000.0f);
-        m_prog.matrix44f("view") =
-          matrix::lookAt(Vector3f(0.0f, 10.0f, 100.0f), Vector3f(30), Vector3f(0,1,0));
-      }
-    else
-      {
-        std::cerr << "failed compiling OpenGL program. Reason was '"
-                  << m_prog.getError() << "'" << std::endl;
-      }
-  }
-
-  virtual bool renderable() const override { return true; }
-
-  virtual void renderer() override
-  {
-    Matrix44f transform =
-      matrix::scale(m_world_transform, Transformable3D::localScale());
-
-    m_prog.matrix44f("model") = transform;
-    m_prog.draw(m_vao, Mode::TRIANGLES, 0, 36);
-
-    Node3D::renderer();
-  }
-
-  virtual void update(float const dt)
-  {
-    // Update world transform matrices
-    Node3D::update(dt);
-  }
-
+  //! \brief Create a home-made cube
   static std::shared_ptr<MyCube> create(const char* name)
   {
     return std::make_shared<MyCube>(name);
   }
+
+  //! \brief Render the cube
+  virtual void draw(Matrix44f const& modelMatrix) override;
 
 private:
 
@@ -170,19 +105,14 @@ public:
   CubicRobot(const char *name);
   ~CubicRobot();
 
+  //! \brief Create a new Robot
   static CubicRobot_SP create(const char *name)
   {
     return std::make_shared<CubicRobot>(name);
   }
 
-  virtual void update(float const dt) override;
-
-  virtual bool renderable() const override { return false; }
-
-  virtual void renderer() override
-  {
-    Node3D::renderer();
-  }
+  //! \brief Animation of the robot
+  virtual void doUpdate(float const dt) override;
 
 private:
 
@@ -222,7 +152,14 @@ private:
 private:
 
   CameraController m_camera;
-  Node3D_SP        m_scene;
+#if PREFERED_SWITCH_NODE
+  //! \brief Allow to display one of the three robots at a time manually.
+  //! Use the keyboard to select your desired robot.
+  SwitchNode3D_SP  m_scene;
+#else
+  //! \brief Allow to display one of the three robots at a time automatically.
+  BlinkerNode3D_SP m_scene;
+#endif
   GLImGUI          m_imgui;
 };
 
