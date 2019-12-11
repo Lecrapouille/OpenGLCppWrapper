@@ -47,6 +47,7 @@ protected:
   virtual void onMouseButtonPressed(Mouse const& mouse) override;
   virtual void onMouseMoved(Mouse const& mouse) override;
   virtual void onMouseScrolled(Mouse const& mouse) override;
+  virtual void onKeyboardEvent() override;
   virtual bool setup() override;
   virtual bool draw() override;
 };

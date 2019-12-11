@@ -50,9 +50,10 @@ protected:
   enum class Brush { Node, Arc, Zone };
   enum class Action { Insertion, Deletion, Moving };
 
-  virtual void onWindowSizeChanged() override;
   virtual void onMouseButtonPressed(Mouse const& mouse) override;
   virtual void onMouseMoved(Mouse const& mouse) override;
+  virtual void onKeyboardEvent() override;
+  virtual void onWindowSizeChanged() override;
   virtual bool setup() override;
   virtual bool draw() override;
 

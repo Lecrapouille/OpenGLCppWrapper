@@ -62,6 +62,21 @@ void GLExample13::onMouseScrolled(Mouse const& mouse)
   m_prog_lamp.matrix44f("projection") = proj;
 }
 
+// --------------------------------------------------------------
+//! \brief Keyboard event
+// --------------------------------------------------------------
+void GLExample13::onKeyboardEvent()
+{
+  if (isKeyDown(GLFW_KEY_W) || isKeyDown(GLFW_KEY_UP))
+    m_cameraController.processKeyboard(CameraController::Movement::FORWARD, dt());
+  if (isKeyDown(GLFW_KEY_S) || isKeyDown(GLFW_KEY_DOWN))
+    m_cameraController.processKeyboard(CameraController::Movement::BACKWARD, dt());
+  if (isKeyDown(GLFW_KEY_A) || isKeyDown(GLFW_KEY_LEFT))
+    m_cameraController.processKeyboard(CameraController::Movement::LEFT, dt());
+  if (isKeyDown(GLFW_KEY_D) || isKeyDown(GLFW_KEY_RIGHT))
+    m_cameraController.processKeyboard(CameraController::Movement::RIGHT, dt());
+}
+
 //------------------------------------------------------------------
 //! \brief Create a cube for the lamp.
 //------------------------------------------------------------------
@@ -212,6 +227,8 @@ bool GLExample13::setup()
   glCheck(glEnable(GL_DEPTH_TEST));
   glCheck(glDepthFunc(GL_LESS));
 
+  // Enable IO callbacks
+  enableCallbacks(Event::MouseMove | Event::MouseScroll | Event::Keyboard);
   hideMouseCursor();
 
   // Place a camera controlled by the user
@@ -244,16 +261,6 @@ bool GLExample13::draw()
 
   m_prog_cube.draw(m_cube, Mode::TRIANGLES);
   m_prog_lamp.draw(m_lamp, Mode::TRIANGLES);
-
-  // Key pressed
-  if (keyPressed(GLFW_KEY_W) || keyPressed(GLFW_KEY_UP))
-    m_cameraController.processKeyboard(CameraController::Movement::FORWARD, dt());
-  if (keyPressed(GLFW_KEY_S) || keyPressed(GLFW_KEY_DOWN))
-    m_cameraController.processKeyboard(CameraController::Movement::BACKWARD, dt());
-  if (keyPressed(GLFW_KEY_A) || keyPressed(GLFW_KEY_LEFT))
-    m_cameraController.processKeyboard(CameraController::Movement::LEFT, dt());
-  if (keyPressed(GLFW_KEY_D) || keyPressed(GLFW_KEY_RIGHT))
-    m_cameraController.processKeyboard(CameraController::Movement::RIGHT, dt());
 
   return true;
 }

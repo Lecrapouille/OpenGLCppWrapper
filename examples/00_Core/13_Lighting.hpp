@@ -52,6 +52,7 @@ protected:
   void changeLightProperties(float const time);
   virtual void onMouseScrolled(Mouse const& mouse) override;
   virtual void onMouseMoved(Mouse const& mouse) override;
+  virtual void onKeyboardEvent() override;
   virtual void onWindowSizeChanged() override;
   virtual bool setup() override;
   virtual bool draw() override;

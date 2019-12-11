@@ -63,6 +63,21 @@ void GLExample07::onMouseScrolled(Mouse const& mouse)
   m_progSkyBox.matrix44f("projection") = proj;
 }
 
+// --------------------------------------------------------------
+//! \brief Keyboard event
+// --------------------------------------------------------------
+void GLExample07::onKeyboardEvent()
+{
+  if (isKeyDown(GLFW_KEY_W) || isKeyDown(GLFW_KEY_UP))
+    m_cameraController.processKeyboard(CameraController::Movement::FORWARD, dt());
+  if (isKeyDown(GLFW_KEY_S) || isKeyDown(GLFW_KEY_DOWN))
+    m_cameraController.processKeyboard(CameraController::Movement::BACKWARD, dt());
+  if (isKeyDown(GLFW_KEY_A) || isKeyDown(GLFW_KEY_LEFT))
+    m_cameraController.processKeyboard(CameraController::Movement::LEFT, dt());
+  if (isKeyDown(GLFW_KEY_D) || isKeyDown(GLFW_KEY_RIGHT))
+    m_cameraController.processKeyboard(CameraController::Movement::RIGHT, dt());
+}
+
 //------------------------------------------------------------------
 //! \brief Create a skybox.
 //------------------------------------------------------------------
@@ -155,6 +170,8 @@ bool GLExample07::setup()
   glCheck(glDisable(GL_BLEND));
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
+  // Enable IO callbacks
+  enableCallbacks(window::Event::MouseMove | window::Event::MouseScroll | window::Event::Keyboard);
   hideMouseCursor();
 
   // Place a camera controlled by the user
@@ -206,16 +223,6 @@ bool GLExample07::draw()
   drawShape();
   // Draw skybox as last. Set depth function back to default
   drawSkyBox();
-
-  // Key pressed
-  if (keyPressed(GLFW_KEY_W) || keyPressed(GLFW_KEY_UP))
-    m_cameraController.processKeyboard(CameraController::Movement::FORWARD, dt());
-  if (keyPressed(GLFW_KEY_S) || keyPressed(GLFW_KEY_DOWN))
-    m_cameraController.processKeyboard(CameraController::Movement::BACKWARD, dt());
-  if (keyPressed(GLFW_KEY_A) || keyPressed(GLFW_KEY_LEFT))
-    m_cameraController.processKeyboard(CameraController::Movement::LEFT, dt());
-  if (keyPressed(GLFW_KEY_D) || keyPressed(GLFW_KEY_RIGHT))
-    m_cameraController.processKeyboard(CameraController::Movement::RIGHT, dt());
 
   return true;
 }

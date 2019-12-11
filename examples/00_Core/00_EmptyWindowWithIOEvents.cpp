@@ -44,11 +44,13 @@ void GLExample00::onWindowSizeChanged()
 }
 
 //------------------------------------------------------------------
-//! \brief Init your scene.
+//! \brief Add your OpenGL code here for initializing your scene.
 //------------------------------------------------------------------
 bool GLExample00::setup()
 {
-  std::cout << "Add your OpenGL code here for initializing your scene." << std::endl;
+  // Enable IO callbacks
+  enableCallbacks(Event::MouseMove | Event::MouseScroll |
+                  Event::MouseButton | Event::Keyboard);
 
   // Do not show the mouse cursor
   hideMouseCursor();
@@ -80,22 +82,36 @@ bool GLExample00::draw()
   glCheck(glClearColor(st, ct, 0.0f, 1.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-  // Key pressed event (Note Escape key is already map to kill the application).
-  if (keyPressed(GLFW_KEY_W)) { std::cout << std::endl << "Key pressed 'W'" << std::endl; }
-  if (keyPressed(GLFW_KEY_F1)) { std::cout << std::endl << "Key pressed 'F1'" << std::endl; }
-
   // Success
   return true;
 }
 
-  // QQ TODO: a separer dans une nouvelle callback
+// -----------------------------------------------------------------------------
+//! \brief Keyboard event (Note Escape key is already map to kill the
+//! application).
 
-// --------------------------------------------------------------
+// -----------------------------------------------------------------------------
+void GLExample00::onKeyboardEvent()
+{
+  if (isKeyDown(GLFW_KEY_W))
+    std::cout << std::endl << "Key pressed 'W'" << std::endl;
+
+  if (isKeyDown(GLFW_KEY_F1))
+    std::cout << std::endl << "Key pressed 'F1'" << std::endl;
+
+  if (isKeyUp(GLFW_KEY_W))
+    std::cout << std::endl << "Key released 'W'" << std::endl;
+
+  if (isKeyUp(GLFW_KEY_F1))
+    std::cout << std::endl << "Key released 'F1'" << std::endl;
+}
+
+// -----------------------------------------------------------------------------
 //! \brief Callback on mouse pressed or release event.
 //!
 //! This example display the mouse status and hide/show the mouse
 //! cursor.
-// --------------------------------------------------------------
+// -----------------------------------------------------------------------------
 void GLExample00::onMouseButtonPressed(Mouse const& mouse)
 {
   std::cout << "Mouse button " << static_cast<int>(mouse.button)
@@ -107,17 +123,17 @@ void GLExample00::onMouseButtonPressed(Mouse const& mouse)
   (false == state) ? hideMouseCursor() : showMouseCursor();
 }
 
-// --------------------------------------------------------------
+// -----------------------------------------------------------------------------
 //! \brief Callback on mouse scroll event.
-// --------------------------------------------------------------
+// -----------------------------------------------------------------------------
 void GLExample00::onMouseScrolled(Mouse const& mouse)
 {
   std::cout << "Mouse scrolled " << mouse.scroll.x << std::endl;
 }
 
-// --------------------------------------------------------------
+// -----------------------------------------------------------------------------
 //! \brief Callback on mouse movement event.
-// --------------------------------------------------------------
+// -----------------------------------------------------------------------------
 void GLExample00::onMouseMoved(Mouse const& mouse)
 {
   std::cout << "Mouse moved to "

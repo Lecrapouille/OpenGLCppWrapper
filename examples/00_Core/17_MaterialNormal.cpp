@@ -49,6 +49,43 @@ void GLExample17::onMouseMoved(Mouse const& mouse)
   m_cameraController.processMouseMovement(dx, dy, dt());
 }
 
+// --------------------------------------------------------------
+//! \brief Keyboard event
+// --------------------------------------------------------------
+void GLExample17::onKeyboardEvent()
+{
+  if (isKeyDown(GLFW_KEY_UP))
+    m_cameraController.processKeyboard(CameraController::Movement::FORWARD, dt());
+  if (isKeyDown(GLFW_KEY_DOWN))
+    m_cameraController.processKeyboard(CameraController::Movement::BACKWARD, dt());
+  if (isKeyDown(GLFW_KEY_LEFT))
+    m_cameraController.processKeyboard(CameraController::Movement::LEFT, dt());
+  if (isKeyDown(GLFW_KEY_RIGHT))
+    m_cameraController.processKeyboard(CameraController::Movement::RIGHT, dt());
+
+  if (isKeyDown(GLFW_KEY_M))
+    m_shape = m_tube1;
+  if (isKeyDown(GLFW_KEY_L))
+    m_shape = m_tube2;
+  if (isKeyDown(GLFW_KEY_K))
+    m_shape = m_cone1;
+  if (isKeyDown(GLFW_KEY_J))
+    m_shape = m_cone2;
+  if (isKeyDown(GLFW_KEY_H))
+    m_shape = m_pyra1;
+  if (isKeyDown(GLFW_KEY_G))
+    m_shape = m_pyra2;
+
+  if (isKeyDown(GLFW_KEY_A))
+    m_slices = std::min(128u, m_slices + 1u);
+  if (isKeyDown(GLFW_KEY_Z))
+    m_slices = std::max(4u, m_slices - 1u);
+  if (isKeyDown(GLFW_KEY_Q))
+    m_base_radius = std::min(4.0f, m_base_radius + 0.1f);
+  if (isKeyDown(GLFW_KEY_S))
+    m_base_radius = std::max(1.0f, m_base_radius - 0.1f);
+}
+
 //------------------------------------------------------------------
 //! \brief Init your scene.
 //------------------------------------------------------------------
@@ -60,6 +97,8 @@ bool GLExample17::setup()
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
   //glCheck(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 
+  // Enable IO callbacks
+  enableCallbacks(window::Event::MouseMove | window::Event::Keyboard);
   hideMouseCursor();
 
   // Place a camera controlled by the user
@@ -118,37 +157,6 @@ bool GLExample17::draw()
 
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-
-  if (keyPressed(GLFW_KEY_UP))
-    m_cameraController.processKeyboard(CameraController::Movement::FORWARD, dt());
-  if (keyPressed(GLFW_KEY_DOWN))
-    m_cameraController.processKeyboard(CameraController::Movement::BACKWARD, dt());
-  if (keyPressed(GLFW_KEY_LEFT))
-    m_cameraController.processKeyboard(CameraController::Movement::LEFT, dt());
-  if (keyPressed(GLFW_KEY_RIGHT))
-    m_cameraController.processKeyboard(CameraController::Movement::RIGHT, dt());
-
-  if (keyPressed(GLFW_KEY_M))
-    m_shape = m_tube1;
-  if (keyPressed(GLFW_KEY_L))
-    m_shape = m_tube2;
-  if (keyPressed(GLFW_KEY_K))
-    m_shape = m_cone1;
-  if (keyPressed(GLFW_KEY_J))
-    m_shape = m_cone2;
-  if (keyPressed(GLFW_KEY_H))
-    m_shape = m_pyra1;
-  if (keyPressed(GLFW_KEY_G))
-    m_shape = m_pyra2;
-
-  if (keyPressed(GLFW_KEY_A))
-    m_slices = std::min(128u, m_slices + 1u);
-  if (keyPressed(GLFW_KEY_Z))
-    m_slices = std::max(4u, m_slices - 1u);
-  if (keyPressed(GLFW_KEY_Q))
-    m_base_radius = std::min(4.0f, m_base_radius + 0.1f);
-  if (keyPressed(GLFW_KEY_S))
-    m_base_radius = std::max(1.0f, m_base_radius - 0.1f);
 
   // FIXME no this shall be main_prog->view() =
   m_shape->view() = m_cameraController.camera().viewMatrix();

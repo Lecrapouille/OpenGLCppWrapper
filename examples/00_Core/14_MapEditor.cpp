@@ -45,6 +45,8 @@ bool GLExample14::setup()
   glCheck(glDisable(GL_BLEND));
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
+  enableCallbacks(window::Event::All);
+
   // Load vertex and fragment shaders with GLSL code.
   m_vertex_shader.fromFile("shaders/14_MapEditor.vs");
   m_fragment_shader.fromFile("shaders/14_MapEditor.fs");
@@ -59,6 +61,49 @@ bool GLExample14::setup()
 
   // Success
   return true;
+}
+
+// --------------------------------------------------------------
+//! \brief Keyboard event
+// --------------------------------------------------------------
+void GLExample14::onKeyboardEvent()
+{
+  if (isKeyDown(GLFW_KEY_A))
+    {
+      std::cout << "Arc mode" << std::endl;
+      m_brush = Brush::Arc;
+      SelectTool();
+    }
+  else if (isKeyDown(GLFW_KEY_N))
+    {
+      std::cout << "Nodes mode" << std::endl;
+      m_brush = Brush::Node;
+      SelectTool();
+    }
+  else if (isKeyDown(GLFW_KEY_Z))
+    {
+      std::cout << "Zones Mode" << std::endl;
+      m_brush = Brush::Zone;
+      SelectTool();
+    }
+  else if (isKeyDown(GLFW_KEY_I))
+    {
+      std::cout << "Insertion mode" << std::endl;
+      m_action = Action::Insertion;
+      SelectTool();
+    }
+  else if (isKeyDown(GLFW_KEY_D))
+    {
+      std::cout << "Deletion mode" << std::endl;
+      m_action = Action::Deletion;
+      SelectTool();
+    }
+  else if (isKeyDown(GLFW_KEY_M))
+    {
+      std::cout << "Movine mode" << std::endl;
+      m_action = Action::Moving;
+      SelectTool();
+    }
 }
 
 //------------------------------------------------------------------
@@ -78,43 +123,6 @@ bool GLExample14::draw()
 
   m_prog.vector3f("color") = Vector3f(0.0f, 0.0f, 1.0f);
   m_prog.draw(m_vao_zones, Mode::LINE_STRIP);
-
-  if (keyPressed(GLFW_KEY_A))
-    {
-      std::cout << "Arc mode" << std::endl;
-      m_brush = Brush::Arc;
-      SelectTool();
-    }
-  else if (keyPressed(GLFW_KEY_N))
-    {
-      std::cout << "Nodes mode" << std::endl;
-      m_brush = Brush::Node;
-      SelectTool();
-    }
-  else if (keyPressed(GLFW_KEY_Z))
-    {
-      std::cout << "Zones Mode" << std::endl;
-      m_brush = Brush::Zone;
-      SelectTool();
-    }
-  else if (keyPressed(GLFW_KEY_I))
-    {
-      std::cout << "Insertion mode" << std::endl;
-      m_action = Action::Insertion;
-      SelectTool();
-    }
-  else if (keyPressed(GLFW_KEY_D))
-    {
-      std::cout << "Deletion mode" << std::endl;
-      m_action = Action::Deletion;
-      SelectTool();
-    }
-  else if (keyPressed(GLFW_KEY_M))
-    {
-      std::cout << "Movine mode" << std::endl;
-      m_action = Action::Moving;
-      SelectTool();
-    }
 
   // Success
   return true;

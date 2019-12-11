@@ -45,6 +45,7 @@ protected:
   bool pimpShape(Shape3D_SP shape);
   virtual void onWindowSizeChanged() override;
   virtual void onMouseMoved(Mouse const& mouse) override;
+  virtual void onKeyboardEvent() override;
   virtual bool setup() override;
   virtual bool draw() override;
 
