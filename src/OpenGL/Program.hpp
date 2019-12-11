@@ -66,7 +66,7 @@ public:
   //----------------------------------------------------------------------------
   GLProgram(std::string const& name, size_t const nb_vertices = 0_z)
     : GLObject(name),
-      m_vbo_init_size(nb_vertices)
+      m_vbo_reserve(nb_vertices)
   {}
 
   //----------------------------------------------------------------------------
@@ -159,7 +159,7 @@ public:
   //!     VAO has its list of VBOs and textures created. Elements are refered by
   //!     the variable name used in shaders. VBOs are pre-allocated with the
   //!     number of elements (either set from the by GLProgram constructor or by
-  //!     the method setInitialVBOSize()) but no data are filled, this is the
+  //!     the method bind()) but no data are filled, this is the
   //!     job of the developper to do it explicitly.
   //!   - Else, if the VAO was bound previously, nothing is made (list are not
   //!     created/updated).
@@ -211,6 +211,18 @@ public:
     // Bind the VAO to the GLProgram
     m_vao = &vao;
     return true;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief First, change how many elements are pre-allocated when creating
+  //! VBOs, second, call bind().
+  //! \param[in] vao the VAO to be bound with this instance of GLProgram.
+  //! \param[in] reserve VBO size when created.
+  //----------------------------------------------------------------------------
+  inline bool bind(GLVAO& vao, size_t const reserve)
+  {
+    m_vbo_reserve = reserve;
+    return bind(vao);
   }
 
   //----------------------------------------------------------------------------
@@ -752,16 +764,6 @@ public:
     m_vbo_usage = usage;
   }
 
-  //----------------------------------------------------------------------------
-  //! \brief Change how many elements are pre-allocated when creating
-  //! VBOs. If this method is not called default usage will be 0.
-  //! \fixme bind cannot replace this method ?
-  //----------------------------------------------------------------------------
-  void setInitialVBOSize(size_t const size)
-  {
-    m_vbo_init_size = size;
-  }
-
 private:
 
   //----------------------------------------------------------------------------
@@ -899,16 +901,16 @@ private:
         switch (it.second->dim())
           {
           case 1:
-            vao.createVBO<float>(name, m_vbo_init_size, m_vbo_usage);
+            vao.createVBO<float>(name, m_vbo_reserve, m_vbo_usage);
             break;
           case 2:
-            vao.createVBO<Vector2f>(name, m_vbo_init_size, m_vbo_usage);
+            vao.createVBO<Vector2f>(name, m_vbo_reserve, m_vbo_usage);
             break;
           case 3:
-            vao.createVBO<Vector3f>(name, m_vbo_init_size, m_vbo_usage);
+            vao.createVBO<Vector3f>(name, m_vbo_reserve, m_vbo_usage);
             break;
           case 4:
-            vao.createVBO<Vector4f>(name, m_vbo_init_size, m_vbo_usage);
+            vao.createVBO<Vector4f>(name, m_vbo_reserve, m_vbo_usage);
             break;
           default:
             throw OpenGLException("Attribute with dimension > 4 is not managed");
@@ -1374,7 +1376,7 @@ protected:
     m_sampler_count = 0u;
     m_compiled = false;
     m_vbo_usage = BufferUsage::STATIC_DRAW;
-    m_vbo_init_size = 0_z;
+    m_vbo_reserve = 0_z;
   }
 
 private:
@@ -1399,7 +1401,7 @@ private:
   //! \brief Preferred VBO storage inside GPU (fast, low).
   BufferUsage            m_vbo_usage = BufferUsage::STATIC_DRAW;
   //! \brief Reserve memory when creating VBOs.
-  size_t                 m_vbo_init_size = 0_z;
+  size_t                 m_vbo_reserve = 0_z;
 };
 
 //----------------------------------------------------------------------------
