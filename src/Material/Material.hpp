@@ -52,8 +52,8 @@ public:
   Material(std::string const& name, Type const type)
     : m_name("material_" + name),
       m_type(type),
-      vertexShader("VS_material_" + name),
-      fragmentShader("FS_material_" + name),
+      m_vertexShader("VS_material_" + name),
+      m_fragmentShader("FS_material_" + name),
       m_program("prog_material_" + name)
   {
     DEBUG("Create material '%s'", m_name.c_str());
@@ -83,16 +83,16 @@ public:
 
 protected:
 
-  void debug(GLVertexShader const& vertexShader, GLFragmentShader const& fragmentShader)
+  void debug()
   {
     std::cerr
       << "Shaders for Material '" << m_name << "'" << std::endl
       << "---------------------" << std::endl
       << "Vertex Shader:" << std::endl
-      << vertexShader << std::endl
+      << m_vertexShader << std::endl
       << "---------------------" << std::endl
       << "Fragment Shader:" << std::endl
-      << fragmentShader << std::endl
+      << m_fragmentShader << std::endl
       << "---------------------" << std::endl;
   }
 
@@ -104,8 +104,8 @@ protected:
 
   std::string      m_name;
   Type             m_type;
-  GLVertexShader   vertexShader;
-  GLFragmentShader fragmentShader;
+  GLVertexShader   m_vertexShader;
+  GLFragmentShader m_fragmentShader;
   GLProgram        m_program;
 };
 
@@ -119,16 +119,18 @@ public:
   MaterialDepth()
     : Material("depth", Material::Type::Depth)
   {
-    createDepthMaterialShader(vertexShader, fragmentShader);
-    debug(vertexShader, fragmentShader);
-    m_program.attachShaders(vertexShader, fragmentShader);
+    createDepthMaterialShader(m_vertexShader, m_fragmentShader);
+    debug();
+    m_program.attachShaders(m_vertexShader, m_fragmentShader);
   }
 
   virtual void init() override // FIXME because uniforms cannot be reached while program is not yet compiled
   {
+      ERROR("MERDE {");
     near() = 1.0f;
     far() = 100.0f;
     opacity() = 1.0f;
+    ERROR("} MERDE %f", far());
   }
 
   static MaterialDepth_SP create()
@@ -172,9 +174,9 @@ public:
   MaterialNormal()
     : Material("normals", Material::Type::Normal)
   {
-    createNormalMaterialShader(vertexShader, fragmentShader);
-    debug(vertexShader, fragmentShader);
-    m_program.attachShaders(vertexShader, fragmentShader);
+    createNormalMaterialShader(m_vertexShader, m_fragmentShader);
+    debug();
+    m_program.attachShaders(m_vertexShader, m_fragmentShader);
   }
 
   virtual void init() override // FIXME because uniforms cannot be reached while program is not yet compiled
@@ -225,9 +227,9 @@ public:
       m_config(config)
   {
     //m_specialization = config.name();
-    createBasicMaterialShader(vertexShader, fragmentShader, config);
-    debug(vertexShader, fragmentShader);
-    m_program.attachShaders(vertexShader, fragmentShader);
+    createBasicMaterialShader(m_vertexShader, m_fragmentShader, config);
+    debug();
+    m_program.attachShaders(m_vertexShader, m_fragmentShader);
   }
 
   virtual void init() override // FIXME because uniforms cannot be reached while program is not yet compiled

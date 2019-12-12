@@ -125,9 +125,9 @@ static void on_keyboard_event(GLFWwindow* obj, int key, int /*scancode*/, int ac
   assert(nullptr != obj);
   IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
   if (action == GLFW_PRESS)
-    window->onSetKeyAction(key, true);
+    window->onSetKeyAction(static_cast<size_t>(key), true);
   else if (action == GLFW_RELEASE)
-    window->onSetKeyAction(key, false);
+    window->onSetKeyAction(static_cast<size_t>(key), false);
 }
 
 //------------------------------------------------------------------------------
@@ -298,8 +298,8 @@ bool IGLWindow::start()
   // Ensure we can capture keyboard being pressed below
   glfwSetInputMode(m_main_window, GLFW_STICKY_KEYS, GL_TRUE);
 
-  for (int i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
-    m_lastKeys[i] = m_currentKeys[i] = glfwGetKey(m_main_window, i);
+  for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
+    m_lastKeys[i] = m_currentKeys[i] = false;
 
   // Flush OpenGL errors before using this function on real OpenGL
   // routines else a fake error is returned on the first OpenGL
@@ -368,7 +368,7 @@ bool IGLWindow::loop()
       {
         glfwPollEvents();
         const std::lock_guard<std::mutex> lock(m_mutex);
-        for (int i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
+        for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
           m_lastKeys[i] = m_currentKeys[i];
         onKeyboardEvent();
       }

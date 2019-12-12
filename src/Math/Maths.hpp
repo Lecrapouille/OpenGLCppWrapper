@@ -119,9 +119,11 @@ namespace glwrap
 
     //! \brief Random integer-typed values, uniformly distributed on the
     //! interval [low, high].
-    inline int random(int const low, int const high)
+    template<typename T>
+    inline typename std::enable_if<std::is_integral<T>::value && !std::is_floating_point<T>::value, T>::type
+    random(T const low = zero<T>(), T const high = one<T>())
     {
-      return low + static_cast<int>(::floor(maths::random<float>() * static_cast<float>(high - low + 1)));
+      return low + static_cast<T>(::floor(maths::random<float>() * static_cast<float>(high - low + 1)));
     }
 
 #   pragma GCC diagnostic push

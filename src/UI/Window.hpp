@@ -173,7 +173,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Callback when a key of the keyboard has been pressed or released.
   //----------------------------------------------------------------------------
-  inline void onSetKeyAction(int key, bool action)
+  inline void onSetKeyAction(size_t const key, bool const action)
   {
     const std::lock_guard<std::mutex> lock(m_mutex);
     m_currentKeys[key] = action;
@@ -217,23 +217,23 @@ public:
       (glfwGetWindowMonitor(m_main_window) != nullptr);
   }
 
-  inline bool isKeyDown(int const key)
+  inline bool isKeyDown(size_t const key)
   {
     return GLFW_PRESS == m_currentKeys[key];
   }
 
-  inline bool isKeyUp(int const key)
+  inline bool isKeyUp(size_t const key)
   {
     return GLFW_RELEASE == m_currentKeys[key];
   }
 
-  inline bool wasKeyPressed(int const key)
+  inline bool wasKeyPressed(size_t const key)
   {
     return GLFW_PRESS == m_currentKeys[key] &&
       GLFW_RELEASE == m_lastKeys[key];
   }
 
-  inline bool wasKeyReleased(int const key)
+  inline bool wasKeyReleased(size_t const key)
   {
     return GLFW_RELEASE == m_currentKeys[key] &&
       GLFW_PRESS && m_lastKeys[key];

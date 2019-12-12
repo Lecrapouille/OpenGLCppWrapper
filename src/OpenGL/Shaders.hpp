@@ -390,7 +390,7 @@ inline std::ostream& operator<<(std::ostream& os, GLShader const& shader)
 //! \brief Prepend the shader code to the shader.
 //----------------------------------------------------------------------------
 template<typename T>
-static inline GLShader& operator>>(T const& code, GLShader& shader)
+inline GLShader& operator>>(T const& code, GLShader& shader)
 {
   shader.m_shader_code = code + shader.m_shader_code;
   return shader;

@@ -140,7 +140,7 @@ public:
   template<class U>
   GLUniform<T>& operator=(const U& val)
   {
-    GLUniform<T>::data() = T(val);
+    GLUniform<T>::m_data = T(val);
     DEBUG("Uniform '%s' operator=", cname());
     redoUpdate();
     return *this;

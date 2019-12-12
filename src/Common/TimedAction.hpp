@@ -108,7 +108,7 @@ namespace glwrap
         {
           Time currentTime = Clock::now();
           auto dt = currentTime - m_startedTime;
-          long int dt_ms = duration_cast<milliseconds>(dt).count();
+          long long int dt_ms = duration_cast<milliseconds>(dt).count();
           if (dt_ms > m_duration)
             {
               m_startedTime = currentTime;
@@ -142,7 +142,7 @@ namespace glwrap
     //! \brief time at start (milliseconds)
     Time m_startedTime;
     //! \brief
-    long int m_duration;
+    long long int m_duration;
   };
 } // namespace glwrap
 

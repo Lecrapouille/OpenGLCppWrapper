@@ -41,7 +41,7 @@ public:
   //----------------------------------------------------------------------------
   Color()
   {
-    fromABGR(maths::random(0, 0xFFFFFF));
+    fromABGR(maths::random<uint32_t>(0, 0xFFFFFF));
   }
 
   //----------------------------------------------------------------------------
@@ -58,6 +58,13 @@ public:
   template<typename T>
   explicit Color(Vector<T,3> const& v)
     : Color(v[0], v[1], v[2], maths::one<T>())
+  {}
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  Color(Color const& other)
+    : r(other.r), g(other.g), b(other.b), a(other.a)
   {}
 
   //----------------------------------------------------------------------------
@@ -217,7 +224,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief From Hexa value
   //----------------------------------------------------------------------------
-  void fromARGB(unsigned const hex)
+  void fromARGB(uint32_t const hex)
   {
     a = static_cast<float>((hex >> 24) & 255) / 255.0f;
     r = static_cast<float>((hex >> 16) & 255) / 255.0f;
@@ -254,7 +261,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief From Hexa value
   //----------------------------------------------------------------------------
-  void fromABGR(unsigned const hex)
+  void fromABGR(uint32_t const hex)
   {
     a = static_cast<float>((hex >> 24) & 255) / 255.0f;
     b = static_cast<float>((hex >> 16) & 255) / 255.0f;
@@ -288,7 +295,7 @@ public:
   //----------------------------------------------------------------------------
   //! \brief From Hexa value
   //----------------------------------------------------------------------------
-  void fromRGBA(unsigned const hex)
+  void fromRGBA(uint32_t const hex)
   {
     r = static_cast<float>((hex >> 24) & 255) / 255.0f;
     g = static_cast<float>((hex >> 16) & 255) / 255.0f;
