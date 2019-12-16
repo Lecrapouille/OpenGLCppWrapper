@@ -901,6 +901,8 @@ private:
         switch (it.second->dim())
           {
           case 1:
+            // FIXME: simply vao.VBO<T> =  ?
+            // FIXME: complexity O(n^2) tests
             vao.createVBO<float>(name, m_vbo_reserve, m_vbo_usage);
             break;
           case 2:
@@ -1142,31 +1144,42 @@ private:
     GLsizei length = 0;
     GLint size = 0;
     GLint count = 0;
-    GLuint i;
+    GLuint location;
     GLenum type;
 
     // Create the list of uniforms
     DEBUG("Prog '%s' populating shader uniforms and samplers {", cname());
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
-    i = static_cast<GLuint>(count);
-    while (i--)
+    location = static_cast<GLuint>(count);
+    while (location--)
       {
-        glCheck(glGetActiveUniform(m_handle, i, bufSize, &length,
+        glCheck(glGetActiveUniform(m_handle, location, bufSize, &length,
                                    &size, &type, name));
-        DEBUG("  Uniform #%u Type: %u Name: %s", i, type, name);
-        addNewUniform(type, name);
+        DEBUG("  Uniform #%u Type: %u Name: %s", location, type, name);
+        if (m_uniforms.find(name) == m_uniforms.end())
+          {
+            // Uniform has never been refered before the compilation of the
+            // GLProgram: create a new instance.
+            addNewUniform(type, name);
+          }
+        else
+          {
+            // Uniform has never refered before the compilation of the
+            // GLProgram: update it by setting the OpenGL id of the program.
+            m_uniforms[name]->setProgram(m_handle);
+          }
       }
     DEBUG("} Prog '%s' populating shader uniforms and samplers", cname());
 
     // Create the list of attributes and list of VBOs
     DEBUG("Prog '%s' populating shader attributes {", cname());
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_ATTRIBUTES, &count));
-    i = static_cast<GLuint>(count);
-    while (i--)
+    location = static_cast<GLuint>(count);
+    while (location--)
       {
-        glCheck(glGetActiveAttrib(m_handle, i, bufSize, &length,
+        glCheck(glGetActiveAttrib(m_handle, location, bufSize, &length,
                                   &size, &type, name));
-        DEBUG("  Attribute #%u Type: %u Name: %s", i, type, name);
+        DEBUG("  Attribute #%u Type: %u Name: %s", location, type, name);
         addNewAttribute(type, name);
       }
     DEBUG("} Prog '%s' populating shader attributes", cname());
@@ -1272,36 +1285,7 @@ private:
   //! \throw OpenGLException if the uniform does not exist or bad T type param.
   //----------------------------------------------------------------------------
   template<class T>
-  GLUniform<T>& getUniform(const char *name)
-  {
-    if (unlikely(nullptr == name))
-      throw OpenGLException("nullptr passed to getUniform");
-
-    DEBUG("GLProgram '%s' get Uniform '%s'", cname(), name);
-    if (unlikely(!isCompiled()))
-      {
-        if (unlikely(!compile()))
-          throw OpenGLException("Failed compiling GLProgram");
-      }
-
-    //if (unlikely(!isBound()))
-    //  throw OpenGLException("GLUniform '" + std::string(name) +
-    //                        "' does not exist because no VAO has been bound");
-
-    auto it = m_uniforms.find(name);
-    if (likely(m_uniforms.end() != it))
-      {
-        GLUniform<T> *uniform = dynamic_cast<GLUniform<T>*>(it->second.get());
-        if (likely(nullptr != uniform))
-          return *uniform;
-
-        throw std::invalid_argument("GLUniform '" + std::string(name) +
-                                    "' exists but has wrong template type");
-      }
-
-    // TODO: shall be allowed
-    throw OpenGLException("GLUniform '" + std::string(name) + "' does not exist");
-  }
+  GLUniform<T>& getUniform(const char *name);
 
 private:
 
@@ -1379,6 +1363,9 @@ protected:
     m_vbo_reserve = 0_z;
   }
 
+  template<class T>
+  void createUniform(const char *name);
+
 private:
 
   //! \brief Hold the localization of shader attributes.
@@ -1403,6 +1390,131 @@ private:
   //! \brief Reserve memory when creating VBOs.
   size_t                 m_vbo_reserve = 0_z;
 };
+
+template<>
+inline void GLProgram::createUniform<float>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<float>>(name, 1, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector2f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector2f>>(name, 2, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector3f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector3f>>(name, 3, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector4f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector4f>>(name, 4, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Matrix22f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Matrix22f>>(name, 4, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Matrix33f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Matrix33f>>(name, 9, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Matrix44f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<int>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<int>>(name, 1, GL_INT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector2i>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector2i>>(name, 2, GL_INT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector3i>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector3i>>(name, 3, GL_INT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector4i>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector4i>>(name, 4, GL_INT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<GLSampler1D>(const char *name)
+{
+  m_samplers[name] = std::make_unique<GLSampler1D>(name, m_sampler_count, handle());
+  m_sampler_count += 1u;
+}
+
+template<>
+inline void GLProgram::createUniform<GLSampler2D>(const char *name)
+{
+  m_samplers[name] = std::make_unique<GLSampler2D>(name, m_sampler_count, handle());
+  m_sampler_count += 1u;
+}
+
+template<>
+inline void GLProgram::createUniform<GLSampler3D>(const char *name)
+{
+  m_samplers[name] = std::make_unique<GLSampler3D>(name, m_sampler_count, handle());
+  m_sampler_count += 1u;
+}
+
+template<>
+inline void GLProgram::createUniform<GLSamplerCube>(const char *name)
+{
+  m_samplers[name] = std::make_unique<GLSamplerCube>(name, m_sampler_count, handle());
+  m_sampler_count += 1u;
+}
+
+template<class T>
+GLUniform<T>& GLProgram::getUniform(const char *name)
+{
+  if (unlikely(nullptr == name))
+    throw OpenGLException("nullptr passed to getUniform");
+
+  if (likely(isCompiled()))
+    {
+      auto it = m_uniforms.find(name);
+      if (likely(m_uniforms.end() != it))
+        {
+          GLUniform<T> *uniform = dynamic_cast<GLUniform<T>*>(it->second.get());
+          if (likely(nullptr != uniform))
+            return *uniform;
+
+          throw std::invalid_argument("GLUniform '" + std::string(name) +
+                                      "' exists but has wrong template type");
+        }
+
+      throw OpenGLException("GLUniform '" + std::string(name) + "' does not exist");
+    }
+  else
+    {
+      if (likely(m_uniforms.end() == m_uniforms.find(name)))
+        createUniform<T>(name);
+
+      GLUniform<T> *uniform = dynamic_cast<GLUniform<T>*>(m_uniforms[name].get());
+      return *uniform;
+    }
+}
 
 //----------------------------------------------------------------------------
 //! \class GLProgram Program.hpp

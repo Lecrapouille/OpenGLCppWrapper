@@ -106,8 +106,7 @@ bool GLExample16::setup()
   camera.lookAt(Vector3f(0.3f, 0.3f, 3.0f), Vector3f(0.0f, 0.0f, -1.0f));
 
   m_material->near() = 0.1f;
-  m_material->far() = 2.0f;
-ERROR("MMM %f", m_material->far());
+  m_material->far() = 10.0f;
 
   // Create shapes
   m_tube1 = Tube::create("Tube1", m_material, 1.0f, m_base_radius, 1.0f, 128u);

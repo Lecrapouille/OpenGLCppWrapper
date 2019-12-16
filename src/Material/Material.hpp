@@ -64,8 +64,6 @@ public:
     DEBUG("Destroy material '%s'", m_name.c_str());
   }
 
-  virtual void init() = 0;
-
   inline GLProgram& program()
   {
     return m_program;
@@ -122,15 +120,10 @@ public:
     createDepthMaterialShader(m_vertexShader, m_fragmentShader);
     debug();
     m_program.attachShaders(m_vertexShader, m_fragmentShader);
-  }
 
-  virtual void init() override // FIXME because uniforms cannot be reached while program is not yet compiled
-  {
-      ERROR("MERDE {");
     near() = 1.0f;
     far() = 100.0f;
     opacity() = 1.0f;
-    ERROR("} MERDE %f", far());
   }
 
   static MaterialDepth_SP create()
@@ -177,10 +170,7 @@ public:
     createNormalMaterialShader(m_vertexShader, m_fragmentShader);
     debug();
     m_program.attachShaders(m_vertexShader, m_fragmentShader);
-  }
 
-  virtual void init() override // FIXME because uniforms cannot be reached while program is not yet compiled
-  {
     opacity() = 1.0f;
     normalMatrix() = Matrix33f(matrix::Identity);
   }
@@ -230,10 +220,7 @@ public:
     createBasicMaterialShader(m_vertexShader, m_fragmentShader, config);
     debug();
     m_program.attachShaders(m_vertexShader, m_fragmentShader);
-  }
 
-  virtual void init() override // FIXME because uniforms cannot be reached while program is not yet compiled
-  {
     diffuse() = Color().toVector3f();
     opacity() = 1.0f;
 

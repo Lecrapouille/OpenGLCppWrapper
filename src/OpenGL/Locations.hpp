@@ -52,6 +52,9 @@ DECLARE_CLASS(GLLocation)
 // *****************************************************************************
 class GLLocation: public GLObject<GLint>
 {
+  //! \brief GLProgram directly modifies GLLocation states.
+  friend class GLProgram;
+
 public:
 
   //----------------------------------------------------------------------------
@@ -97,12 +100,22 @@ public:
     return m_target;
   }
 
+private:
+
+  //----------------------------------------------------------------------------
+  //! \brief Bind to a new program
+  //----------------------------------------------------------------------------
+  inline void setProgram(GLuint const prog)
+  {
+    m_program = prog;
+  }
+
 protected:
 
   //! \brief Dimension of the attribute variable (scalar, vector, matrix).
   const GLint  m_dim;
   //! \brief The handle of the GLProgram owning this instance.
-  const GLuint m_program;
+  /*const*/ GLuint m_program; // FIXME
 };
 
 } // namespace glwrap

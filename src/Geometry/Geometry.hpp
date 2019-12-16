@@ -74,8 +74,6 @@ public: // TODO BoundingBox, BoundingSphere
       throw OpenGLException(m_program.getError());
 
     m_program.bind(m_vao);
-    m_material->init(); // FIXME: ugly code
-
     model() = Matrix44f(matrix::Identity);
 
     DEBUG("%s", "------------- NewGeometry+Material ------------------------------------------>>>");
