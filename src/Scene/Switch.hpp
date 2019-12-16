@@ -36,7 +36,6 @@ namespace glwrap
   class SwitchNode3D
     : public Node3D
   {
-    //FIXME protected:
   public:
 
     //--------------------------------------------------------------------------

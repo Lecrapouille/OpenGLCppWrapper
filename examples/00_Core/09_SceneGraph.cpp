@@ -126,12 +126,12 @@ CubicRobot::CubicRobot(const char *name)
   m_rightLeg->position(Vector3f(8.0f, 0.0f, 0.0f));
 
   // Robot
-  m_body->add(m_head);
-  m_body->add(m_leftArm);
-  m_body->add(m_rightArm);
-  m_body->add(m_leftLeg);
-  m_body->add(m_rightLeg);
-  this->add(m_body);
+  m_body->attach(m_head);
+  m_body->attach(m_leftArm);
+  m_body->attach(m_rightArm);
+  m_body->attach(m_leftLeg);
+  m_body->attach(m_rightLeg);
+  attach(m_body);
 
   //m_body->debug();
 }
@@ -265,9 +265,9 @@ bool GLExample09::setup()
   // Change of robot every 2 seconds
   m_scene = BlinkerNode3D::create("Root", 2000_z);
 #endif
-  m_scene->add(robot1);
-  m_scene->add(robot2);
-  m_scene->add(robot3);
+  m_scene->attach(robot1);
+  m_scene->attach(robot2);
+  m_scene->attach(robot3);
 
   m_scene->debug();
 
@@ -276,8 +276,8 @@ bool GLExample09::setup()
   // manage nodes with duplicated identifier: it will halt on the
   // first id.
   {
-    Node3D::getNodeFromPath(m_scene, "CubicRobot1/Body/LeftLeg")->debug();
-    //TODO m_scene["CubicRobot1/Body/LeftLeg"]->debug();
+    Node3D::getNode(m_scene, "CubicRobot1/Body/LeftLeg")->debug();
+    //*(m_scene)["/Root/CubicRobot1/Body/LeftLeg"]->debug();
   }
 
   // Show the scene graph in the GUI. Note: this method is not safe
