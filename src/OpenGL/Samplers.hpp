@@ -36,13 +36,13 @@
 //!   - GLSamplerCube:
 // *****************************************************************************
 
-#  include "OpenGL/LocationUniform.hpp"
+#  include "OpenGL/Uniform.hpp"
 
 namespace glwrap
 {
 
 //! \brief Used by GLProgram
-DECLARE_CLASS(GLSampler)
+DECLARE_CLASS(GLSampler);
 
 // *****************************************************************************
 //! \brief A GLSampler is an OpenGL uniform for texture.

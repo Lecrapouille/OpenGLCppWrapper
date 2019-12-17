@@ -21,11 +21,11 @@
 #ifndef OPENGLCPPWRAPPER_GEOMETRY_CUBE_HPP
 #  define OPENGLCPPWRAPPER_GEOMETRY_CUBE_HPP
 
-#  include "Geometry/Geometry.hpp"
+#  include "Scene/Shape.hpp"
 
 namespace glwrap
 {
-  DECLARE_CLASS(Cube)
+  DECLARE_CLASS(Cube);
 
 // *****************************************************************************
 //! \brief Create an unity-size cube centered at 0

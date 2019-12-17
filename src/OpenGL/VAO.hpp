@@ -42,7 +42,7 @@ namespace glwrap
 {
 
 // Used by SceneGraph
-DECLARE_CLASS(GLVAO)
+DECLARE_CLASS(GLVAO);
 
 // *****************************************************************************
 //! \brief Handle the OpenGL representation of 3D models. Hold a list of VBO and

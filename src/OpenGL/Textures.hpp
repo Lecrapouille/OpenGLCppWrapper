@@ -71,7 +71,7 @@ struct TextureOptions
 };
 
 //! \brief Used by GLVAO
-DECLARE_CLASS(IGLTexture)
+DECLARE_CLASS(IGLTexture);
 
 // *****************************************************************************
 //! \brief Generic Texture.

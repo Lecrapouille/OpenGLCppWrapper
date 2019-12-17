@@ -38,7 +38,7 @@ namespace glwrap
 {
 
 // Used by GLProgram
-DECLARE_CLASS(GLLocation)
+DECLARE_CLASS(GLLocation);
 
 // *****************************************************************************
 //! \class GLLocation Locations.hpp

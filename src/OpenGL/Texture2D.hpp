@@ -78,7 +78,7 @@ static bool doload2D(const char *const filename, const PixelLoadFormat format,
 }
 
 //! \brief Used by GLTexture3D and GLTextureCube
-DECLARE_CLASS(GLTexture2D)
+DECLARE_CLASS(GLTexture2D);
 
 // *****************************************************************************
 //! \brief A 2D Texture.

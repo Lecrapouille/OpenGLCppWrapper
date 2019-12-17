@@ -25,7 +25,7 @@
 
 namespace glwrap
 {
-  DECLARE_CLASS(SwitchNode3D)
+  DECLARE_CLASS(SwitchNode3D);
 
   // ***************************************************************************
   //! \brief A special node scene allowing to select a single child allowed to

@@ -89,7 +89,7 @@ private:
   GLVAO             m_vao;
 };
 
-DECLARE_CLASS(CubicRobot)
+DECLARE_CLASS(CubicRobot);
 
 // *****************************************************************
 //! \brief a CubicRobot is an robot made of cubes. A CubicRobot is a

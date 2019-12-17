@@ -17,46 +17,67 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
-//
-// This file is a derived work of https://github.com/glumpy/glumpy
-//
-// Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
-// Distributed under the (new) BSD License.
-//=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_GEOMETRY_SHADER_HPP
-#  define OPENGLCPPWRAPPER_GEOMETRY_SHADER_HPP
+#ifndef OPENGLCPPWRAPPER_MATERIALDEPTH_HPP
+#  define OPENGLCPPWRAPPER_MATERIALDEPTH_HPP
 
-#  include "OpenGL/Shaders.hpp"
-
-// *****************************************************************************
-//! \file ShaderGeometry.hpp file implements:
-//!   - GLGeometryShader:
-// *****************************************************************************
+#  include "Material/Material.hpp"
 
 namespace glwrap
 {
 
+DECLARE_CLASS(MaterialDepth);
+
 // *****************************************************************************
-//!
+//! \brief
 // *****************************************************************************
-class GLGeometryShader: public GLShader
+class MaterialDepth : public Material
 {
 public:
 
-  GLGeometryShader(std::string const& name = "GeometryShader")
-    : GLShader(name, GL_GEOMETRY_SHADER)
+  MaterialDepth()
+    : Material("depth", Material::Type::Depth)
   {
+    createDepthMaterialShader(m_vertexShader, m_fragmentShader);
+    debug();
+    m_program.attachShaders(m_vertexShader, m_fragmentShader);
+
+    near() = 1.0f;
+    far() = 100.0f;
+    opacity() = 1.0f;
   }
 
-private:
-
-  virtual const char* type() const override
+  static MaterialDepth_SP create()
   {
-    return "Geometry Shader script";
+    return std::make_shared<MaterialDepth>();
+    /* Not working beacuse we do not want to change a uniform for all materials
+    auto& it = materials.find(type());
+    if (it == materials.end())
+      {
+        MaterialDepth_SP m = std::make_shared<MaterialDepth>();
+        materials[type()] = m;
+        return m;
+      }
+    return it->second;
+    */
+  }
+
+  inline float& near()
+  {
+    return m_program.scalarf("near");
+  }
+
+  inline float& far()
+  {
+    return m_program.scalarf("far");
+  }
+
+  inline float& opacity()
+  {
+    return m_program.scalarf("opacity");
   }
 };
 
 } // namespace glwrap
 
-#endif // OPENGLCPPWRAPPER_GEOMETRY_SHADER_HPP
+#endif // OPENGLCPPWRAPPER_MATERIALDEPTH_HPP

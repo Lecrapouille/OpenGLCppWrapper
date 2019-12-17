@@ -28,7 +28,7 @@ namespace glwrap
 {
 
   //! \brief Used by CameraController and SceneGraph
-  DECLARE_CLASS(OrthographicCamera3D)
+  DECLARE_CLASS(OrthographicCamera3D);
 
   // *****************************************************************************
   //! \brief

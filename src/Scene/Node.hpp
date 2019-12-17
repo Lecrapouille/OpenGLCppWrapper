@@ -26,7 +26,7 @@
 
 namespace glwrap
 {
-  DECLARE_CLASS(Node3D)
+  DECLARE_CLASS(Node3D);
 
   // ***************************************************************************
   //! \brief Class defining a Scene node.
@@ -52,8 +52,6 @@ namespace glwrap
   {
   public:
 
-    Node3D() {}
-
     //--------------------------------------------------------------------------
     //! \brief Create a scene node with a given name.
     //!
@@ -69,6 +67,13 @@ namespace glwrap
     {
       ERROR("Create Node3D named '%s'", name.c_str());
     }
+
+    //--------------------------------------------------------------------------
+    //! \brief Create a not renderable scene node having an empty name.
+    //--------------------------------------------------------------------------
+    Node3D()
+      : Node3D("", false)
+    {}
 
   public:
 
@@ -192,7 +197,8 @@ namespace glwrap
     //! \note: the project https://github.com/vahlers/scg3 traverse the tree
     //! using the vistor design pattern. I did not follow because I am a big fan
     //! of visitors: in my personal opinion they make the code harder to
-    //! understand. In the course https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/scenegraphs/Tutorial%206%20-%20Scene%20Graphs.pdf
+    //! understand. In the course https://research.ncl.ac.uk/game/mastersdegree/
+    //! graphicsforgames/scenegraphs/Tutorial%206%20-%20Scene%20Graphs.pdf
     //! they let derived classes override the method update() but suppose the
     //! developper will call the method update() of the parent class. I think this
     //! is an error prone pratice. I think doUpdate() does the same thing in a more
@@ -218,8 +224,8 @@ namespace glwrap
       if (likely(m_renderable))
         {
           // TODO: is this not better to create an node like OpenInventor
-          // separator instead of this computation made everytime even if When
-          // scaling a node it will also scale descendants. Sometimes you just
+          // separator instead of this computation made everytime (even if
+          // scaling a node it will also scale descendants)? Sometimes you just
           // want to scale the node not its descendants.
           draw(matrix::scale(m_world_transform, Transformable3D::localScale()));
         }

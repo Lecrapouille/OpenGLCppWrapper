@@ -28,22 +28,10 @@
 //----------------------------------------------------------------------------
 
 #  include "OpenGL/Shaders.hpp"
+#  include "Material/Config.hpp"
 
 namespace glwrap
 {
-  struct MaterialConfig
-  {
-    bool useAlphaTest = false;
-    bool useGammaInput = false;
-    bool useGammaOutput = false;
-    bool useMap = true;
-    bool useBumpMap = false;
-    bool useSpecularMap = false;
-    bool useColor = true;
-    bool useFog = true;
-    bool useExpFog = false;
-  };
-
 #   pragma GCC diagnostic push
 #   pragma GCC diagnostic ignored "-Wunused-function"
 

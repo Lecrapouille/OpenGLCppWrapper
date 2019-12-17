@@ -26,7 +26,7 @@
 namespace glwrap
 {
 
-DECLARE_CLASS(Cylinder)
+DECLARE_CLASS(Cylinder);
 
 // *****************************************************************************
 //! \brief Class holding meshes of a cylinder. A cylinder is a Tube where top

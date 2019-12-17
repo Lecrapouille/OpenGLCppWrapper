@@ -26,7 +26,7 @@
 namespace glwrap
 {
 
-DECLARE_CLASS(Cone)
+DECLARE_CLASS(Cone);
 
 // *****************************************************************************
 //! \brief Class holding meshes of a cone. A cone is a Tube with no top radius.

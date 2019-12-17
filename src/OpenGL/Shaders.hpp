@@ -396,10 +396,66 @@ inline GLShader& operator>>(T const& code, GLShader& shader)
   return shader;
 }
 
-} // namespace glwrap
+// *****************************************************************************
+//!
+// *****************************************************************************
+class GLVertexShader: public GLShader
+{
+public:
 
-//#  include "OpenGL/ShaderVertex.hpp"
-//#  include "OpenGL/ShaderFragment.hpp"
-//#  include "OpenGL/ShaderGeometry.hpp"
+  GLVertexShader(std::string const& name = "VertexShader")
+    : GLShader(name, GL_VERTEX_SHADER)
+  {
+  }
+
+private:
+
+  virtual const char* type() const override
+  {
+    return "Vertex Shader script";
+  }
+};
+
+// *****************************************************************************
+//!
+// *****************************************************************************
+class GLFragmentShader: public GLShader
+{
+public:
+
+  GLFragmentShader(std::string const& name = "FragmentShader")
+    : GLShader(name, GL_FRAGMENT_SHADER)
+  {
+  }
+
+private:
+
+  virtual const char* type() const override
+  {
+    return "Fragment Shader script";
+  }
+};
+
+// *****************************************************************************
+//!
+// *****************************************************************************
+class GLGeometryShader: public GLShader
+{
+public:
+
+  GLGeometryShader(std::string const& name = "GeometryShader")
+    : GLShader(name, GL_GEOMETRY_SHADER)
+  {
+  }
+
+private:
+
+  virtual const char* type() const override
+  {
+    return "Geometry Shader script";
+  }
+};
+
+} // namespace glwrap
 
 #endif // OPENGLCPPWRAPPER_GLSHADERS_HPP

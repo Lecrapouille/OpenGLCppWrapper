@@ -17,46 +17,61 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
-//
-// This file is a derived work of https://github.com/glumpy/glumpy
-//
-// Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
-// Distributed under the (new) BSD License.
-//=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_VERTEX_SHADER_HPP
-#  define OPENGLCPPWRAPPER_VERTEX_SHADER_HPP
+#ifndef OPENGLCPPWRAPPER_MATERIALNORMALS_HPP
+#  define OPENGLCPPWRAPPER_MATERIALNORMALS_HPP
 
-#  include "OpenGL/Shaders.hpp"
-
-// *****************************************************************************
-//! \file ShaderVertex.hpp file implements:
-//!   - GLVertexShader:
-// *****************************************************************************
+#  include "Material/Material.hpp"
 
 namespace glwrap
 {
 
+DECLARE_CLASS(MaterialNormals);
+
 // *****************************************************************************
-//!
+//! \brief
 // *****************************************************************************
-class GLVertexShader: public GLShader
+class MaterialNormals : public Material
 {
 public:
 
-  GLVertexShader(std::string const& name = "VertexShader")
-    : GLShader(name, GL_VERTEX_SHADER)
+  MaterialNormals()
+    : Material("normals", Material::Type::Normal)
   {
+    createNormalMaterialShader(m_vertexShader, m_fragmentShader);
+    debug();
+    m_program.attachShaders(m_vertexShader, m_fragmentShader);
+
+    opacity() = 1.0f;
+    normalMatrix() = Matrix33f(matrix::Identity);
   }
 
-private:
-
-  virtual const char* type() const override
+  static MaterialNormals_SP create()
   {
-    return "Vertex Shader script";
+    return std::make_shared<MaterialNormals>();
+    /*
+    auto& it = materials.find(type());
+    if (it == materials.end())
+      {
+        MaterialNormals_SP m = std::make_shared<MaterialNormals>();
+        materials[type()] = m;
+        return m;
+      }
+    return it->second;
+    */
+  }
+
+  inline float& opacity()
+  {
+    return m_program.scalarf("opacity");
+  }
+
+  inline Matrix33f& normalMatrix()
+  {
+    return m_program.matrix33f("normalMatrix");
   }
 };
 
 } // namespace glwrap
 
-#endif // OPENGLCPPWRAPPER_VERTEX_SHADER_HPP
+#endif // OPENGLCPPWRAPPER_MATERIALNORMALS_HPP

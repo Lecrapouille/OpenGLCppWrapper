@@ -18,14 +18,32 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
-#  define OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+#ifndef OPENGLCPPWRAPPER_MATERIAL_CONFIG_HPP
+#  define OPENGLCPPWRAPPER_MATERIAL_CONFIG_HPP
 
-#  include "OpenGLCppWrapper/OpenGL.hpp"
-#  include "OpenGLCppWrapper/Scene.hpp"
-#  include "OpenGLCppWrapper/Material.hpp"
-#  include "OpenGLCppWrapper/Geometry.hpp"
-#  include "OpenGLCppWrapper/Camera.hpp"
-#  include "OpenGLCppWrapper/UI.hpp"
+namespace glwrap
+{
+  struct MaterialConfig
+  {
+    //! \brief
+    bool useAlphaTest = false;
+    //! \brief
+    bool useGammaInput = false;
+    //! \brief
+    bool useGammaOutput = false;
+    //! \brief
+    bool useMap = true;
+    //! \brief
+    bool useBumpMap = false;
+    //! \brief
+    bool useSpecularMap = false;
+    //! \brief
+    bool useColor = true;
+    //! \brief
+    bool useFog = false;
+    //! \brief
+    bool useExpFog = false;
+  };
+} // namespace glwrap
 
-#endif // OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+#endif // OPENGLCPPWRAPPER_MATERIAL_

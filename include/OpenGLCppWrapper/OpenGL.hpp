@@ -18,10 +18,10 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_SCENEGRAPH_HPP
-#  define OPENGLCPPWRAPPER_SCENEGRAPH_HPP
+#ifndef OPENGLCPPWRAPPER_INCLUDE_OPENGL_HPP
+#  define OPENGLCPPWRAPPER_INCLUDE_OPENGL_HPP
 
-#  include "Scene/Switch.hpp"
-#  include "Scene/Blinker.hpp"
+#  include "OpenGL/Program.hpp"
+#  include "OpenGL/FrameBuffers.hpp"
 
-#endif // OPENGLCPPWRAPPER_SCENEGRAPH_HPP
+#endif // OPENGLCPPWRAPPER_INCLUDE_OPENGL_HPP

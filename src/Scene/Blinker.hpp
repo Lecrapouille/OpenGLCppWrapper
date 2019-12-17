@@ -21,12 +21,12 @@
 #ifndef OPENGLCPPWRAPPER_SCENE_BLINKER_HPP
 #  define OPENGLCPPWRAPPER_SCENE_BLINKER_HPP
 
-#  include "Scene/Node.hpp"
+#  include "Scene/Switch.hpp"
 #  include "Common/TimedAction.hpp"
 
 namespace glwrap
 {
-  DECLARE_CLASS(BlinkerNode3D)
+  DECLARE_CLASS(BlinkerNode3D);
 
   // ***************************************************************************
   //! \brief A special scene node cycling its children at a given frequency.

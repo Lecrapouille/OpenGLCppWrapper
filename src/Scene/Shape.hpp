@@ -18,17 +18,17 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_GEOMETRY_HPP
-#  define OPENGLCPPWRAPPER_GEOMETRY_HPP
+#ifndef OPENGLCPPWRAPPER_SHAPE_HPP
+#  define OPENGLCPPWRAPPER_SHAPE_HPP
 
-#  include "Scene/SceneGraph.hpp"
+#  include "Scene/Node.hpp"
 #  include "OpenGL/Program.hpp"
-#  include "Material/Material.hpp"
+#  include "Material/MaterialBasic.hpp"
 
 namespace glwrap
 {
 
-DECLARE_CLASS(Shape3D)
+DECLARE_CLASS(Shape3D);
 
 // *****************************************************************************
 //! \brief Class having predefined GLProgram, GLVBO for holding data of a 3D
@@ -291,4 +291,4 @@ private:
 
 } // namespace glwrap
 
-#endif // OPENGLCPPWRAPPER_GEOMETRY_HPP
+#endif // OPENGLCPPWRAPPER_SHAPE_HPP

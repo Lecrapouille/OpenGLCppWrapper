@@ -58,7 +58,7 @@ protected:
     class TypeName;                                  \
     using TypeName##_SP = std::shared_ptr<TypeName>; \
     using TypeName##_UP = std::unique_ptr<TypeName>; \
-    using TypeName##_WP = std::weak_ptr<TypeName>;
+    using TypeName##_WP = std::weak_ptr<TypeName>
 
 
 // *****************************************************************************

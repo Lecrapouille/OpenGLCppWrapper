@@ -33,7 +33,7 @@ class GLExample17: public IGLWindow
 public:
 
   GLExample17()
-    : m_material(MaterialNormal::create()),
+    : m_material(MaterialNormals::create()),
       m_cameraController(Camera3D::Type::PERSPECTIVE)
   {}
 
@@ -51,17 +51,17 @@ protected:
 
 private:
 
-  MaterialNormal_SP m_material;
-  Tube_SP          m_tube1;
-  Tube_SP          m_tube2;
-  Cone_SP          m_cone1;
-  Cone_SP          m_cone2;
-  Pyramid_SP       m_pyra1;
-  Pyramid_SP       m_pyra2;
-  Shape3D_SP       m_shape;
-  CameraController m_cameraController;
-  uint32_t         m_slices = 8u;
-  float            m_base_radius = 1.0f;
+  MaterialNormals_SP m_material;
+  Tube_SP            m_tube1;
+  Tube_SP            m_tube2;
+  Cone_SP            m_cone1;
+  Cone_SP            m_cone2;
+  Pyramid_SP         m_pyra1;
+  Pyramid_SP         m_pyra2;
+  Shape3D_SP         m_shape;
+  CameraController   m_cameraController;
+  uint32_t           m_slices = 8u;
+  float              m_base_radius = 1.0f;
 };
 
 #endif // EXAMPLE_17_MATERIAL_NORMAL_HPP

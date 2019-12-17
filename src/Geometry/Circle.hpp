@@ -21,12 +21,12 @@
 #ifndef OPENGLCPPWRAPPER_GEOMETRY_CIRCLE_HPP
 #  define OPENGLCPPWRAPPER_GEOMETRY_CIRCLE_HPP
 
-#  include "Geometry/Geometry.hpp"
+#  include "Scene/Shape.hpp"
 
 namespace glwrap
 {
 
-DECLARE_CLASS(Circle)
+DECLARE_CLASS(Circle);
 
 // *****************************************************************************
 //! \brief Create a Z-axis aligned circle shape (with 3d coordinates).

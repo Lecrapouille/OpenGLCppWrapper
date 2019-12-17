@@ -34,7 +34,7 @@ namespace glwrap
 {
 
 //! \brief Used by GLVAO
-DECLARE_CLASS(IGLBuffer)
+DECLARE_CLASS(IGLBuffer);
 
 // **************************************************************
 //! \brief Intermediate class needed by GLVAO for checking VBOs

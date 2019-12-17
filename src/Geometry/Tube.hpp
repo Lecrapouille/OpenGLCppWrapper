@@ -21,12 +21,12 @@
 #ifndef OPENGLCPPWRAPPER_GEOMETRY_TUBE_HPP
 #  define OPENGLCPPWRAPPER_GEOMETRY_TUBE_HPP
 
-#  include "Geometry/Geometry.hpp"
+#  include "Scene/Shape.hpp"
 
 namespace glwrap
 {
 
-DECLARE_CLASS(Tube)
+DECLARE_CLASS(Tube);
 
 // *****************************************************************************
 //! \brief Create a tube shape. Tube is a generic shape that can create Cylinder

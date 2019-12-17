@@ -26,7 +26,7 @@
 namespace glwrap
 {
 
-DECLARE_CLASS(Pyramid)
+DECLARE_CLASS(Pyramid);
 
 // *****************************************************************************
 //! \brief Class holding meshes of a pyramid. A pyramid is a cone with 4 slices.
