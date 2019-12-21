@@ -125,9 +125,9 @@ static void on_keyboard_event(GLFWwindow* obj, int key, int /*scancode*/, int ac
   assert(nullptr != obj);
   IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
   if (action == GLFW_PRESS)
-    window->onSetKeyAction(static_cast<size_t>(key), true);
+    window->onSetKeyAction(static_cast<size_t>(key), window::KEY_PRESS);
   else if (action == GLFW_RELEASE)
-    window->onSetKeyAction(static_cast<size_t>(key), false);
+    window->onSetKeyAction(static_cast<size_t>(key), window::KEY_RELEASE);
 }
 
 //------------------------------------------------------------------------------
@@ -299,7 +299,7 @@ bool IGLWindow::start()
   glfwSetInputMode(m_main_window, GLFW_STICKY_KEYS, GL_TRUE);
 
   for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
-    m_lastKeys[i] = m_currentKeys[i] = false;
+    m_lastKeys[i] = m_currentKeys[i] = window::KEY_RELEASE;
 
   // Flush OpenGL errors before using this function on real OpenGL
   // routines else a fake error is returned on the first OpenGL
@@ -368,9 +368,9 @@ bool IGLWindow::loop()
       {
         glfwPollEvents();
         const std::lock_guard<std::mutex> lock(m_mutex);
+        onKeyboardEvent();
         for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
           m_lastKeys[i] = m_currentKeys[i];
-        onKeyboardEvent();
       }
     }
   // Check if the ESC key was pressed or the window was closed

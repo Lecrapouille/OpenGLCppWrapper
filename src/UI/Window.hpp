@@ -34,6 +34,8 @@ namespace glwrap
 {
 namespace window
 {
+  static bool const KEY_PRESS = true;
+  static bool const KEY_RELEASE = false;
 
   //! \brief Button type
   enum ButtonType
@@ -219,24 +221,24 @@ public:
 
   inline bool isKeyDown(size_t const key)
   {
-    return GLFW_PRESS == m_currentKeys[key];
+    return window::KEY_PRESS == m_currentKeys[key];
   }
 
   inline bool isKeyUp(size_t const key)
   {
-    return GLFW_RELEASE == m_currentKeys[key];
+    return window::KEY_RELEASE == m_currentKeys[key];
   }
 
   inline bool wasKeyPressed(size_t const key)
   {
-    return GLFW_PRESS == m_currentKeys[key] &&
-      GLFW_RELEASE == m_lastKeys[key];
+    return window::KEY_PRESS == m_currentKeys[key] &&
+      window::KEY_RELEASE == m_lastKeys[key];
   }
 
   inline bool wasKeyReleased(size_t const key)
   {
-    return GLFW_RELEASE == m_currentKeys[key] &&
-      GLFW_PRESS && m_lastKeys[key];
+    return window::KEY_RELEASE == m_currentKeys[key] &&
+      window::KEY_PRESS == m_lastKeys[key];
   }
 
 private:
