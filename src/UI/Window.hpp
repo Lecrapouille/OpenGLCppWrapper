@@ -265,6 +265,12 @@ private:
   virtual bool setup() = 0;
 
   //----------------------------------------------------------------------------
+  //! \brief Callback triggered when the method setup() failed. By default this
+  //! method does nothing.
+  //----------------------------------------------------------------------------
+  virtual void onSetupFailed() {};
+
+  //----------------------------------------------------------------------------
   //! \brief Add here all stuffs painting your 3D world to be
   //! displayed. This method is called by the start() method.
   //! \return false for halting start(), else return true for continuing.
@@ -272,18 +278,15 @@ private:
   virtual bool draw() = 0;
 
   //----------------------------------------------------------------------------
+  //! \brief Callback triggered when the method draw() failed. By default this
+  //! method does nothing.
+  //----------------------------------------------------------------------------
+  virtual void onDrawFailed() {};
+
+  //----------------------------------------------------------------------------
   //! \brief Main loop for displaying the 3D world. Call draw().
   //----------------------------------------------------------------------------
   virtual bool loop();
-
-  //----------------------------------------------------------------------------
-  //! \brief Release your 3D models from memory created by setup().
-  //! This method is not called by the destructor because of it's virtual.
-  //----------------------------------------------------------------------------
-  virtual void release()
-  {
-    /* By default no 3D resources has to released */
-  }
 
 private:
 

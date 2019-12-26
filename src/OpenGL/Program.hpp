@@ -1530,6 +1530,7 @@ GLUniform<T>& GLProgram::getUniform(const char *name)
     }
   else
     {
+      DEBUG("GLProgram '%s' not compiled: find or create uniform '%s'", cname(), name);
       if (likely(m_uniforms.end() == m_uniforms.find(name)))
         createUniform<T>(name);
 

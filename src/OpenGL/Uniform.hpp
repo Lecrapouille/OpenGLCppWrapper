@@ -187,66 +187,77 @@ protected:
 template<>
 inline void GLUniform<int>::setValue(const int& value) const
 {
+  DEBUG("Uniform '%s' set %i", cname(), value);
   glCheck(glUniform1i(m_handle, value));
 }
 
 template<>
 inline void GLUniform<float>::setValue(const float& value) const
 {
+  DEBUG("Uniform '%s' set %f", cname(), value);
   glCheck(glUniform1f(m_handle, value));
 }
 
 template<>
 inline void GLUniform<Vector2f>::setValue(const Vector2f& value) const
 {
+  DEBUG("Uniform '%s' set [%f %f]", cname(), value.x, value.y);
   glCheck(glUniform2f(m_handle, value.x, value.y));
 }
 
 template<>
 inline void GLUniform<Vector3f>::setValue(const Vector3f& value) const
 {
+  DEBUG("Uniform '%s' set [%f %f %f]", cname(), value.x, value.y, value.z);
   glCheck(glUniform3f(m_handle, value.x, value.y, value.z));
 }
 
 template<>
 inline void GLUniform<Vector4f>::setValue(const Vector4f& value) const
 {
+  DEBUG("Uniform '%s' set [%f %f %f %f]", cname(), value.x, value.y, value.z, value.w);
   glCheck(glUniform4f(m_handle, value.x, value.y, value.z, value.w));
 }
 
 template<>
 inline void GLUniform<Vector2i>::setValue(const Vector2i& value) const
 {
+  DEBUG("Uniform '%s' set [%i %i]", cname(), value.x, value.y);
   glCheck(glUniform2i(m_handle, value.x, value.y));
 }
 
 template<>
 inline void GLUniform<Vector3i>::setValue(const Vector3i& value) const
 {
+  DEBUG("Uniform '%s' set [%i %i %i]", cname(), value.x, value.y, value.z);
   glCheck(glUniform3i(m_handle, value.x, value.y, value.z));
 }
 
 template<>
 inline void GLUniform<Vector4i>::setValue(const Vector4i& value) const
 {
+  DEBUG("Uniform '%s' set [%i %i %i %i]", cname(), value.x, value.y, value.z, value.w);
   glCheck(glUniform4i(m_handle, value.x, value.y, value.z, value.w));
 }
 
 template<>
 inline void GLUniform<Matrix22f>::setValue(const Matrix22f& m) const
 {
+  DEBUG("Uniform '%s' set matrix", cname());
   glCheck(glUniformMatrix2fv(m_handle, 1, GL_FALSE, m));
 }
 
 template<>
 inline void GLUniform<Matrix33f>::setValue(const Matrix33f& m) const
 {
+  DEBUG("Uniform '%s' set matrix", cname());
   glCheck(glUniformMatrix3fv(m_handle, 1, GL_FALSE, m));
 }
 
 template<>
 inline void GLUniform<Matrix44f>::setValue(const Matrix44f& m) const
 {
+  DEBUG("Uniform '%s' set matrix", cname());
   glCheck(glUniformMatrix4fv(m_handle, 1, GL_FALSE, m));
 }
 

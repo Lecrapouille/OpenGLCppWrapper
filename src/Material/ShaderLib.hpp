@@ -40,7 +40,7 @@ namespace glwrap
     //--------------------------------------------------------------------------
     namespace common
     {
-      static const char* version(/*MaterialConfig const& config*/)
+      static const char* version(/*BasicMaterialConfig const& config*/)
       {
 #if defined(GLES)
         return "precision highp float;\n#version 330\n\n";
@@ -59,7 +59,7 @@ namespace glwrap
 
       namespace vertex
       {
-        static const char* params(/*MaterialConfig const& config*/)
+        static const char* params(/*BasicMaterialConfig const& config*/)
         {
           return
             "uniform mat4 modelMatrix;\n"
@@ -74,7 +74,7 @@ namespace glwrap
 
       namespace fragment
       {
-        static const char* params(/*MaterialConfig const& config*/)
+        static const char* params(/*BasicMaterialConfig const& config*/)
         {
           return
             "uniform mat4 viewMatrix;\n"
@@ -88,7 +88,7 @@ namespace glwrap
     {
       namespace fragment
       {
-        static const char* params(MaterialConfig const& config)
+        static const char* params(BasicMaterialConfig const& config)
         {
           if (config.useColor)
             return
@@ -97,7 +97,7 @@ namespace glwrap
           return "";
         }
 
-        static const char* code(MaterialConfig const& config)
+        static const char* code(BasicMaterialConfig const& config)
         {
           if (config.useColor)
             return
@@ -109,7 +109,7 @@ namespace glwrap
 
       namespace vertex
       {
-        static const char* params(MaterialConfig const& config)
+        static const char* params(BasicMaterialConfig const& config)
         {
           if (config.useColor)
             return
@@ -119,7 +119,7 @@ namespace glwrap
           return "";
         }
 
-        static const char* code(MaterialConfig const& config)
+        static const char* code(BasicMaterialConfig const& config)
         {
           if (config.useColor) {
             if (config.useGammaInput)
@@ -140,7 +140,7 @@ namespace glwrap
     {
       namespace vertex
       {
-        static const char* params(MaterialConfig const& config)
+        static const char* params(BasicMaterialConfig const& config)
         {
           if ((config.useMap) || (config.useBumpMap) || (config.useSpecularMap))
             return
@@ -150,7 +150,7 @@ namespace glwrap
           return "";
         }
 
-        static const char* code(MaterialConfig const& config)
+        static const char* code(BasicMaterialConfig const& config)
         {
           if ((config.useMap) || (config.useBumpMap) || (config.useSpecularMap))
             return
@@ -162,7 +162,7 @@ namespace glwrap
 
       namespace fragment
       {
-        static const char* params(MaterialConfig const& config)
+        static const char* params(BasicMaterialConfig const& config)
         {
           if ((config.useMap) || (config.useBumpMap) || (config.useSpecularMap))
             return
@@ -172,7 +172,7 @@ namespace glwrap
           return "";
         }
 
-        static const char* code(MaterialConfig const& config)
+        static const char* code(BasicMaterialConfig const& config)
         {
           if (config.useMap) {
             if (config.useGammaInput)
@@ -195,13 +195,13 @@ namespace glwrap
     {
       namespace vertex
       {
-        static const char* params(MaterialConfig const& /*config*/)
+        static const char* params(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
         }
 
-        static const char* code(MaterialConfig const& /*config*/)
+        static const char* code(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -210,13 +210,13 @@ namespace glwrap
 
       namespace fragment
       {
-        static const char* params(MaterialConfig const& /*config*/)
+        static const char* params(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
         }
 
-        static const char* code(MaterialConfig const& /*config*/)
+        static const char* code(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -229,7 +229,7 @@ namespace glwrap
     {
       namespace fragment
       {
-        static const char* params(MaterialConfig const& config)
+        static const char* params(BasicMaterialConfig const& config)
         {
           if (config.useFog)
             return
@@ -247,7 +247,7 @@ namespace glwrap
           return "";
         }
 
-        static const char* code(MaterialConfig const& config)
+        static const char* code(BasicMaterialConfig const& config)
         {
           if (config.useFog)
             return
@@ -274,13 +274,13 @@ namespace glwrap
     {
       namespace vertex
       {
-        static const char* params(MaterialConfig const& /*config*/)
+        static const char* params(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
         }
 
-        static const char* code(MaterialConfig const& /*config*/)
+        static const char* code(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -289,13 +289,13 @@ namespace glwrap
 
       namespace fragment
       {
-        static const char* params(MaterialConfig const& /*config*/)
+        static const char* params(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
         }
 
-        static const char* code(MaterialConfig const& /*config*/)
+        static const char* code(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -308,13 +308,13 @@ namespace glwrap
     {
       namespace vertex
       {
-        static const char* params(MaterialConfig const& /*config*/)
+        static const char* params(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
         }
 
-        static const char* code(MaterialConfig const& /*config*/)
+        static const char* code(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -323,13 +323,13 @@ namespace glwrap
 
       namespace fragment
       {
-        static const char* params(MaterialConfig const& /*config*/)
+        static const char* params(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
         }
 
-        static const char* code(MaterialConfig const& /*config*/)
+        static const char* code(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -342,7 +342,7 @@ namespace glwrap
     {
       namespace vertex
       {
-        static const char* code(MaterialConfig const& /*config*/)
+        static const char* code(BasicMaterialConfig const& /*config*/)
         {
           return
             "  // Base vertex\n"
@@ -357,7 +357,7 @@ namespace glwrap
     {
       namespace fragment
       {
-        static const char* code(MaterialConfig const& config)
+        static const char* code(BasicMaterialConfig const& config)
         {
           if (config.useAlphaTest)
             return
@@ -373,7 +373,7 @@ namespace glwrap
     {
       namespace fragment
       {
-        static const char* code(MaterialConfig const& config)
+        static const char* code(BasicMaterialConfig const& config)
         {
           if (config.useGammaOutput)
             return
@@ -444,7 +444,7 @@ namespace glwrap
   // -----------------------------------------------------------------------------
   static void createBasicMaterialShader(GLVertexShader& vertexShader,
                                         GLFragmentShader& fragmentShader,
-                                        MaterialConfig const& config)
+                                        BasicMaterialConfig const& config)
   {
     vertexShader
       << shaders::common::version()

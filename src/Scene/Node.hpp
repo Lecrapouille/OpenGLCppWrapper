@@ -65,7 +65,7 @@ namespace glwrap
       : m_name(name),
         m_renderable(renderable)
     {
-      ERROR("Create Node3D named '%s'", name.c_str());
+      DEBUG("Create Node3D named '%s'", name.c_str());
     }
 
     //--------------------------------------------------------------------------
@@ -83,7 +83,7 @@ namespace glwrap
     //--------------------------------------------------------------------------
     virtual ~Node3D()
     {
-      ERROR("Destroy Node3D %s", name().c_str());
+      DEBUG("Destroy Node3D '%s'", name().c_str());
       m_children.clear();
     }
 
@@ -216,7 +216,7 @@ namespace glwrap
     //!
     //! \fixme Can we compile/compute the scene once and only update some parts ?
     //--------------------------------------------------------------------------
-    virtual void renderer(/* RendererState */)
+    virtual void render(/* RendererState */)
     {
       if (unlikely(!isTraversable()))
         return;
@@ -231,7 +231,7 @@ namespace glwrap
         }
 
       for (auto& c: m_children)
-        c->renderer();
+        c->render();
     }
 
     //--------------------------------------------------------------------------
@@ -328,7 +328,7 @@ namespace glwrap
     //! \param node the node to start with.
     //! \param functor the function to call for each traversed node.
     //--------------------------------------------------------------------------
-    template<typename Functor>
+    template<typename Functor, typename arg>
     static void traverse(Node3D_SP node, Functor functor)
     {
       if (unlikely(!node->isTraversable()))

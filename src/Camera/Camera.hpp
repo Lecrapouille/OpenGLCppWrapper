@@ -21,7 +21,7 @@
 #ifndef OPENGLCPPWRAPPER_CAMERA_HPP
 #  define OPENGLCPPWRAPPER_CAMERA_HPP
 
-#  include "Scene/Transformable.hpp"
+#  include "Scene/Node.hpp"
 
 namespace glwrap
 {
@@ -32,7 +32,7 @@ namespace glwrap
   // *****************************************************************************
   //! \brief
   // *****************************************************************************
-  class Camera3D: public Transformable3D
+  class Camera3D: public Node3D
   {
     friend class CameraController;
 
@@ -43,8 +43,9 @@ namespace glwrap
     //----------------------------------------------------------------------------
     //! \brief
     //----------------------------------------------------------------------------
-    Camera3D(Type const type)
-      : m_type(type)
+    Camera3D(Type const type, std::string const& name = "camera")
+      : Node3D(name, false),
+        m_type(type)
     {
       m_position = Vector3f::UNIT_SCALE;
     }

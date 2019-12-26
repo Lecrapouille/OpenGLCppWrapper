@@ -86,6 +86,28 @@ namespace glwrap
     }
 
     //--------------------------------------------------------------------------
+    //! \brief Switch to the next child. Start to the first if the last was used.
+    //--------------------------------------------------------------------------
+    void next()
+    {
+      m_designated = (m_designated + 1_z) % m_children.size();
+      m_selected = m_designated;
+      updateTraversable();
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Switch to the previous child. Start to the last if the first was used.
+    //--------------------------------------------------------------------------
+    void previous()
+    {
+      if (unlikely(m_designated == 0_z))
+        m_designated = m_children.size();
+      --m_designated;
+      m_selected = m_designated;
+      updateTraversable();
+    }
+
+    //--------------------------------------------------------------------------
     //! \brief Call Node3D::debug() and show additional information.
     //--------------------------------------------------------------------------
     virtual void debug() const override

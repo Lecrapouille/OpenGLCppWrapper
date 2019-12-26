@@ -32,6 +32,8 @@
 namespace glwrap
 {
 
+  DECLARE_CLASS(CameraController);
+
   // *****************************************************************************
   //! \brief
   // *****************************************************************************
@@ -49,6 +51,11 @@ namespace glwrap
     CameraController(PerspectiveCamera3D_SP camera) // Camera3D_SP camera)
     {
       setCamera(camera);
+    }
+
+    static CameraController_SP create(Camera3D::Type const type)
+    {
+       return std::make_shared<CameraController>(type);
     }
 
     Camera3D& setCamera(Camera3D::Type const type)

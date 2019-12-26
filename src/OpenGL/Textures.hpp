@@ -99,10 +99,10 @@ public:
   //----------------------------------------------------------------------------
   IGLTexture(const uint8_t dimension, std::string const& name, const GLenum target)
     : GLObject(name),
+      m_buffer(name),
       m_dimension(dimension)
   {
     m_target = target;
-    m_buffer.setDebugName(name);
   }
 
   //----------------------------------------------------------------------------

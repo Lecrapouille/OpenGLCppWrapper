@@ -58,15 +58,6 @@ namespace glwrap
       return glwrap::make_shared<BlinkerNode3D>(name, duration/*, functor*/);
     }
 
-    //--------------------------------------------------------------------------
-    //! \brief Switch to the next child and start back to the 1st child if the
-    //! last child has done its action.
-    //--------------------------------------------------------------------------
-    inline void nextChild()
-    {
-      select((selected() + 1_z) % children().size());
-    }
-
   protected:
 
     //--------------------------------------------------------------------------
@@ -94,7 +85,7 @@ namespace glwrap
     virtual void doUpdate(float const /*dt*/) override
     {
       // m_timedAction.update(m_functor);
-      m_timedAction.update([this]() { nextChild(); });
+      m_timedAction.update([this]() { next(); });
     }
 
   protected:

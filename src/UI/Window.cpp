@@ -306,43 +306,36 @@ bool IGLWindow::start()
   // routines while valid.
   glCheck();
 
-  int res;
+  // Init OpenGL states of the user application
+  DEBUG("%s", "============= SETUP ============================================================");
+
   try
     {
-      // Init OpenGL states of the user application
-      DEBUG("%s", "============= SETUP ============================================================");
-      res = setup();
-      if (likely(res))
-        {
-          // Force refreshing computation made when window changed
-          onWindowSizeChanged();
-
-          // Show the estimated GPU mempry usage
-          display_gpu_memory();
-
-          // init FPS
-          m_lastTime = glfwGetTime();
-          m_lastFrameTime = m_lastTime;
-          m_fps = 0;
-
-          // Draw OpenGL scene
-          res = loop();
-        }
-      else
+      if (unlikely(!setup()))
         {
           ERROR("Failed setting-up graphics");
+          onSetupFailed();
+          return false;
         }
+
+      // Force refreshing computation made when window changed
+      onWindowSizeChanged();
     }
   catch (const OpenGLException& e)
     {
-      ERROR("Caught exception: '%s'", e.message().c_str());
-      res = false;
+      ERROR("Caught exception during setting-up graphics: '%s'",
+            e.message().c_str());
+      onSetupFailed();
+      return false;
     }
 
-  // Release the memory
-  release();
+  // init FPS
+  m_lastTime = glfwGetTime();
+  m_lastFrameTime = m_lastTime;
+  m_fps = 0;
 
-  return res;
+  // Draw OpenGL scene
+  return loop();
 }
 
 //------------------------------------------------------------------------------
@@ -355,9 +348,20 @@ bool IGLWindow::loop()
       display_gpu_memory();
       computeFPS();
 
-      if (likely(false == draw()))
+      try
         {
-          ERROR("Aborting");
+          if (likely(false == draw()))
+            {
+              ERROR("Failed drawing graphics");
+              onDrawFailed();
+              return false;
+            }
+        }
+      catch (const OpenGLException& e)
+        {
+          ERROR("Caught exception during drawing graphics: '%s'",
+                e.message().c_str());
+          onDrawFailed();
           return false;
         }
 

@@ -23,7 +23,7 @@
 
 #  include "Scene/Node.hpp"
 #  include "OpenGL/Program.hpp"
-#  include "Material/MaterialBasic.hpp"
+#  include "Material/Basic.hpp"
 
 namespace glwrap
 {
@@ -55,15 +55,17 @@ public: // TODO BoundingBox, BoundingSphere
   //!
   //! \fixme Attach Material, attach std::function<onUpdate>
   //----------------------------------------------------------------------------
-  Shape3D(std::string const& name, Material_SP material = MaterialBasic::create())
+  Shape3D(std::string const& name, Material_SP material = BasicMaterial::create())
     : Node3D(name, true),
       m_material(material),
       m_program(m_material->program()),
       m_vao("VAO_" + name),
       m_vertices(m_vao.vector3f("position")),
       m_normals(m_vao.vector3f("normal")),
+      // FIXME To be moved inside material {
       m_uv(m_vao.vector2f("UV")),
       m_texture(m_vao.texture2D("texture")),
+      // } FIXME
       m_indices(m_vao.index32())
   {
     throwIfOpenGLClassCalledBeforeContext();
@@ -240,6 +242,7 @@ public: // TODO BoundingBox, BoundingSphere
   //----------------------------------------------------------------------------
   inline void draw(Matrix44f const& matrix)
   {
+    DEBUG("Draw Shape '%s'", cname());
     model() = matrix;
     draw();
   }
@@ -250,6 +253,7 @@ public: // TODO BoundingBox, BoundingSphere
   //----------------------------------------------------------------------------
   inline void draw()
   {
+    DEBUG("Draw Shape '%s'", cname());
     m_program.draw(m_vao, Mode::TRIANGLES, index());
   }
 

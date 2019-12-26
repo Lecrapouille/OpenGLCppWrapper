@@ -23,7 +23,7 @@
 
 namespace glwrap
 {
-  struct MaterialConfig
+  struct BasicMaterialConfig
   {
     //! \brief
     bool useAlphaTest = false;
@@ -32,7 +32,7 @@ namespace glwrap
     //! \brief
     bool useGammaOutput = false;
     //! \brief
-    bool useMap = true;
+    bool useMap = false;
     //! \brief
     bool useBumpMap = false;
     //! \brief
