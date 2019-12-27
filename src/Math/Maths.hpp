@@ -41,11 +41,18 @@ namespace glwrap
     //! \brief
     template<typename T> T inf() { return std::numeric_limits<T>::max(); }
 
+    //! \brief
+    template<typename T> T nan() { return std::numeric_limits<T>::quiet_NaN(); }
+
+     //! \brief
+    template<typename T> bool isNan(T const& x) { return std::isnan(x); }
+
 #   pragma GCC diagnostic push
 #   pragma GCC diagnostic ignored "-Wunused-const-variable"
 
     //! \brief PI number
     static double const PI = 3.14159265358979323846;
+    static double const HALF_PI = 0.5 * PI;
     static double const TWO_PI = 2.0 * PI;
     static double const LN2 = 0.6931471805599453094;
 

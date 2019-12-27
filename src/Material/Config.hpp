@@ -23,25 +23,30 @@
 
 namespace glwrap
 {
+  //! \brief Configure allows to enable or disable portion of shader code for
+  //! adding or removing behaviors in shaders.
   struct BasicMaterialConfig
   {
-    //! \brief
+    //! \brief If true then allow to drop fragment colors if lower than a given
+    //! threshold.
     bool useAlphaTest = false;
-    //! \brief
+    //! \brief If true then taken into account gamma correction.
     bool useGammaInput = false;
-    //! \brief
+    //! \brief If true then taken into account gamma correction.
     bool useGammaOutput = false;
-    //! \brief
+    //! \brief If true then apply a texture to the object.
     bool useMap = false;
-    //! \brief
+    //! \brief If true then apply a bump mapping texture to the object.
     bool useBumpMap = false;
-    //! \brief
+    //! \brief If true then simulate the bright spot of a light that appears on
+    //! shiny objects. Specular highlights are often more inclined to the color
+    //! of the light than the color of the object.
     bool useSpecularMap = false;
-    //! \brief
+    //! \brief If true then apply a color to the object.
     bool useColor = true;
-    //! \brief
+    //! \brief If true then apply a linear fog. Disabled if useExpFog is set to true.
     bool useFog = false;
-    //! \brief
+    //! \brief If true then apply exponential fog and disable useFog.
     bool useExpFog = false;
   };
 } // namespace glwrap

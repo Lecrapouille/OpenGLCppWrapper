@@ -21,8 +21,6 @@
 #ifndef OPENGLCPPWRAPPER_CAMERACONTROLLER_HPP
 #  define OPENGLCPPWRAPPER_CAMERACONTROLLER_HPP
 
-// TODO
-#include <iostream>
 // TODO: control any camera
 // TODO: other type of control: like 3th person, trackball,
 // TODO: follow a path

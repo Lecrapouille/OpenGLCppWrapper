@@ -21,6 +21,33 @@
 #ifndef EXAMPLE_05_SCENEFOG_HPP
 #  define EXAMPLE_05_SCENEFOG_HPP
 
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
+using namespace glwrap;
+
+// *****************************************************************************
+//! \brief
+// *****************************************************************************
+class SceneFog
+  : public IGLWindow
+{
+public:
+
+  SceneFog();
+  ~SceneFog();
+
+private:
+
+  virtual void onWindowSizeChanged() override;
+  virtual void onKeyboardEvent() override;
+  virtual bool setup() override;
+  virtual bool draw() override;
+
+private:
+
+  Cube_SP             m_cube;
+  BasicMaterial_SP    m_material;
+  CameraController_SP m_cameraController;
+};
 
 #endif // EXAMPLE_05_SCENEFOG_HPP

@@ -18,50 +18,50 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_GEOMETRY_CUBE_HPP
-#  define OPENGLCPPWRAPPER_GEOMETRY_CUBE_HPP
-
-#  include "Scene/Shape.hpp"
+#ifndef OPENGLCPPWRAPPER_LINES_HPP
+#  define OPENGLCPPWRAPPER_LINES_HPP
 
 namespace glwrap
 {
-  DECLARE_CLASS(Cube);
+
+DECLARE_CLASS(LineBasicMaterial);
 
 // *****************************************************************************
-//! \brief Create an unity-size cube centered at 0
+//! \brief
 // *****************************************************************************
-class Cube: public Shape3D
+class LineBasicMaterial : public Material
 {
 public:
 
-  Cube(std::string const& name, Material_SP material)
-    : Shape3D(name, Mode::TRIANGLES, material)
+  LineBasicMaterial(std::string const& name = "line-basic")
+    : Material(name, Material::Type::Basic)
   {
-    DEBUG("%s", "<<<---------- Fill Cube ------------------------------------------------------");
+    //m_specialization = config.name();
+    createLineBasicMaterialShader(m_vertexShader, m_fragmentShader);
+    debug();
+    m_program.attachShaders(m_vertexShader, m_fragmentShader);
 
-    vertices() = {
-       #include "Geometry/CubeVertices.incl"
-    };
-
-    normals() = {
-       #include "Geometry/CubeNormals.incl"
-    };
-
-    uv() = {
-       #include "Geometry/CubeUV.incl"
-    };
-
-    DEBUG("%s", "------------- Fill Cube --------------------------------------------------->>>");
+    //width() = 1.0f;
+    //color() = Vector3f(1.0f, 0.0f, 0.0f);
   }
 
-public:
-
-  static Cube_SP create(std::string const& name, Material_SP material)
+  static LineBasicMaterial_SP create(std::string const& name = "line-basic")
   {
-    return std::make_shared<Cube>(name, material);
+    return std::make_shared<LineBasicMaterial>(name);
   }
+
+
+
+  //inline float& width()
+  //{
+  //   return m_program.scalarf("width");
+  //}
+
+  //private:
+
+  //GLVertexBuffer<Vector4f>& m_colors;
 };
 
 } // namespace glwrap
 
-#endif // OPENGLCPPWRAPPER_GEOMETRY_CUBE_HPP
+#endif // OPENGLCPPWRAPPER_LINES_HPP

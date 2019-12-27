@@ -18,57 +18,51 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_02_EMPTY_WINDOW_WITH_DEAR_IMGUI_HPP
-#  define EXAMPLE_02_EMPTY_WINDOW_WITH_DEAR_IMGUI_HPP
+#ifndef OPENGLCPPWRAPPER_GEOMETRY_AXIS_HPP
+#  define OPENGLCPPWRAPPER_GEOMETRY_AXIS_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "Scene/Polyline.hpp"
 
-using namespace glwrap;
-using namespace glwrap::window;
+namespace glwrap
+{
+
+DECLARE_CLASS(AxesHelper);
 
 // *****************************************************************************
-//! \brief This example shows how to add and use Dear ImGui widgets.
-//! For more information see: https://github.com/ocornut/imgui
+//! \brief Create a Z-axis aligned circle shape (with 3d coordinates).
+//! \ingroup Geometry
 // *****************************************************************************
-class WindowImGui: public IGLWindow
+class AxesHelper: public Polyline3D
 {
 public:
 
-  WindowImGui();
-  ~WindowImGui();
-
-private:
-
-  virtual bool setup() override;
-  virtual bool draw() override;
-
-private:
-
   //----------------------------------------------------------------------------
-  //! \brief Sub class managing Dear ImGui context and allowing to draw widgets.
-  //! \note this class can be place outside \c WindowImGui
+  //! \brief Constructor.
   //----------------------------------------------------------------------------
-  class GUI: public DearImGui
+  AxesHelper(std::string const& name, float const size = 1.0f, Material_SP material = LineBasicMaterial::create())
+    : Polyline3D(name, Mode::LINES, material)
   {
-  public:
+    vertices() =
+    {
+       Vector3f(0.0f, 0.0f, 0.0f),  Vector3f(size, 0.0f, 0.0f),
+       Vector3f(0.0f, 0.0f, 0.0f),  Vector3f(0.0f, size, 0.0f),
+       Vector3f(0.0f, 0.0f, 0.0f),  Vector3f(0.0f, 0.0f, size)
+    };
 
-    GUI(WindowImGui& window)
-      : m_window(window)
-    {}
+    colors() =
+    {
+       Vector4f(1.0f, 0.6f, 0.0f, 1.0f),  Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
+       Vector4f(0.6f, 1.0f, 0.0f, 1.0f),  Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
+       Vector4f(0.0f, 0.6f, 1.0f, 1.0f),  Vector4f(0.0f, 0.0f, 1.0f, 1.0f)
+    };
+  }
 
-  protected:
-
-    virtual bool render() override;
-
-  private:
-
-    WindowImGui& m_window;
-  };
-
-private:
-
-  static float color[4];
-  GUI   m_imgui;
+  static AxesHelper_SP create(std::string const& name, float const size = 1.0f, Material_SP material = LineBasicMaterial::create())
+  {
+    return std::make_shared<AxesHelper>(name, size, material);
+  }
 };
 
-#endif // EXAMPLE_02_EMPTY_WINDOW_WITH_DEAR_IMGUI_HPP
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_GEOMETRY_AXIS_HPP

@@ -65,6 +65,21 @@ void SceneNodes::onKeyboardEvent()
       m_switch->previous();
       std::cout << "Previous child: " << m_switch->selected() << std::endl;
     }
+
+  if (isKeyDown(GLFW_KEY_W) || isKeyDown(GLFW_KEY_UP))
+    m_cameraController->processKeyboard(CameraController::Movement::FORWARD, dt());
+  if (isKeyDown(GLFW_KEY_S) || isKeyDown(GLFW_KEY_DOWN))
+    m_cameraController->processKeyboard(CameraController::Movement::BACKWARD, dt());
+  if (isKeyDown(GLFW_KEY_A) || isKeyDown(GLFW_KEY_LEFT))
+    m_cameraController->processKeyboard(CameraController::Movement::LEFT, dt());
+  if (isKeyDown(GLFW_KEY_D) || isKeyDown(GLFW_KEY_RIGHT))
+    m_cameraController->processKeyboard(CameraController::Movement::RIGHT, dt());
+
+  auto& camera = m_cameraController->camera();
+  m_cube1->view() = camera.updateViewMatrix();
+  m_cube2->view() = camera.updateViewMatrix();
+  m_cube3->view() = camera.updateViewMatrix();
+  m_cube4->view() = camera.updateViewMatrix();
 }
 
 //------------------------------------------------------------------------------
@@ -81,6 +96,7 @@ bool SceneNodes::setup()
   // Create and place a camera
   m_cameraController = CameraController::create(Camera3D::Type::PERSPECTIVE);
   m_cameraController->camera().lookAt(Vector3f(10.0f), Vector3f::ZERO, Vector3f::UNIT_Y);
+  m_cameraController->setMoveVelocity(10.0f);
 
   BasicMaterialConfig config;
 
@@ -94,8 +110,13 @@ bool SceneNodes::setup()
   // Define material 2
   config.useMap = true;
   config.useColor = false;
+  config.useFog = true;
   m_material2 = BasicMaterial::create(config, "basic2");
-  m_material2->color() = Vector3f(1.0f, 0.0f, 0.0f);
+  m_material2->color() = Vector3f(1.0f, 1.0f, 1.0f);
+  m_material2->diffuse() = Vector3f(1.0f, 1.0f, 1.0f);
+  m_material2->fogNear() = 1.0f;
+  m_material2->fogFar() = 20.0f;
+  m_material2->fogColor() = Vector3f(0.5f, 0.5f, 0.5f);
   // FIXME: m_material2->texture().load("textures/wooden-crate.jpg");
 
   // Create leaves of the scene graph

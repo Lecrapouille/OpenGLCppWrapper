@@ -21,7 +21,10 @@
 #include "02_WindowImGui.hpp"
 #include <iostream>
 
+float WindowImGui::color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
 WindowImGui::WindowImGui()
+  : m_imgui(*this)
 {
   std::cout << "Hello WindowImGui" << std::endl;
 }
@@ -45,9 +48,7 @@ bool WindowImGui::setup()
 bool WindowImGui::GUI::render()
 {
   ImGui::Begin("Hello, world!");
-  static float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-  ImGui::ColorEdit3("color", color);
-  glCheck(glClearColor(color[0], color[1], color[2], color[3]));
+  ImGui::ColorEdit3("color", m_window.color);
   ImGui::End();
 
   // Success
@@ -61,6 +62,7 @@ bool WindowImGui::draw()
 {
   // First draw your OpenGL scene
   glCheck(glClear(GL_COLOR_BUFFER_BIT));
+  glCheck(glClearColor(color[0], color[1], color[2], color[3]));
 
   // Then DearImGui
   return m_imgui.draw();

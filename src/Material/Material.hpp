@@ -58,7 +58,7 @@ public:
 
   virtual ~Material()
   {
-    DEBUG("Destroy material '%s'", m_name.c_str());
+    ERROR("Destroy material '%s'", m_name.c_str());
   }
 
   inline GLProgram& program()
@@ -91,9 +91,10 @@ protected:
       << "---------------------" << std::endl;
   }
 
-protected:
-
-  static std::map<std::string, Material_SP> materials;
+// TODO: flyweigh factory ?
+//protected:
+//
+  //static std::map<std::string, Material_SP> materials;
 
 protected:
 

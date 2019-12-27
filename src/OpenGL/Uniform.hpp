@@ -147,7 +147,7 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the CPU data.
+  //! \brief Getter. Return the reference of the CPU data in read only mode.
   //----------------------------------------------------------------------------
   inline operator const T&() const
   {
@@ -155,6 +155,11 @@ public:
     return m_data;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Setter. Return the reference of CPU data in write mode. New value
+  //! will be transfered to GPU memory.
+  //! \fixme Could be nice to avoid transfering to the GPU if we set the same val
+  //----------------------------------------------------------------------------
   inline operator T&()
   {
     DEBUG("Uniform '%s' set data", cname());

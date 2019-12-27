@@ -328,7 +328,7 @@ namespace glwrap
     //! \param node the node to start with.
     //! \param functor the function to call for each traversed node.
     //--------------------------------------------------------------------------
-    template<typename Functor, typename arg>
+    template<typename Functor>
     static void traverse(Node3D_SP node, Functor functor)
     {
       if (unlikely(!node->isTraversable()))

@@ -80,6 +80,7 @@ public:
     ImGui_ImplGlfw_InitForOpenGL(window.window(), true);
     ImGui_ImplOpenGL3_Init(NULL);
     ImGui::StyleColorsDark();
+    m_init = true;
 
     return true;
   }
@@ -90,19 +91,23 @@ public:
   //------------------------------------------------------------------
   bool draw()
   {
-    bool res;
+    if (unlikely(!m_init))
+      {
+        ERROR("It seems that bool setup(IGLWindow &window) has never been called.");
+        return false;
+      }
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    res = render();
+    bool res = render();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     return res;
   }
 
-protected:
+private:
 
   //------------------------------------------------------------------
   //! \brief Method for drawing the HMI. This has to be implemented by
@@ -113,6 +118,11 @@ protected:
   //! this problem.
   //------------------------------------------------------------------
   virtual bool render() = 0;
+
+private:
+
+  //! \brief Check if setup() has been called
+  bool m_init = false;
 };
 
 } // namespace glwrap

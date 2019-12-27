@@ -21,8 +21,9 @@
 #ifndef OPENGLCPPWRAPPER_INCLUDE_MATERIAL_HPP
 #  define OPENGLCPPWRAPPER_INCLUDE_MATERIAL_HPP
 
-#  include "Material/Basic.hpp"
-#  include "Material/Depth.hpp"
-#  include "Material/Normals.hpp"
+#  include "Material/BasicMaterial.hpp"
+#  include "Material/DepthMaterial.hpp"
+#  include "Material/NormalsMaterial.hpp"
+#  include "Material/LineBasicMaterial.hpp"
 
 #endif // OPENGLCPPWRAPPER_INCLUDE_MATERIAL_HPP

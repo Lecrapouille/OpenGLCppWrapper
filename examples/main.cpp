@@ -43,8 +43,9 @@
 #include "02_Scene/02_NormalsMaterial.hpp"
 #include "02_Scene/03_SceneNodes.hpp"
 #include "02_Scene/04_SceneGraph.hpp"
-//#include "02_Scene/05_SceneFog.hpp"
+#include "02_Scene/05_SceneFog.hpp"
 //#include "02_Scene/06_SceneLight.hpp"
+#include "02_Scene/07_AlphaTest.hpp"
 
 #include <iostream>
 #include <stdlib.h>
@@ -86,7 +87,8 @@ static void usage(char *argv[])
   std::cout << " 21: Show different scene nodes." << std::endl;
   std::cout << " 22: Show different way to create a scene graph." << std::endl;
   std::cout << " 23: Show a scene graph with fog." << std::endl;
-  std::cout << " 24: Show a scene graph with lights." << std::endl;
+  std::cout << " 24: Show a tree with alpha testing." << std::endl;
+  std::cout << " 25: Show a scene graph with lights." << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -184,10 +186,13 @@ int main(int argc, char *argv[])
         case 22:
           win = std::make_unique<RobotsSceneGraph>();
           break;
-          /*case 23:
+        case 23:
           win = std::make_unique<SceneFog>();
           break;
         case 24:
+          win = std::make_unique<AlphaTest>();
+          break;
+          /*case 25:
           win = std::make_unique<SceneLight>();
           break;*/
         default:

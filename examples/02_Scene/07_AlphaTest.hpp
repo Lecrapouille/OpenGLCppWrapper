@@ -18,50 +18,62 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_GEOMETRY_CUBE_HPP
-#  define OPENGLCPPWRAPPER_GEOMETRY_CUBE_HPP
+#ifndef EXAMPLE_07_ALPHATEST_HPP
+#  define EXAMPLE_07_ALPHATEST_HPP
 
-#  include "Scene/Shape.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
-namespace glwrap
-{
-  DECLARE_CLASS(Cube);
+using namespace glwrap;
+using namespace glwrap::window;
 
 // *****************************************************************************
-//! \brief Create an unity-size cube centered at 0
+//! \brief
 // *****************************************************************************
-class Cube: public Shape3D
+class AlphaTest : public IGLWindow
 {
-public:
-
-  Cube(std::string const& name, Material_SP material)
-    : Shape3D(name, Mode::TRIANGLES, material)
-  {
-    DEBUG("%s", "<<<---------- Fill Cube ------------------------------------------------------");
-
-    vertices() = {
-       #include "Geometry/CubeVertices.incl"
-    };
-
-    normals() = {
-       #include "Geometry/CubeNormals.incl"
-    };
-
-    uv() = {
-       #include "Geometry/CubeUV.incl"
-    };
-
-    DEBUG("%s", "------------- Fill Cube --------------------------------------------------->>>");
-  }
+  friend class GUI;
 
 public:
 
-  static Cube_SP create(std::string const& name, Material_SP material)
+  AlphaTest();
+  ~AlphaTest();
+
+private:
+
+  void createTree(const char* name, const char* texture_path, float const angle);
+  virtual void onMouseMoved(Mouse const& mouse) override;
+  virtual void onKeyboardEvent() override;
+  virtual void onWindowSizeChanged() override;
+  virtual bool setup() override;
+  virtual bool draw() override;
+
+private:
+
+  class GUI: public DearImGui
   {
-    return std::make_shared<Cube>(name, material);
-  }
+  public:
+
+    GUI(AlphaTest& window)
+      : m_window(window)
+    {}
+
+  protected:
+
+    virtual bool render() override;
+
+  private:
+
+    AlphaTest& m_window;
+  };
+
+private:
+
+  float               m_alphatest = 0.5f;
+  GUI                 m_imgui;
+  Node3D_SP           m_scene;
+  Plane_SP            m_planes[5]; // FIXME a supprimer
+  AxesHelper_SP m_axis; // FIXME: a supprimer
+  CameraController_SP m_cameraController;
 };
 
-} // namespace glwrap
-
-#endif // OPENGLCPPWRAPPER_GEOMETRY_CUBE_HPP
+#endif // EXAMPLE_07_ALPHATEST_HPP

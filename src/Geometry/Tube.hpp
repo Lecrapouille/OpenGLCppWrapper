@@ -46,7 +46,7 @@ public:
   //----------------------------------------------------------------------------
   Tube(std::string const& name, Material_SP material, float const top_radius, float const base_radius,
        float const height, uint32_t const slices)
-    : Shape3D(name, material)
+    : Shape3D(name, Mode::TRIANGLES, material)
   {
     // Create caps ?
     const bool base_caps = base_radius > 0.0f;

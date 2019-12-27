@@ -22,6 +22,7 @@
 #  define OPENGLCPPWRAPPER_INCLUDE_SCENE_HPP
 
 #  include "Scene/Shape.hpp"
+#  include "Scene/Polyline.hpp"
 #  include "Scene/Blinker.hpp"
 
 #endif // OPENGLCPPWRAPPER_INCLUDE_SCENE_HPP

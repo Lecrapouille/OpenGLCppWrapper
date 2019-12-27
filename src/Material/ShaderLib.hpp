@@ -357,11 +357,20 @@ namespace glwrap
     {
       namespace fragment
       {
+        static const char* params(BasicMaterialConfig const& config)
+        {
+          if (config.useAlphaTest)
+            return
+              "// Alpha test\n"
+              "uniform float ALPHATEST;";
+          return "";
+        }
+
         static const char* code(BasicMaterialConfig const& config)
         {
           if (config.useAlphaTest)
             return
-              "  // Alpha Test\n"
+              "  // Alpha test\n"
               "  if (gl_FragColor.a < ALPHATEST) discard;\n";
           return "";
         }
@@ -462,6 +471,7 @@ namespace glwrap
     fragmentShader
       << shaders::common::version()
       << shaders::common::constants()
+      << shaders::alpha::fragment::params(config)
       << shaders::common::fragment::params()
       << "uniform vec3 diffuse;\n"
       << "uniform float opacity;\n"
@@ -481,6 +491,34 @@ namespace glwrap
       << shaders::gamma::fragment::code(config)
       << shaders::fog::fragment::code(config) << "}";
   }
+
+  // -----------------------------------------------------------------------------
+  //! \brief
+  // -----------------------------------------------------------------------------
+  static void createLineBasicMaterialShader(GLVertexShader& vertexShader, GLFragmentShader& fragmentShader)
+  {
+    vertexShader
+      << shaders::common::version()
+      << "uniform mat4 modelMatrix;\n"
+      << "uniform mat4 viewMatrix;\n"
+      << "uniform mat4 projectionMatrix;\n"
+      << "in vec3 position;\n"
+      << "in vec4 colors;\n"
+      << "out vec4 vColors;\n"
+      << "\nvoid main()\n{\n"
+      << "  vec4 mvPosition = modelMatrix * viewMatrix * vec4(position, 1.0);\n"
+      << "  gl_Position = projectionMatrix * mvPosition;\n"
+      << "  vColors = colors;\n"
+      << "}\n";
+
+    fragmentShader
+      << shaders::common::version()
+      << "in vec4 vColors;\n"
+      << "\nvoid main()\n{\n"
+      << "  gl_FragColor = vColors;\n"
+      << "}\n";
+  }
+
 } // namespace glwrap
 
 #endif // OPENGLCPPWRAPPER_SHADERLIB_HPP

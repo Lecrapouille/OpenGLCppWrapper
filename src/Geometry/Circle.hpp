@@ -42,7 +42,7 @@ public:
   //! \param slices The number of subdivisions around the Z axis.
   //----------------------------------------------------------------------------
   Circle(std::string const& name, Material_SP material, float const radius, uint32_t const slices/*, bool const inversed*/)
-    : Shape3D(name, material)
+    : Shape3D(name, Mode::TRIANGLES, material)
   {
     std::vector<float> angle;
     maths::linspace(0.0f, float(maths::TWO_PI), slices + 1u, angle, true);

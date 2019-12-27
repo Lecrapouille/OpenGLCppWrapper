@@ -54,6 +54,9 @@ public:
     if (m_config.useColor)
       color() = diffuse();
 
+    if (m_config.useAlphaTest)
+      alphaTest() = 0.5f;
+
     if ((m_config.useMap) || (m_config.useBumpMap) || (m_config.useSpecularMap))
       offsetTexture() = Vector4f(0.0f, 0.0f, 1.0f, 1.0f);
 
@@ -63,9 +66,9 @@ public:
 
     if (m_config.useFog)
       {
-        fogColor() = Color().toVector3f();
-        fogNear() = 0.1f;
-        fogFar() = 2000.0f;
+        fogColor() = Vector3f(0.5f, 0.5f, 0.5f);
+        fogNear() = 1.0f;
+        fogFar() = 10.0f;
       }
 
     if (m_config.useExpFog)
@@ -108,6 +111,11 @@ public:
     return m_program.vector3f("color");
   }
 
+  inline float& alphaTest()
+  {
+    return m_program.scalarf("ALPHATEST");
+  }
+
   inline Vector4f& offsetTexture()
   {
     return m_program.vector4f("offsetRepeat");
@@ -135,7 +143,7 @@ public:
 
 protected:
 
-    BasicMaterialConfig m_config; // FIXME: necessaire ?
+  BasicMaterialConfig m_config;
 };
 
 } // namespace glwrap

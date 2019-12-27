@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_SHAPE_HPP
-#  define OPENGLCPPWRAPPER_SHAPE_HPP
+#ifndef OPENGLCPPWRAPPER_GEOMETRY_POLYLINE_HPP
+#  define OPENGLCPPWRAPPER_GEOMETRY_POLYLINE_HPP
 
 #  include "Scene/Node.hpp"
 #  include "OpenGL/Program.hpp"
@@ -28,50 +28,31 @@
 namespace glwrap
 {
 
-DECLARE_CLASS(Shape3D);
+DECLARE_CLASS(Polyline3D);
 
 // *****************************************************************************
-//! \brief Class having predefined GLProgram, GLVBO for holding data of a 3D
-//! model.
-//! \ingroup OpenGL.
-//! \fixme Uuse the idea of GLObject begin() to create the Shape only when
-//! OpenGL context is created ?
+//! \brief
 // *****************************************************************************
-class Shape3D: public Node3D
+class Polyline3D: public Node3D
 {
-public: // TODO BoundingBox, BoundingSphere
+public:
 
   //----------------------------------------------------------------------------
-  //! \brief Constructor. Compile the internal GLSL shader.
-  //!
-  //! \throw OpenGLException is the OpenGL context is not created or if the
-  //! GLProgram could not be compiled.
-  //!
-  //! \note Make sure the OpenGL is created before (from the constructor of
-  //! IGLWindow) else an OpenGLException is thrown.
-  //!
-  //! \note we init reference on VAO not yet existing, this is fine because map
-  //!       does not invalidate iterator and references.
-  //!
-  //! \fixme Attach Material, attach std::function<onUpdate>
+  //! \brief Constructor.
   //----------------------------------------------------------------------------
-  Shape3D(std::string const& name, Mode const mode, Material_SP material)// = BasicMaterial::create())
+  Polyline3D(std::string const& name, Mode const mode, Material_SP material)
     : Node3D(name, true),
       m_mode(mode),
       m_material(material),
       m_program(m_material->program()),
       m_vao("VAO_" + name),
       m_vertices(m_vao.vector3f("position")),
-      m_normals(m_vao.vector3f("normal")),
-      // FIXME To be moved inside material {
-      m_uv(m_vao.vector2f("UV")),
-      m_texture(m_vao.texture2D("texture")),
-      // } FIXME
+      m_colors(m_vao.vector4f("colors")),
       m_indices(m_vao.index32())
   {
     throwIfOpenGLClassCalledBeforeContext();
 
-    DEBUG("%s", "<<<---------- NewGeometry+Material ---------------------------------------------");
+    DEBUG("%s", "<<<---------- NewPolyline+Material ---------------------------------------------");
 
     if (unlikely(!m_program.compile()))
       throw OpenGLException(m_program.getError());
@@ -79,20 +60,15 @@ public: // TODO BoundingBox, BoundingSphere
     m_program.bind(m_vao);
     model() = Matrix44f(matrix::Identity);
 
-    DEBUG("%s", "------------- NewGeometry+Material ------------------------------------------>>>");
+    DEBUG("%s", "------------- NewPolyline+Material ------------------------------------------>>>");
   }
-
-  // TODO
-  //Shape3D(std::string const& name)
-  //  : Shape3D(name, Material::create(Material::Type::Basic))
-  //{}
 
   //----------------------------------------------------------------------------
   //! \brief Destructor. Release VBOs.
   //----------------------------------------------------------------------------
-  virtual ~Shape3D()
+  virtual ~Polyline3D()
   {
-    ERROR("Destroying shape '%s'", cname());
+    ERROR("Destroying polyline '%s'", cname());
   }
 
   //----------------------------------------------------------------------------
@@ -114,70 +90,6 @@ public: // TODO BoundingBox, BoundingSphere
   {
     return m_program.isValid() && m_vao.checkVBOSizes() &&
       m_vao.checkLoadTextures();
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the reference of the VBO holding vertices positions.
-  //! \return VBO holding vertex positions of the model.
-  //----------------------------------------------------------------------------
-  inline GLVertexBuffer<Vector3f>& vertices()
-  {
-    return m_vertices;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the reference of the nth vertex position. If not present and
-  //! the VBO can be resized, the VBO size is updated. The nth element is set
-  //! pending to be transfered to the GPU memory.
-  //! \param[in] nth the desired vertex.
-  //! \return the nth vertex positions of the model.
-  //----------------------------------------------------------------------------
-  inline Vector3f& vertices(size_t const nth)
-  {
-    return m_vertices.set(nth);
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the reference of the VBO holding face normals.
-  //! \return VBO holding face normals of the model.
-  //! \fixme rename to faceNormals() and implement vertexNormals()
-  //----------------------------------------------------------------------------
-  inline GLVertexBuffer<Vector3f>& normals()
-  {
-    return m_normals;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the reference of the nth face normal. If not present and the
-  //! VBO can be resized, the VBO size is updated. The nth element is set
-  //! pending to be transfered to the GPU memory.
-  //! \param[in] nth the desired normal.
-  //! \return the nth face normal of the model.
-  //----------------------------------------------------------------------------
-  inline Vector3f& normals(size_t const nth)
-  {
-    return m_normals.set(nth);
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the reference of the VBO holding texture positions.
-  //! \return VBO holding texture position of the model.
-  //----------------------------------------------------------------------------
-  inline GLVertexBuffer<Vector2f>& uv()
-  {
-    return m_uv;
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the reference of the nth texture position. If not present
-  //! and the VBO can be resized, the VBO size is updated. The nth element is
-  //! set pending to be transfered to the GPU memory.
-  //! \param[in] nth the desired texture position.
-  //! \return the nth texture position of the model.
-  //----------------------------------------------------------------------------
-  inline Vector2f& uv(size_t const nth)
-  {
-    return m_uv.set(nth);
   }
 
   //----------------------------------------------------------------------------
@@ -208,20 +120,17 @@ public: // TODO BoundingBox, BoundingSphere
   }
 
   //----------------------------------------------------------------------------
-  //! \brief
+  //! \brief Return the reference of the VBO holding vertices positions.
+  //! \return VBO holding vertex positions of the model.
   //----------------------------------------------------------------------------
-  inline Vector3f& cameraPosition()
+  inline GLVertexBuffer<Vector3f>& vertices()
   {
-    return m_program.vector3f("cameraPosition");
+    return m_vertices;
   }
 
-  //----------------------------------------------------------------------------
-  //! \brief Return the reference of the texture (Material).
-  //! \return the reference of the texture.
-  //----------------------------------------------------------------------------
-  inline GLTexture2D& texture()
+  inline GLVertexBuffer<Vector4f>& colors()
   {
-    return m_texture;
+    return m_colors;
   }
 
   //----------------------------------------------------------------------------
@@ -232,11 +141,6 @@ public: // TODO BoundingBox, BoundingSphere
   {
     return m_indices;
   }
-
-  // TODO
-  // void computeFaceNormals()
-  // void computeVertexNormals()
-  // void buildIndex()
 
   //----------------------------------------------------------------------------
   //! \brief Renderer the instance.
@@ -260,6 +164,11 @@ public: // TODO BoundingBox, BoundingSphere
     m_program.draw(m_vao, m_mode, index());
   }
 
+  static Polyline3D_SP create(std::string const& name, Mode const mode, Material_SP material)
+  {
+    return std::make_shared<Polyline3D>(name, mode, material);
+  }
+
 protected:
 
   //----------------------------------------------------------------------------
@@ -281,22 +190,12 @@ private:
   Mode                      m_mode;
   Material_SP               m_material;
   GLProgram&                m_program;
-  //! \brief Holds all VBOs.
   GLVAO                     m_vao;
-  //! \brief Reference on the VBO holding vertice positions.
   GLVertexBuffer<Vector3f>& m_vertices;
-  //! \brief Reference on the VBO holding face normals.
-  GLVertexBuffer<Vector3f>& m_normals;
-  //! \brief Reference on the VBO holding texture positions.
-  GLVertexBuffer<Vector2f>& m_uv;
-  //! \brief Texture.
-  //! \fixme multitexture and move this to Material class.
-  GLTexture2D&              m_texture;
-  //! \brief EBO
-  //! \fixme is uint8_t enough ?
+  GLVertexBuffer<Vector4f>& m_colors;
   GLIndexBuffer32&          m_indices;
 };
 
 } // namespace glwrap
 
-#endif // OPENGLCPPWRAPPER_SHAPE_HPP
+#endif // OPENGLCPPWRAPPER_GEOMETRY_POLYLINE_HPP

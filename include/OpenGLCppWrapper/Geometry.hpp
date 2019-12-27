@@ -30,7 +30,7 @@
 #  include "Geometry/Cone.hpp"
 #  include "Geometry/Cylinder.hpp"
 #  include "Geometry/Pyramid.hpp"
-#  include "Geometry/Axis.hpp"
+#  include "Geometry/Axes.hpp"
 #  include "Geometry/Arrows.hpp"
 #  include "Geometry/CameraView.hpp"
 

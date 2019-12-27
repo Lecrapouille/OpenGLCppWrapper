@@ -63,9 +63,10 @@ OBJS_SCENE = \
   01_DepthMaterial.o \
   02_NormalsMaterial.o \
   03_SceneNodes.o \
-  04_SceneGraph.o
+  04_SceneGraph.o \
+  05_SceneFog.o \
+  07_AlphaTest.o
 
-#  05_SceneFog.o \
 #  06_SceneLighting.o \
 
 OBJS += \
