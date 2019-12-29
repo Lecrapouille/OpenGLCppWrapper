@@ -137,6 +137,8 @@ public:
   {
     m_scale = scale;
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //! \brief Get the absolute scale factors of the object.
@@ -296,6 +298,11 @@ public:
       }
     return m_inverse_transform;
   }
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  // TODO void lookAt(Vector3f const &target);
 
 protected:
 

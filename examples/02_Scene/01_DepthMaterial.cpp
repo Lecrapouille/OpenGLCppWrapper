@@ -22,7 +22,8 @@
 #include <iostream>
 
 ShapeDepthMaterial::ShapeDepthMaterial()
-  : m_material(DepthMaterial::create()),
+  : m_imgui(*this),
+    m_material(DepthMaterial::create()),
     m_cameraController(Camera3D::Type::PERSPECTIVE)
 {}
 
@@ -42,16 +43,6 @@ void ShapeDepthMaterial::onWindowSizeChanged()
 
   m_shape->projection() =
     m_cameraController.camera().updateProjectionMatrix();
-}
-
-// --------------------------------------------------------------
-//! \brief Mouse event
-// --------------------------------------------------------------
-void ShapeDepthMaterial::onMouseMoved(Mouse const& mouse)
-{
-  float const dx = static_cast<float>(mouse.displacement.x);
-  float const dy = static_cast<float>(mouse.displacement.y);
-  m_cameraController.processMouseMovement(dx, dy, dt());
 }
 
 // --------------------------------------------------------------
@@ -102,11 +93,9 @@ bool ShapeDepthMaterial::setup()
   glCheck(glDepthFunc(GL_LESS));
   glCheck(glDisable(GL_BLEND));
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-  //glCheck(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 
   // Enable IO callbacks
-  enableCallbacks(window::Event::MouseMove | window::Event::Keyboard);
-  hideMouseCursor();
+  enableCallbacks(window::Event::Keyboard);
 
   // Place a camera controlled by the user
   PerspectiveCamera3D& camera = m_cameraController.camera();
@@ -116,7 +105,7 @@ bool ShapeDepthMaterial::setup()
                 Vector3f(-0.826219f, -0.0917643f, -0.555825f));
 
   m_material->near() = 0.1f;
-  m_material->far() = 10.0f;
+  m_material->far() = 5.0f;
 
   // Create shapes
   m_tube1 = Tube::create("Tube1", m_material, 1.0f, m_base_radius, 1.0f, 128u);
@@ -139,7 +128,7 @@ bool ShapeDepthMaterial::setup()
   m_shape = m_tube1;
 
   // Success
-  return true;
+  return m_imgui.setup(*this);
 }
 
 // FIXME: to be removed but cannot do it yet !
@@ -159,7 +148,39 @@ bool ShapeDepthMaterial::pimpShape(Shape3D_SP shape)
 
   return true;
 }
-// FIXME
+
+//------------------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------------------
+bool ShapeDepthMaterial::GUI::render()
+{
+  static float new_near = 0.1f;
+  static float previous_near = 0.1f;
+  static float new_far = 5.0f;
+  static float previous_far = 5.0f;
+
+  ImGui::Begin("Hello, world!");
+  ImGui::SliderFloat("Depth near", &new_near, 0.01f, 10.0f);
+  ImGui::SliderFloat("Depth far ", &new_far, 0.01f, 10.0f);
+  ImGui::End();
+
+  // Apply new depth near value to the shape
+  if (abs(new_near - previous_near) > 0.001f)
+    {
+      previous_near = new_near;
+      m_window.m_material->near() = new_near;
+    }
+
+  // Apply new depth far value to the shape
+  if (abs(new_far - previous_far) > 0.001f)
+    {
+      previous_far = new_far;
+      m_window.m_material->far() = new_far;
+    }
+
+  // Success
+  return true;
+}
 
 //------------------------------------------------------------------------------
 //! \brief Paint our scene. Here we are using the delta time to
@@ -180,6 +201,5 @@ bool ShapeDepthMaterial::draw()
 
   m_shape->draw();
 
-  // Success
-  return true;
+  return m_imgui.draw();
 }

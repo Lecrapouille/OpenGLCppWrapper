@@ -40,13 +40,32 @@ private:
 
   bool pimpShape(Shape3D_SP shape);
   virtual void onWindowSizeChanged() override;
-  virtual void onMouseMoved(Mouse const& mouse) override;
   virtual void onKeyboardEvent() override;
   virtual bool setup() override;
   virtual bool draw() override;
 
 private:
 
+  class GUI: public DearImGui
+  {
+  public:
+
+    GUI(ShapeDepthMaterial& window)
+      : m_window(window)
+    {}
+
+  protected:
+
+    virtual bool render() override;
+
+  private:
+
+    ShapeDepthMaterial& m_window;
+  };
+
+private:
+
+  GUI              m_imgui;
   DepthMaterial_SP m_material;
   Tube_SP          m_tube1;
   Tube_SP          m_tube2;

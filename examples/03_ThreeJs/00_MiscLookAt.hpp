@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_07_ALPHATEST_HPP
-#  define EXAMPLE_07_ALPHATEST_HPP
+#ifndef EXAMPLE_00_MISCLOOKAT_HPP
+#  define EXAMPLE_00_MISCLOOKAT_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
@@ -29,50 +29,28 @@ using namespace glwrap::window;
 // *****************************************************************************
 //! \brief
 // *****************************************************************************
-class AlphaTest : public IGLWindow
+class MiscLookAt : public IGLWindow
 {
   friend class GUI;
 
 public:
 
-  AlphaTest();
-  ~AlphaTest();
+  MiscLookAt();
+  ~MiscLookAt();
 
 private:
 
-  void createTree(const char* name, const char* texture_path, float const angle);
   virtual void onMouseMoved(Mouse const& mouse) override;
-  virtual void onKeyboardEvent() override;
   virtual void onWindowSizeChanged() override;
   virtual bool setup() override;
   virtual bool draw() override;
 
 private:
 
-  class GUI: public DearImGui
-  {
-  public:
-
-    GUI(AlphaTest& window)
-      : m_window(window)
-    {}
-
-  protected:
-
-    virtual bool render() override;
-
-  private:
-
-    AlphaTest& m_window;
-  };
-
-private:
-
-  GUI                 m_imgui;
+  Vector3f            m_mouse_position;
+  Cube_SP             m_cube;
   Node3D_SP           m_scene;
-  Plane_SP            m_planes[5]; // FIXME a supprimer
-  AxesHelper_SP m_axis; // FIXME: a supprimer
   CameraController_SP m_cameraController;
 };
 
-#endif // EXAMPLE_07_ALPHATEST_HPP
+#endif // EXAMPLE_00_MISCLOOKAT_HPP

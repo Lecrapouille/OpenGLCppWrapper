@@ -92,7 +92,7 @@ public: // TODO BoundingBox, BoundingSphere
   //----------------------------------------------------------------------------
   virtual ~Shape3D()
   {
-    ERROR("Destroying shape '%s'", cname());
+    DEBUG("Destroying shape '%s'", cname());
   }
 
   //----------------------------------------------------------------------------

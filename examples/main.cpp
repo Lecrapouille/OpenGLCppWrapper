@@ -47,11 +47,13 @@
 //#include "02_Scene/06_SceneLight.hpp"
 #include "02_Scene/07_AlphaTest.hpp"
 
+#include "03_ThreeJs/00_MiscLookAt.hpp"
+
 #include <iostream>
 #include <stdlib.h>
 #include <limits.h>
 
-#define MAX_EXAMPLES 24
+#define MAX_EXAMPLES 27
 
 //------------------------------------------------------------------------------
 __attribute__((__noreturn__))
@@ -89,12 +91,31 @@ static void usage(char *argv[])
   std::cout << " 23: Show a scene graph with fog." << std::endl;
   std::cout << " 24: Show a tree with alpha testing." << std::endl;
   std::cout << " 25: Show a scene graph with lights." << std::endl;
+  std::cout << "Examples from ThreeJs:" << std::endl;
+  std::cout << " 26: Cones pointing to a moving cube." << std::endl;
   exit(EXIT_FAILURE);
 }
 
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+  Matrix44f A({1.0f, 0.0f, 0.0f, 0.0f,
+               0.0f, 1.0f, 0.0f, 0.0f,
+               0.0f, 0.0f, 1.0f, 0.0f,
+               0.0f, 0.0f, 0.0f, 1.0f});
+  std::cout << matrix::translate(A, Vector3f(2.0f, 3.0f, 4.0f)) << std::endl;
+
+  //Matrix44f A({1.0f, 2.0f, 3.0f, 4.0f,
+  //              5.0f, 6.0f, 7.0f, 8.0f,
+  //             9.0f, 10.0f, 11.0f, 12.0f,
+  //             13.0f, 14.0f, 15.0f, 16.0f});
+  //std::cout << A << std::endl;
+  //std::cout << matrix::translate(A, Vector3f(2.0f, 3.0f, 4.0f)) << std::endl;
+  //std::cout << matrix::scale(A, Vector3f(2.0f, 3.0f, 4.0f)) << std::endl;
+  //std::cout << A * A << std::endl;
+  //return 0;
+
+
   // Need the id of the desired example
   if (argc <= 1)
     {
@@ -195,6 +216,9 @@ int main(int argc, char *argv[])
           /*case 25:
           win = std::make_unique<SceneLight>();
           break;*/
+        case 26:
+          win = std::make_unique<MiscLookAt>();
+          break;
         default:
           std::cerr << "Incorrect example id !" << std::endl;
           std::cerr << "'" << argv[1] << "' is not a valid example id !" << std::endl;

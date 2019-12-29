@@ -67,16 +67,19 @@ OBJS_SCENE = \
   05_SceneFog.o \
   07_AlphaTest.o
 
+OBJS_THREE = \
+  00_MiscLookAt.o
+
 #  06_SceneLighting.o \
 
 OBJS += \
-  $(OBJS_WINDOW) $(OBJS_CORE) $(OBJS_SCENE) main.o
+  $(OBJS_WINDOW) $(OBJS_CORE) $(OBJS_SCENE) $(OBJS_THREE) main.o
 
 VPATH += \
-  00_Window 01_Core 02_Scene
+  00_Window 01_Core 02_Scene 03_ThreeJs
 
 INCLUDES += \
-  -I00_Window -I01_Core -I02_Scene
+  -I00_Window -I01_Core -I02_Scene -I03_ThreeJs
 
 ###################################################
 # Downoad textures
