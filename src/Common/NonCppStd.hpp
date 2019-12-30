@@ -2,6 +2,7 @@
 #  define OPENGLCPPWRAPPER_NONCPPSTD_HPP
 
 #  include "Common/Verbose.hpp"
+#  include "Common/Profiler.hpp"
 #  include <cstddef>
 #  include <memory>
 
