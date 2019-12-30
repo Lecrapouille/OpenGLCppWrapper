@@ -39,7 +39,7 @@ public:
 
 private:
 
-  bool cubeSetup();
+  bool cubeSetup(GLVAO& cube, const char* texturepath);
   bool floorSetup();
   virtual void onWindowSizeChanged() override;
   virtual bool setup() override;
@@ -49,7 +49,8 @@ private:
 
   GLVertexShader     m_vertex_shader;
   GLFragmentShader   m_fragment_shader;
-  GLVAO              m_cube;
+  GLVAO              m_cube1;
+  GLVAO              m_cube2;
   GLVAO              m_floor;
   GLProgram          m_prog;
   Transformable<float, 3U> m_transformable;

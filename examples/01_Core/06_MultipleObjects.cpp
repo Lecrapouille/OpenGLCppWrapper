@@ -22,7 +22,8 @@
 #include <iostream>
 
 MultipleObjects::MultipleObjects()
-  : m_cube("VAO_cube"),
+  : m_cube1("VAO1_cube"),
+    m_cube2("VAO2_cube"),
     m_floor("VAO_floor"),
     m_prog("Prog")
 {
@@ -50,28 +51,40 @@ void MultipleObjects::onWindowSizeChanged()
 }
 
 //------------------------------------------------------------------
-//! \brief Create a cube (= first VAO).
+//! \brief Create a cube.
 //------------------------------------------------------------------
-bool MultipleObjects::cubeSetup()
+bool MultipleObjects::cubeSetup(GLVAO& cube, const char* texture_path)
 {
-  m_prog.bind(m_cube);
+  m_prog.bind(cube);
 
   // Fill VBOs of the VAO: init vertex positions.
-  m_cube.vector3f("position") =
+  cube.vector3f("position") =
     {
       #include "geometry/cube_position.txt"
     };
 
   // Fill VBOs of the VAO: init texture positions.
-  m_cube.vector2f("UV") =
+  cube.vector2f("UV") =
     {
       #include "geometry/cube_texture.txt"
     };
 
-  GLTexture2D& texture = m_cube.texture2D("texID");
-  texture.interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  texture.wrap(TextureWrap::CLAMP_TO_EDGE);
-  return texture.load("textures/hazard.png");
+  // Apply a texture
+  GLTexture2D& texture = cube.texture2D("texID");
+  static int i = 0; // Randomize texture settings
+  if (++i % 2 == 0)
+    {
+      texture.interpolation(TextureMinFilter::LINEAR,
+                            TextureMagFilter::LINEAR);
+      texture.wrap(TextureWrap::CLAMP_TO_EDGE);
+    }
+  else
+    {
+      texture.interpolation(TextureMinFilter::NEAREST,
+                            TextureMagFilter::NEAREST);
+      texture.wrap(TextureWrap::MIRRORED_REPEAT);
+    }
+  return texture.load(texture_path);
 }
 
 //------------------------------------------------------------------
@@ -139,7 +152,9 @@ bool MultipleObjects::setup()
     matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
 
   // Create 2 VAOs from the same shader program: one cube and one plane.
-  return floorSetup() && cubeSetup();
+  return floorSetup() &&
+    cubeSetup(m_cube1, "textures/hazard.png") &&
+    cubeSetup(m_cube2, "textures/path.png");
 }
 
 //------------------------------------------------------------------
@@ -155,21 +170,29 @@ bool MultipleObjects::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  // Draw the first cube with a "pinkished" coloration.
-  // Make this cube spining around itself.
+  // Draw the first cube from the 1st VAO. Apply a "pinkished" coloration and
+  // make this cube spining around itself.
   m_prog.vector4f("color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
   m_transformable.rotateY(4.0f * ct);                      // Apply a rotation around Y-axis
   m_transformable.position(Vector3f(-1.0f, 0.0f, -1.0f));  // Apply a translation
   m_prog.matrix44f("model") = m_transformable.transform(); // Rotate and translate the cube
-  m_prog.draw(m_cube, Mode::TRIANGLES, 0, 36);       // Style 01: pass all parameters
+  m_prog.draw(m_cube1, Mode::TRIANGLES, 0, 36);            // Style 01: pass all parameters
 
-  // Draw a second cube (same model = same VAO) with a "darkished"
-  // coloration. Make this cube static.
+  // Draw a second cube from the 1st VAO (same model = same VAO). Apply a
+  // "darkished" coloration and let this cube static (no motion).
   m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
   m_transformable.reset();
   m_transformable.position(Vector3f(3.0f, 0.0f, 0.0f)); // Apply a translation
   m_prog.matrix44f("model") = m_transformable.transform();
-  m_prog.draw(m_cube, Mode::TRIANGLES /*, 0, 36*/); // Style 02: do not pass first and count vertices
+  m_prog.draw(m_cube1, Mode::TRIANGLES /*, 0, 36*/); // Style 02: do not pass first and count vertices
+
+  // Draw a thrid cube from the 2nd VAO. Apply a "darkished" coloration and let
+  // this cube static (no motion).
+  m_prog.vector4f("color") = Vector4f(0.4f, 0.4f, 0.5f, 0.2f);
+  m_transformable.reset();
+  m_transformable.position(Vector3f(-1.0f, 0.0f, 2.0f)); // Apply a translation
+  m_prog.matrix44f("model") = m_transformable.transform();
+  m_prog.draw(m_cube2, Mode::TRIANGLES /*, 0, 36*/); // Style 02: do not pass first and count vertices
 
   // Draw the floor (second model = second VAO).
   m_prog.vector4f("color") = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
