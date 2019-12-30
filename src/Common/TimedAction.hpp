@@ -31,8 +31,8 @@ namespace glwrap
   // \brief Base class for all animations (abstract), providing general functionality.
   class TimedAction
   {
-    using Time = steady_clock::time_point;
     using Clock = steady_clock;
+    using Time = Clock::time_point;
 
   public:
 
