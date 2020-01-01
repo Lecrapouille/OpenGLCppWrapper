@@ -458,11 +458,9 @@ public:
   bool checkLoadTextures()
   {
     if (likely(m_textures_verified))
-      {
-        return true;
-      }
+      return true;
 
-    if (unlikely(!isBound() || m_vbos.empty()))
+    if (unlikely(!isBound()))
       {
         ERROR("VAO '%s' is not yet bound to a GLProgram", cname());
         return false;

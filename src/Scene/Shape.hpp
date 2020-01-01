@@ -98,9 +98,13 @@ public: // TODO BoundingBox, BoundingSphere
   //----------------------------------------------------------------------------
   //! \brief
   //----------------------------------------------------------------------------
-  inline Material& material()
+  template<class M>
+  inline M& material()
   {
-    return *m_material;
+    M* m = dynamic_cast<M*>(m_material.get());
+    if (m == nullptr)
+      throw OpenGLException("Invalid material type");
+    return *m;
   }
 
   //----------------------------------------------------------------------------

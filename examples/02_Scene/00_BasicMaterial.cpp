@@ -22,8 +22,7 @@
 #include <iostream>
 
 ShapeBasicMaterial::ShapeBasicMaterial()
-  : m_material(BasicMaterial::create()),
-    m_cameraController(Camera3D::Type::PERSPECTIVE)
+  : m_cameraController(Camera3D::Type::PERSPECTIVE)
 {}
 
 ShapeBasicMaterial::~ShapeBasicMaterial()
@@ -115,6 +114,12 @@ bool ShapeBasicMaterial::setup()
                 // looking at
                 Vector3f(-0.826219f, -0.0917643f, -0.555825f));
 
+  // Create a material
+  BasicMaterialConfig config;
+  config.useMap = true;
+  config.useColor = true;
+  m_material = BasicMaterial::create(config);
+
   // Create different shapes
   m_tube1 = Tube::create("Tube1", m_material, 1.0f, m_base_radius, 1.0f, 128u);
   m_tube2 = Tube::create("Tube2", m_material, 1.0f, -m_base_radius, 1.0f, 128u);
@@ -142,7 +147,7 @@ bool ShapeBasicMaterial::setup()
 //------------------------------------------------------------------------------
 bool ShapeBasicMaterial::pimpShape(Shape3D_SP shape)
 {
-  if (!shape->texture().load("textures/wooden-crate.jpg"))
+  if (!shape->texture().load("textures/path.png"))
     {
       std::cerr << "Failed loading texture" << std::endl;
       return false;

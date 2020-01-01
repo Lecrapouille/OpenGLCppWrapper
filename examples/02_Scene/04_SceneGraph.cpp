@@ -165,7 +165,6 @@ void CubicRobot::doUpdate(float const dt)
 void GUI::observeNode(Node3D const& node) //const
 {
   std::string nodename("Node '" + node.name() + "'");
-  ImGui::SetNextTreeNodeOpen(true);
   if (ImGui::TreeNode(nodename.c_str()))
     {
       // Renderable = contains a mesh to be rendered.
@@ -185,8 +184,7 @@ void GUI::observeNode(Node3D const& node) //const
       ImGui::TextUnformatted(ss.str().c_str());
 
       ss.str("");
-      ss << "Has child " << node.children().size() << " Nodes:";
-      ImGui::SetNextTreeNodeOpen(true);
+      ss << "Has " << node.children().size() << " child nodes:";
       if (ImGui::TreeNode(ss.str().c_str()))
         {
           for (auto const& i: node.children())
@@ -205,16 +203,11 @@ void GUI::observeNode(Node3D const& node) //const
 bool GUI::render()
 {
   ImGui::SetNextTreeNodeOpen(true);
-  ImGui::Begin("Hello, world!");
-
-  if (ImGui::TreeNode("Scene graph"))
-    {
-      observeNode(*m_scene);
-      ImGui::TreePop();
-    }
-  ImGui::Separator();
-
+  ImGui::Begin("Scene graph");
+  ImGui::SetNextItemOpen(true);
+  observeNode(*m_scene);
   ImGui::End();
+
   return true;
 }
 

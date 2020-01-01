@@ -67,8 +67,7 @@ namespace glwrap
             "uniform mat4 projectionMatrix;\n"
             "uniform vec3 cameraPosition;\n"
             "in vec3 position;\n"
-            "in vec3 normal;\n"
-            "in vec2 UV;\n";
+            "in vec3 normal;\n";
         }
       } // namespace vertex
 
@@ -146,6 +145,7 @@ namespace glwrap
             return
               "// Texture\n"
               "uniform vec4 offsetRepeat;\n"
+              "in vec2 UV;\n"
               "out vec2 vUV;\n";
           return "";
         }

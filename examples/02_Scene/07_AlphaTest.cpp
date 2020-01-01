@@ -167,8 +167,8 @@ bool AlphaTest::GUI::render()
       Plane* plane = dynamic_cast<Plane*>(node.get());
       if (plane != nullptr)
         {
-          BasicMaterial* material = reinterpret_cast<BasicMaterial*>(&plane->material());
-          material->alphaTest() = new_alpha;
+          BasicMaterial& material = plane->material<BasicMaterial>();
+          material.alphaTest() = new_alpha;
         }
     });
 

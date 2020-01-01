@@ -74,6 +74,12 @@ void SceneNodes::onKeyboardEvent()
     m_cameraController->processKeyboard(CameraController::Movement::LEFT, dt());
   if (isKeyDown(GLFW_KEY_D) || isKeyDown(GLFW_KEY_RIGHT))
     m_cameraController->processKeyboard(CameraController::Movement::RIGHT, dt());
+  if (wasKeyPressed(GLFW_KEY_F1))
+    m_cube1->material<BasicMaterial>().color() = Vector3f(1.0f, 0.0f, 0.0f);
+  if (wasKeyPressed(GLFW_KEY_F2))
+    m_cube1->material<BasicMaterial>().color() = Vector3f(0.0f, 1.0f, 0.0f);
+  if (wasKeyPressed(GLFW_KEY_F3))
+    m_cube1->material<BasicMaterial>().color() = Vector3f(0.0f, 0.0f, 1.0f);
 
   auto& camera = m_cameraController->camera();
   m_cube1->view() = camera.updateViewMatrix();
@@ -110,7 +116,6 @@ bool SceneNodes::setup()
   // Define material 2
   config.useMap = true;
   config.useColor = false;
-  config.useFog = true;
   m_material2 = BasicMaterial::create(config, "basic2");
   m_material2->color() = Vector3f(1.0f, 1.0f, 1.0f);
   m_material2->diffuse() = Vector3f(1.0f, 1.0f, 1.0f);
@@ -144,10 +149,10 @@ bool SceneNodes::setup()
   m_cube2->vertices() *= 2.0f;
   m_cube3->vertices() *= 2.0f;
   m_cube4->vertices() *= 2.0f;
-  m_cube1->move(Vector3f(-2.0f, -2.0f, 0.0f));
-  m_cube2->move(Vector3f(-2.0f,  2.0f, 0.0f));
-  m_cube3->move(Vector3f( 2.0f, -2.0f, 0.0f));
-  m_cube4->move(Vector3f( 2.0f,  2.0f, 0.0f));
+  m_cube1->translate(Vector3f(-2.0f, -2.0f, 0.0f));
+  m_cube2->translate(Vector3f(-2.0f,  2.0f, 0.0f));
+  m_cube3->translate(Vector3f( 2.0f, -2.0f, 0.0f));
+  m_cube4->translate(Vector3f( 2.0f,  2.0f, 0.0f));
 
   // TODO: render + apply override material
 

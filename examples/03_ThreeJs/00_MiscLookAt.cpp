@@ -133,7 +133,7 @@ bool MiscLookAt::draw()
   //  it->lookAt(m_cube->position());
 
   auto& camera = m_cameraController->camera();
-  camera.move(m_mouse_position);
+  camera.translate(m_mouse_position);
   camera.lookAt(m_scene->position());
 
   m_scene->update(dt());

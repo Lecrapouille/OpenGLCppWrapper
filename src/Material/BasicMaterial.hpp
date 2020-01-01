@@ -43,7 +43,6 @@ public:
     : Material(name, Material::Type::Basic),
       m_config(config)
   {
-    //m_specialization = config.name();
     createBasicMaterialShader(m_vertexShader, m_fragmentShader, config);
     debug();
     m_program.attachShaders(m_vertexShader, m_fragmentShader);
