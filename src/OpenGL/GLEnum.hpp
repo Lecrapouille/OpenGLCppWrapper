@@ -80,8 +80,8 @@ enum class PixelFormat : GLenum
     /* 0x1906 */ ALPHA = GL_ALPHA,
     /* 0x1907 */ RGB = GL_RGB,
     /* 0x1908 */ RGBA = GL_RGBA,
-    /* 0x1909 */ LUMINANCE = GL_LUMINANCE,
-    /* 0x190A */ LUMINANCE_ALPHA = GL_LUMINANCE_ALPHA,
+    /* 0x1909 */ LUMINANCE = GL_LUMINANCE, // Greyscale
+    /* 0x190A */ LUMINANCE_ALPHA = GL_LUMINANCE_ALPHA, // Luminance with alpha
     /* 0x80E0 */ BGR = GL_BGR,
     /* 0x84F9 */ DEPTH_STENCIL = GL_DEPTH_STENCIL,
   };
@@ -90,6 +90,12 @@ enum class PixelFormat : GLenum
 enum class PixelType : GLenum
   {
     /* 0x1401 */ UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
+  };
+
+//! \brief Save texture as.
+enum class PictureFile : GLenum
+  {
+    TGA, BMP, DDS
   };
 
 // **************************************************************

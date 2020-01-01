@@ -64,7 +64,7 @@ class GLVAO: public GLObject<GLenum>
   //! \note Unordered map = hash table = O(1) access time but the last does not
   //! invalidate references and iterator when inserting, which is needed by
   //! Shape3D.
-  using mapGLTexture = std::map<std::string, IGLTexture_UP>;
+  using mapGLTexture = std::map<std::string, GLTexture_UP>;
 
 public:
 
@@ -281,7 +281,7 @@ public:
   // TODO bool hasTexture(const char *name) const
   //{
   //  return std_find_if(m_textures.begin(), m_textures.end(),
-  //            [](IGLTexture_UP texture) { return name == texture.filename()} );
+  //            [](GLTexture_UP texture) { return name == texture.filename()} );
   //}
 
   //----------------------------------------------------------------------------

@@ -40,7 +40,7 @@ namespace glwrap
 // *****************************************************************************
 //! \brief A 1D Texture.
 // *****************************************************************************
-class GLTexture1D: public IGLTexture
+class GLTexture1D: public GLTexture
 {
 public:
 
@@ -48,7 +48,7 @@ public:
   //! \brief
   //----------------------------------------------------------------------------
   GLTexture1D(std::string const& name)
-    : IGLTexture(1u, name, GL_TEXTURE_1D)
+    : GLTexture(1u, name, GL_TEXTURE_1D)
   {}
 
 private:
@@ -65,10 +65,10 @@ private:
       }
 
     glCheck(glTexImage1D(m_target, 0,
-                         static_cast<GLint>(m_options.gpuPixelFormat),
+                         static_cast<GLint>(m_gpuPixelFormat),
                          static_cast<GLsizei>(m_width),
                          0,
-                         static_cast<GLenum>(m_options.cpuPixelFormat),
+                         static_cast<GLenum>(m_cpuPixelFormat),
                          static_cast<GLenum>(m_options.pixelType),
                          nullptr));
     applyTextureParam();
@@ -93,7 +93,7 @@ private:
 
     glCheck(glBindTexture(m_target, m_handle));
     glCheck(glTexSubImage1D(m_target, 0, x, width,
-                            static_cast<GLenum>(m_options.cpuPixelFormat),
+                            static_cast<GLenum>(m_cpuPixelFormat),
                             static_cast<GLenum>(m_options.pixelType),
                             m_buffer.to_array()));
 

@@ -41,7 +41,7 @@ namespace glwrap
 // *****************************************************************************
 //! \brief A 3D Texture specialized for rendering skybox.
 // *****************************************************************************
-class GLTextureCube: public IGLTexture
+class GLTextureCube: public GLTexture
 {
 public:
 
@@ -54,7 +54,7 @@ public:
   //! \param name the name of this instance used by GLProgram and GLVAO.
   //----------------------------------------------------------------------------
   GLTextureCube(std::string const& name)
-    : IGLTexture(3u, name, GL_TEXTURE_CUBE_MAP)
+    : GLTexture(3u, name, GL_TEXTURE_CUBE_MAP)
   {}
 
   virtual ~GLTextureCube()
@@ -189,7 +189,7 @@ private:
 // *****************************************************************************
 //! \brief A 3D Texture.
 // *****************************************************************************
-class GLTexture3D: public IGLTexture
+class GLTexture3D: public GLTexture
 {
 public:
 
@@ -197,7 +197,7 @@ public:
   //! \brief
   //----------------------------------------------------------------------------
   GLTexture3D(std::string const& name)
-    : IGLTexture(3u, name, GL_TEXTURE_3D)
+    : GLTexture(3u, name, GL_TEXTURE_3D)
   {}
 
   //----------------------------------------------------------------------------
@@ -210,6 +210,7 @@ public:
     uint32_t prevWidth = 0;
     uint32_t prevHeight = 0;
     size_t depth = filenames.size();
+    SOIL soil(m_cpuPixelFormat);
 
     m_buffer.clear();
     for (size_t i = 0; i < depth; ++i)
@@ -218,10 +219,8 @@ public:
 
         // Load a Texture2D and pack it subsequently into a large 2D texture
         width = height = 0;
-        if (unlikely(!doload2D(filenames[i].c_str(), PixelLoadFormat::LOAD_RGBA, m_buffer, width, height)))
-          {
-            return false;
-          }
+        if (unlikely(!soil.load(filenames[i].c_str(), m_buffer, width, height)))
+          return false;
 
         // Check consistency of Texture2D dimension
         if ((i != 0) && ((prevWidth != width) || (prevHeight != height)))
@@ -250,12 +249,12 @@ private:
   inline void specifyTexture3D() const
   {
     glCheck(glTexImage3D(m_target, 0,
-                         static_cast<GLint>(m_options.gpuPixelFormat),
+                         static_cast<GLint>(m_gpuPixelFormat),
                          static_cast<GLsizei>(m_width),
                          static_cast<GLsizei>(m_height),
                          static_cast<GLsizei>(m_depth),
                          0,
-                         static_cast<GLenum>(m_options.cpuPixelFormat),
+                         static_cast<GLenum>(m_cpuPixelFormat),
                          static_cast<GLenum>(m_options.pixelType),
                          m_buffer.to_array()));
   }
