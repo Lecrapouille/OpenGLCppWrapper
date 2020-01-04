@@ -348,11 +348,11 @@ namespace glwrap
     template<typename Functor>
     static void traverseAncestors(Node3D_SP node, Functor functor)
     {
-      Node3D& n = *(node.get());
-      while (likely(n.hasParent()))
+      Node3D* n = node.get();
+      while (likely(n->hasParent()))
         {
-          n = n.parent();
-          functor(n);
+          n = n->m_parent;
+          functor(*n);
         }
     }
 
@@ -362,10 +362,10 @@ namespace glwrap
     //--------------------------------------------------------------------------
     static Node3D& root(Node3D_SP node)
     {
-      Node3D& n = *(node.get());
-      while (likely(n.hasParent()))
-        n = n.parent();
-      return n;
+      Node3D* n = node.get();
+      while (likely(n->hasParent()))
+        n = n->m_parent;
+      return *n;
     }
 
     //--------------------------------------------------------------------------

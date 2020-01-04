@@ -51,6 +51,9 @@ namespace glwrap
       setCamera(camera);
     }
 
+    virtual ~CameraController()
+    {}
+
     static CameraController_SP create(Camera3D::Type const type)
     {
        return std::make_shared<CameraController>(type);
