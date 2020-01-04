@@ -136,7 +136,7 @@ bool SceneNodes::setup()
   m_switch->select(0);
 
   // Node switching children periodically
-  m_blinker = BlinkerNode3D::create("Blinker2s", 2000_z);
+  m_blinker = BlinkerNode3D::create("Blinker2s", 2000_ms);
 
   // Create the whole scene graph
   m_root = Node3D::create("Root", false);

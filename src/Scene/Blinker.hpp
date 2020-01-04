@@ -53,7 +53,8 @@ namespace glwrap
     //! \return the shared pointer of the newly created blinker node.
     //--------------------------------------------------------------------------
     static BlinkerNode3D_SP create(std::string const& name,
-                                   size_t const duration/*, Functor functor*/)
+                                   std::chrono::milliseconds const duration
+                                   /*, Functor functor*/)
     {
       return glwrap::make_shared<BlinkerNode3D>(name, duration/*, functor*/);
     }
@@ -68,7 +69,8 @@ namespace glwrap
     //! \param the duration (in ms) of each child activity (before switch shift
     //! to the next child).
     //--------------------------------------------------------------------------
-    BlinkerNode3D(std::string const& name, size_t const duration/*, Functor functor*/)
+    BlinkerNode3D(std::string const& name, std::chrono::milliseconds const duration
+                  /*, Functor functor*/)
       : SwitchNode3D(name),
         m_timedAction(duration)//,m_functor(functor)
     {

@@ -24,6 +24,11 @@
 #  include "Math/Maths.hpp"
 #  include <chrono>
 
+constexpr std::chrono::milliseconds operator ""_ms(unsigned long long ms)
+{
+  return std::chrono::milliseconds(ms);
+}
+
 namespace glwrap
 {
   using namespace std::chrono;
@@ -36,12 +41,12 @@ namespace glwrap
 
   public:
 
-    TimedAction(size_t const duration)
+    TimedAction(milliseconds const duration)
       : m_duration(duration)
     {}
 
     TimedAction()
-      : m_duration(0)
+      : m_duration(0_ms)
     {}
 
     virtual ~TimedAction()
@@ -61,19 +66,20 @@ namespace glwrap
 
     //! \brief Start or restart animation with given time.
     //! \param duration milliseconds
-    void start(size_t const duration)
+    void start(milliseconds const duration)
     {
       if (m_started)
         return ;
 
       m_started = true;
-      m_duration = std::min(1_z, duration);
+
+      m_duration = std::min(1_ms, duration);
     }
 
     //! \brief if and only if duration has been set
     bool start()
     {
-      if (0_z == m_duration)
+      if (0_ms == m_duration)
         {
           ERROR("Duration has not been initialized");
           return false;
@@ -89,11 +95,11 @@ namespace glwrap
     }
 
     //! \brief Reset animation, i.e., set all variables to their initial states.
-    inline void reset(size_t const duration)
+    inline void reset(milliseconds const duration)
     {
       m_started = false;
       m_running = false;
-      m_duration = std::min(1_z, duration);
+      m_duration = std::min(1_ms, duration);
     }
 
     //! \brief Update animation with given time.
@@ -107,9 +113,9 @@ namespace glwrap
       if (likely(m_running))
         {
           Time currentTime = Clock::now();
-          auto dt = currentTime - m_startedTime;
-          long long int dt_ms = duration_cast<milliseconds>(dt).count();
-          if (dt_ms > m_duration)
+          milliseconds dt =
+            duration_cast<milliseconds>(currentTime - m_startedTime);
+          if (dt > m_duration)
             {
               m_startedTime = currentTime;
               functor();
@@ -119,7 +125,7 @@ namespace glwrap
         }
       else
         {
-          if (unlikely(0_z == m_duration))
+          if (unlikely(0_ms == m_duration))
             {
               ERROR("duration has not been set");
               return false;
@@ -142,7 +148,7 @@ namespace glwrap
     //! \brief time at start (milliseconds)
     Time m_startedTime;
     //! \brief
-    long long int m_duration;
+    milliseconds m_duration;
   };
 } // namespace glwrap
 
