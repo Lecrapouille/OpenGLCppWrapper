@@ -33,11 +33,19 @@
 // *****************************************************************************
 //! \file GLTexture2D.hpp file implements:
 //!   - GLTexture2D:
-//!   - GLTextureDepth2D:
+//!   - GLDepthTexture2D:
 // *****************************************************************************
 
 namespace glwrap
 {
+
+  template<class T>
+  static T getMaxTextureSize()
+  {
+    GLint maxTextureSize;
+    glCheck(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize));
+    return static_cast<T>(maxTextureSize);
+  }
 
 //! \brief Used by GLTexture3D and GLTextureCube
 DECLARE_CLASS(GLTexture2D);
@@ -55,16 +63,17 @@ class GLTexture2D: public GLTexture
 public:
 
   //----------------------------------------------------------------------------
-  //! \brief Constructor. Should be used if you will load texture from
-  //! a picture file (jpg, png ...) with the load() method.
+  //! \brief Constructor.
   //!
-  //! Give a name to the instance. This constructor makes no other
-  //! actions.
+  //! Give a name to the instance. This constructor makes no other actions.
   //!
-  //! \param name the name of this instance used by GLProgram and GLVAO.
+  //! \param name the sampler name used inside sader code. This name will be
+  //! used by GLProgram and GLVAO. Please do not give the name or path of the
+  //! picture file (jpeg, tga ...) but the sampler name! Path will be given
+  //! thought the method load().
   //----------------------------------------------------------------------------
   GLTexture2D(std::string const& name)
-    : GLTexture(2u, name, GL_TEXTURE_2D)
+    : GLTexture(2u, name, GL_TEXTURE_2D, CPUPixelFormat::RGBA, GPUPixelFormat::RGBA)
   {}
 
   //----------------------------------------------------------------------------
@@ -80,12 +89,55 @@ public:
   //! \param height Buffer height (pixel). Shall be > 0.
   //----------------------------------------------------------------------------
   GLTexture2D(std::string const& name, const uint32_t width, const uint32_t height)
-    : GLTexture(2u, name, GL_TEXTURE_2D)
+    : GLTexture(2u, name, GL_TEXTURE_2D, CPUPixelFormat::RGBA, GPUPixelFormat::RGBA)
   {
     // Note: Allow texture with no size for FrameBuffers
     m_width = width;
     m_height = height;
   }
+
+protected:
+
+  //----------------------------------------------------------------------------
+  //! \brief Constructor.
+  //!
+  //! Give a name to the instance. This constructor makes no other actions.
+  //!
+  //! \param name the sampler name used inside sader code. This name will be
+  //! used by GLProgram and GLVAO. Please do not give the name or path of the
+  //! picture file (jpeg, tga ...) but the sampler name! Path will be given
+  //! thought the method load().
+  //----------------------------------------------------------------------------
+  GLTexture2D(std::string const& name,
+              CPUPixelFormat const cpuPixelFormat,
+              GPUPixelFormat const gpuPixelFormat)
+    : GLTexture(2u, name, GL_TEXTURE_2D, cpuPixelFormat, gpuPixelFormat)
+  {}
+
+  //----------------------------------------------------------------------------
+  //! \brief Constructor. Should be used if you will load texture from
+  //! a frame buffer.
+  //!
+  //! Give a name to the instance. Get the texture size. This
+  //! constructor makes no other actions.
+  //!
+  //! \param name the name of this instance used by GLProgram and GLVAO.
+  //! \param target the texture type (GL_TEXTURE_1D .. GL_TEXTURE_3D ...)
+  //! \param width Buffer width (pixels). Shall be > 0.
+  //! \param height Buffer height (pixel). Shall be > 0.
+  //----------------------------------------------------------------------------
+  GLTexture2D(std::string const& name, const uint32_t width, const uint32_t height,
+              CPUPixelFormat const cpuPixelFormat,
+              GPUPixelFormat const gpuPixelFormat)
+    : GLTexture(2u, name, GL_TEXTURE_2D, cpuPixelFormat, gpuPixelFormat)
+  {
+    // Note: Allow texture with no size for FrameBuffers
+    m_width = width;
+    m_height = height;
+    // TODO #warning "ICI m_cpuPixelType et m_cpuPixelCount ne seont pas renseignes"
+  }
+
+public:
 
   //----------------------------------------------------------------------------
   //! \brief Destructor. Release elements in CPU and GPU memories.
@@ -134,12 +186,14 @@ public:
   //!
   //! \return true if texture data have been loaded.
   //----------------------------------------------------------------------------
-  inline bool load(const char *const filename)
+  virtual bool load(const char *const filename)
   {
-    DEBUG("Texture2D '%s' load bitmap '%s'", cname(), filename);
+    DEBUG("Texture2D '%s' load from bitmap '%s'", cname(), filename);
     m_buffer.clear(); m_width = m_height = 0;
     SOIL soil(m_cpuPixelFormat);
-    return soil.load(filename, m_buffer, m_width, m_height);
+    bool ret = soil.load(filename, m_buffer, m_width, m_height);
+    soil.getPixelInfo(m_cpuPixelType, m_cpuPixelCount);
+    return ret;
   }
 
   //----------------------------------------------------------------------------
@@ -150,8 +204,9 @@ public:
   //!
   //! \return true if texture data have been writen in the file, else false.
   //----------------------------------------------------------------------------
-  inline bool save(const char *const filename)
+  virtual bool save(const char *const filename)
   {
+    DEBUG("Texture2D '%s' save to bitmap '%s'", cname(), filename);
     SOIL soil(m_cpuPixelFormat);
     return soil.save(filename, m_buffer, m_width, m_height);
   }
@@ -182,7 +237,7 @@ public:
   //----------------------------------------------------------------------------
   inline unsigned char& set(const size_t u, const size_t v, const size_t off)
   {
-    return GLTexture2D::set((u * m_width + v) * 4 + off); //TODO 4 because RGBA
+    return GLTexture2D::set((u * m_width + v) * m_cpuPixelCount + off);
   }
 
   //----------------------------------------------------------------------------
@@ -190,7 +245,7 @@ public:
   //----------------------------------------------------------------------------
   inline const unsigned char& get(const size_t u, const size_t v, const size_t off) const
   {
-    return GLTexture2D::get((u * m_width + v) * 4 + off);
+    return GLTexture2D::get((u * m_width + v) * m_cpuPixelCount + off);
   }
 
 private:
@@ -209,7 +264,7 @@ private:
                          static_cast<GLsizei>(m_height),
                          0,
                          static_cast<GLenum>(m_cpuPixelFormat),
-                         static_cast<GLenum>(m_options.pixelType),
+                         m_cpuPixelType,
                          m_buffer.to_array()));
   }
 
@@ -223,7 +278,8 @@ private:
     // Note: m_buffer can nullptr
     if (unlikely(!loaded()))
       {
-        ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", cname());
+        ERROR("Cannot setup texture '%s' because no texture has not yet been loaded. "
+              "Please call load(filepath) before using the texture.", cname());
         return true;
       }
 
@@ -260,7 +316,7 @@ private:
     glCheck(glBindTexture(m_target, m_handle));
     glCheck(glTexSubImage2D(m_target, 0, x, y, width, height,
                             static_cast<GLenum>(m_cpuPixelFormat),
-                            static_cast<GLenum>(m_options.pixelType),
+                            static_cast<GLenum>(m_cpuPixelType),
                             m_buffer.to_array()));
 
     m_buffer.clearPending();
@@ -272,24 +328,53 @@ private:
 // *****************************************************************************
 //! \brief a 2D Texture storing the depth information of the scene.
 // *****************************************************************************
-class GLTextureDepth2D: public GLTexture2D
+class GLDepthTexture2D: public GLTexture2D
 {
 public:
 
   //----------------------------------------------------------------------------
   //! \brief Constructor.
   //!
-  //! Give a name to the instance. This constructor makes no other
-  //! actions.
+  //! Give a name to the instance. This constructor makes no other actions.
   //!
-  //! \param name the name of this instance used by GLProgram and GLVAO.
+  //! \param name the sampler name used inside sader code. This name will be
+  //! used by GLProgram and GLVAO. Please do not give the name or path of the
+  //! picture file (jpeg, tga ...) but the sampler name! Path will be given
+  //! thought the method load().
   //----------------------------------------------------------------------------
-  GLTextureDepth2D(std::string const& name)
-    : GLTexture2D(name)
-  {
-    m_gpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
-    m_cpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
-  }
+  GLDepthTexture2D(std::string const& name)
+    : GLTexture2D(name, CPUPixelFormat::DEPTH_COMPONENT, GPUPixelFormat::DEPTH_COMPONENT32F)
+  {}
+
+  GLDepthTexture2D(std::string const& name, const uint32_t width, const uint32_t height)
+    : GLTexture2D(name, width, height, CPUPixelFormat::DEPTH_COMPONENT, GPUPixelFormat::DEPTH_COMPONENT32F)
+  {}
+};
+
+// *****************************************************************************
+//! \brief a 2D Texture storing float values.
+// *****************************************************************************
+class GLFloatTexture2D: public GLTexture2D
+{
+public:
+
+  //----------------------------------------------------------------------------
+  //! \brief Constructor.
+  //!
+  //! Give a name to the instance. This constructor makes no other actions.
+  //!
+  //! \param name the sampler name used inside sader code. This name will be
+  //! used by GLProgram and GLVAO. Please do not give the name or path of the
+  //! picture file (jpeg, tga ...) but the sampler name! Path will be given
+  //! thought the method load().
+  //----------------------------------------------------------------------------
+  GLFloatTexture2D(std::string const& name)
+    : GLTexture2D(name, CPUPixelFormat::RGBA, GPUPixelFormat::RGBA32F)
+  {}
+
+  GLFloatTexture2D(std::string const& name, const uint32_t width, const uint32_t height)
+    : GLTexture2D(name, width, height, CPUPixelFormat::RGBA, GPUPixelFormat::RGBA32F)
+  {}
 };
 
 } // namespace glwrap

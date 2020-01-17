@@ -18,15 +18,36 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
-#  define OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+#ifndef EXAMPLE_15_COLLECTION_HPP
+#define EXAMPLE_15_COLLECTION_HPP
 
-#  include "OpenGLCppWrapper/OpenGL.hpp"
-#  include "OpenGLCppWrapper/Texturing.hpp"
-#  include "OpenGLCppWrapper/Material.hpp"
-#  include "OpenGLCppWrapper/Scene.hpp"
-#  include "OpenGLCppWrapper/Geometry.hpp"
-#  include "OpenGLCppWrapper/Camera.hpp"
-#  include "OpenGLCppWrapper/UI.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
-#endif // OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+using namespace glwrap;
+using namespace glwrap::window;
+
+// *****************************************************************************
+//! \brief This example shows how to create a basic light.
+// *****************************************************************************
+class BasicCollection: public IGLWindow
+{
+public:
+
+  BasicCollection();
+  ~BasicCollection();
+
+private:
+
+  virtual void onWindowSizeChanged() override;
+  virtual bool setup() override;
+  virtual bool draw() override;
+
+private:
+
+  Collection         m_collection;
+  GLVertexShader     m_vs;
+  GLFragmentShader   m_fs;
+  GLProgram          m_prog;
+};
+
+#endif // EXAMPLE_15_COLLECTION_HPP

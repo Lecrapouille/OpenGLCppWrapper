@@ -732,6 +732,9 @@ private:
   //----------------------------------------------------------------------------
   virtual bool update() override
   {
+    // for cases (mostly I guess) where you do not care holding data on CPU
+    // TODO if (!pureGPU<>()) { delete m_vbos; delete m_textures; delete m_index; }
+    //
     return false;
   }
 

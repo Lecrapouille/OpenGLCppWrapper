@@ -55,8 +55,19 @@ struct TextureOptions
   TextureWrap wrapS = TextureWrap::REPEAT;
   TextureWrap wrapT = TextureWrap::REPEAT;
   TextureWrap wrapR = TextureWrap::REPEAT;
-  PixelType pixelType = PixelType::UNSIGNED_BYTE;
   bool generateMipmaps = false;
+};
+
+struct PixelSettings
+{
+  // Input
+  CPUPixelFormat cpuPixelFormat;     // ie RGBA
+  GLenum         cpuPixelType;       // ie RGBA using GL_UNSIGNED_BYTE by component
+  size_t         cpuPixelComponents; // ie RGBA = 4 components
+  size_t         cpuPixelSize;       // ie RGBA using GL_UNSIGNED_BYTE by component = 4*1 = 4
+
+  // Output
+  GPUPixelFormat gpuPixelFormat;     // ie RGB32F
 };
 
 //! \brief Used by GLVAO
@@ -83,12 +94,18 @@ public:
   //! Give a name to the instance. This constructor makes no other
   //! actions.
   //!
-  //! \param name the name of this instance used by GLProgram and GLVAO.
+  //! \param name the sampler name used inside sader code. This name will be
+  //! used by GLProgram and GLVAO. Please do not give the name or path of the
+  //! picture file (jpeg, tga ...) but the sampler name! Path will be given
+  //! thought the method load().
   //! \param target the texture type (GL_TEXTURE_1D .. GL_TEXTURE_3D ...)
   //----------------------------------------------------------------------------
-  GLTexture(const uint8_t dimension, std::string const& name, const GLenum target)
+  GLTexture(uint8_t const dimension, std::string const& name, GLenum const target,
+            CPUPixelFormat const cpuPixelFormat, GPUPixelFormat const gpuPixelFormat)
     : GLObject(name),
       m_buffer(name),
+      m_cpuPixelFormat(cpuPixelFormat),
+      m_gpuPixelFormat(gpuPixelFormat),
       m_dimension(dimension)
   {
     m_target = target;
@@ -136,7 +153,7 @@ public:
   //! \return the reference of this instence.
   //----------------------------------------------------------------------------
   GLTexture& interpolation(TextureMinFilter const min_filter,
-                            TextureMagFilter const mag_filter)
+                           TextureMagFilter const mag_filter)
   {
     m_options.minFilter = min_filter;
     m_options.magFilter = mag_filter;
@@ -302,14 +319,18 @@ protected:
   //! \brief Desired format of texture once loaded from the picture file (CPU
   //! side).  \note Beware all format are not supported by loaders: ie SOIL only
   //! manages RGB, RGBA, luminance greyscale and luminance with alpha.
-  PixelFormat    m_cpuPixelFormat = PixelFormat::RGBA;
+  CPUPixelFormat m_cpuPixelFormat;
+  //! \brief Specifies the data type of the pixel data (CPU side)
+  GLenum         m_cpuPixelType;
+  //! \brief
+  size_t         m_cpuPixelCount;
   //! \brief Desired format of texture once loaded into the GPU.
-  PixelFormat    m_gpuPixelFormat = PixelFormat::RGBA;
+  GPUPixelFormat m_gpuPixelFormat;
 
 private:
 
   //! \brief Texture1D, Texture2D, Texture3D, TextureCube
-  const uint8_t  m_dimension;
+  uint8_t const  m_dimension;
 };
 
 } // namespace glwrap

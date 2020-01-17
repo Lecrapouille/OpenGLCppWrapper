@@ -72,6 +72,28 @@ public:
     destroy();
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Set stride and offset values. TODO: can be done after begin() ?!
+  //!
+  //! \tparam S Specifies the byte offset between consecutive generic vertex
+  //! attributes.
+  //! \tparam O Specifies an offset of the first component of the first generic
+  //! vertex attribute in the array in the data store of the buffer.
+  //!
+  //! \code
+  //! struct Vertex { Vector3f Position; Vector3f Normal; Vector2f TexCoords; };
+  //! attrib1.set<Vertex, Position>();
+  //! attrib2.set<Vertex, Normal>();
+  //! attrib3.set<Vertex, TexCoords>();
+  //! \endcode
+  //----------------------------------------------------------------------------
+  //template<class S, class O>
+  //void set()
+  //{
+  //  m_stride = sizeof(S);
+  //  m_offset = offsetof(S, O);
+  //}
+
 private:
 
   //----------------------------------------------------------------------------

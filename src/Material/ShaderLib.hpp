@@ -29,6 +29,7 @@
 
 #  include "OpenGL/Shaders.hpp"
 #  include "Material/Config.hpp"
+#  include "Texturing/Collection.hpp"
 
 namespace glwrap
 {
@@ -59,7 +60,7 @@ namespace glwrap
 
       namespace vertex
       {
-        static const char* params(/*BasicMaterialConfig const& config*/)
+        static const char* variables(/*BasicMaterialConfig const& config*/)
         {
           return
             "uniform mat4 modelMatrix;\n"
@@ -73,7 +74,7 @@ namespace glwrap
 
       namespace fragment
       {
-        static const char* params(/*BasicMaterialConfig const& config*/)
+        static const char* variables(/*BasicMaterialConfig const& config*/)
         {
           return
             "uniform mat4 viewMatrix;\n"
@@ -87,7 +88,7 @@ namespace glwrap
     {
       namespace fragment
       {
-        static const char* params(BasicMaterialConfig const& config)
+        static const char* variables(BasicMaterialConfig const& config)
         {
           if (config.useColor)
             return
@@ -108,7 +109,7 @@ namespace glwrap
 
       namespace vertex
       {
-        static const char* params(BasicMaterialConfig const& config)
+        static const char* variables(BasicMaterialConfig const& config)
         {
           if (config.useColor)
             return
@@ -139,7 +140,7 @@ namespace glwrap
     {
       namespace vertex
       {
-        static const char* params(BasicMaterialConfig const& config)
+        static const char* variables(BasicMaterialConfig const& config)
         {
           if ((config.useMap) || (config.useBumpMap) || (config.useSpecularMap))
             return
@@ -162,7 +163,7 @@ namespace glwrap
 
       namespace fragment
       {
-        static const char* params(BasicMaterialConfig const& config)
+        static const char* variables(BasicMaterialConfig const& config)
         {
           if ((config.useMap) || (config.useBumpMap) || (config.useSpecularMap))
             return
@@ -195,7 +196,7 @@ namespace glwrap
     {
       namespace vertex
       {
-        static const char* params(BasicMaterialConfig const& /*config*/)
+        static const char* variables(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -210,7 +211,7 @@ namespace glwrap
 
       namespace fragment
       {
-        static const char* params(BasicMaterialConfig const& /*config*/)
+        static const char* variables(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -229,7 +230,7 @@ namespace glwrap
     {
       namespace fragment
       {
-        static const char* params(BasicMaterialConfig const& config)
+        static const char* variables(BasicMaterialConfig const& config)
         {
           if (config.useFog)
             return
@@ -274,7 +275,7 @@ namespace glwrap
     {
       namespace vertex
       {
-        static const char* params(BasicMaterialConfig const& /*config*/)
+        static const char* variables(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -289,7 +290,7 @@ namespace glwrap
 
       namespace fragment
       {
-        static const char* params(BasicMaterialConfig const& /*config*/)
+        static const char* variables(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -308,7 +309,7 @@ namespace glwrap
     {
       namespace vertex
       {
-        static const char* params(BasicMaterialConfig const& /*config*/)
+        static const char* variables(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -323,7 +324,7 @@ namespace glwrap
 
       namespace fragment
       {
-        static const char* params(BasicMaterialConfig const& /*config*/)
+        static const char* variables(BasicMaterialConfig const& /*config*/)
         {
           return // TODO
             "";
@@ -357,7 +358,7 @@ namespace glwrap
     {
       namespace fragment
       {
-        static const char* params(BasicMaterialConfig const& config)
+        static const char* variables(BasicMaterialConfig const& config)
         {
           if (config.useAlphaTest)
             return
@@ -392,9 +393,71 @@ namespace glwrap
         }
       } // namespace fragment
     } // namespace gamma
+
+    //--------------------------------------------------------------------------
+    namespace collection
+    {
+      namespace vertex
+      {
+        static const char* variables()
+        {
+          return
+            "// Collections: variables for fetch_collection()\n"
+            "#define GET_FIELD(i) texture2D(collection, vec2(float(i)/size_x,ty))\n"
+            "uniform   sampler2D collection;\n"
+            "uniform   vec3      collection_shape;\n"
+            "attribute float     collection_index;\n";
+        }
+
+        static const char* code() // TODO add Collection const& col*/) to generate a full function
+        {
+          return
+            "  float rows   = collection_shape.x;\n"
+            "  float cols   = collection_shape.y;\n"
+            "  float count  = collection_shape.z;\n"
+            "  int index_x  = int(mod(collection_index, (floor(cols/(count/4.0))))) * int(count/4.0);\n"
+            "  int index_y  = int(floor(collection_index / (floor(cols/(count/4.0)))));\n"
+            "  float size_x = cols - 1.0;\n"
+            "  float size_y = rows - 1.0;\n"
+            "  float ty     = 0.0;\n"
+            "  if (size_y > 0.0)\n"
+            "    ty = float(index_y) / size_y;\n";
+        }
+      } // namespace vertex
+    } // namespace collection
   } // namespace shaders
 
-#   pragma GCC diagnostic pop
+  // -----------------------------------------------------------------------------
+  //! \brief
+  // -----------------------------------------------------------------------------
+  static void createCollectionShader(GLVertexShader& vertexShader,
+                                     GLFragmentShader& fragmentShader,
+                                     Collection const& col)
+  {
+    vertexShader
+      << shaders::common::version()
+      << shaders::collection::vertex::variables()
+      << "\n"
+      << col.toVariableShaders()
+      << "\nvoid fetch_collection()\n{\n"
+      << shaders::collection::vertex::code()
+      << "\n  // Init fields\n"
+      << "  int i = index_x;\n"
+      << "  m_vec4 field;\n"
+      << col.toVertexShaders()
+      << "}\n\nvoid main()\n{\n"
+      << "  fetch_uniforms();\n"
+      << "  gl_Position = modelMatrix * viewMatrix * projectionMatrix * position;"
+      << "\n}";
+
+    fragmentShader
+      << shaders::common::version()
+    //  << col.fragmentVariables()
+    //  << "void main()\n{\n"
+      // << col.fragmentCode()
+    //   << "\n}"
+      ;
+  }
 
   // -----------------------------------------------------------------------------
   //! \brief
@@ -403,14 +466,14 @@ namespace glwrap
   {
     vertexShader
       << shaders::common::version()
-      << shaders::common::vertex::params()
+      << shaders::common::vertex::variables()
       << "\nvoid main()\n{\n"
       << "  gl_Position = projectionMatrix * modelMatrix * viewMatrix * vec4(position, 1.0);\n"
       << "}\n";
 
     fragmentShader
       << shaders::common::version()
-      << shaders::common::fragment::params()
+      << shaders::common::fragment::variables()
       << "uniform float near;\n"
       << "uniform float far;\n"
       << "uniform float opacity;\n"
@@ -428,7 +491,7 @@ namespace glwrap
   {
     vertexShader
       << shaders::common::version()
-      << shaders::common::vertex::params()
+      << shaders::common::vertex::variables()
       << "uniform mat3 normalMatrix; // = mat3(transpose(inverse(modelMatrix * viewMatrix)));\n"
       << "out vec3 vNormal;\n"
       << "\nvoid main()\n{\n"
@@ -439,7 +502,7 @@ namespace glwrap
 
     fragmentShader
       << shaders::common::version()
-      << shaders::common::fragment::params()
+      << shaders::common::fragment::variables()
       << "uniform float opacity;\n"
       << "in vec3 vNormal;\n"
       << "\nvoid main()\n{\n"
@@ -457,10 +520,10 @@ namespace glwrap
   {
     vertexShader
       << shaders::common::version()
-      << shaders::common::vertex::params()
-      << shaders::texture::vertex::params(config)
-      << shaders::light::vertex::params(config)
-      << shaders::color::vertex::params(config)
+      << shaders::common::vertex::variables()
+      << shaders::texture::vertex::variables(config)
+      << shaders::light::vertex::variables(config)
+      << shaders::color::vertex::variables(config)
       << "\nvoid main()\n{\n"
       << "  vec4 mvPosition = modelMatrix * viewMatrix * vec4(position, 1.0);\n"
       << shaders::texture::vertex::code(config)
@@ -471,16 +534,16 @@ namespace glwrap
     fragmentShader
       << shaders::common::version()
       << shaders::common::constants()
-      << shaders::alpha::fragment::params(config)
-      << shaders::common::fragment::params()
+      << shaders::alpha::fragment::variables(config)
+      << shaders::common::fragment::variables()
       << "uniform vec3 diffuse;\n"
       << "uniform float opacity;\n"
-      << shaders::color::fragment::params(config)
-      << shaders::texture::fragment::params(config)
-      << shaders::light::fragment::params(config)
-      << shaders::fog::fragment::params(config)
-      << shaders::shadow::fragment::params(config)
-      << shaders::specular::fragment::params(config)
+      << shaders::color::fragment::variables(config)
+      << shaders::texture::fragment::variables(config)
+      << shaders::light::fragment::variables(config)
+      << shaders::fog::fragment::variables(config)
+      << shaders::shadow::fragment::variables(config)
+      << shaders::specular::fragment::variables(config)
       << "\nvoid main()\n{\n"
       << "  gl_FragColor = vec4(diffuse, opacity);\n"
       << shaders::texture::fragment::code(config)
@@ -518,6 +581,8 @@ namespace glwrap
       << "  gl_FragColor = vColors;\n"
       << "}\n";
   }
+
+#   pragma GCC diagnostic pop
 
 } // namespace glwrap
 

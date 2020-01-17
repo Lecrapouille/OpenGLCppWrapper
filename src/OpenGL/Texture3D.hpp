@@ -48,13 +48,15 @@ public:
   //----------------------------------------------------------------------------
   //! \brief Constructor.
   //!
-  //! Give a name to the instance. This constructor makes no other
-  //! actions.
+  //! Give a name to the instance. This constructor makes no other actions.
   //!
-  //! \param name the name of this instance used by GLProgram and GLVAO.
+  //! \param name the sampler name used inside sader code. This name will be
+  //! used by GLProgram and GLVAO. Please do not give the name or path of the
+  //! picture file (jpeg, tga ...) but the sampler name! Path will be given
+  //! thought the method load().
   //----------------------------------------------------------------------------
   GLTextureCube(std::string const& name)
-    : GLTexture(3u, name, GL_TEXTURE_CUBE_MAP)
+    : GLTexture(3u, name, GL_TEXTURE_CUBE_MAP, CPUPixelFormat::RGBA, GPUPixelFormat::RGBA)
   {}
 
   virtual ~GLTextureCube()
@@ -194,10 +196,17 @@ class GLTexture3D: public GLTexture
 public:
 
   //----------------------------------------------------------------------------
-  //! \brief
+  //! \brief Constructor.
+  //!
+  //! Give a name to the instance. This constructor makes no other actions.
+  //!
+  //! \param name the sampler name used inside sader code. This name will be
+  //! used by GLProgram and GLVAO. Please do not give the name or path of the
+  //! picture file (jpeg, tga ...) but the sampler name! Path will be given
+  //! thought the method load().
   //----------------------------------------------------------------------------
   GLTexture3D(std::string const& name)
-    : GLTexture(3u, name, GL_TEXTURE_3D)
+    : GLTexture(3u, name, GL_TEXTURE_3D, CPUPixelFormat::RGBA, GPUPixelFormat::RGBA)
   {}
 
   //----------------------------------------------------------------------------
@@ -255,7 +264,7 @@ private:
                          static_cast<GLsizei>(m_depth),
                          0,
                          static_cast<GLenum>(m_cpuPixelFormat),
-                         static_cast<GLenum>(m_options.pixelType),
+                         static_cast<GLenum>(m_cpuPixelType),
                          m_buffer.to_array()));
   }
 

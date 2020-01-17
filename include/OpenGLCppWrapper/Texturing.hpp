@@ -18,15 +18,9 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
-#  define OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+#ifndef OPENGLCPPWRAPPER_INCLUDE_TEXTURING_HPP
+#  define OPENGLCPPWRAPPER_INCLUDE_TEXTURING_HPP
 
-#  include "OpenGLCppWrapper/OpenGL.hpp"
-#  include "OpenGLCppWrapper/Texturing.hpp"
-#  include "OpenGLCppWrapper/Material.hpp"
-#  include "OpenGLCppWrapper/Scene.hpp"
-#  include "OpenGLCppWrapper/Geometry.hpp"
-#  include "OpenGLCppWrapper/Camera.hpp"
-#  include "OpenGLCppWrapper/UI.hpp"
+#  include "Texturing/Collection.hpp"
 
-#endif // OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+#endif // OPENGLCPPWRAPPER_INCLUDE_TEXTURING_HPP

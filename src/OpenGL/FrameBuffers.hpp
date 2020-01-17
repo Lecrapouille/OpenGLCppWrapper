@@ -52,13 +52,13 @@ public:
                  const uint32_t width,
                  const uint32_t height,
                  const GLenum attachment,
-                 const GLenum format)
+                 const RenderBufferFormat format)
     : GLObject(name)
   {
     m_width = width;
     m_height = height;
     m_attachment = attachment;
-    m_format = format;
+    m_format = static_cast<GLenum>(format);
     m_target = GL_RENDERBUFFER;
   }
 
@@ -197,8 +197,8 @@ public:
                   const uint32_t width,
                   const uint32_t height,
                   const GLenum attachment,
-                  const PixelFormat format = PixelFormat::RGBA)
-    : GLRenderBuffer(texture.name(), width, height, attachment, static_cast<GLenum>(format)),
+                  const RenderBufferFormat format = RenderBufferFormat::RGBA8)
+    : GLRenderBuffer(texture.name(), width, height, attachment, format),
       m_texture(texture)
   {
     m_texture.m_width = width;
@@ -266,8 +266,8 @@ public:
                 const uint32_t width,
                 const uint32_t height,
                 const GLenum attachment,
-                const PixelFormat format = PixelFormat::RGBA)
-    : GLRenderBuffer(name, width, height, attachment, static_cast<GLenum>(format))
+                const RenderBufferFormat format = RenderBufferFormat::RGBA8)
+    : GLRenderBuffer(name, width, height, attachment, format)
   {}
 
   virtual void attach() override
@@ -295,8 +295,8 @@ public:
   GLDepthBuffer(std::string const& name,
                 const uint32_t width,
                 const uint32_t height,
-                const PixelFormat format = PixelFormat::DEPTH_COMPONENT)
-    : GLRenderBuffer(name, width, height, GL_DEPTH_ATTACHMENT, static_cast<GLenum>(format))
+                const RenderBufferFormat format = RenderBufferFormat::DEPTH_COMPONENT16)
+    : GLRenderBuffer(name, width, height, GL_DEPTH_ATTACHMENT, format)
   {}
 
   virtual void attach() override
@@ -316,8 +316,8 @@ public:
   GLStencilBuffer(std::string const& name,
                   const uint32_t width,
                   const uint32_t height,
-                  const PixelFormat format = PixelFormat::STENCIL_INDEX)
-    : GLRenderBuffer(name, width, height, GL_STENCIL_ATTACHMENT, static_cast<GLenum>(format))
+                  const RenderBufferFormat format = RenderBufferFormat::STENCIL_INDEX8)
+    : GLRenderBuffer(name, width, height, GL_STENCIL_ATTACHMENT, format)
   {}
 
   virtual void attach() override

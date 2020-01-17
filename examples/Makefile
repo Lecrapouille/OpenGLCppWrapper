@@ -56,7 +56,8 @@ OBJS_CORE = \
   11_SimpleFrameBuffer.o \
   12_PostProdFrameBuffer.o \
   13_ComplexShader.o \
-  14_BasicLighting.o
+  14_BasicLighting.o \
+  15_BasicCollection.o
 
 OBJS_SCENE = \
   00_BasicMaterial.o \

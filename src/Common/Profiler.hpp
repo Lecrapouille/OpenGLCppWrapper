@@ -34,6 +34,8 @@
 #  include <fstream>
 #  include <thread>
 #  include <iomanip>
+#  include <mutex>
+#  include <sstream>
 
 namespace glwrap
 {
@@ -62,66 +64,61 @@ namespace glwrap
     //! To make things simple, you cannot record several sessions at the same
     //! time with the same profiler.
     //--------------------------------------------------------------------------
-    void begin(const char* name, const char* filepath = "profile.json")
+    inline void begin(const char* name, const char* filepath = "profile.json")
     {
       m_started = true;
-      m_file.open(filepath);
-      m_file << std::setprecision(3) << std::fixed;
-      header();
+      m_json.open(filepath);
+      m_json << "{\"otherData\": {},\"traceEvents\":[\n";
       m_session = name;
     }
 
     //--------------------------------------------------------------------------
     //! \brief End recording the session.
     //--------------------------------------------------------------------------
-    void end()
+    inline void end()
     {
       if (!m_started)
         return ;
 
-      footer();
+      m_json << "{} ]}\n";
       m_started = false;
     }
 
     //--------------------------------------------------------------------------
     //! \brief Write time measurement in the json file.
     //--------------------------------------------------------------------------
-    void write(const char* name, double const start, double const end, size_t const threadID)
+    inline void write(const char* name, double const start, double const end, size_t const threadID)
     {
       if (!m_started)
         return ;
 
-      m_file << "{\"cat\":\"function\",\"dur\":" << (end - start);
-      m_file << ",\"name\":\"" << name;
-      m_file << "\",\"ph\":\"X\",\"pid\":0,\"tid\":" << threadID;
-      m_file << ",\"ts\":" << start;
-      m_file << "}," << std::endl;
+      std::stringstream ss;
+      ss << std::setprecision(3) << std::fixed;
+      ss << "{\"cat\":\"function\",\"dur\":" << (end - start);
+      ss << ",\"name\":\"" << name;
+      ss << "\",\"ph\":\"X\",\"pid\":0,\"tid\":" << threadID;
+      ss << ",\"ts\":" << start;
+      ss << "},\n";
+
+      std::lock_guard<std::mutex> lock(m_mutex);
+      m_json << ss.str();
     }
 
   private:
-
-    void header()
-    {
-      m_file << "{\"otherData\": {},\"traceEvents\":[" << std::endl;
-    }
-
-    void footer()
-    {
-      m_file << "{} ]}" << std::endl;
-    }
 
     Profiler()
     {}
 
   private:
 
-    //! \brief session name
-    std::string   m_session;
-    //! \brief json file we are writting on
-    std::ofstream m_file;
-    //! \brief Security: allow to write in json file only when a session has
-    //! started.
-    bool          m_started = false;
+    //! \brief session name.
+    std::string m_session;
+    //! \brief json file we are writting on.
+    std::ofstream m_json;
+    //! \brief Security: allow to write in json file only when a session has started.
+    bool m_started = false;
+    //! \brief Avoid concurrency when writting in the file.
+    std::mutex m_mutex;
   };
 
   // ***************************************************************************
@@ -131,6 +128,7 @@ namespace glwrap
   {
     using Clock = std::chrono::steady_clock;
     using TimePoint = std::chrono::time_point<Clock>;
+    using Duration = std::chrono::duration<double, std::micro>;
 
   public:
 
@@ -138,33 +136,18 @@ namespace glwrap
     //! \brief Start measuring the time.
     //! \param name the name of the function or the name of the scope.
     //--------------------------------------------------------------------------
-    InstrumentationTimer(const char* name)
-      : m_name(name)
-    {
-      m_startTimepoint = Clock::now();
-    }
+    inline InstrumentationTimer(const char* name)
+      : m_start(Duration{Clock::now().time_since_epoch()}.count()),
+        m_name(name)
+    {}
 
     //--------------------------------------------------------------------------
     //! \brief Stop measuring the time.
     //--------------------------------------------------------------------------
-    ~InstrumentationTimer()
+    inline ~InstrumentationTimer()
     {
-      stop();
-    }
-
-  private:
-
-    //--------------------------------------------------------------------------
-    //! \brief Stop measuring the time and record the new measurement.
-    //--------------------------------------------------------------------------
-    void stop()
-    {
-      using namespace std::chrono;
-
-      Profiler::singleton().write(
-        m_name,
-        static_cast<double>(time_point_cast<nanoseconds>(m_startTimepoint).time_since_epoch().count()) / 1000.0,
-        static_cast<double>(time_point_cast<nanoseconds>(Clock::now()).time_since_epoch().count()) / 1000.0,
+      ::glwrap::Profiler::singleton().write(
+        m_name, m_start, Duration{Clock::now().time_since_epoch()}.count(),
         std::hash<std::thread::id>{}(std::this_thread::get_id())
       );
     }
@@ -172,7 +155,7 @@ namespace glwrap
   private:
 
     //! \brief for computing the elapsed time
-    TimePoint    m_startTimepoint;
+    double      m_start;
     //! \brief the name of the function or the name of the scope.
     const char*  m_name;
   };

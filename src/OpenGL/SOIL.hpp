@@ -33,38 +33,39 @@ class SOIL
 {
 public:
 
-  SOIL(PixelFormat const cpuformat)
+  SOIL(CPUPixelFormat const cpuformat)
   {
     switch (cpuformat)
       {
-      case PixelFormat::RGBA:
+      case CPUPixelFormat::RGBA:
         m_soilformat = SOIL_LOAD_RGBA;
         m_nbpixel = 4_z;
         m_isvalid = true;
         break;
-      case PixelFormat::RGB:
+      case CPUPixelFormat::RGB:
         m_soilformat = SOIL_LOAD_RGB;
         m_nbpixel = 3_z;
         m_isvalid = true;
         break;
-      case PixelFormat::LUMINANCE:
+      case CPUPixelFormat::LUMINANCE:
         ERROR("LUMINANCE_ALPHA not yet managed");
         m_soilformat = SOIL_LOAD_L;
         m_isvalid = false;
         break;
-      case PixelFormat::LUMINANCE_ALPHA:
+      case CPUPixelFormat::LUMINANCE_ALPHA:
         ERROR("LUMINANCE_ALPHA not yet managed");
         m_soilformat = SOIL_LOAD_LA;
         m_isvalid = false;
         break;
-      case PixelFormat::BGR:
-      case PixelFormat::STENCIL_INDEX:
-      case PixelFormat::DEPTH_COMPONENT:
-      case PixelFormat::RED:
-      case PixelFormat::GREEN:
-      case PixelFormat::BLUE:
-      case PixelFormat::ALPHA:
-      case PixelFormat::DEPTH_STENCIL:
+      case CPUPixelFormat::DEPTH_COMPONENT:
+      case CPUPixelFormat::RED:
+      case CPUPixelFormat::ALPHA:
+      case CPUPixelFormat::RG:
+      case CPUPixelFormat::DEPTH_STENCIL:
+      case CPUPixelFormat::RED_INTEGER:
+      case CPUPixelFormat::RGB_INTEGER:
+      case CPUPixelFormat::RGBA_INTEGER:
+      case CPUPixelFormat::RG_INTEGER:
         ERROR("SOIL does not surport the given pixel format");
         m_soilformat = SOIL_LOAD_AUTO;
         m_isvalid = false;
@@ -74,6 +75,13 @@ public:
 
   ~SOIL()
   {}
+
+  bool getPixelInfo(GLenum& type, size_t& count)
+  {
+    type = GL_UNSIGNED_BYTE; // SOIL does not manage other type
+    count = m_nbpixel;
+    return m_isvalid;
+  }
 
   //----------------------------------------------------------------------------
   //! \brief Load picture file (jpg, png ...)
@@ -95,8 +103,7 @@ public:
 
     // Load the image as a C array.
     int w, h;
-    unsigned char* image = SOIL_load_image(filename, &w, &h, 0,
-                                           static_cast<int>(m_soilformat));
+    unsigned char* image = SOIL_load_image(filename, &w, &h, 0, m_soilformat);
     if (likely(nullptr != image))
       {
         // Use the max because with framebuffer we can resize texture

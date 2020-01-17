@@ -37,6 +37,7 @@
 #include "01_Core/12_PostProdFrameBuffer.hpp"
 #include "01_Core/13_ComplexShader.hpp"
 #include "01_Core/14_BasicLighting.hpp"
+#include "01_Core/15_BasicCollection.hpp"
 
 #include "02_Scene/00_BasicMaterial.hpp"
 #include "02_Scene/01_DepthMaterial.hpp"
@@ -53,7 +54,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#define MAX_EXAMPLES 27
+#define MAX_EXAMPLES 28
 
 //------------------------------------------------------------------------------
 __attribute__((__noreturn__))
@@ -82,17 +83,18 @@ static void usage(char *argv[])
   std::cout << " 15: Render a box an apply a 2D post-production effect." << std::endl;
   std::cout << " 16: Run a complex shader found on https://shaderfrog.com." << std::endl;
   std::cout << " 17: Basic light." << std::endl;
+  std::cout << " 18: Basic Collection." << std::endl;
   std::cout << "Scene Graph:" << std::endl;
-  std::cout << " 18: Display a geometry primitive with a basic material." << std::endl;
-  std::cout << " 19: Display a geometry primitive with a depth material." << std::endl;
-  std::cout << " 20: Display a geometry primitive with a normal material." << std::endl;
-  std::cout << " 21: Show different scene nodes." << std::endl;
-  std::cout << " 22: Show different way to create a scene graph." << std::endl;
-  std::cout << " 23: Show a scene graph with fog." << std::endl;
-  std::cout << " 24: Show a tree with alpha testing." << std::endl;
-  std::cout << " 25: Show a scene graph with lights." << std::endl;
+  std::cout << " 19: Display a geometry primitive with a basic material." << std::endl;
+  std::cout << " 20: Display a geometry primitive with a depth material." << std::endl;
+  std::cout << " 21: Display a geometry primitive with a normal material." << std::endl;
+  std::cout << " 22: Show different scene nodes." << std::endl;
+  std::cout << " 23: Show different way to create a scene graph." << std::endl;
+  std::cout << " 24: Show a scene graph with fog." << std::endl;
+  std::cout << " 25: Show a tree with alpha testing." << std::endl;
+  std::cout << " 26: Show a scene graph with lights." << std::endl;
   std::cout << "Examples from ThreeJs:" << std::endl;
-  std::cout << " 26: Cones pointing to a moving cube." << std::endl;
+  std::cout << " 27: Cones pointing to a moving cube." << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -193,30 +195,33 @@ int main(int argc, char *argv[])
           win = std::make_unique<BasicLighting>();
           break;
         case 18:
-          win = std::make_unique<ShapeBasicMaterial>();
+          win = std::make_unique<BasicCollection>();
           break;
         case 19:
-          win = std::make_unique<ShapeDepthMaterial>();
+          win = std::make_unique<ShapeBasicMaterial>();
           break;
         case 20:
-          win = std::make_unique<ShapeNormalsMaterial>();
+          win = std::make_unique<ShapeDepthMaterial>();
           break;
         case 21:
-          win = std::make_unique<SceneNodes>();
+          win = std::make_unique<ShapeNormalsMaterial>();
           break;
         case 22:
-          win = std::make_unique<RobotsSceneGraph>();
+          win = std::make_unique<SceneNodes>();
           break;
         case 23:
-          win = std::make_unique<SceneFog>();
+          win = std::make_unique<RobotsSceneGraph>();
           break;
         case 24:
+          win = std::make_unique<SceneFog>();
+          break;
+        case 25:
           win = std::make_unique<AlphaTest>();
           break;
-          /*case 25:
+          /*case 26:
           win = std::make_unique<SceneLight>();
           break;*/
-        case 26:
+        case 27:
           win = std::make_unique<MiscLookAt>();
           break;
         default:

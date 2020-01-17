@@ -45,10 +45,17 @@ class GLTexture1D: public GLTexture
 public:
 
   //----------------------------------------------------------------------------
-  //! \brief
+  //! \brief Constructor.
+  //!
+  //! Give a name to the instance. This constructor makes no other actions.
+  //!
+  //! \param name the sampler name used inside sader code. This name will be
+  //! used by GLProgram and GLVAO. Please do not give the name or path of the
+  //! picture file (jpeg, tga ...) but the sampler name! Path will be given
+  //! thought the method load().
   //----------------------------------------------------------------------------
   GLTexture1D(std::string const& name)
-    : GLTexture(1u, name, GL_TEXTURE_1D)
+    : GLTexture(1u, name, GL_TEXTURE_1D, CPUPixelFormat::RGBA, GPUPixelFormat::RGBA)
   {}
 
 private:
@@ -69,7 +76,7 @@ private:
                          static_cast<GLsizei>(m_width),
                          0,
                          static_cast<GLenum>(m_cpuPixelFormat),
-                         static_cast<GLenum>(m_options.pixelType),
+                         static_cast<GLenum>(m_cpuPixelType),
                          nullptr));
     applyTextureParam();
     return false;
@@ -94,7 +101,7 @@ private:
     glCheck(glBindTexture(m_target, m_handle));
     glCheck(glTexSubImage1D(m_target, 0, x, width,
                             static_cast<GLenum>(m_cpuPixelFormat),
-                            static_cast<GLenum>(m_options.pixelType),
+                            static_cast<GLenum>(m_cpuPixelType),
                             m_buffer.to_array()));
 
     m_buffer.clearPending();
