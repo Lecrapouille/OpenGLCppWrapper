@@ -2,8 +2,9 @@
 
 ## What is OpenGLCppWrapper Library ?
 
-OpenGLCppWrapper is a C++11 wrapper for writing OpenGL `Core Profile`
-applications in few lines of code.
+[OpenGLCppWrapper](https://github.com/Lecrapouille/OpenGLCppWrapper) is a
+C++11 wrapper for writing OpenGL `Core Profile` applications in few lines of
+code.
 
 **Warning:** Do not confuse Core Profile OpenGL (>= 2.2) with Legacy OpenGL (<=
 2.1). This API does not manage OpenGL Legacy but manages OpenGL version 3.3.
