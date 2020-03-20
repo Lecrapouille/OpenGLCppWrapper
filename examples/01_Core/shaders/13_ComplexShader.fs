@@ -15,7 +15,7 @@
 precision highp float;
 precision highp int;
 
-varying vec2 vUv;
+in vec2 vUv;
 
 uniform vec3 color;
 uniform float time;
@@ -24,7 +24,7 @@ uniform float speed;
  
 uniform float brightness;
 uniform float distfading;
- 
+out vec4 FragColor;
 
 #define PI 3.141592653589793238462643383279
 
@@ -71,6 +71,5 @@ void main( void ) {
  
     // Motion blur; increases temporal coherence of undersampled flickering stars
     // and provides temporal filtering under true motion.  
-    gl_FragColor = vec4( starColor * color, 1.0 );
+    FragColor = vec4( starColor * color, 1.0 );
 }
-

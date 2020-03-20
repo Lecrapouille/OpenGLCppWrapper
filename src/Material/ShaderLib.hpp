@@ -45,9 +45,13 @@ namespace glwrap
 #if defined(GLES)
         return "precision highp float;\n#version 330\n\n";
 #elif defined(__APPLE__)
-        return "#version 330\n\n";
+        return
+          "#version 330\n\n"
+          "out vec4 FragColor;\n";
 #else
-        return "#version 330\n\n";
+        return
+          "#version 330\n\n"
+          "out vec4 FragColor;\n";
 #endif
       }
 
@@ -101,7 +105,7 @@ namespace glwrap
           if (config.useColor)
             return
               "  // Color\n"
-              "  gl_FragColor = gl_FragColor * vec4(vColor, opacity);\n";
+              "  FragColor = FragColor * vec4(vColor, opacity);\n";
           return "";
         }
       } // namespace fragment
@@ -180,10 +184,10 @@ namespace glwrap
                 "  // Texture + Gamma input\n"
                 "  vec4 texelColor = texture2D(texture, vUV);\n"
                 "  texelColor.xyz *= texelColor.xyz;\n"
-                "  gl_FragColor = gl_FragColor * texelColor;\n";
+                "  FragColor = FragColor * texelColor;\n";
             return
               "  // Texture\n"
-              "  gl_FragColor = gl_FragColor * texture2D(texture, vUV);\n";
+              "  FragColor = FragColor * texture2D(texture, vUV);\n";
           }
           return "";
         }
@@ -254,7 +258,7 @@ namespace glwrap
               "  // Fog\n"
               "  float depth = gl_FragCoord.z / gl_FragCoord.w;\n"
               "  float fogFactor = smoothstep(fogNear, fogFar, depth);\n"
-              "  gl_FragColor = mix(gl_FragColor, vec4(fogColor, gl_FragColor.w), fogFactor);\n";
+              "  FragColor = mix(FragColor, vec4(fogColor, FragColor.w), fogFactor);\n";
 
           if (config.useExpFog)
             return
@@ -262,7 +266,7 @@ namespace glwrap
               "  float depth = gl_FragCoord.z / gl_FragCoord.w;\n"
               "  float fogFactor = exp2(-fogDensity * fogDensity * depth * depth * LOG2);\n"
               "  fogFactor = 1.0 - clamp(fogFactor, 0.0, 1.0);\n"
-              "  gl_FragColor = mix(gl_FragColor, vec4(fogColor, gl_FragColor.w), fogFactor);\n";
+              "  FragColor = mix(FragColor, vec4(fogColor, FragColor.w), fogFactor);\n";
 
           return "";
         }
@@ -371,7 +375,7 @@ namespace glwrap
           if (config.useAlphaTest)
             return
               "  // Alpha test\n"
-              "  if (gl_FragColor.a < ALPHATEST) discard;\n";
+              "  if (FragColor.a < ALPHATEST) discard;\n";
           return "";
         }
       } // namespace fragment
@@ -387,7 +391,7 @@ namespace glwrap
           if (config.useGammaOutput)
             return
               "  // Gamma\n"
-              "  gl_FragColor.xyz = sqrt(gl_FragColor.xyz);\n";
+              "  FragColor.xyz = sqrt(FragColor.xyz);\n";
           return "";
         }
       } // namespace fragment
@@ -417,7 +421,7 @@ namespace glwrap
       << "\nvoid main()\n{\n"
       << "  float depth = gl_FragCoord.z / gl_FragCoord.w;\n"
       << "  float color = 1.0 - smoothstep(near, far, depth);\n"
-      << "  gl_FragColor = vec4(vec3(color), opacity);\n"
+      << "  FragColor = vec4(vec3(color), opacity);\n"
       << "}\n";
   }
 
@@ -443,7 +447,7 @@ namespace glwrap
       << "uniform float opacity;\n"
       << "in vec3 vNormal;\n"
       << "\nvoid main()\n{\n"
-      << "  gl_FragColor = vec4(0.5 * normalize(vNormal) + 0.5, opacity);\n"
+      << "  FragColor = vec4(0.5 * normalize(vNormal) + 0.5, opacity);\n"
       << "}\n";
   }
 
@@ -482,7 +486,7 @@ namespace glwrap
       << shaders::shadow::fragment::params(config)
       << shaders::specular::fragment::params(config)
       << "\nvoid main()\n{\n"
-      << "  gl_FragColor = vec4(diffuse, opacity);\n"
+      << "  FragColor = vec4(diffuse, opacity);\n"
       << shaders::texture::fragment::code(config)
       << shaders::alpha::fragment::code(config)
       << shaders::light::fragment::code(config)
@@ -515,7 +519,7 @@ namespace glwrap
       << shaders::common::version()
       << "in vec4 vColors;\n"
       << "\nvoid main()\n{\n"
-      << "  gl_FragColor = vColors;\n"
+      << "  FragColor = vColors;\n"
       << "}\n";
   }
 
