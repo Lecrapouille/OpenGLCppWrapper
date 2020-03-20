@@ -313,10 +313,13 @@ public:
         getFailedShaders(shaders);
         for (auto& it: shaders)
           {
-            msg += ' ';
+            msg += "  - ";
             msg += it->name();
+            if (!it->path().empty())
+                msg += " (" + it->path() + ")";
+            msg += '\n';
           }
-        msg += "\nReason was:\n";
+        msg += "Reason was:\n";
         msg += m_error_msg;
       }
 
@@ -1068,7 +1071,7 @@ private:
             it->begin();
             if (it->hasErrored())
               {
-                std::string msg = " " + it->name() + ":\n   " + it->getError();
+                std::string msg = "  - " + it->name() + ":\n" + it->getError();
                 concatError(msg);
                 failure = true;
               }

@@ -344,11 +344,14 @@ namespace glwrap
     //----------------------------------------------------------------------------
     virtual void release() = 0;
 
-  private:
+  protected:
 
     //! \brief Object name used as the same time as a key for lookup tables and
     //! for debuging (logs, ...)
     std::string m_name;
+
+  private:
+
     //! \brief hold the information if the OpenGL object has to do its setup.
     bool m_need_setup;
     //! \brief hold the information if the OpenGL object has to be created.

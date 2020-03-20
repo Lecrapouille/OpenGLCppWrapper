@@ -86,6 +86,7 @@ public:
   bool fromString(std::string const& script)
   {
     throw_if_already_compiled();
+    m_path.clear();
     m_shader_code = script;
     DEBUG("From script '%s' %s: '%s'", cname(), type(), m_shader_code.c_str());
     return true;
@@ -129,6 +130,7 @@ public:
     std::string msg;
     std::ifstream infile;
 
+    m_path = path;
     infile.open(path, std::ifstream::in);
     if (infile.fail())
       {
@@ -213,6 +215,11 @@ l_error:
   inline bool loaded() const
   {
     return !m_shader_code.empty();
+  }
+
+  inline std::string const& path() const
+  {
+    return m_path;
   }
 
 private:
@@ -331,7 +338,11 @@ private:
         std::vector<char> log(static_cast<size_t>(length));
         glCheck(glGetShaderInfoLog(obj, length - 1, &length, &log[0U]));
         concatError(&log[0U]);
-        ERROR("Failed compiling '%s'. Reason was '%s'", cname(), m_error_msg.c_str());
+        std::string path;
+        if (!m_path.empty())
+            path = " (" + m_path + ")";
+        ERROR("Failed compiling '%s'%s. Reason was '%s'", cname(), path.c_str(),
+              m_error_msg.c_str());
       }
     else
       {
@@ -352,7 +363,7 @@ private:
   {
     if (unlikely(!needSetup()))
       {
-        throw OpenGLException("Failed Shader already compiled");
+        throw OpenGLException("Shader already compiled");
       }
   }
 
@@ -372,9 +383,15 @@ private:
 
 private:
 
+  //! \brief Hold the code source of the shader
   std::string m_shader_code;
+  //! \brief Hold error messages
   std::string m_error_msg;
+  //! \brief Hold the file path (when shader is loaded from a file)
+  std::string m_path;
+  //! \brief Compiled with success?
   bool m_compiled = false;
+  //! \brief GLProgram bound to this shader
   GLenum m_attached = 0;
 };
 
