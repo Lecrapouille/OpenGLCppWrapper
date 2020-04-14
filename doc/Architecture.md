@@ -70,7 +70,7 @@ ColorBuffer or StencilBuffer (for cutting regions of the scene).
 The following table allows to understand that OpenGL routines for any
 kind of OpenGL objects (VAO, VBO ...) can be grouped into six main
 functions: creation/relase, activation/deactivation, setup/update.
-[Click here](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/CodeSheet.txt)
+[Click here](CodeSheet.txt)
 to see in raw format the table.
 
 |              | create()             | setup()                                       | activate()                                       | update()        | deactivate()               | release()                      | handle   | target                                                   |
@@ -121,7 +121,7 @@ to implement all of these methods.
 
 The following picture shows the inheritance of OpenGL classes.
 
-![alt tag](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/uml/opengl_inhe.png)
+![alt tag](uml/opengl_inhe.png)
 
 The table is a summary of which OpenGL functions is called by the
 concrete methods (implementation). For example the setup for Program
@@ -264,7 +264,7 @@ The following picture summarizes the composition of OpenGL classes
 described in steps seen previously. The Client is the class
 representing your application.
 
-![alt tag](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/uml/opengl_compo.png)
+![alt tag](uml/opengl_compo.png)
 
 ## VBO attributes offset and stride
 

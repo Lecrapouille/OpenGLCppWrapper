@@ -47,7 +47,7 @@ changing the background color.
 ## 01_Core
 
 All examples in this section follow the guiding line explained in the document
-[tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/tutorials/Core.md). For
+[tutorials](../doc/tutorials/Core.md). For
 summarizing it:
 
 Initialization phase:
