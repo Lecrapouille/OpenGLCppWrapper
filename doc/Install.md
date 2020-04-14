@@ -145,6 +145,8 @@ Example with a simple file main.cpp:
 g++ -W -Wall --std=c++11 main.cpp -o prog `pkg-config openglcppwrapper --cflags --libs`
 ```
 
+Example with Makefile given in [../tests/BasicProject](../tests/BasicProject)
+
 ### What code to write in my project ?
 
 * [Tutorials](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/tutorials/Core.md)
