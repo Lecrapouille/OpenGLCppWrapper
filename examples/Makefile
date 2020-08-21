@@ -29,7 +29,7 @@ M=$(P)/.makefile
 #
 TARGET = OpenGLExamples
 DESCRIPTION = Unit tests for $(PROJECT)
-BUILD_TYPE = debug
+BUILD_TYPE = release
 
 include $(P)/Makefile.common
 

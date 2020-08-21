@@ -28,6 +28,7 @@
 #  define OPENGLCPPWRAPPER_GLTEXTURE3D_HPP
 
 #  include "OpenGL/Texture2D.hpp"
+#  include <array>
 
 // *****************************************************************************
 //! \file GLTexture3D.hpp file implements:
