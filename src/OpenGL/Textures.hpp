@@ -38,21 +38,12 @@
 
 #  include "OpenGL/GLObject.hpp"
 #  include "Common/PendingContainer.hpp"
-#  include "external/SOIL/SOIL.h"
-#  include <array>
 
 namespace glwrap
 {
 
 //! \brief Internal format storing texture data
 using TextureData = PendingContainer<unsigned char>;
-
-//! \brief Texture Pixel Format.
-enum class PixelLoadFormat : GLenum
-  {
-    /* 3 */ LOAD_RGB = SOIL_LOAD_RGB,
-    /* 4 */ LOAD_RGBA = SOIL_LOAD_RGBA,
-  };
 
 // *****************************************************************************
 //! \brief Default options for textures when setup.
@@ -64,14 +55,12 @@ struct TextureOptions
   TextureWrap wrapS = TextureWrap::REPEAT;
   TextureWrap wrapT = TextureWrap::REPEAT;
   TextureWrap wrapR = TextureWrap::REPEAT;
-  PixelFormat cpuPixelFormat = PixelFormat::RGBA; // FIXME can be in conflict with SOIL_LOAD_xxx
-  PixelFormat gpuPixelFormat = PixelFormat::RGBA;
   PixelType pixelType = PixelType::UNSIGNED_BYTE;
   bool generateMipmaps = false;
 };
 
 //! \brief Used by GLVAO
-DECLARE_CLASS(IGLTexture)
+DECLARE_CLASS(GLTexture);
 
 // *****************************************************************************
 //! \brief Generic Texture.
@@ -82,7 +71,7 @@ DECLARE_CLASS(IGLTexture)
 //! Shader, or it can be used as a render target (FrameBuffer). A
 //! texture can be of dimension 1, 2 or 3.
 // *****************************************************************************
-class IGLTexture
+class GLTexture
   : public GLObject<GLenum>
 {
 public:
@@ -97,18 +86,18 @@ public:
   //! \param name the name of this instance used by GLProgram and GLVAO.
   //! \param target the texture type (GL_TEXTURE_1D .. GL_TEXTURE_3D ...)
   //----------------------------------------------------------------------------
-  IGLTexture(const uint8_t dimension, std::string const& name, const GLenum target)
+  GLTexture(const uint8_t dimension, std::string const& name, const GLenum target)
     : GLObject(name),
+      m_buffer(name),
       m_dimension(dimension)
   {
     m_target = target;
-    m_buffer.setDebugName(name);
   }
 
   //----------------------------------------------------------------------------
   //! \brief Destructor. Release elements in CPU and GPU memories.
   //----------------------------------------------------------------------------
-  virtual ~IGLTexture()
+  virtual ~GLTexture()
   {
     destroy();
   }
@@ -146,7 +135,7 @@ public:
   //! \brief Change minifier and magnifier options.
   //! \return the reference of this instence.
   //----------------------------------------------------------------------------
-  IGLTexture& interpolation(TextureMinFilter const min_filter,
+  GLTexture& interpolation(TextureMinFilter const min_filter,
                             TextureMagFilter const mag_filter)
   {
     m_options.minFilter = min_filter;
@@ -159,7 +148,7 @@ public:
   //! \brief Change wrapping options for S, T and R.
   //! \return the reference of this instence.
   //----------------------------------------------------------------------------
-  IGLTexture& wrap(TextureWrap const wrap)
+  GLTexture& wrap(TextureWrap const wrap)
   {
     m_options.wrapS = wrap;
     m_options.wrapT = wrap;
@@ -172,7 +161,7 @@ public:
   //! \brief Change wrapping options for S, T and R.
   //! \return the reference of this instence.
   //----------------------------------------------------------------------------
-  IGLTexture& wrapSTR(TextureWrap const wrapS, TextureWrap const wrapT, TextureWrap const wrapR)
+  GLTexture& wrapSTR(TextureWrap const wrapS, TextureWrap const wrapT, TextureWrap const wrapR)
   {
     m_options.wrapS = wrapS;
     m_options.wrapT = wrapT;
@@ -185,7 +174,7 @@ public:
   //! \brief Replace current texture settings by a new one.
   //! \return the reference of this instence.
   //----------------------------------------------------------------------------
-  IGLTexture& options(TextureOptions const& options)
+  GLTexture& options(TextureOptions const& options)
   {
     m_options = options;
     return *this;
@@ -310,6 +299,12 @@ protected:
   uint32_t       m_height = 0;
   //! \brief For Texture3D, TextureCube
   uint8_t        m_depth = 0u;
+  //! \brief Desired format of texture once loaded from the picture file (CPU
+  //! side).  \note Beware all format are not supported by loaders: ie SOIL only
+  //! manages RGB, RGBA, luminance greyscale and luminance with alpha.
+  PixelFormat    m_cpuPixelFormat = PixelFormat::RGBA;
+  //! \brief Desired format of texture once loaded into the GPU.
+  PixelFormat    m_gpuPixelFormat = PixelFormat::RGBA;
 
 private:
 
@@ -318,9 +313,5 @@ private:
 };
 
 } // namespace glwrap
-
-//#  include "OpenGL/Texture1D.hpp"
-//#  include "OpenGL/Texture2D.hpp"
-//#  include "OpenGL/Texture3D.hpp"
 
 #endif // OPENGLCPPWRAPPER_GLTEXTURES_HPP

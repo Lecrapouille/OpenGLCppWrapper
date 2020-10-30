@@ -26,6 +26,7 @@
 #  include <cassert>
 #  include <cmath>
 #  include <limits>
+#  include <random>
 
 namespace glwrap
 {
@@ -37,11 +38,45 @@ namespace glwrap
     //! \brief Allow to redefine neutral and/or absorbing element in algebra.
     template<typename T> T zero() { return T(0); }
 
-    //! \brief PI number
-    static double PI = 3.14159265358979323846;
+    //! \brief
+    template<typename T> T inf() { return std::numeric_limits<T>::max(); }
 
     //! \brief
-    static uint32_t maxUlps = 4U;
+    template<typename T> T nan() { return std::numeric_limits<T>::quiet_NaN(); }
+
+     //! \brief
+    template<typename T> bool isNan(T const& x) { return std::isnan(x); }
+
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wunused-const-variable"
+
+    //! \brief PI number
+    static double const PI = 3.14159265358979323846;
+    static double const HALF_PI = 0.5 * PI;
+    static double const TWO_PI = 2.0 * PI;
+    static double const LN2 = 0.6931471805599453094;
+
+#   pragma GCC diagnostic pop
+
+    static inline bool isPowerOfTwo(int const value)
+    {
+      return (value != 0) && ((value & (value - 1)) == 0);
+    }
+
+    static inline int upperPowerOfTwo(int const value)
+    {
+      return static_cast<int>(std::pow(2.0f, std::ceil(std::log(static_cast<float>(value)) / LN2)));
+    }
+
+    static inline int lowerPowerOfTwo(int const value)
+    {
+      return static_cast<int>(std::pow(2.0f, std::floor(std::log(static_cast<float>(value)) / LN2)));
+    }
+
+    static inline int nearestPowerOfTwo(int const value)
+    {
+      return static_cast<int>(std::pow(2.0f, std::round(std::log(static_cast<float>(value)) / LN2)));
+    }
 
     template<typename T>
     static inline T abs(T const x)
@@ -75,12 +110,38 @@ namespace glwrap
       return ::sqrt(x);
     }
 
+    //! \brief Produce random T-typed values, uniformly distributed on the
+    //! interval [low, high[. If no parameters is given and T is not given then
+    //! produce uniformly double-typed values distributed on the interval [0, 1[.
+    template<typename T>
+    inline typename std::enable_if<std::is_floating_point<T>::value,T>::type
+    random(T const low = zero<T>(), T const high = one<T>())
+    {
+      // FIXME: not generated in case of fork()
+      static std::random_device rd;
+      static std::mt19937 rng(rd());
+      std::uniform_real_distribution<T> dis(low, high);
+      return dis(rng);
+    }
+
+    //! \brief Random integer-typed values, uniformly distributed on the
+    //! interval [low, high].
+    template<typename T>
+    inline typename std::enable_if<std::is_integral<T>::value && !std::is_floating_point<T>::value, T>::type
+    random(T const low = zero<T>(), T const high = one<T>())
+    {
+      return low + static_cast<T>(::floor(maths::random<float>() * static_cast<float>(high - low + 1)));
+    }
+
 #   pragma GCC diagnostic push
 #   pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #   pragma GCC diagnostic ignored "-Wfloat-equal"
 #   pragma GCC diagnostic ignored "-Wold-style-cast"
 #   pragma GCC diagnostic ignored "-Wcast-qual"
 #   pragma GCC diagnostic ignored "-Wsign-conversion"
+
+    //! \brief
+    static uint32_t maxUlps = 4U;
 
     static inline bool almostEqual(float const A, float const B)
     {
@@ -261,6 +322,26 @@ namespace glwrap
           result.push_back(end);
         }
       return delta;
+    }
+
+    template<typename T>
+    T smoothstep(T const x, T const min, T const max)
+    {
+      if (x <= min) return zero<T>();
+      if (x >= max) return one<T>();
+
+      x = (x - min) / (max - min);
+      return x * x * (T(3) - T(2) * x);
+    }
+
+    template<typename T>
+    T smootherstep(T const x, T const min, T const max)
+    {
+      if (x <= min) return zero<T>();
+      if (x >= max) return one<T>();
+
+      x = (x - min) / (max - min);
+      return x * x * x * (x * (x * T(6) - T(15)) + T(10));
     }
   } // namespace maths
 } // namespace glwrap

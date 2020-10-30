@@ -34,7 +34,7 @@ namespace glwrap
 {
 
 //! \brief Used by GLVAO
-DECLARE_CLASS(IGLBuffer)
+DECLARE_CLASS(IGLBuffer);
 
 // **************************************************************
 //! \brief Intermediate class needed by GLVAO for checking VBOs
@@ -70,22 +70,21 @@ public:
 
   //! \brief Constructor with the object name
   explicit GLBuffer(std::string const& name, GLenum const target, BufferUsage const usage)
-    : IGLBuffer(name)
+    : IGLBuffer(name),
+      PendingContainer<T>(name)
   {
     GLObject::m_target = target;
     m_usage = static_cast<GLenum>(usage);
-    PendingContainer<T>::setDebugName(name);
   }
 
   //! \brief Constructor with the object name and reserved number of
   //! elements.
   explicit GLBuffer(std::string const& name, GLenum const target, size_t const init_size, BufferUsage const usage)
     : IGLBuffer(name),
-      PendingContainer<T>(init_size)
+      PendingContainer<T>(name, init_size)
   {
     GLObject::m_target = target;
     m_usage = static_cast<GLenum>(usage);
-    PendingContainer<T>::setDebugName(name);
   }
 
   virtual ~GLBuffer() override

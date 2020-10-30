@@ -1,0 +1,49 @@
+      //  X     Y     Z
+
+      // bottom
+      Vector3f(-0.5f,-0.5f,-0.5f),
+      Vector3f( 0.5f,-0.5f,-0.5f),
+      Vector3f(-0.5f,-0.5f, 0.5f),
+      Vector3f( 0.5f,-0.5f,-0.5f),
+      Vector3f( 0.5f,-0.5f, 0.5f),
+      Vector3f(-0.5f,-0.5f, 0.5f),
+
+      // top
+      Vector3f(-0.5f, 0.5f,-0.5f),
+      Vector3f(-0.5f, 0.5f, 0.5f),
+      Vector3f( 0.5f, 0.5f,-0.5f),
+      Vector3f( 0.5f, 0.5f,-0.5f),
+      Vector3f(-0.5f, 0.5f, 0.5f),
+      Vector3f( 0.5f, 0.5f, 0.5f),
+
+      // front
+      Vector3f(-0.5f,-0.5f, 0.5f),
+      Vector3f( 0.5f,-0.5f, 0.5f),
+      Vector3f(-0.5f, 0.5f, 0.5f),
+      Vector3f( 0.5f,-0.5f, 0.5f),
+      Vector3f( 0.5f, 0.5f, 0.5f),
+      Vector3f(-0.5f, 0.5f, 0.5f),
+
+      // back
+      Vector3f(-0.5f,-0.5f,-0.5f),
+      Vector3f(-0.5f, 0.5f,-0.5f),
+      Vector3f( 0.5f,-0.5f,-0.5f),
+      Vector3f( 0.5f,-0.5f,-0.5f),
+      Vector3f(-0.5f, 0.5f,-0.5f),
+      Vector3f( 0.5f, 0.5f,-0.5f),
+
+      // left
+      Vector3f(-0.5f,-0.5f, 0.5f),
+      Vector3f(-0.5f, 0.5f,-0.5f),
+      Vector3f(-0.5f,-0.5f,-0.5f),
+      Vector3f(-0.5f,-0.5f, 0.5f),
+      Vector3f(-0.5f, 0.5f, 0.5f),
+      Vector3f(-0.5f, 0.5f,-0.5f),
+
+      // right
+      Vector3f(0.5f,-0.5f, 0.5f),
+      Vector3f(0.5f,-0.5f,-0.5f),
+      Vector3f(0.5f, 0.5f,-0.5f),
+      Vector3f(0.5f,-0.5f, 0.5f),
+      Vector3f(0.5f, 0.5f,-0.5f),
+      Vector3f(0.5f, 0.5f, 0.5f)

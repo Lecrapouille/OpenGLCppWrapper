@@ -37,18 +37,41 @@ IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
 //----------------------------------------------------------------------------
 static std::atomic<bool> OpenGLContextCreated{false};
 
+//----------------------------------------------------------------------------
 bool isContextCreated()
 {
   DEBUG("OpenGL Context >>>>>>>>>>>>>>>>>>>>>>>>>>>>> %u", OpenGLContextCreated.load());
   return OpenGLContextCreated;
 }
 
+//----------------------------------------------------------------------------
 void setContextCreated(bool const v)
 {
   OpenGLContextCreated.store(v);
   DEBUG("OpenGL Context <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< %u", OpenGLContextCreated.load());
 }
 
+//----------------------------------------------------------------------------
+void throwIfNoOpenGLContext(std::string const& msg)
+{
+  if (unlikely(!isContextCreated()))
+    throw OpenGLException("OpenGL Context is not yet created. " + msg);
+}
+
+//----------------------------------------------------------------------------
+void throwIfNoOpenGLContext()
+{
+  if (unlikely(!isContextCreated()))
+    throw OpenGLException("OpenGL Context is not yet created");
+}
+
+//----------------------------------------------------------------------------
+void throwIfOpenGLClassCalledBeforeContext()
+{
+  throwIfNoOpenGLContext("Make this instance called after GLWindow constructor");
+}
+
+//----------------------------------------------------------------------------
 void checkError(const char* filename, const uint32_t line, const char* expression)
 {
   GLenum id;
@@ -81,7 +104,7 @@ void checkError(const char* filename, const uint32_t line, const char* expressio
       // Do not use directly LOG macros because it will catch this
       // filename and its line instead of the faulty file/line which
       // produced the OpenGL error.
-      errout(stderr, "GLERR", filename, line, "Failed executing '%s'. Reason is '%s'",
+      errout(stderr, "GLERR:", filename, line, "Failed executing '%s'. Reason is '%s'",
              expression, error);
     }
 }

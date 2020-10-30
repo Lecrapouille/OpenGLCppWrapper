@@ -1,138 +1,114 @@
-// Copyright https://learnopengl.com
+//=====================================================================
+// OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of OpenGLCppWrapper.
+//
+// OpenGLCppWrapper is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
 
-#ifndef CAMERA_H
-#define CAMERA_H
+#ifndef OPENGLCPPWRAPPER_CAMERA_HPP
+#  define OPENGLCPPWRAPPER_CAMERA_HPP
 
-#include "Scene/Transformation.hpp"
+#  include "Scene/Node.hpp"
 
-using namespace glwrap;
-
-// Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
-enum class Camera_Movement {
-    FORWARD,
-    BACKWARD,
-    LEFT,
-    RIGHT
-};
-
-// Default camera values
-const float YAW         = -90.0f;
-const float PITCH       =  0.0f;
-const float SPEED       =  2.5f;
-const float SENSITIVITY =  0.1f;
-const float ZOOM        =  45.0f;
-
-
-// An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
-class Camera
+namespace glwrap
 {
-public:
-    // Camera Attributes
-    Vector3f Position;
-    Vector3f Front;
-    Vector3f Up;
-    Vector3f Right;
-    Vector3f WorldUp;
-    // Euler Angles
-    float Yaw;
-    float Pitch;
-    // Camera options
-    float MovementSpeed;
-    float MouseSensitivity;
-    float Zoom;
 
-    // Constructor with vectors
-    Camera(Vector3f position = Vector3f(0.0f, 0.0f, 0.0f), Vector3f up = Vector3f(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(Vector3f(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
-    {
-        Position = position;
-        WorldUp = up;
-        Yaw = yaw;
-        Pitch = pitch;
-        updateCameraVectors();
-    }
-    // Constructor with scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(Vector3f(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
-    {
-        Position = Vector3f(posX, posY, posZ);
-        WorldUp = Vector3f(upX, upY, upZ);
-        Yaw = yaw;
-        Pitch = pitch;
-        updateCameraVectors();
-    }
+  //! \brief Used by CameraController and SceneGraph
+  DECLARE_CLASS(Camera3D);
 
-    // Returns the view matrix calculated using Euler Angles and the LookAt Matrix
-    Matrix44f GetViewMatrix()
-    {
-        return matrix::lookAt(Position, Position + Front, Up);
-    }
-
-    // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void ProcessKeyboard(Camera_Movement direction, float deltaTime)
-    {
-        float velocity = MovementSpeed * deltaTime;
-        if (direction == Camera_Movement::FORWARD)
-            Position += Front * velocity;
-        if (direction == Camera_Movement::BACKWARD)
-            Position -= Front * velocity;
-        if (direction == Camera_Movement::LEFT)
-            Position -= Right * velocity;
-        if (direction == Camera_Movement::RIGHT)
-            Position += Right * velocity;
-    }
-
-    // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true)
-    {
-        xoffset *= MouseSensitivity;
-        yoffset *= MouseSensitivity;
-
-        Yaw   += xoffset;
-        Pitch += yoffset;
-
-        // Make sure that when pitch is out of bounds, screen doesn't get flipped
-        if (constrainPitch)
-        {
-            if (Pitch > 89.0f)
-                Pitch = 89.0f;
-            if (Pitch < -89.0f)
-                Pitch = -89.0f;
-        }
-
-        // Update Front, Right and Up Vectors using the updated Euler angles
-        updateCameraVectors();
-    }
-
-    // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
-    void ProcessMouseScroll(float yoffset)
-    {
-        if (Zoom >= 1.0f && Zoom <= 45.0f)
-            Zoom -= yoffset;
-        if (Zoom <= 1.0f)
-            Zoom = 1.0f;
-        if (Zoom >= 45.0f)
-            Zoom = 45.0f;
-    }
-
-private:
-
-  inline float radians(float const degrees)
+  // *****************************************************************************
+  //! \brief
+  // *****************************************************************************
+  class Camera3D: public Node3D
   {
-    return degrees * 0.0174532925f;
-  }
+    friend class CameraController;
 
-    // Calculates the front vector from the Camera's (updated) Euler Angles
-    void updateCameraVectors()
+  public:
+
+    enum class Type { ORTHOGRAPHIC, PERSPECTIVE };
+
+    //----------------------------------------------------------------------------
+    //! \brief
+    //----------------------------------------------------------------------------
+    Camera3D(Type const type, std::string const& name = "camera")
+      : Node3D(name, false),
+        m_type(type)
     {
-        // Calculate the new Front vector
-        Vector3f f;
-        f.x = cosf(radians(Yaw)) * cosf(radians(Pitch));
-        f.y = sinf(radians(Pitch));
-        f.z = sinf(radians(Yaw)) * cosf(radians(Pitch));
-        Front = vector::normalize(f);
-        // Also re-calculate the Right and Up vector
-        Right = vector::normalize(vector::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-        Up    = vector::normalize(vector::cross(Right, Front));
+      m_position = Vector3f::UNIT_SCALE;
     }
-};
 
-#endif
+    //----------------------------------------------------------------------------
+    //! \brief
+    //----------------------------------------------------------------------------
+    virtual ~Camera3D()
+    {}
+
+    //----------------------------------------------------------------------------
+    //! \brief
+    //----------------------------------------------------------------------------
+    inline Type type() const
+    {
+      return m_type;
+    }
+
+    //----------------------------------------------------------------------------
+    //! \brief Get projection matrix.
+    //----------------------------------------------------------------------------
+    inline Matrix44f const& projectionMatrix() const
+    {
+      return m_projection;
+    }
+
+    //----------------------------------------------------------------------------
+    //! \brief Get view transformation matrix according to camera position and
+    //! orientation.
+    //----------------------------------------------------------------------------
+    inline Matrix44f const& viewMatrix() const
+    {
+      return m_view;
+    }
+
+    //----------------------------------------------------------------------------
+    //! \brief
+    //----------------------------------------------------------------------------
+    virtual Matrix44f const& updateProjectionMatrix(float const width, float const height) = 0;
+
+    //----------------------------------------------------------------------------
+    //! \brief Update projection matrix from current viewport dimensions, should
+    //! be called if window has been resized.
+    //----------------------------------------------------------------------------
+    virtual Matrix44f const& updateProjectionMatrix() = 0;
+
+    //----------------------------------------------------------------------------
+    //! \brief
+    //----------------------------------------------------------------------------
+    virtual Matrix44f const& updateViewMatrix() = 0;
+
+    //----------------------------------------------------------------------------
+    //! \brief
+    //----------------------------------------------------------------------------
+    virtual void lookAt(Vector3f const &target) = 0;
+
+    //protected:
+
+    Matrix44f m_projection;
+    Matrix44f m_view;
+    Type      m_type;
+  };
+
+} // namespace glwrap
+
+#endif // OPENGLCPPWRAPPER_CAMERA_HPP

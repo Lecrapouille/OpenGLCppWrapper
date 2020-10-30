@@ -80,8 +80,8 @@ enum class PixelFormat : GLenum
     /* 0x1906 */ ALPHA = GL_ALPHA,
     /* 0x1907 */ RGB = GL_RGB,
     /* 0x1908 */ RGBA = GL_RGBA,
-    /* 0x1909 */ LUMINANCE = GL_LUMINANCE,
-    /* 0x190A */ LUMINANCE_ALPHA = GL_LUMINANCE_ALPHA,
+    /* 0x1909 */ LUMINANCE = GL_LUMINANCE, // Greyscale
+    /* 0x190A */ LUMINANCE_ALPHA = GL_LUMINANCE_ALPHA, // Luminance with alpha
     /* 0x80E0 */ BGR = GL_BGR,
     /* 0x84F9 */ DEPTH_STENCIL = GL_DEPTH_STENCIL,
   };
@@ -92,10 +92,18 @@ enum class PixelType : GLenum
     /* 0x1401 */ UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
   };
 
+//! \brief Save texture as.
+enum class PictureFile : GLenum
+  {
+    TGA, BMP, DDS
+  };
+
 // **************************************************************
-//! GLBuffer
+// GLBuffer
 // **************************************************************
 
+//! \brief Specifies the expected usage pattern of the data store for
+//! glBufferData.
 enum class BufferUsage : GLenum
   {
     /* 0x88E0 */ STREAM_DRAW = GL_STREAM_DRAW,
@@ -103,6 +111,7 @@ enum class BufferUsage : GLenum
     /* 0x88E8 */ DYNAMIC_DRAW = GL_DYNAMIC_DRAW,
   };
 
+//! \brief Type of buffer used by frame buffers.
 enum class FrameBuffer : GLenum
   {
     /* 0x1800 */ COLOR = GL_COLOR_BUFFER_BIT,
@@ -110,6 +119,7 @@ enum class FrameBuffer : GLenum
     /* 0x1802 */ STENCIL = GL_STENCIL_BUFFER_BIT,
   };
 
+//! \brief Mode for drawing primitives (points, lines, triangles ...)
 enum class Mode : GLenum
   {
     /* 0x0000 */ POINTS = GL_POINTS,

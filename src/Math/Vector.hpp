@@ -184,9 +184,15 @@ public:
     size_t i = n;
 
     while (i--)
-      {
-        m_data[i] *= l;
-      }
+      m_data[i] *= l;
+  }
+
+  void lerpSelf(Vector<T,n> const& uv, T const alpha)
+  {
+    size_t i = n;
+
+    while (i--)
+      m_data[i] += (uv.m_data[i] - m_data[i]) * alpha;
   }
 
 protected:
@@ -609,7 +615,7 @@ DEFINE_UNARY_OPERATOR(~)
 
 DEFINE_INPLACE_OPERATORS(+=)
 DEFINE_INPLACE_OPERATORS(-=)
-DEFINE_INPLACE_OPERATORS(*=)
+DEFINE_INPLACE_OPERATORS(*=) // FIXME: now cross product
 DEFINE_INPLACE_OPERATORS(/=)
 
 DEFINE_RELATIONAL_OPERATORS(==)

@@ -2,7 +2,7 @@
 
 ## How to use this API? An explained 'Hello-world' example
 
-This section will treat on how to use this API. This is a small tutorial explaining the template for your projects. Indeed, the pseudo-C++ code shown in this tutorial will be the same for many of your 3D applications that you will make. As proof, I made numerous [examples](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md) included with the code source of this library, which follow the pseudo-code of this tutorial. My examples are greatly inspired by several OpenGL tutorials found on the internet (see their README for credits). You can compare the length of the code.
+This section will treat on how to use this API. This is a small tutorial explaining the template for your projects. Indeed, the pseudo-C++ code shown in this tutorial will be the same for many of your 3D applications that you will make. As proof, I made numerous [examples](../../examples/README.md) included with the code source of this library, which follow the pseudo-code of this tutorial. My examples are greatly inspired by several OpenGL tutorials found on the internet (see their README for credits). You can compare the length of the code.
 
 In this document, I consider that the reader has basic knowledge of modern OpenGL (which is my case). There is nothing particularly difficult with this tutorial because everything is already largely explained in the first chapters of any OpenGL tutorials foundable on the internet.
 
@@ -193,7 +193,7 @@ If you want to paint two cubes (let say for this example), you do not have to cr
 * Apply this matrix to your shader uniform matrix named "model" of the Model View Projection.
 * Draw the first cube.
 * Use again the Transformable for placing the second cube: redo the three previous steps but this time, draw the second cube (update transformable, apply a matrix to uniform, draw).
-* See my [examples](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md) directory to know how to do it concretely.
+* See my [examples](../../examples/README.md) directory to know how to do it concretely.
 
 With this method, for this example, you will save GPU memory by avoiding storing an additional VAO and all its VBOs needed for drawing a cube.
 
@@ -210,4 +210,4 @@ Not yet shown in tutorials but OpenGLCppWrapper can manage framebuffer and cubic
 * to wrap the initialization of [Dear ImGui](https://github.com/ocornut/imgui) an API for developing GUI in immediate mode (using just if then else instead of callbacks/signal-slot/observers methods like done with GTK+ or Qt).
 * to wrap OpenGL window and offers to the user the init, run-time phase and callbacks like keyboard and windows resizing.
 
-See my [examples](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/README.md) directory to know how to do it concretely.
+See my [examples](../../examples/README.md) directory to know how to do it concretely.

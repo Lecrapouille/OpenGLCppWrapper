@@ -21,7 +21,7 @@
 #ifndef OPENGLCPPWRAPPER_TRANSFORMABLE_HPP
 #  define OPENGLCPPWRAPPER_TRANSFORMABLE_HPP
 
-#  include "Scene/Transformation.hpp"
+#  include "Math/Transformation.hpp"
 
 namespace glwrap
 {
@@ -137,6 +137,8 @@ public:
   {
     m_scale = scale;
     m_transform_needs_update = true;
+
+    return *this;
   }
 
   //! \brief Get the absolute scale factors of the object.
@@ -297,6 +299,11 @@ public:
     return m_inverse_transform;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  // TODO void lookAt(Vector3f const &target);
+
 protected:
 
   //! \brief Position of the origin relative to the origin of the world.
@@ -317,6 +324,8 @@ protected:
   bool m_transform_needs_update;
   bool m_inverse_trans_needs_update;
 };
+
+using Transformable3D = Transformable<float, 3u>;
 
 } // namespace glwrap
 

@@ -118,6 +118,19 @@ static void on_mouse_button_pressed(GLFWwindow* obj, int button, int action, int
 }
 
 //------------------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------------------
+static void on_keyboard_event(GLFWwindow* obj, int key, int /*scancode*/, int action, int /*mods*/)
+{
+  assert(nullptr != obj);
+  IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
+  if (action == GLFW_PRESS)
+    window->onSetKeyAction(static_cast<size_t>(key), window::KEY_PRESS);
+  else if (action == GLFW_RELEASE)
+    window->onSetKeyAction(static_cast<size_t>(key), window::KEY_RELEASE);
+}
+
+//------------------------------------------------------------------------------
 //! \brief Static function allowing to "cast" a function pointer to
 //! a method pointer. This function is triggered when the window
 //! has been resized.
@@ -135,8 +148,11 @@ static void on_window_resized(GLFWwindow* obj, int width, int height)
 IGLWindow::IGLWindow(uint32_t const width, uint32_t const height, const char *title)
   : m_width(width),
     m_height(height),
-    m_title(title)
+    m_title(title),
+    m_lastKeys(GLFW_KEY_LAST + 1),
+    m_currentKeys(GLFW_KEY_LAST + 1)
 {
+
   DEBUG("%s", "============= OpenGL Context creation ==========================================");
 
   if (unlikely(nullptr == m_title)) { m_title = ""; }
@@ -187,9 +203,7 @@ IGLWindow::IGLWindow(uint32_t const width, uint32_t const height, const char *ti
 IGLWindow::~IGLWindow()
 {
   if (nullptr != m_main_window)
-    {
-      glfwDestroyWindow(m_main_window);
-    }
+    glfwDestroyWindow(m_main_window);
   glfwTerminate();
 }
 
@@ -249,6 +263,29 @@ void IGLWindow::computeFPS()
 }
 
 //------------------------------------------------------------------------------
+static window::Event operator&(window::Event lhs, window::Event rhs)
+{
+  return static_cast<window::Event>(
+        static_cast<std::underlying_type<window::Event>::type>(lhs) &
+        static_cast<std::underlying_type<window::Event>::type>(rhs));
+}
+
+//------------------------------------------------------------------------------
+// \fixme callbacksOn(Event::All) + callbacksOn(Event::None) => callbacks are
+// not removed.
+void IGLWindow::enableCallbacks(window::Event const events)
+{
+  if ((events & window::Event::MouseMove) != window::Event::None)
+    glfwSetCursorPosCallback(m_main_window, on_mouse_moved);
+  if ((events & window::Event::MouseScroll) != window::Event::None)
+    glfwSetScrollCallback(m_main_window, on_mouse_scrolled);
+  if ((events & window::Event::MouseButton) != window::Event::None)
+    glfwSetMouseButtonCallback(m_main_window, on_mouse_button_pressed);
+  if ((events & window::Event::Keyboard) != window::Event::None)
+    glfwSetKeyCallback(m_main_window, on_keyboard_event);
+}
+
+//------------------------------------------------------------------------------
 bool IGLWindow::start()
 {
   // Save the class address to "cast" function callback into a method
@@ -257,54 +294,48 @@ bool IGLWindow::start()
 
   // I/O callbacks
   glfwSetFramebufferSizeCallback(m_main_window, on_window_resized);
-  glfwSetCursorPosCallback(m_main_window, on_mouse_moved);
-  glfwSetScrollCallback(m_main_window, on_mouse_scrolled);
-  glfwSetMouseButtonCallback(m_main_window, on_mouse_button_pressed);
+
   // Ensure we can capture keyboard being pressed below
   glfwSetInputMode(m_main_window, GLFW_STICKY_KEYS, GL_TRUE);
+
+  for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
+    m_lastKeys[i] = m_currentKeys[i] = window::KEY_RELEASE;
 
   // Flush OpenGL errors before using this function on real OpenGL
   // routines else a fake error is returned on the first OpenGL
   // routines while valid.
   glCheck();
 
-  int res;
+  // Init OpenGL states of the user application
+  DEBUG("%s", "============= SETUP ============================================================");
+
   try
     {
-      // Init OpenGL states of the user application
-      DEBUG("%s", "============= SETUP ============================================================");
-      res = setup();
-      if (likely(res))
-        {
-          // Force refreshing computation made when window changed
-          onWindowSizeChanged();
-
-          // Show the estimated GPU mempry usage
-          display_gpu_memory();
-
-          // init FPS
-          m_lastTime = glfwGetTime();
-          m_lastFrameTime = m_lastTime;
-          m_fps = 0;
-
-          // Draw OpenGL scene
-          res = loop();
-        }
-      else
+      if (unlikely(!setup()))
         {
           ERROR("Failed setting-up graphics");
+          onSetupFailed();
+          return false;
         }
+
+      // Force refreshing computation made when window changed
+      onWindowSizeChanged();
     }
   catch (const OpenGLException& e)
     {
-      ERROR("Caught exception: '%s'", e.message().c_str());
-      res = false;
+      ERROR("Caught exception during setting-up graphics: '%s'",
+            e.message().c_str());
+      onSetupFailed();
+      return false;
     }
 
-  // Release the memory
-  release();
+  // init FPS
+  m_lastTime = glfwGetTime();
+  m_lastFrameTime = m_lastTime;
+  m_fps = 0;
 
-  return res;
+  // Draw OpenGL scene
+  return loop();
 }
 
 //------------------------------------------------------------------------------
@@ -313,19 +344,44 @@ bool IGLWindow::loop()
   do
     {
       DEBUG("%s", "============= LOOP =============================================================");
+
       display_gpu_memory();
       computeFPS();
-      if (likely(false == draw()))
+
+      try
         {
-          ERROR("Aborting");
+          if (likely(false == draw()))
+            {
+              ERROR("Failed drawing graphics");
+              onDrawFailed();
+              return false;
+            }
+        }
+      catch (const OpenGLException& e)
+        {
+          ERROR("Caught exception during drawing graphics: '%s'",
+                e.message().c_str());
+          onDrawFailed();
           return false;
         }
+
       // Swap buffers
       glfwSwapBuffers(m_main_window);
-      glfwPollEvents();
+
+      // Update window events (input etc)
+      {
+        glfwPollEvents();
+        const std::lock_guard<std::mutex> lock(m_mutex);
+        onKeyboardEvent();
+        for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
+          m_lastKeys[i] = m_currentKeys[i];
+      }
     }
   // Check if the ESC key was pressed or the window was closed
-  while (!keyPressed(GLFW_KEY_ESCAPE) && (0 == glfwWindowShouldClose(m_main_window)));
+  // Note: use keyPressed() not isKeyDown() because if Event::Keyboard is not we
+  // no longer can halt the window.
+  while ((GLFW_PRESS != glfwGetKey(m_main_window, GLFW_KEY_ESCAPE)) &&
+         (0 == glfwWindowShouldClose(m_main_window)));
   return true;
 }
 

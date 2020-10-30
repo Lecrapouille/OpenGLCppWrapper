@@ -72,7 +72,7 @@ class PendingContainer: public PendingData
     {}
 
     //! \brief Getter method.
-    inline operator T()
+    inline operator T() const
     {
       return m_ref.get(m_index);
     }
@@ -99,6 +99,13 @@ public:
   {}
 
   //----------------------------------------------------------------------------
+  //! \brief Constructor. Do nothing.
+  //----------------------------------------------------------------------------
+  PendingContainer(std::string const& name)
+    : m_debug(name)
+  {}
+
+  //----------------------------------------------------------------------------
   //! \brief Constructor and reserve the correct amount of elements.
   //!
   //! \note: hack! We call std::vector::reserve(count) but
@@ -106,7 +113,8 @@ public:
   //! constructor (which called resize) because we do not want, for VBOs, to
   //! transfer invalid dummy data to the GPU.
   //----------------------------------------------------------------------------
-  explicit PendingContainer(size_t const count)
+  explicit PendingContainer(std::string const& name, size_t const count)
+    : m_debug(name)
   {
     m_container.reserve(count);
     GPUMemory() += memory();
@@ -117,9 +125,10 @@ public:
   //----------------------------------------------------------------------------
   //! \brief
   //----------------------------------------------------------------------------
-  explicit PendingContainer(size_t const count, T const& val)
+  explicit PendingContainer(std::string const& name, size_t const count, T const& val)
     : PendingData(count),
-      m_container(count, val)
+      m_container(count, val),
+      m_debug(name)
   {
     GPUMemory() += memory();
     DEBUG("'%s': Reserve %zu elements of %zu bytes. GPU memory: %zu bytes",
@@ -737,11 +746,6 @@ public:
   inline std::vector<T>& data()
   {
     return m_container;
-  }
-
-  void setDebugName(std::string const& n)
-  {
-    m_debug = n;
   }
 
 protected:

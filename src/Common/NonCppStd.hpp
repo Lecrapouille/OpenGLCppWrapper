@@ -2,8 +2,34 @@
 #  define OPENGLCPPWRAPPER_NONCPPSTD_HPP
 
 #  include "Common/Verbose.hpp"
+#  include "Common/Profiler.hpp"
 #  include <cstddef>
 #  include <memory>
+
+// *****************************************************************************
+//! \brief Allows to create literal values of type std::size_t In the same way
+//! than U, LL or UL macros.
+//!
+//! Indeed size_t can be uint32_t or uint64_t depending on the architecture.
+//! \code
+//! size_t i = 42_z;
+//! \endcode
+// *****************************************************************************
+constexpr std::size_t operator "" _z (unsigned long long const n)
+{
+  return static_cast<std::size_t>(n);
+}
+
+// *****************************************************************************
+//! \brief Return the number of elements in an array.
+//! \tparam S for the size of the array.
+//! \tparam T for the type of data.
+// *****************************************************************************
+template<size_t S, typename T>
+inline size_t ARRAY_SIZE(T (&)[S])
+{
+  return S;
+}
 
 // *****************************************************************************
 //! \brief Make the class and its derived class non copyable by deleting methods
@@ -23,46 +49,6 @@ protected:
 };
 
 // *****************************************************************************
-//! \brief Allows to create literal values of type std::size_t In the same way
-//! than U, LL or UL macros.
-//!
-//! Indeed size_t can be uint32_t or uint64_t depending on the architecture.
-//! \code
-//! size_t i = 42_z;
-//! \endcode
-// *****************************************************************************
-constexpr std::size_t operator "" _z (unsigned long long const n)
-{
-  return static_cast<std::size_t>(n);
-}
-
-// *****************************************************************************
-// Enable for C++11 and Visual Studio
-// *****************************************************************************
-#  if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900)
-namespace std
-{
-  //! \brief Implement the C++14 std::make_unique for C++11
-  template<typename T, typename... Args>
-    std::unique_ptr<T> make_unique(Args&&... args)
-  {
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-  }
-}
-#  endif
-
-// *****************************************************************************
-//! \brief Return the number of elements in an array.
-//! \tparam S for the size of the array.
-//! \tparam T for the type of data.
-// *****************************************************************************
-template<size_t S, typename T>
-inline size_t ARRAY_SIZE(T (&)[S])
-{
-  return S;
-}
-
-// *****************************************************************************
 //! \brief Forward declaration of classes with shared and unique
 //! pointers:
 //! - Class
@@ -72,7 +58,98 @@ inline size_t ARRAY_SIZE(T (&)[S])
 #define DECLARE_CLASS(TypeName)                      \
     class TypeName;                                  \
     using TypeName##_SP = std::shared_ptr<TypeName>; \
-    using TypeName##_UP = std::unique_ptr<TypeName>;
+    using TypeName##_UP = std::unique_ptr<TypeName>; \
+    using TypeName##_WP = std::weak_ptr<TypeName>
+
+
+// *****************************************************************************
+// Enable make_unique for C++11 and Visual Studio
+// *****************************************************************************
+#if !((defined(_MSC_VER) && (_MSC_VER >= 1800)) ||                                    \
+      (defined(__clang__) && defined(__APPLE__) && (COMPILER_VERSION >= 60000)) ||    \
+      (defined(__clang__) && (!defined(__APPLE__)) && (COMPILER_VERSION >= 30400)) && (__cplusplus > 201103L) || \
+      (defined(__GNUC__) && (COMPILER_VERSION >= 40900) && (__cplusplus > 201103L)))
+
+// These compilers do not support make_unique so redefine it
+namespace std
+{
+  template<class T> struct _Unique_if
+  {
+    typedef unique_ptr<T> _Single_object;
+  };
+
+  template<class T> struct _Unique_if<T[]>
+  {
+    typedef unique_ptr<T[]> _Unknown_bound;
+  };
+
+  template<class T, size_t N> struct _Unique_if<T[N]>
+  {
+    typedef void _Known_bound;
+  };
+
+  template<class T, class... Args>
+  typename _Unique_if<T>::_Single_object
+  make_unique(Args&&... args)
+  {
+    return unique_ptr<T>(new T(std::forward<Args>(args)...));
+  }
+
+  template<class T>
+  typename _Unique_if<T>::_Unknown_bound
+  make_unique(size_t n)
+  {
+    typedef typename remove_extent<T>::type U;
+    return unique_ptr<T>(new U[n]());
+  }
+
+  //! \brief Implement the C++14 std::make_unique for C++11
+  template<class T, class... Args>
+  typename _Unique_if<T>::_Known_bound
+  make_unique(Args&&...) = delete;
+}
+#  endif
+
+// *****************************************************************************
+// Hack for allowing std::make_unique to create instances of class having a
+// protected constructor (private constructor does not work).
+// *****************************************************************************
+
+namespace glwrap
+{
+  //! \brief Proxy class deriving of the desired class T having a protected
+  //! constructor.
+  template <typename T>
+  struct Derived : public T
+  {
+    template <typename... Args>
+    Derived(Args&& ... args)
+      : T(std::move(args)...)
+    {}
+
+    template <typename... Args>
+    Derived(const Args& ... args)
+      : T(args...)
+    {}
+  };
+
+  //! \brief Allow to create shared_ptr of T even if this class has protected
+  //! constructor
+  template <typename T>
+  inline std::shared_ptr<T> make_shared()
+  {
+    struct Derived : public T { };
+    return std::make_shared<Derived>();
+  }
+
+  //! \brief Allow to create shared_ptr of T even if this class has protected
+  //! constructor
+  template < typename T, typename... Args >
+  inline std::shared_ptr<T> make_shared(Args&& ... args)
+  {
+    return std::make_shared<Derived<T>>(std::move(args)...);
+  }
+} // namespace glwrap
 
 // *****************************************************************************
 //! \brief One of the most used optimization used in Linux kernel. When

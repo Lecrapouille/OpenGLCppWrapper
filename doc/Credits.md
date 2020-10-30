@@ -103,5 +103,5 @@ full-feature portage of Glumpy or opengl4csharp.
   draw them. In my API only VAOs are directly created. They hold VBOs and
   texture once bound to GLProgram. The result is equivalent to Glumpy but the
   internal code is different. See this file
-  [differences](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Differences.md)
+  [differences](Differences.md)
   for more differences.

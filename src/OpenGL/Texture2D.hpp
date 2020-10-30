@@ -28,6 +28,7 @@
 #  define OPENGLCPPWRAPPER_GLTEXTURE2D_HPP
 
 #  include "OpenGL/Textures.hpp"
+#  include "OpenGL/SOIL.hpp"
 
 // *****************************************************************************
 //! \file GLTexture2D.hpp file implements:
@@ -38,52 +39,13 @@
 namespace glwrap
 {
 
-//----------------------------------------------------------------------------
-//! \brief Load picture file (jpg, png ...) with SOIL library into or internal
-//! format.
-//! \param[out] width Buffer width (pixels)
-//! \param[out] height Buffer height (pixel)
-//----------------------------------------------------------------------------
-static bool doload2D(const char *const filename, const PixelLoadFormat format,
-                     TextureData& data, uint32_t& width, uint32_t& height)
-{
-  if (unlikely(nullptr == filename)) return false;
-  DEBUG("Loading texture '%s'", filename);
-
-  // Load the image as a C array.
-  int w, h;
-  unsigned char* image = SOIL_load_image(filename, &w, &h, 0, static_cast<int>(format));
-  if (likely(nullptr != image))
-    {
-      // Use the max because with framebuffer we can resize texture
-      width = std::max(width, static_cast<uint32_t>(w)); // FIXME
-      height = std::max(height, static_cast<uint32_t>(h));
-
-      // Convert it as std::vector
-      size_t size = static_cast<size_t>(w * h) * sizeof(unsigned char)
-        * ((format == PixelLoadFormat::LOAD_RGBA) ? 4 : 3);
-      data.append(image, size); // FIXME: not working with preallocated size
-      SOIL_free_image_data(image);
-      DEBUG("Successfully loaded %ux%u texture '%s'", width, height, filename);
-      return true;
-    }
-  else
-    {
-      ERROR("Failed loading picture file '%s'. Reason was '%s'",
-            filename, SOIL_last_result());
-      width = height = 0;
-      data.clear();
-      return false;
-    }
-}
-
 //! \brief Used by GLTexture3D and GLTextureCube
-DECLARE_CLASS(GLTexture2D)
+DECLARE_CLASS(GLTexture2D);
 
 // *****************************************************************************
 //! \brief A 2D Texture.
 // *****************************************************************************
-class GLTexture2D: public IGLTexture
+class GLTexture2D: public GLTexture
 {
   //! \brief GLTextureCube is made of GLTexture2D. Let it access to
   //! GLTexture2D private states.
@@ -102,7 +64,7 @@ public:
   //! \param name the name of this instance used by GLProgram and GLVAO.
   //----------------------------------------------------------------------------
   GLTexture2D(std::string const& name)
-    : IGLTexture(2u, name, GL_TEXTURE_2D)
+    : GLTexture(2u, name, GL_TEXTURE_2D)
   {}
 
   //----------------------------------------------------------------------------
@@ -118,7 +80,7 @@ public:
   //! \param height Buffer height (pixel). Shall be > 0.
   //----------------------------------------------------------------------------
   GLTexture2D(std::string const& name, const uint32_t width, const uint32_t height)
-    : IGLTexture(2u, name, GL_TEXTURE_2D)
+    : GLTexture(2u, name, GL_TEXTURE_2D)
   {
     // Note: Allow texture with no size for FrameBuffers
     m_width = width;
@@ -142,7 +104,7 @@ public:
   {
     return
       // Texture loaded from a file (jpeg ...)
-      IGLTexture::loaded() ||
+      GLTexture::loaded() ||
       // Dummy textures accepted by FrameBuffer
       ((0 != m_width) && (0 != m_height));
   }
@@ -176,21 +138,22 @@ public:
   {
     DEBUG("Texture2D '%s' load bitmap '%s'", cname(), filename);
     m_buffer.clear(); m_width = m_height = 0;
-    return doload2D(filename, PixelLoadFormat::LOAD_RGBA, m_buffer, m_width, m_height);
+    SOIL soil(m_cpuPixelFormat);
+    return soil.load(filename, m_buffer, m_width, m_height);
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Save the texture into a picture file depending on the file extension
+  //! on filename.
+  //! \note Beware loaders may not manage all picture format. For example
+  //! SOIL only manages BMP, TGA and DDS.
+  //!
+  //! \return true if texture data have been writen in the file, else false.
+  //----------------------------------------------------------------------------
   inline bool save(const char *const filename)
   {
-    unsigned char* p = m_buffer.to_array();
-    if (likely(nullptr != p))
-      {
-        //TODO 4 because RGBA
-        return !!SOIL_save_image(filename, SOIL_SAVE_TYPE_BMP,
-                                 static_cast<int>(m_width),
-                                 static_cast<int>(m_height),
-                                 4, p);
-      }
-    return false;
+    SOIL soil(m_cpuPixelFormat);
+    return soil.save(filename, m_buffer, m_width, m_height);
   }
 
   //----------------------------------------------------------------------------
@@ -241,11 +204,11 @@ private:
     // m_width != 0 and m_height != 0 and buffer == nullptr
     // This will reserve the buffer size.
     glCheck(glTexImage2D(m_target, 0,
-                         static_cast<GLint>(m_options.gpuPixelFormat),
+                         static_cast<GLint>(m_gpuPixelFormat),
                          static_cast<GLsizei>(m_width),
                          static_cast<GLsizei>(m_height),
                          0,
-                         static_cast<GLenum>(m_options.cpuPixelFormat),
+                         static_cast<GLenum>(m_cpuPixelFormat),
                          static_cast<GLenum>(m_options.pixelType),
                          m_buffer.to_array()));
   }
@@ -296,7 +259,7 @@ private:
     // FIXME: not working if width and height are not the txture size
     glCheck(glBindTexture(m_target, m_handle));
     glCheck(glTexSubImage2D(m_target, 0, x, y, width, height,
-                            static_cast<GLenum>(m_options.cpuPixelFormat),
+                            static_cast<GLenum>(m_cpuPixelFormat),
                             static_cast<GLenum>(m_options.pixelType),
                             m_buffer.to_array()));
 
@@ -324,8 +287,8 @@ public:
   GLTextureDepth2D(std::string const& name)
     : GLTexture2D(name)
   {
-    m_options.gpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
-    m_options.cpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
+    m_gpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
+    m_cpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
   }
 };
 

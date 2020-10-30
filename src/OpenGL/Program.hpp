@@ -27,12 +27,10 @@
 #ifndef OPENGLCPPWRAPPER_GLPROGRAM_HPP
 #  define OPENGLCPPWRAPPER_GLPROGRAM_HPP
 
-#  include "OpenGL/ShaderVertex.hpp"
-#  include "OpenGL/ShaderFragment.hpp"
-#  include "OpenGL/ShaderGeometry.hpp"
-#  include "OpenGL/LocationAttribute.hpp"
-#  include "OpenGL/LocationUniform.hpp"
-#  include "OpenGL/LocationSamplers.hpp"
+#  include "OpenGL/Shaders.hpp"
+#  include "OpenGL/Attribute.hpp"
+#  include "OpenGL/Uniform.hpp"
+#  include "OpenGL/Samplers.hpp"
 #  include "OpenGL/VAO.hpp"
 #  include <unordered_map>
 
@@ -40,33 +38,40 @@ namespace glwrap
 {
 
 // *****************************************************************************
-//! \brief Manage a list of GLSL shaders, compile them and extract lists of
-//! shader variables (uniforms, samplers and attributes); create VBOs and
-//! textures for a VAO when bound to it and render them.
+//! \brief This class allows to do three things:
+//! - Manage a list of GLSL shaders, compile them and extract from their code
+//!   source lists of shader variables (uniforms, samplers and attributes).
+//! - Manage the creation of VBOs and textures when bound for the first time to
+//!   a VAO (in accordance of the list of shader variables).
+//! - Allow to render a VAO if bound to it.
 // *****************************************************************************
 class GLProgram: public GLObject<GLenum>
 {
+
   //! \brief Memorize GLAttributes and GLUniforms.
   //! \note Unordered map = hash table = O(1) access time.
-  using mapGLLocation = std::unordered_map<std::string, GLLocation_SP>;
+  using mapGLLocation = std::map<std::string, GLLocation_SP>;
 
   //! \brief Memorize GLSamplers.
   //! \note Unordered map = hash table = O(1) access time.
-  using mapGLSampler = std::unordered_map<std::string, GLSampler_SP>;
+  using mapGLSampler = std::map<std::string, GLSampler_SP>;
 
 public:
 
   //----------------------------------------------------------------------------
   //! \brief Constructor. Give a name to the instance. Set the number of
-  //! elements to allocate when creating VBOs (0 by default). This constructor
+  //! elements to reserve when creating VBOs (0 by default). This constructor
   //! makes no other actions.
   //!
   //! \param[in] name the name of this instance (used for debug and traces).
   //! \param[in] nb_vertices number of elements to allocate when creating VBOs.
+  //!
+  //! \note VBO size can be resized as long as they have not been allocated
+  //! inside the GPU memory.
   //----------------------------------------------------------------------------
-  GLProgram(std::string const& name, size_t const nb_vertices = 0_z)
+  GLProgram(std::string const& name, size_t const vbo_size = 0_z)
     : GLObject(name),
-      m_vbo_init_size(nb_vertices)
+      m_vbo_reserve(vbo_size)
   {}
 
   //----------------------------------------------------------------------------
@@ -79,14 +84,16 @@ public:
 
   //----------------------------------------------------------------------------
   //! \brief Attach a vertex shader or fragment shader or geometry shader to
-  //! this instance. No action is immediatly made but attached shaders will be
+  //! this instance. No action is immediatly made: attached shaders will be
   //! compiled on delegated moment.
   //!
-  //! \note the number of shaders elements is not managed.
+  //! \note the number of shaders elements is not managed here but before the
+  //! compilation.
   //!
-  //! \param[in] shader: an instance of the class holding a vertex or fragment or
-  //! geometry shader.
-  //! \param[in] if the list has to be cleared before being filled.
+  //! \param[in] shader: a reference to the instance holding either a vertex or
+  //! fragment or geometry shader.
+  //! \param[in] clear if the list has to be cleared before being filled.
+  //! Set it if shaders have previously failed compiling.
   //!
   //! \return the reference of this instance (*this).
   //----------------------------------------------------------------------------
@@ -103,12 +110,14 @@ public:
   //! to this class. No action is immediatly made but attached shaders will be
   //! compiled on delegated moment.
   //!
-  //! \note the number of shaders elements is not managed.
+  //! \note the number of shaders elements is not managed here but before the
+  //! compilation.
   //!
   //! \param[in] vertex_shader: an instance of the class holding a vertex shader.
   //! \param[in] fragment_shader: an instance of the class holding a fragment shader.
   //! \param[in] geometry_shader: an instance of the class holding a geometry shader.
-  //! \param[in] if the list has to be cleared before being filled.
+  //! \param[in] clear if the list has to be cleared before being filled. Set it
+  //! if shaders have previously failed compiling.
   //!
   //! \return the reference of this instance (*this).
   //----------------------------------------------------------------------------
@@ -131,11 +140,13 @@ public:
   //! action is immediatly made but attached shaders will be compiled on
   //! delegated moment.
   //!
-  //! \note the number of shaders elements is not managed.
+  //! \note the number of shaders elements is not managed here but before the
+  //! compilation.
   //!
   //! \param[in] vertex_shader: an instance of the class holding a vertex shader.
   //! \param[in] fragment_shader: an instance of the class holding a fragment shader.
-  //! \param[in] if the list has to be cleared before being filled.
+  //! \param[in] clear if the list has to be cleared before being filled. Set it
+  //! if shaders have previously failed compiling.
   //!
   //! \return the reference of this instance (*this).
   //----------------------------------------------------------------------------
@@ -152,15 +163,15 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Bind VAO with this instance.
+  //! \brief Bind VAO with this GLProgram instance.
   //!
   //! Two cases:
   //!   - If it's the first time that the VAO is bound to the GLProgram then the
-  //!     VAO has its list of VBOs and textures created. Elements are refered by
-  //!     the variable name used in shaders. VBOs are pre-allocated with the
-  //!     number of elements (either set from the by GLProgram constructor or by
-  //!     the method setInitialVBOSize()) but no data are filled, this is the
-  //!     job of the developper to do it explicitly.
+  //!     VAO has its internal list of VBOs and textures populated. They are
+  //!     refered by the variable name used in shaders (string). VBOs are
+  //!     pre-allocated with the number of elements (either set from the by
+  //!     GLProgram constructor or by the method bind()) but no data are filled,
+  //!     this is the job of the developper to do it explicitly.
   //!   - Else, if the VAO was bound previously, nothing is made (list are not
   //!     created/updated).
   //!
@@ -180,7 +191,7 @@ public:
   {
     DEBUG("Binding VAO '%s' to Prog '%s':", vao.cname(), cname());
 
-    // Try compile the GLProgram
+    // Try compile the GLProgram if not previously compiled
     if (unlikely(!isCompiled()))
       {
         if (!compile())
@@ -194,7 +205,7 @@ public:
     if (unlikely(0 == vao.prog))
       {
         // When binding the VAO to GLProgram for the first time:
-        // create VBOs to the VAO.
+        // populate VBOs and textures in the VAO.
         DEBUG("%s", "  First binding. VBOs will be populated {");
         initVAO(vao);
         DEBUG("%s", "  } First binding. VBOs will be populated");
@@ -208,9 +219,26 @@ public:
         return false;
       }
 
-    // Bind the VAO to the GLProgram
+    // Bind the VAO to the GLProgram. This relationship is now unbreakable
     m_vao = &vao;
     return true;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Change how many elements shall be pre-allocated when creating VBOs
+  //! and bind the VAO.
+  //!
+  //! \note This method is interesting when VAO has never been bound, else use
+  //! this method without the parameter vbo_size.
+  //!
+  //! \param[in] vao the VAO to be bound with this instance of GLProgram.
+  //! \param[in] vbo_size number of elements to allocate when creating VBOs.
+  //! \return true if the GLVAO has been bound with success.
+  //----------------------------------------------------------------------------
+  inline bool bind(GLVAO& vao, size_t const vbo_size)
+  {
+    m_vbo_reserve = vbo_size;
+    return bind(vao);
   }
 
   //----------------------------------------------------------------------------
@@ -239,10 +267,10 @@ public:
   //! \brief Compile attached shaders in the case it has not already been done.
   //!
   //! \note: this method is equivalent to the method begin() but with a more
-  //! explicit name.
+  //! explicit name and return the status of the compilation.
   //!
   //! \return true if the program has been successfully compiled, else return
-  //! false.
+  //! false. A internal error message is created in case of error.
   //----------------------------------------------------------------------------
   inline bool compile()
   {
@@ -285,12 +313,14 @@ public:
         getFailedShaders(shaders);
         for (auto& it: shaders)
           {
-            msg += ' ';
+            msg += "  - ";
             msg += it->name();
+            if (!it->path().empty())
+                msg += " (" + it->path() + ")";
+            msg += '\n';
           }
-        msg += "\nReason was:\n";
+        msg += "Reason was:\n";
         msg += m_error_msg;
-        //msg += '\n';
       }
 
     m_error_msg.clear();
@@ -321,11 +351,12 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the list of shaders that failed to be compiled. This is
-  //! method is mainly used for debug purpose.
+  //! \brief Return the list of shaders that failed to be compiled (if happened).
+  //! This is method is mainly used for debug purpose.
   //!
-  //! \note if no shader have never been attached to a GLProgram this method
-  //! will return an empty list.
+  //! \note if no shader have been attached to a GLProgram or no compilation
+  //! error happened or no compilation have been made this method will return an
+  //! empty list.
   //!
   //! \param[in,out] list the list where to insert shaders.
   //! \param[in] if the list has to be cleared before being filled.
@@ -347,11 +378,12 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Return the list of uniform names. This is method is mainly
-  //! used for debug purpose.
+  //! \brief Return the list of uniform names. This is method is mainly used for
+  //! debug purpose.
   //!
-  //! \note if no shader have never been attached to a GLProgram this method
-  //! will return an empty list.
+  //! \note if no shader have been attached to a GLProgram or compilation error
+  //! happened or no compilation have been made or the shader code did not use
+  //! uniforms this method will return an empty list.
   //!
   //! \param[in,out] list the list where to insert attributes names.
   //! \param[in] if the list has to be cleared before being filled.
@@ -360,6 +392,9 @@ public:
   //----------------------------------------------------------------------------
   size_t getUniformNames(std::vector<std::string>& list, bool const clear = true)
   {
+    // TODO list = m_uniform_names.to_list();
+    // TODO for (MapType::iterator it = m.begin(); it != m.end(); ++it)
+    // TODO { v.push_back( it->second ); }
     if (clear) { list.clear(); }
     list.reserve(m_uniforms.size());
     for (auto const& it: m_uniforms)
@@ -373,8 +408,9 @@ public:
   //! \brief Return the list of attributes names. This is method is mainly
   //! used for debug purpose.
   //!
-  //! \note if no shader have never been attached to a GLProgram this method
-  //! will return an empty list.
+  //! \note if no shader have been attached to a GLProgram or compilation error
+  //! happened or no compilation have been made this method will return an empty
+  //! list.
   //!
   //! \param[in,out] list the list where to insert attributes names.
   //! \param[in] if the list has to be cleared before being filled.
@@ -396,12 +432,13 @@ public:
   //! \brief Return the list of texture names. This is method is mainly
   //! used for debug purpose.
   //!
-  //! \note Do not be confused with meaning of texture name. We do not refer to
-  //! the jpeg, png or bmp file name but to the shader uniform name (used in
-  //! shaders).
+  //! \note Do not confuse samplers with textures. In this method, we do not
+  //! refer to the file name with jpeg, png or bmp ... extensions but to the
+  //! GLSL uniform name (used inside shader code sources).
   //!
-  //! \note if no shader have never been attached to a GLProgram this method
-  //! will return an empty list.
+  //! \note if no shader have been attached to a GLProgram or compilation error
+  //! happened or no compilation have been made or the shader code did not use
+  //! sampler, this method will return an empty list.
   //!
   //! \param[in,out] list the list where to insert sampler names.
   //! \param[in] if the list has to be cleared before being filled.
@@ -427,6 +464,7 @@ public:
   //----------------------------------------------------------------------------
   inline bool hasUniform(const char *name) const
   {
+// TODO: m_uniform_names[name]
     if (unlikely(nullptr == name)) return false;
     return m_uniforms.end() != m_uniforms.find(name);
   }
@@ -438,6 +476,7 @@ public:
   //----------------------------------------------------------------------------
   inline bool hasUniforms() const
   {
+// TODO: 0_z != m_uniform_names.size();
     return 0_z != m_uniforms.size();
   }
 
@@ -454,12 +493,12 @@ public:
   inline T& uniform(const char *name)
   {
     DEBUG("Prog '%s' get uniform '%s'", cname(), name);
-    return getUniform<T>(name).data();
+    return getUniform<T>(name);
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Locate and return the uniform variable refered by its name and by its
-  //! type T.
+  //! \brief Locate and return the uniform variable refered by its name and by
+  //! its type T.
   //!
   //! \return the reference of the shader uniform if it exists.
   //!
@@ -470,13 +509,12 @@ public:
   inline const T& uniform(const char *name) const
   {
     DEBUG("Prog '%s' const get uniform '%s'", cname(), name);
-    return getUniform<T>(name).data();
+    return getUniform<T>(name);
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Locate and return the shader uniform float 4x4 matrix.
-  //! This method wraps the \a uniform() method hidding the misery of
-  //! the template.
+  //! \brief Locate and return the shader uniform float 4x4 matrix. This method
+  //! wraps the \a uniform() method hidding the misery of the template.
   //----------------------------------------------------------------------------
   inline Matrix44f& matrix44f(const char *name)
   {
@@ -484,9 +522,8 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  //! \brief Locate and return the shader uniform float 3x3 matrix.
-  //! This method wraps the \a uniform() method hidding the misery of
-  //! the template.
+  //! \brief Locate and return the shader uniform float 3x3 matrix. This method
+  //! wraps the \a uniform() method hidding the misery of the template.
   //----------------------------------------------------------------------------
   inline Matrix33f& matrix33f(const char *name)
   {
@@ -752,16 +789,6 @@ public:
     m_vbo_usage = usage;
   }
 
-  //----------------------------------------------------------------------------
-  //! \brief Change how many elements are pre-allocated when creating
-  //! VBOs. If this method is not called default usage will be 0.
-  //! \fixme bind cannot replace this method ?
-  //----------------------------------------------------------------------------
-  void setInitialVBOSize(size_t const size)
-  {
-    m_vbo_init_size = size;
-  }
-
 private:
 
   //----------------------------------------------------------------------------
@@ -797,6 +824,38 @@ private:
     DEBUG("Prog::isValid %d", isCompiled());
     return isCompiled();
     }*/
+
+  //----------------------------------------------------------------------------
+  //! \brief
+  //----------------------------------------------------------------------------
+  void throw_if_incompatible_number_of_shaders()
+  {
+    size_t no_vertex_shaders = 0_z;
+    size_t no_fragment_shaders = 0_z;
+
+    for (auto const& it: m_shaders)
+      {
+        switch (it->target())
+          {
+          case GL_VERTEX_SHADER:
+            ++no_vertex_shaders;
+            if (no_vertex_shaders > 1_z)
+              throw OpenGLException("has too many vertex shaders. One is needed");
+            if (!it->loaded())
+              throw OpenGLException("Vertex shader has empty GLSL code");
+            break;
+          case GL_FRAGMENT_SHADER:
+            ++no_fragment_shaders;
+            if (no_fragment_shaders > 1_z)
+              throw OpenGLException("Prog '%s' has too many fragment shaders. One is needed");
+            if (!it->loaded())
+              throw OpenGLException("Fragment shader has empty GLSL code");
+            break;
+          case GL_GEOMETRY_SHADER:
+            break;
+          }
+      }
+  }
 
   //----------------------------------------------------------------------------
   //! \brief Throw OpenGLException if GLProgram cannot be compiled (due to
@@ -847,6 +906,10 @@ private:
       {
         throw OpenGLException("Failed OpenGL attributes have not the same size");
       }
+    if (!m_vao->checkLoadTextures())
+      {
+        throw OpenGLException("Failed OpenGL textures have not all been loaded");
+      }
   }
 
   //----------------------------------------------------------------------------
@@ -863,16 +926,18 @@ private:
         switch (it.second->dim())
           {
           case 1:
-            vao.createVBO<float>(name, m_vbo_init_size, m_vbo_usage);
+            // FIXME: simply vao.VBO<T> =  ?
+            // FIXME: complexity O(n^2) tests
+            vao.createVBO<float>(name, m_vbo_reserve, m_vbo_usage);
             break;
           case 2:
-            vao.createVBO<Vector2f>(name, m_vbo_init_size, m_vbo_usage);
+            vao.createVBO<Vector2f>(name, m_vbo_reserve, m_vbo_usage);
             break;
           case 3:
-            vao.createVBO<Vector3f>(name, m_vbo_init_size, m_vbo_usage);
+            vao.createVBO<Vector3f>(name, m_vbo_reserve, m_vbo_usage);
             break;
           case 4:
-            vao.createVBO<Vector4f>(name, m_vbo_init_size, m_vbo_usage);
+            vao.createVBO<Vector4f>(name, m_vbo_reserve, m_vbo_usage);
             break;
           default:
             throw OpenGLException("Attribute with dimension > 4 is not managed");
@@ -994,19 +1059,32 @@ private:
     DEBUG("Prog '%s' setup {", cname());
     bool failure = false;
 
-    // Compile shaders if they have not yet compiled
-    DEBUG("Prog '%s' compile shaders {", cname());
-    for (auto& it: m_shaders)
+    if (likely(m_shaders.size() >= 2_z))
       {
-        it->begin();
-        if (it->hasErrored())
+        throw_if_incompatible_number_of_shaders();
+
+        // Compile shaders if they have not yet compiled
+        DEBUG("Prog '%s' compile shaders {", cname());
+        for (auto& it: m_shaders)
           {
-            std::string msg = " " + it->name() + ":\n   " + it->getError();
-            concatError(msg);
-            failure = true;
+            DEBUG("Prog '%s' compile shader '%s'", cname(), it->cname());
+            it->begin();
+            if (it->hasErrored())
+              {
+                std::string msg = "  - " + it->name() + ":\n" + it->getError();
+                concatError(msg);
+                failure = true;
+              }
           }
+        DEBUG("} Prog '%s' compile shaders. Failure? %u", cname(), failure);
       }
-    DEBUG("} Prog '%s' compile shaders. Failure? %u", cname(), failure);
+    else
+      {
+        ERROR("Prog '%s' has not enough shaders. Need >= 2 but got %zu",
+              cname(), m_shaders.size());
+        DEBUG("} Prog '%s' setup. Linked? %u", cname(), m_compiled);
+        failure = true;
+      }
 
     if (!failure)
       {
@@ -1091,31 +1169,42 @@ private:
     GLsizei length = 0;
     GLint size = 0;
     GLint count = 0;
-    GLuint i;
+    GLuint location;
     GLenum type;
 
     // Create the list of uniforms
     DEBUG("Prog '%s' populating shader uniforms and samplers {", cname());
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
-    i = static_cast<GLuint>(count);
-    while (i--)
+    location = static_cast<GLuint>(count);
+    while (location--)
       {
-        glCheck(glGetActiveUniform(m_handle, i, bufSize, &length,
+        glCheck(glGetActiveUniform(m_handle, location, bufSize, &length,
                                    &size, &type, name));
-        DEBUG("  Uniform #%u Type: %u Name: %s", i, type, name);
-        addNewUniform(type, name);
+        DEBUG("  Uniform #%u Type: %u Name: %s", location, type, name);
+        if (m_uniforms.find(name) == m_uniforms.end())
+          {
+            // Uniform has never been refered before the compilation of the
+            // GLProgram: create a new instance.
+            addNewUniform(type, name);
+          }
+        else
+          {
+            // Uniform has never refered before the compilation of the
+            // GLProgram: update it by setting the OpenGL id of the program.
+            m_uniforms[name]->setProgram(m_handle);
+          }
       }
     DEBUG("} Prog '%s' populating shader uniforms and samplers", cname());
 
     // Create the list of attributes and list of VBOs
     DEBUG("Prog '%s' populating shader attributes {", cname());
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_ATTRIBUTES, &count));
-    i = static_cast<GLuint>(count);
-    while (i--)
+    location = static_cast<GLuint>(count);
+    while (location--)
       {
-        glCheck(glGetActiveAttrib(m_handle, i, bufSize, &length,
+        glCheck(glGetActiveAttrib(m_handle, location, bufSize, &length,
                                   &size, &type, name));
-        DEBUG("  Attribute #%u Type: %u Name: %s", i, type, name);
+        DEBUG("  Attribute #%u Type: %u Name: %s", location, type, name);
         addNewAttribute(type, name);
       }
     DEBUG("} Prog '%s' populating shader attributes", cname());
@@ -1221,36 +1310,7 @@ private:
   //! \throw OpenGLException if the uniform does not exist or bad T type param.
   //----------------------------------------------------------------------------
   template<class T>
-  GLUniform<T>& getUniform(const char *name)
-  {
-    if (unlikely(nullptr == name))
-      throw OpenGLException("nullptr passed to getUniform");
-
-    DEBUG("GLProgram '%s' get Uniform '%s'", cname(), name);
-    if (unlikely(!isCompiled()))
-      {
-        if (unlikely(!compile()))
-          throw OpenGLException("Failed compiling GLProgram");
-      }
-
-    //if (unlikely(!isBound()))
-    //  throw OpenGLException("GLUniform '" + std::string(name) +
-    //                        "' does not exist because no VAO has been bound");
-
-    auto it = m_uniforms.find(name);
-    if (likely(m_uniforms.end() != it))
-      {
-        GLUniform<T> *uniform = dynamic_cast<GLUniform<T>*>(it->second.get());
-        if (likely(nullptr != uniform))
-          return *uniform;
-
-        throw std::invalid_argument("GLUniform '" + std::string(name) +
-                                    "' exists but has wrong template type");
-      }
-
-    // TODO: shall be allowed
-    throw OpenGLException("GLUniform '" + std::string(name) + "' does not exist");
-  }
+  GLUniform<T>& getUniform(const char *name);
 
 private:
 
@@ -1268,6 +1328,7 @@ private:
             it->attachProg(0);
           }
       }
+    m_shaders.clear();
   }
 
   //----------------------------------------------------------------------------
@@ -1324,8 +1385,11 @@ protected:
     m_sampler_count = 0u;
     m_compiled = false;
     m_vbo_usage = BufferUsage::STATIC_DRAW;
-    m_vbo_init_size = 0_z;
+    m_vbo_reserve = 0_z;
   }
+
+  template<class T>
+  void createUniform(const char *name);
 
 private:
 
@@ -1349,8 +1413,134 @@ private:
   //! \brief Preferred VBO storage inside GPU (fast, low).
   BufferUsage            m_vbo_usage = BufferUsage::STATIC_DRAW;
   //! \brief Reserve memory when creating VBOs.
-  size_t                 m_vbo_init_size = 0_z;
+  size_t                 m_vbo_reserve = 0_z;
 };
+
+template<>
+inline void GLProgram::createUniform<float>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<float>>(name, 1, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector2f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector2f>>(name, 2, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector3f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector3f>>(name, 3, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector4f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector4f>>(name, 4, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Matrix22f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Matrix22f>>(name, 4, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Matrix33f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Matrix33f>>(name, 9, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Matrix44f>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<int>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<int>>(name, 1, GL_INT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector2i>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector2i>>(name, 2, GL_INT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector3i>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector3i>>(name, 3, GL_INT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<Vector4i>(const char *name)
+{
+  m_uniforms[name] = std::make_unique<GLUniform<Vector4i>>(name, 4, GL_INT, handle());
+}
+
+template<>
+inline void GLProgram::createUniform<GLSampler1D>(const char *name)
+{
+  m_samplers[name] = std::make_unique<GLSampler1D>(name, m_sampler_count, handle());
+  m_sampler_count += 1u;
+}
+
+template<>
+inline void GLProgram::createUniform<GLSampler2D>(const char *name)
+{
+  m_samplers[name] = std::make_unique<GLSampler2D>(name, m_sampler_count, handle());
+  m_sampler_count += 1u;
+}
+
+template<>
+inline void GLProgram::createUniform<GLSampler3D>(const char *name)
+{
+  m_samplers[name] = std::make_unique<GLSampler3D>(name, m_sampler_count, handle());
+  m_sampler_count += 1u;
+}
+
+template<>
+inline void GLProgram::createUniform<GLSamplerCube>(const char *name)
+{
+  m_samplers[name] = std::make_unique<GLSamplerCube>(name, m_sampler_count, handle());
+  m_sampler_count += 1u;
+}
+
+template<class T>
+GLUniform<T>& GLProgram::getUniform(const char *name)
+{
+  if (unlikely(nullptr == name))
+    throw OpenGLException("nullptr passed to getUniform");
+
+  if (likely(isCompiled()))
+    {
+      auto it = m_uniforms.find(name);
+      if (likely(m_uniforms.end() != it))
+        {
+          GLUniform<T> *uniform = dynamic_cast<GLUniform<T>*>(it->second.get());
+          if (likely(nullptr != uniform))
+            return *uniform;
+
+          throw std::invalid_argument("GLUniform '" + std::string(name) +
+                                      "' exists but has wrong template type");
+        }
+
+      throw OpenGLException("GLUniform '" + std::string(name) + "' does not exist");
+    }
+  else
+    {
+      DEBUG("GLProgram '%s' not compiled: find or create uniform '%s'", cname(), name);
+      if (likely(m_uniforms.end() == m_uniforms.find(name)))
+        createUniform<T>(name);
+
+      GLUniform<T> *uniform = dynamic_cast<GLUniform<T>*>(m_uniforms[name].get());
+      return *uniform;
+    }
+}
 
 //----------------------------------------------------------------------------
 //! \class GLProgram Program.hpp

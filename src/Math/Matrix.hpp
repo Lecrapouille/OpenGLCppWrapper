@@ -27,6 +27,7 @@
 // *************************************************************************************************
 
 #  include "Math/Vector.hpp"
+#  include <cassert>
 
 namespace glwrap
 {
@@ -46,8 +47,7 @@ public:
 
   //! \brief Empty constructor. It does NOT initialize the matrix for efficiency.
   Matrix()
-  {
-  }
+  {}
 
   //! \brief Constructor with initialization list.
   Matrix(std::initializer_list<T> initList)
@@ -86,11 +86,8 @@ public:
       {
       case matrix::Identity:
         static_assert(rows == cols, "Can't construct identity for a non-square matrix");
-        i = rows * cols;
-        while (i--)
-          {
-            m_data[i] = (i % (rows + 1_z) == 0) ? maths::one<T>() : maths::zero<T>();
-          }
+        i = rows * cols; while (i--) { m_data[i] = maths::zero<T>(); }
+        i = cols; while (i--) { m_data[cols * i + i] = maths::one<T>(); }
         break;
       default:
         break;
@@ -107,12 +104,12 @@ public:
       {
         for (size_t j = 0_z; j < c; ++j)
           {
-            (*this)[i][j] = T(m[i][j]);
+            (*this)(i, j) = T(m(i, j));
           }
         // Zero-fill any remaining cols
         for (size_t j = c; j < cols; ++j)
           {
-            (*this)[i][j] = maths::zero<T>();
+            (*this)(i, j) = maths::zero<T>();
           }
       }
     // Zero-fill any remaining rows
@@ -129,6 +126,18 @@ public:
   {
     r = rows;
     c = cols;
+  }
+
+  //! \brief Cache friendly version of operator[i][j]
+  T& operator()(size_t const i, size_t const j)
+  {
+    return m_data[cols * i + j];
+  }
+
+  //! \brief Cache friendly version of operator[i][j]
+  T const& operator()(size_t const i, size_t const j) const
+  {
+    return m_data[cols * i + j];
   }
 
   //! \brief Access to the nth row in write mode.
@@ -328,9 +337,78 @@ Matrix<T, rows, cols> operator*(Matrix<T, rows, inner> const &a, Matrix<T, inner
   for (size_t i = 0_z; i < rows; ++i)
     for (size_t j = 0_z; j < cols; ++j)
       for (size_t k = 0; k < inner; ++k)
-        result[i][j] += a[i][k] * b[k][j];
+        result(i, j) += a(i, k) * b(k, j);
   return result;
 }
+
+#if 0
+template <typename T>
+Matrix<T, 4_z, 4_z> operator*(Matrix<T, 4_z, 4_z> const &A, Matrix<T, 4_z, 4_z> const &B)
+{
+  float const a00 = A(0, 0);
+  float const a01 = A(0, 1);
+  float const a02 = A(0, 2);
+  float const a03 = A(0, 3);
+
+  float const a10 = A(1, 0);
+  float const a11 = A(1, 1);
+  float const a12 = A(1, 2);
+  float const a13 = A(1, 3);
+
+  float const a20 = A(2, 0);
+  float const a21 = A(2, 1);
+  float const a22 = A(2, 2);
+  float const a23 = A(2, 3);
+
+  float const a30 = A(3, 0);
+  float const a31 = A(3, 1);
+  float const a32 = A(3, 2);
+  float const a33 = A(3, 3);
+
+  float const b00 = A(0, 0);
+  float const b01 = A(0, 1);
+  float const b02 = A(0, 2);
+  float const b03 = A(0, 3);
+
+  float const b10 = A(1, 0);
+  float const b11 = A(1, 1);
+  float const b12 = A(1, 2);
+  float const b13 = A(1, 3);
+
+  float const b20 = B(2, 0);
+  float const b21 = B(2, 1);
+  float const b22 = B(2, 2);
+  float const b23 = B(2, 3);
+
+  float const b30 = B(3, 0);
+  float const b31 = B(3, 1);
+  float const b32 = B(3, 2);
+  float const b33 = B(3, 3);
+
+  static Matrix<T, 4_z, 4_z> matrix;
+  matrix(0, 0) = a00*b00+a10*b01+a20*b02+a30*b03;
+  matrix(0, 1) = a01*b00+a11*b01+a21*b02+a31*b03;
+  matrix(0, 2) = a02*b00+a12*b01+a22*b02+a32*b03;
+  matrix(0, 3) = a03*b00+a13*b01+a23*b02+a33*b03;
+
+  matrix(1, 0) = a00*b10+a10*b11+a20*b12+a30*b13;
+  matrix(1, 1) = a01*b10+a11*b11+a21*b12+a31*b13;
+  matrix(1, 2) = a02*b10+a12*b11+a22*b12+a32*b13;
+  matrix(1, 3) = a03*b10+a13*b11+a23*b12+a33*b13;
+
+  matrix(2, 0) = a00*b20+a10*b21+a20*b22+a30*b23;
+  matrix(2, 1) = a01*b20+a11*b21+a21*b22+a31*b23;
+  matrix(2, 2) = a02*b20+a12*b21+a22*b22+a32*b23;
+  matrix(2, 3) = a03*b20+a13*b21+a23*b22+a33*b23;
+
+  matrix(3, 0) = a00*b30+a10*b31+a20*b32+a30*b33;
+  matrix(3, 1) = a01*b30+a11*b31+a21*b32+a31*b33;
+  matrix(3, 2) = a02*b30+a12*b31+a22*b32+a32*b33;
+  matrix(3, 3) = a03*b30+a13*b31+a23*b32+a33*b33;
+
+  return matrix;
+}
+#endif
 
 //! \brief Matrix-Vector multiplication.
 template <typename T, size_t rows, size_t cols>
@@ -342,7 +420,7 @@ Vector<T, rows> operator*(Matrix<T, rows, cols> const &a, Vector<T, cols> const 
     {
       size_t j = cols;
       while (j--)
-        result[i] += (a[i][j] * b[j]);
+        result[i] += (a(i, j) * b[j]);
     }
   return result;
 }
@@ -358,7 +436,7 @@ Vector<T, cols> operator*(Vector<T, rows> const &a, Matrix<T, rows, cols> const 
     {
       size_t j = cols;
       while (j--)
-        result[j] += (a[i] * b[i][j]);
+        result[j] += (a[i] * b(i, j));
     }
   return result;
 }
@@ -390,7 +468,7 @@ namespace matrix
     size_t i = rows;
     while (i--)
       {
-        a[i][i] = maths::one<T>();
+        a(i, i) = maths::one<T>();
       }
   }
 
@@ -421,7 +499,7 @@ namespace matrix
       {
         size_t j = cols;
         while (j--)
-          result[i][j] = a[i][j] * b[i][j];
+          result(i, j) = a(i, j) * b(i, j);
       }
     return result;
   }
@@ -437,7 +515,7 @@ namespace matrix
         size_t j = cols;
         while (j--)
           {
-            result[j][i] = a[i][j];
+            result(j, i) = a(i, j);
           }
       }
     return result;
@@ -453,7 +531,7 @@ namespace matrix
     size_t i = rows;
 
     while (i--)
-      result += a[i][i];
+      result += a(i, i);
 
     return result;
   }
@@ -473,7 +551,7 @@ namespace matrix
           {
             if (i != j)
               {
-                if (!maths::almostZero(a[i][j]))
+                if (!maths::almostZero(a(i, j)))
                   return false;
               }
           }
@@ -496,7 +574,7 @@ namespace matrix
           {
             if (i != j)
               {
-                if (!maths::almostEqual(a[i][j], a[j][i]))
+                if (!maths::almostEqual(a(i, j), a(j, i)))
                   return false;
               }
           }
@@ -543,137 +621,90 @@ namespace matrix
     return true;
   }
 
-  template <typename T>
-  bool inverse(Matrix<T, 4_z, 4_z> const& m,
-               Matrix<T, 4_z, 4_z> const& invOut)
+  template <typename T, size_t rows, size_t cols>
+  T determinant(Matrix<T, 2_z, 2_z> const& m)
   {
-    double inv[16], det;
-    int i;
+    return m[0][0] * m[1][1] - m[1][0] * m[0][1];
+  }
 
-    inv[0] = m[5]  * m[10] * m[15] -
-             m[5]  * m[11] * m[14] -
-             m[9]  * m[6]  * m[15] +
-             m[9]  * m[7]  * m[14] +
-             m[13] * m[6]  * m[11] -
-             m[13] * m[7]  * m[10];
+  template <typename T, size_t rows, size_t cols>
+  T determinant(Matrix<T, 3_z, 3_z> const& m)
+  {
+    return   m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
+           - m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
+           + m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]);
+  }
 
-    inv[4] = -m[4]  * m[10] * m[15] +
-              m[4]  * m[11] * m[14] +
-              m[8]  * m[6]  * m[15] -
-              m[8]  * m[7]  * m[14] -
-              m[12] * m[6]  * m[11] +
-              m[12] * m[7]  * m[10];
+  // 4x4 determinate inplemented by blocks ..
+  //     | A B |
+  // det | C D | = det (A) * det(D - CA'B)
+  //
+  //template <typename T, size_t rows, size_t cols>
+  //T determinant(Matrix<T, 4_z, 4_z> const& m)
+  //{}
 
-    inv[8] = m[4]  * m[9] * m[15] -
-             m[4]  * m[11] * m[13] -
-             m[8]  * m[5] * m[15] +
-             m[8]  * m[7] * m[13] +
-             m[12] * m[5] * m[11] -
-             m[12] * m[7] * m[9];
+  // TODO:https://stackoverflow.com/a/2625420/8877076
 
-    inv[12] = -m[4]  * m[9] * m[14] +
-               m[4]  * m[10] * m[13] +
-               m[8]  * m[5] * m[14] -
-               m[8]  * m[6] * m[13] -
-               m[12] * m[5] * m[10] +
-               m[12] * m[6] * m[9];
+  template <typename T>
+  Matrix<T, 4_z, 4_z> inverse(Matrix<T, 4_z, 4_z> const& m)
+  {
+    T m00 = m[0][0], m01 = m[0][1], m02 = m[0][2], m03 = m[0][3];
+    T m10 = m[1][0], m11 = m[1][1], m12 = m[1][2], m13 = m[1][3];
+    T m20 = m[2][0], m21 = m[2][1], m22 = m[2][2], m23 = m[2][3];
+    T m30 = m[3][0], m31 = m[3][1], m32 = m[3][2], m33 = m[3][3];
 
-    inv[1] = -m[1]  * m[10] * m[15] +
-              m[1]  * m[11] * m[14] +
-              m[9]  * m[2] * m[15] -
-              m[9]  * m[3] * m[14] -
-              m[13] * m[2] * m[11] +
-              m[13] * m[3] * m[10];
+    T v0 = m20 * m31 - m21 * m30;
+    T v1 = m20 * m32 - m22 * m30;
+    T v2 = m20 * m33 - m23 * m30;
+    T v3 = m21 * m32 - m22 * m31;
+    T v4 = m21 * m33 - m23 * m31;
+    T v5 = m22 * m33 - m23 * m32;
 
-    inv[5] = m[0]  * m[10] * m[15] -
-             m[0]  * m[11] * m[14] -
-             m[8]  * m[2] * m[15] +
-             m[8]  * m[3] * m[14] +
-             m[12] * m[2] * m[11] -
-             m[12] * m[3] * m[10];
+    T t00 = + (v5 * m11 - v4 * m12 + v3 * m13);
+    T t10 = - (v5 * m10 - v2 * m12 + v1 * m13);
+    T t20 = + (v4 * m10 - v2 * m11 + v0 * m13);
+    T t30 = - (v3 * m10 - v1 * m11 + v0 * m12);
 
-    inv[9] = -m[0]  * m[9] * m[15] +
-              m[0]  * m[11] * m[13] +
-              m[8]  * m[1] * m[15] -
-              m[8]  * m[3] * m[13] -
-              m[12] * m[1] * m[11] +
-              m[12] * m[3] * m[9];
+    T invDet = maths::one<T>() / (t00 * m00 + t10 * m01 + t20 * m02 + t30 * m03);
+    //assert(invDet != maths::zero<T>() && "The matrix cannot be inversed");
 
-    inv[13] = m[0]  * m[9] * m[14] -
-              m[0]  * m[10] * m[13] -
-              m[8]  * m[1] * m[14] +
-              m[8]  * m[2] * m[13] +
-              m[12] * m[1] * m[10] -
-              m[12] * m[2] * m[9];
+    Matrix<T, 4_z, 4_z> inv;
+    inv[0][0] = t00 * invDet;
+    inv[1][0] = t10 * invDet;
+    inv[2][0] = t20 * invDet;
+    inv[3][0] = t30 * invDet;
 
-    inv[2] = m[1]  * m[6] * m[15] -
-             m[1]  * m[7] * m[14] -
-             m[5]  * m[2] * m[15] +
-             m[5]  * m[3] * m[14] +
-             m[13] * m[2] * m[7] -
-             m[13] * m[3] * m[6];
+    inv[0][1] = - (v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+    inv[1][1] = + (v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+    inv[2][1] = - (v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+    inv[3][1] = + (v3 * m00 - v1 * m01 + v0 * m02) * invDet;
 
-    inv[6] = -m[0]  * m[6] * m[15] +
-              m[0]  * m[7] * m[14] +
-              m[4]  * m[2] * m[15] -
-              m[4]  * m[3] * m[14] -
-              m[12] * m[2] * m[7] +
-              m[12] * m[3] * m[6];
+    v0 = m10 * m31 - m11 * m30;
+    v1 = m10 * m32 - m12 * m30;
+    v2 = m10 * m33 - m13 * m30;
+    v3 = m11 * m32 - m12 * m31;
+    v4 = m11 * m33 - m13 * m31;
+    v5 = m12 * m33 - m13 * m32;
 
-    inv[10] = m[0]  * m[5] * m[15] -
-              m[0]  * m[7] * m[13] -
-              m[4]  * m[1] * m[15] +
-              m[4]  * m[3] * m[13] +
-              m[12] * m[1] * m[7] -
-              m[12] * m[3] * m[5];
+    inv[0][2] = + (v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+    inv[1][2] = - (v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+    inv[2][2] = + (v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+    inv[3][2] = - (v3 * m00 - v1 * m01 + v0 * m02) * invDet;
 
-    inv[14] = -m[0]  * m[5] * m[14] +
-               m[0]  * m[6] * m[13] +
-               m[4]  * m[1] * m[14] -
-               m[4]  * m[2] * m[13] -
-               m[12] * m[1] * m[6] +
-               m[12] * m[2] * m[5];
+    v0 = m21 * m10 - m20 * m11;
+    v1 = m22 * m10 - m20 * m12;
+    v2 = m23 * m10 - m20 * m13;
+    v3 = m22 * m11 - m21 * m12;
+    v4 = m23 * m11 - m21 * m13;
+    v5 = m23 * m12 - m22 * m13;
 
-    inv[3] = -m[1] * m[6] * m[11] +
-              m[1] * m[7] * m[10] +
-              m[5] * m[2] * m[11] -
-              m[5] * m[3] * m[10] -
-              m[9] * m[2] * m[7] +
-              m[9] * m[3] * m[6];
+    inv[0][3] = - (v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+    inv[1][3] = + (v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+    inv[2][3] = - (v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+    inv[3][3] = + (v3 * m00 - v1 * m01 + v0 * m02) * invDet;
 
-    inv[7] = m[0] * m[6] * m[11] -
-             m[0] * m[7] * m[10] -
-             m[4] * m[2] * m[11] +
-             m[4] * m[3] * m[10] +
-             m[8] * m[2] * m[7] -
-             m[8] * m[3] * m[6];
-
-    inv[11] = -m[0] * m[5] * m[11] +
-               m[0] * m[7] * m[9] +
-               m[4] * m[1] * m[11] -
-               m[4] * m[3] * m[9] -
-               m[8] * m[1] * m[7] +
-               m[8] * m[3] * m[5];
-
-    inv[15] = m[0] * m[5] * m[10] -
-              m[0] * m[6] * m[9] -
-              m[4] * m[1] * m[10] +
-              m[4] * m[2] * m[9] +
-              m[8] * m[1] * m[6] -
-              m[8] * m[2] * m[5];
-
-    det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
-
-    if (det == maths::zero<T>())
-      return false;
-
-    det = 1.0 / det;
-
-    for (i = 0; i < 16; i++)
-      invOut[i] = inv[i] * det;
-
-    return true;
-}
+    return inv;
+  }
 
   //! \brief This function LU decomposes a given matrix A and stores
   //! it in two new matricies L and U.  It uses the Gaussian
@@ -696,14 +727,14 @@ namespace matrix
 
     for (i = 0; i < rows - 1; ++i)
       {
-        double max = maths::abs(A[i][i]);
+        double max = maths::abs(A(i, i));
         size_t pivot = i;
 
         for (j = i + 1_z; j < rows; ++j)
           {
-            if (maths::abs(A[j][i]) > max)
+            if (maths::abs(A(j, i)) > max)
               {
-                max = maths::abs(A[j][i]);
+                max = maths::abs(A(j, i));
                 pivot = j;
               }
           }
@@ -715,33 +746,33 @@ namespace matrix
           }
 
         // ERROR:
-        // -- original code:  if (A[i][i] != 0.0)
-        // -- new code which seems to give less good results: if (fabs(A[i][i]) > 0.00001)
+        // -- original code:  if (A(i, i) != 0.0)
+        // -- new code which seems to give less good results: if (fabs(A(i, i)) > 0.00001)
         // we cannot use == with floats or double !!!!
-        if (A[i][i] != maths::zero<T>())
+        if (A(i, i) != maths::zero<T>())
           {
             for (j = i + 1_z; j < rows; ++j)
               {
-                A[j][i] = A[j][i] / A[i][i];
+                A(j, i) = A(j, i) / A(i, i);
                 for (size_t k = i + 1_z; k < rows; ++k)
                   {
-                    A[j][k] = A[j][k] - A[j][i] * A[i][k];
+                    A(j, k) = A(j, k) - A(j, i) * A(i, k);
                   }
               }
           }
       }
     for (i = 0_z; i < rows; ++i)
       {
-        L[i][i] = maths::one<T>();
+        L(i, i) = maths::one<T>();
         for (j = 0_z; j < rows; ++j)
           {
             if (j < i)
               {
-                L[i][j] = A[i][j];
+                L(i, j) = A(i, j);
               }
             else
               {
-                U[i][j] = A[i][j];
+                U(i, j) = A(i, j);
               }
           }
       }
@@ -762,28 +793,28 @@ namespace matrix
 
     // y = U.x, thus Ly = b
     // solve for y by forward substitution
-    y[0] = b[0] / L[0][0];
+    y[0] = b[0] / L(0, 0);
     for (size_t i = 1_z; i < rows; ++i)
       {
-        y[i] = b[i] / L[i][i];
+        y[i] = b[i] / L(i, i);
         for (size_t j = 0_z; j < i; ++j)
           {
-            y[i] -= (L[i][j] * y[j] / L[i][i]);
+            y[i] -= (L(i, j) * y[j] / L(i, i));
           }
       }
 
     // U.x = y
     // Solve for x by backward substitution
     size_t r = rows - 1_z;
-    solution[r] = y[r] / U[r][r];
+    solution[r] = y[r] / U(r, r);
 
     size_t i = r;
     while (i--)
       {
-        solution[i] = y[i] / U[i][i];
+        solution[i] = y[i] / U(i, i);
         for (size_t j = i + 1u; j < rows; j++)
           {
-            solution[i] -= (U[i][j] * solution[j] / U[i][i]);
+            solution[i] -= (U(i, j) * solution[j] / U(i, i));
           }
       }
     return solution;
@@ -809,7 +840,7 @@ std::ostream& operator<<(std::ostream& os, Matrix<T, rows, cols> const& m)
   for (size_t i = 0_z; i < rows; ++i)
     {
       for (size_t j = 0_z; j < cols; ++j)
-        os << m[i][j] << " ";
+        os << m(i, j) << " ";
       os << '\n';
     }
   return os;

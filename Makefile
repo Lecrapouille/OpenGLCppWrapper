@@ -29,7 +29,7 @@ M := $(P)/.makefile
 #
 TARGET = $(PROJECT)
 DESCRIPTION = C++11 API wrapping Core Profile OpenGL routines and allowing to write applications in few lines of code
-BUILD_TYPE = debug
+BUILD_TYPE = release
 
 include $(P)/Makefile.common
 
@@ -37,7 +37,7 @@ include $(P)/Makefile.common
 # Make the list of compiled files
 #
 OBJ_CORE = Verbose.o Exception.o OpenGL.o Window.o
-OBJ_IMGUI = ImGUI.o
+OBJ_IMGUI = DearImGui.o
 OBJS += $(OBJ_CORE) $(OBJ_IMGUI)
 ifeq ($(ARCHI),Darwin)
 THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/*.o)
@@ -65,18 +65,11 @@ check: unit-tests
 # Install project. You need to be root.
 .PHONY: install
 install: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
-	@$(call RULE_INSTALL_DOC)
-	@cd examples && for d in `find . -type d`; do install -d --mode 755 "$$d" "$(PROJECT_DATA_ROOT)/examples/$$d"; done
-	@cd examples && for f in `find . -type f`; do install -D --mode 644 "$$f" "$(PROJECT_DATA_ROOT)/examples/$$f"; done
-	@$(call RULE_INSTALL_LIBRARIES)
-	@$(call RULE_INSTALL_HEADER_FILES)
-	@cd src && for d in `find . -type d`; do install -d --mode 755 "$$d" "$(INCLDIR)/$(PROJECT)/$$d"; done
-	@cd src && for f in `find . -type f -name "*.hpp"`; do install -D --mode 644 "$$f" "$(INCLDIR)/$(PROJECT)/$$f"; done
-	@install -d --mode 755 "$(INCLDIR)/$(PROJECT)/SOIL"
-	@cd $(THIRDPART)/SOIL/src && for f in `find . -type f -name "*.h"`; do install -D --mode 644 "$$f" "$(INCLDIR)/$(PROJECT)/SOIL/$$f"; done
-	@install -d --mode 755 "$(INCLDIR)/$(PROJECT)/imgui"
-	@cd $(THIRDPART)/imgui && for f in `find . -maxdepth 1 -mindepth 1 -type f -name "*.h"`; do install -D --mode 644 "$$f" "$(INCLDIR)/$(PROJECT)/imgui/$$f"; done
-	@$(call RULE_INSTALL_PKG_CONFIG)
+	@$(call INSTALL_DOCUMENTATION)
+	@$(call INSTALL_PROJECT_LIBRARIES)
+	@$(call INSTALL_PROJECT_HEADERS)
+	@$(call INSTALL_THIRDPART_FOLDER,SOIL/src,SOIL,-name "*.h")
+	@$(call INSTALL_THIRDPART_FILES,imgui,imgui,-name "*.h")
 
 ###################################################
 # Uninstall the project. You need to be root. FIXME: to be updated
