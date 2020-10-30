@@ -1,3 +1,13 @@
+version 0.9.2:
+
+    Allow accessing shader uniforms before their creation (when GLProgram is compiled).
+    Cleaning ScenGraph, Geometry, first import for materials.
+    Add new operators for Shader for helping generating shaders.
+    Removed deprecated shader tokens: varying, gl_FragColor.
+    Solved some fixes in textures, keyboard, io callbacks, OpenGL context.
+    Reworked and added examples.
+    Updated Makefile, doc.
+
 version 0.9.1:
 
     OpenGL context created sooner.
