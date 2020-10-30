@@ -29,8 +29,6 @@
 #  include "Math/Vector.hpp"
 #  include <cassert>
 
-namespace glwrap
-{
 namespace matrix
 {
 
@@ -852,7 +850,5 @@ std::ostream& operator<<(std::ostream& os, Matrix<T, rows, cols> const& m)
 #  undef DEFINE_INPLACE_SCALAR_OPERATOR
 #  undef DEFINE_INPLACE_OPERATORS
 #  undef DEFINE_RELATIONAL_OPERATORS
-
-} // namespace glwrap
 
 #endif // OPENGLCPPWRAPPER_MATRIX_HPP

@@ -30,17 +30,14 @@
 // and the book: "Game Physics Engine Development" by Ian Millington
 // *****************************************************************************
 
+#  include "Common/NonCppStd.hpp"
+#  include "Math/Maths.hpp"
 #  include <initializer_list>
 #  include <algorithm>
-#  include "Common/NonCppStd.hpp"
 #  include <cstdint>
 #  include <cassert>
 #  include <cmath>
 #  include <fstream>
-#  include "Math/Maths.hpp"
-
-namespace glwrap
-{
 
 // *****************************************************************************
 //! \brief Macro for building constructors
@@ -1100,7 +1097,5 @@ typedef Vector<double, 4_z> Vector4g;
 #  undef DEFINE_FUN1_OPERATOR
 #  undef DEFINE_FUN2_OPERATOR
 #  undef DEFINE_BOOL_OPERATOR
-
-} // namespace glwrap
 
 #endif // OPENGLCPPWRAPPER_VECTOR_HPP

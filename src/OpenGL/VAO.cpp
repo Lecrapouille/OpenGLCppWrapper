@@ -24,13 +24,4 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
-#  define OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
-
-#  include "OpenGL/GLObject.hpp"
-
-class GLVAO: public GLObject<GLenum>
-{
-};
-
-#endif // OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
+#include "VAO.hpp"

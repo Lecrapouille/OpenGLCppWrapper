@@ -36,69 +36,7 @@
 //!   - GLSamplerCube:
 // *****************************************************************************
 
-#  include "OpenGL/Uniform.hpp"
-
-namespace glwrap
-{
-
-//! \brief Used by GLProgram
-DECLARE_CLASS(GLSampler);
-
-// *****************************************************************************
-//! \brief A GLSampler is an OpenGL uniform for texture.
-// *****************************************************************************
-class GLSampler: public IGLUniform
-{
-public:
-
-  //----------------------------------------------------------------------------
-  //! \brief See GLLocation constructor.
-  //! \param name
-  //! \param gltype
-  //! \param texture_id count texture.
-  //! \param prog
-  //----------------------------------------------------------------------------
-  GLSampler(const char *name, const GLint gltype, const GLenum texture_id,
-            const GLuint prog)
-    : IGLUniform(name, 0, gltype, prog),
-      m_texture_id(texture_id)
-  {
-    redoUpdate();
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief Return the texture identifier.
-  //----------------------------------------------------------------------------
-  inline GLint textureID() const
-  {
-    return static_cast<GLint>(m_texture_id);
-  }
-
-private:
-
-  //----------------------------------------------------------------------------
-  //! \brief
-  //----------------------------------------------------------------------------
-  virtual void activate() override
-  {
-    DEBUG("Sampler '%s' activate GL_TEXTURE0 + %u", cname(), m_texture_id);
-    glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_id));
-  }
-
-  //----------------------------------------------------------------------------
-  //! \brief
-  //----------------------------------------------------------------------------
-  virtual bool update() override
-  {
-    DEBUG("Sampler '%s' update", cname());
-    glCheck(glUniform1i(m_handle, textureID()));
-    return false;
-  }
-
-protected:
-
-  const GLenum m_texture_id;
-};
+#  include "OpenGL/Sampler.hpp"
 
 // *****************************************************************************
 //! \brief Sampler for 1D texture.
@@ -107,12 +45,12 @@ class GLSampler1D: public GLSampler
 {
 public:
 
-  //----------------------------------------------------------------------------
-  //! \brief See GLLocation constructor.
-  //----------------------------------------------------------------------------
-  GLSampler1D(const char *name, const GLenum texture_id, const GLuint prog)
-    : GLSampler(name, GL_SAMPLER_1D, texture_id, prog)
-  {}
+    //----------------------------------------------------------------------------
+    //! \brief See GLLocation constructor.
+    //----------------------------------------------------------------------------
+    GLSampler1D(const char *name, const GLenum texture_id, const GLuint prog)
+        : GLSampler(name, GL_SAMPLER_1D, texture_id, prog)
+    {}
 };
 
 // *****************************************************************************
@@ -122,12 +60,12 @@ class GLSampler2D: public GLSampler
 {
 public:
 
-  //----------------------------------------------------------------------------
-  //! \brief See GLLocation constructor.
-  //----------------------------------------------------------------------------
-  GLSampler2D(const char *name, const GLenum texture_id, const GLuint prog)
-    : GLSampler(name, GL_SAMPLER_2D, texture_id, prog)
-  {}
+    //----------------------------------------------------------------------------
+    //! \brief See GLLocation constructor.
+    //----------------------------------------------------------------------------
+    GLSampler2D(const char *name, const GLenum texture_id, const GLuint prog)
+        : GLSampler(name, GL_SAMPLER_2D, texture_id, prog)
+    {}
 };
 
 // *****************************************************************************
@@ -137,12 +75,12 @@ class GLSampler3D: public GLSampler
 {
 public:
 
-  //----------------------------------------------------------------------------
-  //! \brief See GLLocation constructor.
-  //----------------------------------------------------------------------------
-  GLSampler3D(const char *name, const GLenum texture_id, const GLuint prog)
-    : GLSampler(name, GL_SAMPLER_3D, texture_id, prog)
-  {}
+    //----------------------------------------------------------------------------
+    //! \brief See GLLocation constructor.
+    //----------------------------------------------------------------------------
+    GLSampler3D(const char *name, const GLenum texture_id, const GLuint prog)
+        : GLSampler(name, GL_SAMPLER_3D, texture_id, prog)
+    {}
 };
 
 // *****************************************************************************
@@ -152,14 +90,12 @@ class GLSamplerCube: public GLSampler
 {
 public:
 
-  //----------------------------------------------------------------------------
-  //! \brief See GLLocation constructor.
-  //----------------------------------------------------------------------------
-  GLSamplerCube(const char *name, const GLenum texture_id, const GLuint prog)
-    : GLSampler(name, GL_SAMPLER_CUBE, texture_id, prog)
-  {}
+    //----------------------------------------------------------------------------
+    //! \brief See GLLocation constructor.
+    //----------------------------------------------------------------------------
+    GLSamplerCube(const char *name, const GLenum texture_id, const GLuint prog)
+        : GLSampler(name, GL_SAMPLER_CUBE, texture_id, prog)
+    {}
 };
-
-} // namespace glwrap
 
 #endif // OPENGLCPPWRAPPER_GLSAMPLERS_HPP

@@ -1,10 +1,29 @@
 #ifndef OPENGLCPPWRAPPER_NONCPPSTD_HPP
 #  define OPENGLCPPWRAPPER_NONCPPSTD_HPP
 
-#  include "Common/Verbose.hpp"
-#  include "Common/Profiler.hpp"
 #  include <cstddef>
 #  include <memory>
+
+// *****************************************************************************
+//! \brief FNV-1a 32bit hashing algorithm.
+//! See https://gist.github.com/Lee-R/3839813
+// *****************************************************************************
+constexpr uint32_t hashing(char const* s, std::size_t count)
+{
+    return ((count ? hashing(s, count - 1) : 2166136261u) ^ uint32_t(s[count]))
+            * 16777619u;
+}
+
+// *****************************************************************************
+//! \brief Create hash of string.
+//! \code
+//! const uint32_t Type = "Component"_hash;
+//! \endcode
+// *****************************************************************************
+constexpr uint32_t operator"" _hash(char const* s, std::size_t count)
+{
+    return hashing(s, count);
+}
 
 // *****************************************************************************
 //! \brief Allows to create literal values of type std::size_t In the same way

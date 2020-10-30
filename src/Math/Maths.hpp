@@ -28,8 +28,6 @@
 #  include <limits>
 #  include <random>
 
-namespace glwrap
-{
   namespace maths
   {
     //! \brief Allow to redefine neutral and/or absorbing element in algebra.
@@ -344,6 +342,5 @@ namespace glwrap
       return x * x * x * (x * (x * T(6) - T(15)) + T(10));
     }
   } // namespace maths
-} // namespace glwrap
 
 #endif

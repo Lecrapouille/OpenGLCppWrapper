@@ -16,33 +16,30 @@
 #  define OPENGLCPPWRAPPER_EXCEPTION_HPP
 
 #  include <typeinfo>
-#  include "Common/NonCppStd.hpp"
+#  include "NonCppStd.hpp"
 
-namespace glwrap
-{
-
-class Exception: public std::exception
+class BaseException: public std::exception
 /// Base class for all exceptions defined in this project.
 {
 public:
 
-  Exception(const std::string& msg, int code = 0);
+  BaseException(const std::string& msg, int code = 0);
   /// Creates an exception.
 
-  Exception(const std::string& msg, const std::string& arg, int code = 0);
+  BaseException(const std::string& msg, const std::string& arg, int code = 0);
   /// Creates an exception.
 
-  Exception(const std::string& msg, const Exception& nested, int code = 0);
+  BaseException(const std::string& msg, const BaseException& nested, int code = 0);
   /// Creates an exception and stores a clone
   /// of the nested exception.
 
-  Exception(const Exception& exc);
+  BaseException(const BaseException& exc);
   /// Copy constructor.
 
-  ~Exception(); /* throw() */
+  ~BaseException(); /* throw() */
   /// Destroys the exception and deletes the nested exception.
 
-  Exception& operator = (const Exception& exc);
+  BaseException& operator = (const BaseException& exc);
   /// Assignment operator.
 
   virtual const char* name() const; /* throw() */
@@ -56,7 +53,7 @@ public:
   ///
   /// Same as name(), but for compatibility with std::exception.
 
-  const Exception* nested() const;
+  const BaseException* nested() const;
   /// Returns a pointer to the nested exception, or
   /// null if no nested exception exists.
 
@@ -70,7 +67,7 @@ public:
   /// Returns a string consisting of the
   /// message name and the message text.
 
-  virtual Exception* clone() const;
+  virtual BaseException* clone() const;
   /// Creates an exact copy of the exception.
   ///
   /// The copy can later be thrown again by
@@ -85,7 +82,7 @@ public:
 
 protected:
 
-  Exception(int code = 0);
+  BaseException(int code = 0);
   /// Standard constructor.
 
   void message(const std::string& msg);
@@ -96,7 +93,7 @@ protected:
 
  protected:
   std::string m_msg;
-  Exception*  m_pNested;
+  BaseException*  m_pNested;
   int         m_code;
 };
 
@@ -104,30 +101,28 @@ protected:
 //
 // inlines
 //
-inline const Exception* Exception::nested() const
+inline const BaseException* BaseException::nested() const
 {
   return m_pNested;
 }
 
 
-inline const std::string& Exception::message() const
+inline const std::string& BaseException::message() const
 {
   return m_msg;
 }
 
 
-inline void Exception::message(const std::string& msg)
+inline void BaseException::message(const std::string& msg)
 {
   m_msg = msg;
 }
 
 
-inline int Exception::code() const
+inline int BaseException::code() const
 {
   return m_code;
 }
-
-} // namespace glwrap
 
 //
 // Macros for quickly declaring and implementing exception classes.
@@ -142,13 +137,13 @@ inline int Exception::code() const
     CLS(int code = CODE);                                               \
     CLS(const std::string& msg, int code = CODE);                       \
     CLS(const std::string& msg, const std::string& arg, int code = CODE); \
-    CLS(const std::string& msg, const Exception& exc, int code = CODE); \
+    CLS(const std::string& msg, const BaseException& exc, int code = CODE); \
     CLS(const CLS& exc);                                                \
     ~CLS(); /* throw() */                                               \
     CLS& operator = (const CLS& exc);                                   \
     const char* name() const; /* throw() */                             \
     const char* className() const; /* throw() */                        \
-    Exception* clone() const;                                           \
+    BaseException* clone() const;                                           \
     void rethrow() const;                                               \
   };
 
@@ -167,7 +162,7 @@ inline int Exception::code() const
     : BASE(msg, arg, code)                                              \
   {                                                                     \
   }                                                                     \
-  CLS::CLS(const std::string& msg, const Exception& exc, int code)      \
+  CLS::CLS(const std::string& msg, const BaseException& exc, int code)      \
     : BASE(msg, exc, code)                                              \
   {                                                                     \
   }                                                                     \
@@ -190,7 +185,7 @@ inline int Exception::code() const
   {                                                                     \
     return typeid(*this).name();                                        \
   }                                                                     \
-  Exception* CLS::clone() const                                         \
+  BaseException* CLS::clone() const                                         \
   {                                                                     \
     return new CLS(*this);                                              \
   }                                                                     \

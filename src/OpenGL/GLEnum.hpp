@@ -119,21 +119,4 @@ enum class FrameBuffer : GLenum
     /* 0x1802 */ STENCIL = GL_STENCIL_BUFFER_BIT,
   };
 
-//! \brief Mode for drawing primitives (points, lines, triangles ...)
-enum class Mode : GLenum
-  {
-    /* 0x0000 */ POINTS = GL_POINTS,
-    /* 0x0001 */ LINES = GL_LINES,
-    /* 0x0002 */ LINE_LOOP = GL_LINE_LOOP,
-    /* 0x0003 */ LINE_STRIP = GL_LINE_STRIP,
-    /* 0x0004 */ TRIANGLES = GL_TRIANGLES,
-    /* 0x0005 */ TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
-    /* 0x0006 */ TRIANGLE_FAN = GL_TRIANGLE_FAN,
-    /* 0x000A */ LINES_ADJACENCY = GL_LINES_ADJACENCY,
-    /* 0x000B */ LINE_STRIP_ADJACENCY = GL_LINE_STRIP_ADJACENCY,
-    /* 0x000C */ TRIANGLES_ADJACENCY = GL_TRIANGLES_ADJACENCY,
-    /* 0x000D */ TRIANGLE_STRIP_ADJACENCY = GL_TRIANGLE_STRIP_ADJACENCY,
-    /* 0x000E */ PATCHES = GL_PATCHES,
-  };
-
 #endif // OPENGLCPPWRAPPER_GLENUM_HPP

@@ -25,13 +25,11 @@
 //! \file GLWindow.hpp manages a window and its i/o for drawing OpenGL scenes.
 // *****************************************************************************
 
-#  include "OpenGL/OpenGL.hpp"
+#  include "OpenGL/Context.hpp"
 #  include "Math/Vector.hpp"
 #  include <GLFW/glfw3.h>
 #  include <mutex>
 
-namespace glwrap
-{
 namespace window
 {
   static bool const KEY_PRESS = true;
@@ -262,7 +260,7 @@ private:
   //! \brief Add here all stuffs concerning the init of your 3D game.
   //! \return false for aborting start(), else true for continuing.
   //----------------------------------------------------------------------------
-  virtual bool setup() = 0;
+  virtual bool onSetup() = 0;
 
   //----------------------------------------------------------------------------
   //! \brief Callback triggered when the method setup() failed. By default this
@@ -275,7 +273,7 @@ private:
   //! displayed. This method is called by the start() method.
   //! \return false for halting start(), else return true for continuing.
   //----------------------------------------------------------------------------
-  virtual bool draw() = 0;
+  virtual bool onDraw() = 0;
 
   //----------------------------------------------------------------------------
   //! \brief Callback triggered when the method draw() failed. By default this
@@ -314,7 +312,5 @@ private:
   std::vector<char> m_currentKeys;
   mutable std::mutex m_mutex;
 };
-
-} // namespace glwrap
 
 #endif // OPENGLCPPWRAPPER_GLWINDOW_HPP

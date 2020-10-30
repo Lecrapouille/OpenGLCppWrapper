@@ -24,75 +24,77 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_GLATTRIBUTES_HPP
-#  define OPENGLCPPWRAPPER_GLATTRIBUTES_HPP
+#ifndef OPENGLCPPWRAPPER_GLSAMPLER_HPP
+#  define OPENGLCPPWRAPPER_GLSAMPLER_HPP
+
+// *****************************************************************************
+//! \file Sampler.hpp file implements:
+//!   - GLSampler:
+//!   - GLSampler1D:
+//!   - GLSampler2D:
+//!   - GLSampler3D:
+//!   - GLSamplerCube:
+// *****************************************************************************
 
 #  include "OpenGL/Location.hpp"
-#  include <cassert>
+
+//! \brief Used by GLProgram
+DECLARE_CLASS(GLSampler);
 
 // *****************************************************************************
-//! \class GLAttribute LocationAttribute.hpp
-//! \ingroup OpenGL
-//!
-//! \brief Represent an attribute variable used in a GLSL shader program.
-//!
-//! This class only stores information about the attribute variable (dimension,
-//! type). These information are used by GLProgam when a VAO is bind to it for
-//! creating GLVBO inside the VAO. GLAttribute should be used directly by the
-//! user, it is an internal class for GLProgram.
+//! \brief A GLSampler is an OpenGL uniform for texture.
 // *****************************************************************************
-class GLAttribute: public GLLocation
+class GLSampler: public GLLocation
 {
 public:
 
     //--------------------------------------------------------------------------
     //! \brief See GLLocation constructor.
-    //! \param[in] name Give a name to the instance. GLProgram uses these names in
-    //! their internal hash table.
-    //! \param[in] dim set the dimension of variable (1 for scalar else the
-    //! dimension for vector)
-    //! \param[in] gltype set the OpenGL type of data (GL_FLOAT ...)
-    //! \param[in] prog the handle of the GLProgram (which is the owner of this
-    //! instance).
+    //! \param name
+    //! \param gltype
+    //! \param texture_id count texture.
+    //! \param prog
     //--------------------------------------------------------------------------
-    GLAttribute(const char *name, const GLint dim, const GLint gltype, const GLuint prog)
-        : GLLocation(name, dim, static_cast<GLenum>(gltype), prog)
+    GLSampler(const char *name, const GLint gltype, const size_t texture_id,
+              const GLuint prog)
+        : GLLocation(name, 0, static_cast<GLenum>(gltype), prog),
+          m_texture_id(GLenum(texture_id))
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Destructor. Release elements from CPU and GPU.
+    //--------------------------------------------------------------------------
+    virtual ~GLSampler() override
     {
-        assert((dim >= 1) && (dim <= 4));
+        release();
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Destructor. Release elements in CPU and GPU memories.
+    //! \brief Return the texture identifier.
     //--------------------------------------------------------------------------
-    virtual ~GLAttribute() override
+    inline GLint textureID() const
     {
-        release();
+        return static_cast<GLint>(m_texture_id);
     }
 
 private:
 
     //--------------------------------------------------------------------------
-    //! \brief Create a new OpenGL Attribute.
+    //! \brief Create a new OpenGL Uniform.
     //--------------------------------------------------------------------------
     virtual bool onCreate() override
     {
-        m_handle = glCheck(glGetAttribLocation(m_program, cname()));
-        m_index = static_cast<GLuint>(m_handle);
+        m_handle = glCheck(glGetUniformLocation(m_program, cname()));
         return false;
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Bind the OpenGL Attribute.
+    //! \brief Bind the OpenGL Uniform. This is a dummy method. No
+    //! action is made.
     //--------------------------------------------------------------------------
     virtual void onActivate() override
     {
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wold-style-cast"
-        glCheck(glEnableVertexAttribArray(m_index)); // FIXME avant ou apres ?
-        glCheck(glVertexAttribPointer(m_index, m_size, m_target, GL_FALSE,
-                                      static_cast<GLsizei>(m_stride),
-                                      (void*) m_offset));
-#  pragma GCC diagnostic pop
+        glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_id));
     }
 
     //--------------------------------------------------------------------------
@@ -109,40 +111,29 @@ private:
     //--------------------------------------------------------------------------
     virtual bool onUpdate() override
     {
+        glCheck(glUniform1i(m_handle, textureID()));
         return false;
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Unbind the OpenGL Attribute.
+    //! \brief Unbind the OpenGL Uniform. This is a dummy method. No
+    //! action is made.
     //--------------------------------------------------------------------------
     virtual void onDeactivate() override
-    {
-        glCheck(glDisableVertexAttribArray(m_index));
-    }
+    {}
 
     //--------------------------------------------------------------------------
-    //! \brief Destroy the OpenGL Attribute. This is a dummy method. No
+    //! \brief Destroy the OpenGL Uniform. This is a dummy method. No
     //! action is made.
     //--------------------------------------------------------------------------
     virtual void onRelease() override
     {
         //GLLocation::onRelease();
-        m_index = 0;
-        m_stride = 0;
-        m_offset = 0;
     }
 
-private:
+protected:
 
-    //! \brief Hack ! This is an alias for m_handle but with a different type.
-    GLuint m_index = 0;
-    //! \brief Specifies the byte offset between consecutive generic vertex
-    //! attributes. See OpenGL API doc for glVertexAttribPointer().
-    size_t m_stride = 0;
-    //! \brief Specifies a offset of the first component of the first generic
-    //! vertex attribute in the array in the data store. See OpenGL API doc for
-    //! glVertexAttribPointer().
-    size_t m_offset = 0;
+    const GLenum m_texture_id;
 };
 
-#endif // OPENGLCPPWRAPPER_GLATTRIBUTES_HPP
+#endif // OPENGLCPPWRAPPER_GLSAMPLER_HPP

@@ -36,9 +36,11 @@ include $(P)/Makefile.common
 ###################################################
 # Make the list of compiled files
 #
-OBJ_CORE = Verbose.o Exception.o OpenGL.o Window.o
-OBJ_IMGUI = DearImGui.o
-OBJS += $(OBJ_CORE) $(OBJ_IMGUI)
+OBJ_COMMON = Exception.o
+OBJ_OPENGL = Context.o Shader.o  Program.o
+OBJ_UI = Window.o # DearImGui.o
+OBJS += $(OBJ_COMMON) $(OBJ_OPENGL) $(OBJ_UI) main.o # TEMPORARY
+
 ifeq ($(ARCHI),Darwin)
 THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/*.o)
 else
@@ -47,7 +49,8 @@ endif
 
 ###################################################
 # Compile static and shared libraries
-all: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
+all: $(TARGET)
+# TODO TEMPORARY $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
 
 ###################################################
 # Compile and launch unit tests and generate the code coverage html report.

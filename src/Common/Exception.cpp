@@ -7,25 +7,18 @@
 // For more informations, see official Poco webpage: https://pocoproject.org/index.html
 
 
-#include "Common/Exception.hpp"
+#include "Exception.hpp"
 
-namespace glwrap
-{
-
-Exception::Exception(int code)
+BaseException::BaseException(int code)
   : m_pNested(0), m_code(code)
-{
-  DEBUG("Exception %u", code);
-}
+{}
 
-Exception::Exception(const std::string& msg, int code)
+BaseException::BaseException(const std::string& msg, int code)
   : m_msg(msg), m_pNested(0), m_code(code)
-{
-  DEBUG("Exception %u '%s'", code, msg.c_str());
-}
+{}
 
 
-Exception::Exception(const std::string& msg, const std::string& arg, int code)
+BaseException::BaseException(const std::string& msg, const std::string& arg, int code)
   : m_msg(msg), m_pNested(0), m_code(code)
 {
   if (!arg.empty())
@@ -33,17 +26,16 @@ Exception::Exception(const std::string& msg, const std::string& arg, int code)
       m_msg.append(": ");
       m_msg.append(arg);
     }
-  DEBUG("Exception %u '%s'", code, m_msg.c_str());
 }
 
 
-Exception::Exception(const std::string& msg, const Exception& nested, int code)
+BaseException::BaseException(const std::string& msg, const BaseException& nested, int code)
   : m_msg(msg), m_pNested(nested.clone()), m_code(code)
 {
 }
 
 
-Exception::Exception(const Exception& exc)
+BaseException::BaseException(const BaseException& exc)
   : std::exception(exc),
     m_msg(exc.m_msg),
     m_code(exc.m_code)
@@ -52,17 +44,17 @@ Exception::Exception(const Exception& exc)
 }
 
 
-Exception::~Exception() /* throw() */
+BaseException::~BaseException() /* throw() */
 {
   delete m_pNested;
 }
 
 
-Exception& Exception::operator = (const Exception& exc)
+BaseException& BaseException::operator = (const BaseException& exc)
 {
   if (&exc != this)
     {
-      Exception* newPNested = exc.m_pNested ? exc.m_pNested->clone() : 0;
+      BaseException* newPNested = exc.m_pNested ? exc.m_pNested->clone() : 0;
       delete m_pNested;
       m_msg     = exc.m_msg;
       m_pNested = newPNested;
@@ -72,25 +64,25 @@ Exception& Exception::operator = (const Exception& exc)
 }
 
 
-const char* Exception::name() const /* throw() */
+const char* BaseException::name() const /* throw() */
 {
-  return "Exception";
+  return "BaseException";
 }
 
 
-const char* Exception::className() const /* throw() */
+const char* BaseException::className() const /* throw() */
 {
   return typeid(*this).name();
 }
 
 
-const char* Exception::what() const noexcept /* throw() */
+const char* BaseException::what() const noexcept /* throw() */
 {
   return name();
 }
 
 
-std::string Exception::displayText() const
+std::string BaseException::displayText() const
 {
   std::string txt = name();
   if (!m_msg.empty())
@@ -102,7 +94,7 @@ std::string Exception::displayText() const
 }
 
 
-void Exception::extendedMessage(const std::string& arg)
+void BaseException::extendedMessage(const std::string& arg)
 {
   if (!arg.empty())
     {
@@ -112,15 +104,13 @@ void Exception::extendedMessage(const std::string& arg)
 }
 
 
-Exception* Exception::clone() const
+BaseException* BaseException::clone() const
 {
-  return new Exception(*this);
+  return new BaseException(*this);
 }
 
 
-NORETURN void Exception::rethrow() const
+NORETURN void BaseException::rethrow() const
 {
   throw *this;
 }
-
-} // namespace glwrap
