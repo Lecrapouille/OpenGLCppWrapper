@@ -37,7 +37,7 @@ include $(P)/Makefile.common
 # Make the list of compiled files
 #
 OBJ_COMMON = Exception.o
-OBJ_OPENGL = Context.o Shader.o  Program.o
+OBJ_OPENGL = Context.o Shader.o Buffer.o Program.o VAO.o
 OBJ_UI = Window.o # DearImGui.o
 OBJS += $(OBJ_COMMON) $(OBJ_OPENGL) $(OBJ_UI) main.o # TEMPORARY
 

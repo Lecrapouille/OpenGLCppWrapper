@@ -21,20 +21,16 @@
 #ifndef OPENGLCPPWRAPPER_MEMORY_HPP
 #  define OPENGLCPPWRAPPER_MEMORY_HPP
 
-#  include "Common/NonCppStd.hpp"
 #  include <atomic>
+#  include <cstddef>
 
-namespace glwrap
+//----------------------------------------------------------------------------
+//! \brief Track the estimated usage of GPU memory in kilo bytes.
+//----------------------------------------------------------------------------
+inline std::atomic<size_t>& GPUMemory()
 {
-  //----------------------------------------------------------------------------
-  //! \brief Track the usage of the estimated GPU memory.
-  //! \return The estimated GPU used by this program in kilo bytes.
-  //----------------------------------------------------------------------------
-  inline std::atomic<size_t>& GPUMemory()
-  {
-    static std::atomic<size_t> mem_gpu{0_z};
+    static std::atomic<size_t> mem_gpu{0u};
     return mem_gpu;
-  }
-} // namespace glwrap
+}
 
 #endif // OPENGLCPPWRAPPER_MEMORY_HPP

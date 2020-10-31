@@ -27,11 +27,11 @@
 #ifndef OPENGLCPPWRAPPER_GLPROGRAM_HPP
 #  define OPENGLCPPWRAPPER_GLPROGRAM_HPP
 
-#  include "OpenGL/VAO.hpp"
 #  include "OpenGL/Shaders.hpp"
 #  include "OpenGL/Attribute.hpp"
 #  include "OpenGL/Uniform.hpp"
 #  include "OpenGL/Samplers.hpp"
+#  include "OpenGL/VAO.hpp"
 #  include "Common/Any.hpp"
 
 //! \brief Mode for drawing primitives (points, lines, triangles ...)
@@ -56,6 +56,12 @@ enum class Mode : GLenum
 // *****************************************************************************
 class GLProgram: public GLObject<GLenum>
 {
+    friend class GLVAO;
+    using Shaders = std::vector<GLShader*>;
+    using Attributes = std::map<std::string, std::shared_ptr<GLAttribute>>;
+    using Uniforms = Any;
+    using Samplers = Any;
+
 public:
 
     //--------------------------------------------------------------------------
@@ -137,7 +143,8 @@ public:
     //! compiled (syntax errors in shader code) or if the VOA has already been
     //! bound by another GLProgram (incompatibility).
     //--------------------------------------------------------------------------
-    bool bind(GLVAO& vao);
+    bool bind(GLVAO& vao, BufferUsage const usage = BufferUsage::STATIC_DRAW,
+              size_t const size = 0u);
 
     //--------------------------------------------------------------------------
     //! \brief Check if a VAO is bound with this GLProgram.
@@ -395,6 +402,16 @@ public:
 
 private:
 
+    Attributes const& attributes() const
+    {
+        return m_attributes;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Do the shader compilation
+    //--------------------------------------------------------------------------
+    bool compile();
+
     //--------------------------------------------------------------------------
     //! \brief Throw GL::Exception if GLProgram cannot be compiled (due to
     //! errors in shaders code source).
@@ -510,11 +527,6 @@ private:
     void doDraw(Mode const mode, size_t const first, size_t const count);
 
 private:
-
-    using Shaders = std::vector<GLShader*>;
-    using Attributes = std::map<std::string, std::shared_ptr<GLAttribute>>;
-    using Uniforms = Any;
-    using Samplers = Any;
 
     //! \brief Hold class holding shader code source.
     //! \note pointer is to avoid copy because of deleted copy constructor.

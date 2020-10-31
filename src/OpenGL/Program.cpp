@@ -58,10 +58,42 @@ void GLProgram::concatError(std::string const& msg)
 }
 
 //----------------------------------------------------------------------------
-bool GLProgram::bind(GLVAO& vao)
+bool GLProgram::bind(GLVAO& vao, BufferUsage const usage, size_t const vbo_size)
 {
-    // TODO
-    return false;
+    // Try compile the GLProgram if not previously compiled
+    if (unlikely(!hasBeenCompiled()))
+    {
+        if (!compile())
+        {
+            std::cerr << "Tried to bind VAO '"
+                      << vao.name()
+                      << "' to a GLProgram '"
+                      << name() << " that failed to compile"
+                      << std::endl;
+            return false;
+        }
+    }
+
+    if (unlikely(vao.isBound(0u)))
+    {
+        // When binding the VAO to GLProgram for the first time:
+        // populate VBOs and textures in the VAO.
+        vao.init(*this, usage, vbo_size);
+    }
+    else if (unlikely(!vao.isBound(m_handle)))
+    {
+        // Check if VAO has been previously bind by this GLProgram. If not
+        // This is probably an error of the developper.
+        std::cerr << "Tried to bind VAO '"
+                  << vao.name()
+                  << " already bound to another GLProgram than '"
+                  << name() << std::endl;
+        return false;
+    }
+
+    // Bind the VAO to the GLProgram. This relationship is now unbreakable
+    m_vao = &vao;
+    return true;
 }
 
 //----------------------------------------------------------------------------
@@ -98,8 +130,7 @@ bool GLProgram::compile(GLVertexShader& vertex, GLFragmentShader& fragment)
     m_shaders.clear();
     m_shaders.push_back(&vertex);
     m_shaders.push_back(&fragment);
-    begin();
-    return !needSetup();
+    return compile();
 }
 
 //--------------------------------------------------------------------------
@@ -110,6 +141,12 @@ bool GLProgram::compile(GLVertexShader& vertex, GLFragmentShader& fragment,
     m_shaders.push_back(&vertex);
     m_shaders.push_back(&fragment);
     m_shaders.push_back(&geometry);
+    return compile();
+}
+
+//--------------------------------------------------------------------------
+bool GLProgram::compile()
+{
     begin();
     return !needSetup();
 }
@@ -517,7 +554,7 @@ void GLProgram::throw_if_vao_cannot_be_bound(GLVAO& vao)
 //----------------------------------------------------------------------------
 void GLProgram::throw_if_vao_not_bound()
 {
-    if (unlikely(!isBound()))
+    if (unlikely(m_vao == nullptr))
     {
         throw GL::Exception("Failed OpenGL program has not been bound to a VAO");
     }

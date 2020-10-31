@@ -24,12 +24,4 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_GLTEXTURES_HPP
-#  define OPENGLCPPWRAPPER_GLTEXTURES_HPP
-
-#  include "OpenGL/Texture1D.hpp"
-#  include "OpenGL/Texture2D.hpp"
-#  include "OpenGL/Texture3D.hpp"
-#  include "OpenGL/TextureCube.hpp"
-
-#endif // OPENGLCPPWRAPPER_GLTEXTURES_HPP
+#include "OpenGL/Buffer.hpp"

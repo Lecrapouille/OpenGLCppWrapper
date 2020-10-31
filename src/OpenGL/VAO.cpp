@@ -24,4 +24,74 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#include "VAO.hpp"
+#include "OpenGL/VAO.hpp"
+#include "OpenGL/Program.hpp"
+
+//uint32_t count() { return static_cast<uint32_t>(m_vbos.begin()->second->size())); }
+
+//----------------------------------------------------------------------------
+//! \brief Populate the VAO with a list of VBOs and textures. The
+//! number depends on the number of shader attributes and uniform
+//! texture samplers.
+//----------------------------------------------------------------------------
+void GLVAO::init(GLProgram& prog, BufferUsage const usage, size_t const vbo_size)
+{
+    // Create a list of VBOs. TODO: manage integers
+    for (auto& it: prog.attributes())
+    {
+        const char *name = it.first.c_str();
+        switch (it.second->size())
+        {
+        case 1:
+            m_vbos.add(name, std::make_shared<GLVertexBuffer<float>>
+                       (name, vbo_size, usage));
+            break;
+        case 2:
+            m_vbos.add(name, std::make_shared<GLVertexBuffer<Vector2f>>
+                       (name, vbo_size, usage));
+            break;
+        case 3:
+            m_vbos.add(name, std::make_shared<GLVertexBuffer<Vector3f>>
+                       (name, vbo_size, usage));
+            break;
+        case 4:
+            m_vbos.add(name, std::make_shared<GLVertexBuffer<Vector4f>>
+                       (name, vbo_size, usage));
+            break;
+        default:
+            throw GL::Exception("Attribute with dimension > 4 is not managed");
+            break;
+        }
+    }
+
+#if 0
+    // Create a list of textures
+    for (auto& it: m_samplers)
+    {
+        const char *name = it.first.c_str();
+        const GLenum gltype = it.second->target();
+        switch (gltype)
+        {
+        case GL_SAMPLER_1D:
+            createTexture<GLTexture1D>(name);
+            break;
+        case GL_SAMPLER_2D:
+            createTexture<GLTexture2D>(name);
+            //FIXME createTexture<GLTextureDepth2D>(name);
+            break;
+        case GL_SAMPLER_3D:
+            createTexture<GLTexture3D>(name);
+            break;
+        case GL_SAMPLER_CUBE:
+            createTexture<GLTextureCube>(name);
+            break;
+        default:
+            ERROR("This kind of sampler is not yet managed: %u", gltype);
+            break;
+        }
+    }
+#endif
+
+    // Make VAO and GLProgram be coupled.
+    m_prog_id = prog.handle();
+}

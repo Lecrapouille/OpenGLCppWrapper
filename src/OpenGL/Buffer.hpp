@@ -1,0 +1,172 @@
+//=====================================================================
+// OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of OpenGLCppWrapper.
+//
+// OpenGLCppWrapper is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+//
+// This file is a derived work of https://github.com/glumpy/glumpy
+//
+// Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
+// Distributed under the (new) BSD License.
+//=====================================================================
+
+#ifndef OPENGLCPPWRAPPER_GLBUFFER_HPP
+#  define OPENGLCPPWRAPPER_GLBUFFER_HPP
+
+#  include "OpenGL/GLObject.hpp"
+#  include "Common/PendingContainer.hpp"
+
+//! \brief Specifies the expected usage pattern of the data store for
+//! glBufferData.
+enum class BufferUsage : GLenum
+{
+    /* 0x88E0 */ STREAM_DRAW = GL_STREAM_DRAW,
+    /* 0x88E4 */ STATIC_DRAW = GL_STATIC_DRAW,
+    /* 0x88E8 */ DYNAMIC_DRAW = GL_DYNAMIC_DRAW,
+};
+
+// *****************************************************************************
+//! \brief GLBuffer is a class of contigous elements CPU side that is aware of
+//! area of dirty elements that needs to be updated to the GPU. GLBuffer can be
+//! used to store vertex data (VBO), pixel data retrieved from images (texture)
+//! or for framebuffer.
+// *****************************************************************************
+template<typename T>
+class GLBuffer: public GLObject<GLenum>, public PendingContainer<T>
+{
+public:
+
+    //--------------------------------------------------------------------------
+    //! \brief Constructor with the object name.
+    //! \param target: GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER ...
+    //! \param usage: GL_STATIC_DRAW, GL_DYNAMIC_DRAW ...
+    //--------------------------------------------------------------------------
+    explicit GLBuffer(std::string const& name, GLenum const target,
+                      BufferUsage const usage)
+        : GLObject(name)
+    {
+        GLObject::m_target = target;
+        m_usage = static_cast<GLenum>(usage);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Constructor with the object name and reserved number of elements.
+    //--------------------------------------------------------------------------
+    explicit GLBuffer(std::string const& name, GLenum const target,
+                      size_t const size, BufferUsage const usage)
+        : GLObject(name), PendingContainer<T>(size)
+    {
+        GLObject::m_target = target;
+        m_usage = static_cast<GLenum>(usage);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual ~GLBuffer() override
+    {
+        release();
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    inline GLenum usage() const
+    {
+        return m_usage;
+    }
+
+private:
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual bool onCreate() override
+    {
+        glCheck(glGenBuffers(1, &m_handle));
+        return false;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual void onActivate() override
+    {
+        glCheck(glBindBuffer(m_target, m_handle));
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual bool onSetup() override
+    {
+        const GLsizeiptr bytes = static_cast<GLsizeiptr>
+                                 (PendingContainer<T>::capacity() * sizeof (T));
+        glCheck(glBufferData(m_target, bytes, NULL, m_usage));
+
+        return false;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual inline bool needUpdate() const override
+    {
+        return PendingContainer<T>::isPending();
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual bool onUpdate() override
+    {
+        size_t pos_start, pos_end;
+        PendingContainer<T>::getPending(pos_start, pos_end);
+        PendingContainer<T>::clearPending();
+
+        size_t offset = sizeof (T) * pos_start;
+        size_t nbytes = sizeof (T) * (pos_end - pos_start);
+        glCheck(glBufferSubData(m_target,
+                                static_cast<GLintptr>(offset),
+                                static_cast<GLsizeiptr>(nbytes),
+                                PendingContainer<T>::to_array()));
+
+        return false;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual void onDeactivate() override
+    {
+        glCheck(glBindBuffer(m_target, 0));
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual void onRelease() override
+    {
+        glCheck(glDeleteBuffers(1, &m_handle));
+    }
+
+private:
+
+    GLenum m_usage;
+};
+
+#endif // OPENGLCPPWRAPPER_GLBUFFER_HPP

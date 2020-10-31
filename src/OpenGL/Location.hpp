@@ -34,9 +34,6 @@
 
 #  include "OpenGL/GLObject.hpp"
 
-// Used by GLProgram
-DECLARE_CLASS(GLLocation);
-
 // *****************************************************************************
 //! \class GLLocation Locations.hpp
 //! \ingroup OpenGL
