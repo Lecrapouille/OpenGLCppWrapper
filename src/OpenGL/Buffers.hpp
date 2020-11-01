@@ -38,6 +38,19 @@ class GLVertexBuffer: public GLBuffer<T>
 public:
 
     //--------------------------------------------------------------------------
+    //! \brief Allows:
+    //! \code
+    //!   GLVertexBuffer<float> vbo;
+    //!   vbo = { 1.0f, 2.0f };
+    //! \endcode
+    //! Else GLVertexBuffer define a couple of operator=() that hide the
+    //! operators inherited from GLBuffer. See
+    //! https://stackoverflow.com/questions/64633899/no-inheritance-found-with-
+    //! operator-and-initializer-list
+    //--------------------------------------------------------------------------
+    using GLBuffer<T>::operator=;
+
+    //--------------------------------------------------------------------------
     //! \brief Constructor with the object name and reserved number of
     //! elements.
     //--------------------------------------------------------------------------
@@ -45,15 +58,6 @@ public:
                             BufferUsage const usage)
         : GLBuffer<T>(name, GL_ARRAY_BUFFER, size, usage)
     {}
-
-    //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    inline GLVertexBuffer<T>& operator=(GLVertexBuffer<T> const& other)
-    {
-        PendingContainer<T>::operator=(other.data());
-        return *this;
-    }
 };
 
 // *****************************************************************************
@@ -79,15 +83,6 @@ public:
                            BufferUsage const usage)
         : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, size, usage)
     {}
-
-    //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    inline GLIndexBuffer<T>& operator=(GLIndexBuffer<T> const& other)
-    {
-        PendingContainer<T>::operator=(other.data());
-        return *this;
-    }
 
     //--------------------------------------------------------------------------
     //! \brief

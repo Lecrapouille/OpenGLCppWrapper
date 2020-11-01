@@ -148,6 +148,62 @@ public:
         return getVBO<float>(name);
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Return the reference of the named VBO holding a 1D texture.
+    //!
+    //! This method wraps the \a texture() method hidding the misery of the
+    //! template.
+    //!
+    //! \throw OpenGLException if the texture does not exist or does not have the
+    //! correct type.
+    //--------------------------------------------------------------------------
+    inline GLTexture1D& texture1D(const char *name)
+    {
+        return getTexture<GLTexture1D>(name);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the reference of the named VBO holding a 2D texture.
+    //!
+    //! This method wraps the \a texture() method hidding the misery of the
+    //! template.
+    //!
+    //! \throw OpenGLException if the texture does not exist or does not have the
+    //! correct type.
+    //--------------------------------------------------------------------------
+    inline GLTexture2D& texture2D(const char *name)
+    {
+        return getTexture<GLTexture2D>(name);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the reference of the named VBO holding a 3D texture.
+    //!
+    //! This method wraps the \a texture() method hidding the misery of the
+    //! template.
+    //!
+    //! \throw OpenGLException if the texture does not exist or does not have the
+    //! correct type.
+    //--------------------------------------------------------------------------
+    inline GLTexture3D& texture3D(const char *name)
+    {
+        return getTexture<GLTexture3D>(name);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the reference of the named VBO holding a cubic texture.
+    //!
+    //! This method wraps the \a texture() method hidding the misery of the
+    //! template.
+    //!
+    //! \throw OpenGLException if the texture does not exist or does not have the
+    //! correct type.
+    //--------------------------------------------------------------------------
+    inline GLTextureCube& textureCube(const char *name)
+    {
+        return getTexture<GLTextureCube>(name);
+    }
+
 private:
 
     void init(GLProgram& prog, BufferUsage const usage, size_t const vbo_size);
@@ -223,14 +279,40 @@ private:
         }
         //else
         //{
-        //    return m_vboss.add<GLVertexBuffer<T>>(name, T{});
+        //    return m_vbos.add<GLVertexBuffer<T>>(name, T{});
+        //}
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    template<class T>
+    T& getTexture(const char *name)
+    {
+        if (unlikely(nullptr == name))
+            throw GL::Exception("nullptr passed to uniform");
+
+        if (likely(isBound()))
+        {
+            try
+            {
+                return *(m_textures.at(name));
+            }
+            catch (std::exception&)
+            {
+                throw GL::Exception("GLTexture '" + std::string(name) + "' does not exist");
+            }
+        }
+        //else
+        //{
+        //    return m_textures.add<GLVertexBuffer<T>>(name, T{});
         //}
     }
 
 private:
 
     using VBOs = Any;
-    using Textures = Any;
+    using Textures = std::map<std::string, std::shared_ptr<GLTexture>>;
 
     VBOs     m_vbos;
     Textures m_textures;

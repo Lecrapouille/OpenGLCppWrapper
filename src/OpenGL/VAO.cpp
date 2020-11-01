@@ -64,33 +64,31 @@ void GLVAO::init(GLProgram& prog, BufferUsage const usage, size_t const vbo_size
         }
     }
 
-#if 0
     // Create a list of textures
-    for (auto& it: m_samplers)
+    for (auto& it: prog.samplers())
     {
         const char *name = it.first.c_str();
         const GLenum gltype = it.second->target();
         switch (gltype)
         {
         case GL_SAMPLER_1D:
-            createTexture<GLTexture1D>(name);
+            m_textures[name] = std::make_unique<GLTexture1D>(name);
             break;
-        case GL_SAMPLER_2D:
-            createTexture<GLTexture2D>(name);
-            //FIXME createTexture<GLTextureDepth2D>(name);
+        case GL_SAMPLER_2D: // TODO GLTextureDepth2D
+            m_textures[name] = std::make_unique<GLTexture2D>(name);
             break;
         case GL_SAMPLER_3D:
-            createTexture<GLTexture3D>(name);
+            m_textures[name] = std::make_unique<GLTexture3D>(name);
             break;
         case GL_SAMPLER_CUBE:
-            createTexture<GLTextureCube>(name);
+            m_textures[name] = std::make_unique<GLTextureCube>(name);
             break;
         default:
-            ERROR("This kind of sampler is not yet managed: %u", gltype);
+            throw GL::Exception("This kind of sampler is not managed: "
+                                + std::to_string(gltype));
             break;
         }
     }
-#endif
 
     // Make VAO and GLProgram be coupled.
     m_prog_id = prog.handle();

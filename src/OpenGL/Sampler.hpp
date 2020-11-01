@@ -38,9 +38,6 @@
 
 #  include "OpenGL/Location.hpp"
 
-//! \brief Used by GLProgram
-DECLARE_CLASS(GLSampler);
-
 // *****************************************************************************
 //! \brief A GLSampler is an OpenGL uniform for texture.
 // *****************************************************************************

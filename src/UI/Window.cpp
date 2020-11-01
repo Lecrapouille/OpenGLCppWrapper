@@ -340,10 +340,10 @@ bool IGLWindow::loop()
 
         try
         {
-            if (likely(false == onDraw()))
+            if (likely(false == onPaint()))
             {
                 //ERROR("Failed drawing graphics");
-                onDrawFailed();
+                onPaintFailed();
                 return false;
             }
         }
@@ -351,7 +351,7 @@ bool IGLWindow::loop()
         {
             //ERROR("Caught exception during drawing graphics: '%s'",
             //      e.message().c_str());
-            onDrawFailed();
+            onPaintFailed();
             return false;
         }
 

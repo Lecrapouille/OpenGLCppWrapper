@@ -340,20 +340,20 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
             std::make_shared<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, prog));
         break;
     case GL_SAMPLER_1D:
-        m_samplers.add(name,
-            std::make_shared<GLSampler1D>(name, m_samplers.size(), prog));
+        m_samplers[name]
+                = std::make_shared<GLSampler1D>(name, m_samplers.size(), prog);
         break;
     case GL_SAMPLER_2D:
-        m_samplers.add(name,
-            std::make_shared<GLSampler2D>(name, m_samplers.size(), prog));
+        m_samplers[name]
+                = std::make_shared<GLSampler2D>(name, m_samplers.size(), prog);
         break;
     case GL_SAMPLER_3D:
-        m_samplers.add(name,
-            std::make_shared<GLSampler3D>(name, m_samplers.size(), prog));
+        m_samplers[name]
+                = std::make_shared<GLSampler3D>(name, m_samplers.size(), prog);
         break;
     case GL_SAMPLER_CUBE:
-        m_samplers.add(name,
-            std::make_shared<GLSamplerCube>(name, m_samplers.size(), prog));
+        m_samplers[name]
+                = std::make_shared<GLSamplerCube>(name, m_samplers.size(), prog);
         break;
     default:
         std::string msg = "The type of Uniform for " + std::string(name)
@@ -423,13 +423,7 @@ size_t GLProgram::getSamplerNames(std::vector<std::string>& list, bool const cle
 {
     if (clear) { list.clear(); }
     list.reserve(m_samplers.size());
-    for (auto const& it: m_samplers.map<std::shared_ptr<GLSampler1D>>())
-        list.push_back(it.first);
-    for (auto const& it: m_samplers.map<std::shared_ptr<GLSampler2D>>())
-        list.push_back(it.first);
-    for (auto const& it: m_samplers.map<std::shared_ptr<GLSampler3D>>())
-        list.push_back(it.first);
-    for (auto const& it: m_samplers.map<std::shared_ptr<GLSamplerCube>>())
+    for (auto const& it: m_samplers)
         list.push_back(it.first);
     return list.size();
 }

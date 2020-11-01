@@ -18,14 +18,35 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
-#  define OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+#ifndef EXAMPLE_02_TEXTURED_TRIANGLE_HPP
+#  define EXAMPLE_02_TEXTURED_TRIANGLE_HPP
 
-#  include "OpenGLCppWrapper/OpenGL.hpp"
-//#  include "OpenGLCppWrapper/Scene.hpp"
-//#  include "OpenGLCppWrapper/Material.hpp"
-//#  include "OpenGLCppWrapper/Geometry.hpp"
-//#  include "OpenGLCppWrapper/Camera.hpp"
-#  include "OpenGLCppWrapper/UI.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
-#endif // OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+// *****************************************************************************
+//! \brief This example shows how to create a simple textured triangle.
+// *****************************************************************************
+class TexturedTriangle: public IGLWindow
+{
+public:
+
+    TexturedTriangle();
+    ~TexturedTriangle();
+
+private:
+
+    bool loadTextures();
+    virtual void onWindowSizeChanged() override;
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    void onDebug();
+
+private:
+
+    GLVertexShader     m_vertex_shader;
+    GLFragmentShader   m_fragment_shader;
+    GLProgram          m_prog;
+    GLVAO              m_mesh;
+};
+
+#endif // EXAMPLE_02_TEXTURED_TRIANGLE_HPP

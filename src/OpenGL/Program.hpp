@@ -57,10 +57,11 @@ enum class Mode : GLenum
 class GLProgram: public GLObject<GLenum>
 {
     friend class GLVAO;
+
+    using Uniforms = Any;
     using Shaders = std::vector<GLShader*>;
     using Attributes = std::map<std::string, std::shared_ptr<GLAttribute>>;
-    using Uniforms = Any;
-    using Samplers = Any;
+    using Samplers = std::map<std::string, std::shared_ptr<GLSampler>>;
 
 public:
 
@@ -405,6 +406,11 @@ private:
     Attributes const& attributes() const
     {
         return m_attributes;
+    }
+
+    Samplers const& samplers() const
+    {
+        return m_samplers;
     }
 
     //--------------------------------------------------------------------------
