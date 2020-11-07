@@ -129,7 +129,8 @@ public:
     //--------------------------------------------------------------------------
     inline bool load(const char *const filename)
     {
-        m_buffer.clear(); m_width = m_height = 0;
+        m_buffer.clear();
+        m_width = m_height = 0;
         SOIL soil(m_cpuPixelFormat);
         return soil.load(filename, m_buffer, m_width, m_height);
     }
@@ -213,7 +214,9 @@ private:
         // Note: m_buffer can nullptr
         if (unlikely(!loaded()))
         {
-            //ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", cname());
+            std::cerr << "Cannot setup texture '" << name()
+                      << "'. Reason 'Data not yet loaded'"
+                      << std::endl;
             return true;
         }
 

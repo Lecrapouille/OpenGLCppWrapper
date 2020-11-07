@@ -21,6 +21,7 @@
 #include "OpenGL/Context.hpp"
 #include <atomic>
 #include <iostream>
+#include <cassert>
 
 namespace GL {
 
@@ -63,7 +64,7 @@ bool isCreated()
 //----------------------------------------------------------------------------
 void setCreated(bool const v)
 {
-  created.store(v);
+    created.store(v);
 }
 
 } // namespace Context
@@ -72,40 +73,41 @@ void setCreated(bool const v)
 //----------------------------------------------------------------------------
 void checkError(const char* filename, const uint32_t line, const char* expression)
 {
-  GLenum id;
-  const char* error;
+    GLenum id;
+    const char* error;
 
-  while ((id = glGetError()) != GL_NO_ERROR)
+    while ((id = glGetError()) != GL_NO_ERROR)
     {
-      switch (id)
+        switch (id)
         {
         case GL_INVALID_OPERATION:
-          error = "GL_INVALID_OPERATION";
-          break;
+            error = "GL_INVALID_OPERATION";
+            break;
         case GL_INVALID_ENUM:
-          error = "GL_INVALID_ENUM";
-          break;
+            error = "GL_INVALID_ENUM";
+            break;
         case GL_INVALID_VALUE:
-          error = "GL_INVALID_VALUE";
-          break;
+            error = "GL_INVALID_VALUE";
+            break;
         case GL_OUT_OF_MEMORY:
-          error = "GL_OUT_OF_MEMORY";
-          break;
+            error = "GL_OUT_OF_MEMORY";
+            break;
         case GL_INVALID_FRAMEBUFFER_OPERATION:
-          error = "GL_INVALID_FRAMEBUFFER_OPERATION";
-          break;
+            error = "GL_INVALID_FRAMEBUFFER_OPERATION";
+            break;
         default:
-          error = "UNKNOWN";
-          break;
+            error = "UNKNOWN";
+            break;
         }
 
-      // Do not use directly LOG macros because it will catch this
-      // filename and its line instead of the faulty file/line which
-      // produced the OpenGL error.
-      //errout(stderr, "GLERR:", filename, line, "Failed executing '%s'. Reason is '%s'",
-      //       expression, error);
-      std::cerr << "GLERR: " << filename << " " << line << "Failed executing "
-                << expression << ". Reason was " << error << std::endl;
+        // Do not use directly LOG macros because it will catch this
+        // filename and its line instead of the faulty file/line which
+        // produced the OpenGL error.
+        //errout(stderr, "GLERR:", filename, line, "Failed executing '%s'. Reason is '%s'",
+        //       expression, error);
+        std::cerr << "GLERR: " << filename << " " << line << ": Failed executing "
+                  << expression << ". Reason was " << error << std::endl;
+        assert(false);
     }
 }
 #  endif // CHECK_OPENGL

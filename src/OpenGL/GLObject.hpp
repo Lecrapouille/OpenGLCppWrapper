@@ -173,13 +173,16 @@ public:
             if (!likely(GL::Context::isCreated()))
                 return ;
 
+            // Usually call glCreateXXX() or glXXX()
             m_need_create = onCreate();
         }
 
         if (likely(isValid()))
         {
+            // Usually call glBindXXX()
             onActivate();
 
+            // Configure (shaders, textures, VBOs ...)
             if (unlikely(needSetup()))
             {
                 m_need_setup = onSetup();
@@ -189,6 +192,7 @@ public:
                 }
             }
 
+            // Transfer CPU data to GPU data (texture, VBOs ...)
             if (unlikely(needUpdate()))
             {
                 m_need_update = onUpdate();

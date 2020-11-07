@@ -54,9 +54,7 @@ public:
     //--------------------------------------------------------------------------
     bool load(std::vector<std::string> const& filenames)
     {
-        m_width = 0u;
-        m_height = 0u;
-        m_depth = filenames.size();
+        m_width = m_height = m_depth = 0u;
         size_t prevWidth = 0;
         size_t prevHeight = 0;
         SOIL soil(m_cpuPixelFormat);
@@ -73,13 +71,16 @@ public:
             // Check consistency of Texture2D dimension
             if ((i != 0) && ((prevWidth != m_width) || (prevHeight != m_height)))
             {
-                //ERROR("Failed picture file '%s' has not correct dimension %ux%u",
-                //      filenames[i].c_str(), prevWidth, prevHeight);
+                std::cerr << "Failed picture file '" << filenames[i]
+                          << "' has not correct dimension "
+                          << prevWidth << "x" << prevHeight
+                          << std::endl;
                 return false;
             }
 
             prevWidth = m_width;
             prevHeight = m_height;
+            m_depth = filenames.size();
         }
 
         // Success
@@ -112,7 +113,9 @@ private:
         // Note: m_buffer can nullptr
         if (unlikely(!loaded()))
         {
-            //ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", cname());
+            std::cerr << "Cannot setup texture '" << name()
+                      << "'. Reason 'Data not yet loaded'"
+                      << std::endl;
             return true;
         }
 

@@ -58,10 +58,10 @@ class GLProgram: public GLObject<GLenum>
 {
     friend class GLVAO;
 
-    using Uniforms = Any;
     using Shaders = std::vector<GLShader*>;
     using Attributes = std::map<std::string, std::shared_ptr<GLAttribute>>;
     using Samplers = std::map<std::string, std::shared_ptr<GLSampler>>;
+    using Uniforms = Any;
 
 public:
 
@@ -114,7 +114,7 @@ public:
     //! \return true if shaders have been compiled and linked successfuly, else
     //! return false.
     //--------------------------------------------------------------------------
-    bool hasBeenCompiled() const
+    bool compiled() const
     {
         return !needSetup();
     }
@@ -161,6 +161,7 @@ public:
     void draw(GLVAO& vao, Mode const mode, size_t const first, size_t const count);
     void draw(GLVAO& vao, Mode const mode);
     void draw(Mode const mode);
+    // TODO void draw(GLVAO& vao, Mode const mode, GLIndexBuffer<T>& index)
 
     //--------------------------------------------------------------------------
     //! \brief Return all error messages (concated by '\\n' char) produced either
@@ -384,30 +385,39 @@ public:
         if (unlikely(nullptr == name))
             throw GL::Exception("nullptr passed to uniform");
 
-        if (likely(hasBeenCompiled()))
+        if (unlikely(!compiled()))
         {
-            try
-            {
-                return *(m_uniforms.get<std::shared_ptr<GLUniform<T>>>(name));
-            }
-            catch (std::exception&)
-            {
-                throw GL::Exception("GLUniform '" + std::string(name) + "' does not exist");
-            }
+            createUniform(getGLType<T>(), name, handle());
         }
-        //else
-        //{
-        //    return m_uniforms.add<GLUniform<T>>(name, T{});
-        //}
+
+        try
+        {
+            return *(m_uniforms.get<std::shared_ptr<GLUniform<T>>>(name));
+        }
+        catch (std::exception&)
+        {
+            throw GL::Exception("GLUniform '" + std::string(name) + "' does not exist");
+        }
     }
 
 private:
 
+    //--------------------------------------------------------------------------
+    //! \brief From C++ type return the OpenGL enum (ie float => GL_FLOAT).
+    //--------------------------------------------------------------------------
+    template<class T> GLenum getGLType();
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the list of attributes. Only reachable by VAO class.
+    //--------------------------------------------------------------------------
     Attributes const& attributes() const
     {
         return m_attributes;
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief  Return the list of samplers. Only reachable by VAO class.
+    //--------------------------------------------------------------------------
     Samplers const& samplers() const
     {
         return m_samplers;
@@ -443,7 +453,7 @@ private:
     //! \note this function does not check if VAO is bind. Call
     //! throw_if_vao_not_bound() before this method.
     //--------------------------------------------------------------------------
-    void throw_if_inconsitency_attrib_sizes();
+    void throw_if_odd_vao();
 
     //--------------------------------------------------------------------------
     //! \brief Concat the last error to the list of errors
@@ -537,8 +547,10 @@ private:
     //! \brief Hold class holding shader code source.
     //! \note pointer is to avoid copy because of deleted copy constructor.
     Shaders      m_shaders;
+    std::vector<std::string> m_failedShaders;
     //! \brief Collection of GLUniform<T>
     Uniforms     m_uniforms;
+    std::vector<std::shared_ptr<GLObject<GLint>>> m_listUniforms;
     //! \brief Collection of GLSampler. While samplers are considered as
     //! uniforms I prefer to separate containers to make the code easier to
     //! write.
@@ -550,5 +562,21 @@ private:
     //! \brier Internal errno.
     std::string  m_error;
 };
+
+template<> inline GLenum GLProgram::getGLType<float>() { return GL_FLOAT; }
+template<> inline GLenum GLProgram::getGLType<Vector2f>() { return GL_FLOAT_VEC2; }
+template<> inline GLenum GLProgram::getGLType<Vector3f>() { return GL_FLOAT_VEC3; }
+template<> inline GLenum GLProgram::getGLType<Vector4f>() { return GL_FLOAT_VEC4; }
+template<> inline GLenum GLProgram::getGLType<Matrix22f>() { return GL_FLOAT_MAT2; }
+template<> inline GLenum GLProgram::getGLType<Matrix33f>() { return GL_FLOAT_MAT3; }
+template<> inline GLenum GLProgram::getGLType<Matrix44f>() { return GL_FLOAT_MAT4; }
+template<> inline GLenum GLProgram::getGLType<int>() { return GL_INT; }
+template<> inline GLenum GLProgram::getGLType<Vector2i>() { return GL_INT_VEC2; }
+template<> inline GLenum GLProgram::getGLType<Vector3i>() { return GL_INT_VEC3; }
+template<> inline GLenum GLProgram::getGLType<Vector4i>() { return GL_INT_VEC4; }
+template<> inline GLenum GLProgram::getGLType<GLSampler1D>() { return GL_SAMPLER_1D; }
+template<> inline GLenum GLProgram::getGLType<GLSampler2D>() { return GL_SAMPLER_2D; }
+template<> inline GLenum GLProgram::getGLType<GLSampler3D>() { return GL_SAMPLER_3D; }
+template<> inline GLenum GLProgram::getGLType<GLSamplerCube>() { return GL_SAMPLER_CUBE; }
 
 #endif // OPENGLCPPWRAPPER_GLPROGRAM_HPP

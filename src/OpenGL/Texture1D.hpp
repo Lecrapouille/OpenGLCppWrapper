@@ -57,7 +57,9 @@ private:
     {
         if (unlikely(!loaded()))
         {
-            //ERROR("Cannot setup texture '%s'. Reason 'Data not yet loaded'", cname());
+            std::cerr << "Cannot setup texture '" << name()
+                      << "'. Reason 'Data not yet loaded'"
+                      << std::endl;
             return true;
         }
 

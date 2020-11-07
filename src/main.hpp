@@ -38,13 +38,13 @@ private:
     bool loadTextures();
     virtual void onWindowSizeChanged() override;
     virtual bool onSetup() override;
+    virtual void onSetupFailed() override;
     virtual bool onPaint() override;
+    virtual void onPaintFailed() override;
     void onDebug();
 
 private:
 
-    GLVertexShader     m_vertex_shader;
-    GLFragmentShader   m_fragment_shader;
     GLProgram          m_prog;
     GLVAO              m_mesh;
 };

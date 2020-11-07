@@ -49,16 +49,16 @@ public:
     //! \brief See GLLocation constructor.
     //! \param[in] name Give a name to the instance. GLProgram uses these names in
     //! their internal hash table.
-    //! \param[in] dim set the dimension of variable (1 for scalar else the
+    //! \param[in] size set the dimension of variable (1 for scalar else the
     //! dimension for vector)
     //! \param[in] gltype set the OpenGL type of data (GL_FLOAT ...)
     //! \param[in] prog the handle of the GLProgram (which is the owner of this
     //! instance).
     //--------------------------------------------------------------------------
-    GLAttribute(const char *name, const GLint dim, const GLint gltype, const GLuint prog)
-        : GLLocation(name, dim, static_cast<GLenum>(gltype), prog)
+    GLAttribute(const char *name, const GLint size, const GLint gltype, const GLuint prog)
+        : GLLocation(name, size, static_cast<GLenum>(gltype), prog)
     {
-        assert((dim >= 1) && (dim <= 4));
+        assert((size >= 1) && (size <= 4));
     }
 
     //--------------------------------------------------------------------------

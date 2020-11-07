@@ -48,7 +48,7 @@ public:
     //! https://stackoverflow.com/questions/64633899/no-inheritance-found-with-
     //! operator-and-initializer-list
     //--------------------------------------------------------------------------
-    using GLBuffer<T>::operator=;
+    //using GLBuffer<T>::operator=;
 
     //--------------------------------------------------------------------------
     //! \brief Constructor with the object name and reserved number of
@@ -58,6 +58,13 @@ public:
                             BufferUsage const usage)
         : GLBuffer<T>(name, GL_ARRAY_BUFFER, size, usage)
     {}
+
+    template<typename U>
+    inline GLVertexBuffer<T>& operator=(std::initializer_list<U> il)
+    {
+        PendingContainer<T>::operator=(il);
+        return *this;
+    }
 };
 
 // *****************************************************************************
@@ -83,6 +90,13 @@ public:
                            BufferUsage const usage)
         : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, size, usage)
     {}
+
+    template<typename U>
+    inline GLIndexBuffer<T>& operator=(std::initializer_list<U> il)
+    {
+        PendingContainer<T>::operator=(il);
+        return *this;
+    }
 
     //--------------------------------------------------------------------------
     //! \brief

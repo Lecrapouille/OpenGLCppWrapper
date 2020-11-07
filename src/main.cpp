@@ -48,10 +48,6 @@ void TexturedTriangle::onWindowSizeChanged()
 //------------------------------------------------------------------
 void TexturedTriangle::onDebug()
 {
-    // TODO add
-    // getFailedShaders, getFailedTextures (or NotLoaded), getAttributeNames
-
-#if 0
     // Display the list of VBOs hold by the VAO
     {
         std::vector<std::string> vbo_names;
@@ -63,7 +59,6 @@ void TexturedTriangle::onDebug()
             std::cout << "  '" << it << "'" << std::endl;
         }
     }
-#endif
 
     // Display the list of Uniforms hold by the program
     {
@@ -85,7 +80,6 @@ void TexturedTriangle::onDebug()
                   << count << " samplers: " << std::endl;
         for (auto& it: sampler_names)
         {
-            // TODO "for " << it->filename()
             std::cout << "  '" << it << "'" << std::endl;
         }
     }
@@ -96,13 +90,11 @@ void TexturedTriangle::onDebug()
 //------------------------------------------------------------------
 bool TexturedTriangle::loadTextures()
 {
-#if 0
     GLTexture2D& texture = m_mesh.texture2D("texID");
-    texture.interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-    texture.wrap(TextureWrap::MIRRORED_REPEAT);
-    return texture.load("textures/hazard.png");
-#endif
-    return false;
+    texture.interpolation(GLTexture::Minification::LINEAR,
+                          GLTexture::Magnification::LINEAR);
+    texture.wrap(GLTexture::Wrap::MIRRORED_REPEAT);
+    return texture.load("/home/qq/MyGitHub/OpenGLCppWrapper/examples/textures/hazard.png");
 }
 
 //------------------------------------------------------------------
@@ -112,11 +104,13 @@ bool TexturedTriangle::loadTextures()
 bool TexturedTriangle::onSetup()
 {
     // Load vertex and fragment shaders with GLSL code.
-    m_vertex_shader.read("01_Core/shaders/02_TexturedTriangle.vs");
-    m_fragment_shader.read("01_Core/shaders/02_TexturedTriangle.fs");
+    GLVertexShader     vertex_shader;
+    GLFragmentShader   fragment_shader;
+    vertex_shader.read("/home/qq/MyGitHub/OpenGLCppWrapper/src/shaders/02_TexturedTriangle.vs");
+    fragment_shader.read("/home/qq/MyGitHub/OpenGLCppWrapper/src/shaders/02_TexturedTriangle.fs");
 
     // Compile the shader program
-    if (!m_prog.compile(m_vertex_shader, m_fragment_shader))
+    if (!m_prog.compile(vertex_shader, fragment_shader))
     {
         std::cerr << "Failed compiling OpenGL program. Reason was '"
                   << m_prog.strerror() << "'" << std::endl;
@@ -126,11 +120,6 @@ bool TexturedTriangle::onSetup()
     // Create VBOs of the VAO.
     m_prog.bind(m_mesh);
 
-
-    GLVertexBuffer<float> qq("qq", 3u, BufferUsage::STATIC_DRAW);
-    std::cout << qq[0] << std::endl;
-
- #if 0
     // Fill VBOs of the VAO: init triangle vertex positions.
     m_mesh.vector3f("position") =
     {
@@ -138,7 +127,7 @@ bool TexturedTriangle::onSetup()
         Vector3f(1.0f, -1.0f, 0.0f),
         Vector3f(0.0f, 1.0f, 0.0f)
     };
-    //#if 0
+
     // Fill VBOs of the VAO: init triangle texture positions.
     m_mesh.vector2f("UV") =
     {
@@ -152,7 +141,7 @@ bool TexturedTriangle::onSetup()
 
     // Fill Load texture files
     if (!loadTextures())
-    {
+    {/*
         // In case of failure show which textures has failed.
         std::vector<std::string> list;
         size_t count = m_mesh.getFailedTextures(list);
@@ -161,13 +150,14 @@ bool TexturedTriangle::onSetup()
         {
             std::cerr << " " << it;
         }
-        std::cerr << std::endl;
+        std::cerr << std::endl;*/
+        std::cerr << "Failed loading textures:" << std::endl;
         return false;
     }
 
     // Helper for debugging states of your program
     onDebug();
-#endif
+
     return true;
 }
 
@@ -179,7 +169,21 @@ bool TexturedTriangle::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-    m_prog.draw(m_mesh, Mode::TRIANGLES, 0, 3);
+    //m_mesh.draw(Mode::TRIANGLES, 0, 3);
 
     return true;
+}
+
+void TexturedTriangle::onSetupFailed()
+{}
+
+void TexturedTriangle::onPaintFailed()
+{}
+
+int main()
+{
+    std::unique_ptr<IGLWindow> win;
+    win = std::make_unique<TexturedTriangle>();
+
+    return win->start() ? EXIT_SUCCESS : EXIT_FAILURE;
 }

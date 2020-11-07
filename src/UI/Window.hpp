@@ -266,7 +266,7 @@ private:
     //! \brief Callback triggered when the method setup() failed. By default this
     //! method does nothing.
     //--------------------------------------------------------------------------
-    virtual void onSetupFailed() {};
+    virtual void onSetupFailed() = 0;
 
     //--------------------------------------------------------------------------
     //! \brief Add here all stuffs painting your 3D world to be
@@ -279,7 +279,7 @@ private:
     //! \brief Callback triggered when the method draw() failed. By default this
     //! method does nothing.
     //--------------------------------------------------------------------------
-    virtual void onPaintFailed() {};
+    virtual void onPaintFailed() = 0;
 
     //--------------------------------------------------------------------------
     //! \brief Main loop for displaying the 3D world. Call draw().

@@ -106,12 +106,6 @@ bool GLShader::compile()
 }
 
 //--------------------------------------------------------------------------
-void GLShader::bind(GLenum prog)
-{
-    m_program = prog;
-}
-
-//--------------------------------------------------------------------------
 bool GLShader::onCreate()
 {
     m_handle = glCheck(glCreateShader(m_target));
@@ -162,7 +156,6 @@ void GLShader::onRelease()
     glCheck(glDeleteShader(m_handle));
     m_code.clear();
     m_error.clear();
-    m_program = 0u;
 }
 
 //--------------------------------------------------------------------------

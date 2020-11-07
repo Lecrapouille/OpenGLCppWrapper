@@ -40,12 +40,12 @@ GLProgram::~GLProgram()
 //----------------------------------------------------------------------------
 void GLProgram::onRelease()
 {
-    detachAllShaders();
     glCheck(glDeleteProgram(m_handle));
-    m_shaders.clear();
-    m_attributes.clear();
     m_uniforms.clear();
+    m_listUniforms.clear();
     m_samplers.clear();
+    m_attributes.clear();
+    m_vao = nullptr;
     m_error.clear();
 }
 
@@ -61,32 +61,32 @@ void GLProgram::concatError(std::string const& msg)
 bool GLProgram::bind(GLVAO& vao, BufferUsage const usage, size_t const vbo_size)
 {
     // Try compile the GLProgram if not previously compiled
-    if (unlikely(!hasBeenCompiled()))
+    if (unlikely(!compiled()))
     {
         if (!compile())
         {
-            std::cerr << "Tried to bind VAO '"
+            std::cerr << "Tried to bind VAO "
                       << vao.name()
-                      << "' to a GLProgram '"
+                      << "' to a GLProgram "
                       << name() << " that failed to compile"
                       << std::endl;
             return false;
         }
     }
 
-    if (unlikely(vao.isBound(0u)))
+    if (unlikely(!vao.bound()))
     {
         // When binding the VAO to GLProgram for the first time:
         // populate VBOs and textures in the VAO.
         vao.init(*this, usage, vbo_size);
     }
-    else if (unlikely(!vao.isBound(m_handle)))
+    else if (unlikely(!vao.bound(m_handle)))
     {
         // Check if VAO has been previously bind by this GLProgram. If not
         // This is probably an error of the developper.
-        std::cerr << "Tried to bind VAO '"
+        std::cerr << "Tried to bind VAO "
                   << vao.name()
-                  << " already bound to another GLProgram than '"
+                  << " already bound to another GLProgram than "
                   << name() << std::endl;
         return false;
     }
@@ -108,7 +108,7 @@ std::string GLProgram::strerror()
             msg += "The following shaders failed to compile:\n";
             for (auto& it: m_shaders)
             {
-                if (!it->hasBeenCompiled())
+                if (!it->compiled())
                 {
                     msg += "  - ";
                     msg += it->name();
@@ -155,12 +155,8 @@ bool GLProgram::compile()
 bool GLProgram::onCreate()
 {
     m_handle = glCheck(glCreateProgram());
-    return false;
-}
-
-//--------------------------------------------------------------------------
-bool GLProgram::onUpdate()
-{
+    // Hack: setup() has to be called before activate() contrary to VBO, VAO
+    m_need_setup = onSetup();
     return false;
 }
 
@@ -170,10 +166,21 @@ bool GLProgram::onSetup()
     // Compile shaders if they have not yet compiled
     for (auto& it: m_shaders)
     {
+        if (it->code().size() == 0u)
+        {
+            std::string msg = "  - " + it->name() + ":\nhas empty code source\n";
+            concatError(msg);
+            // Release shaders stored in GPU.
+            detachAllShaders();
+            return true;
+        }
+
         if (!it->compile())
         {
             std::string msg = "  - " + it->name() + ":\n" + it->strerror();
             concatError(msg);
+            // Release shaders stored in GPU.
+            detachAllShaders();
             return true;
         }
     }
@@ -197,8 +204,46 @@ bool GLProgram::onSetup()
         // Success
         return false;
     }
+    else
+    {
+        // Release shaders stored in GPU.
+        detachAllShaders();
+    }
 
     return true;
+}
+
+//--------------------------------------------------------------------------
+bool GLProgram::onUpdate()
+{std::cout << "onUpdate() handle " << m_handle << "\n";
+    m_vao->begin();
+    for (auto& it: m_vao->m_listBuffers)
+        it->begin();
+    for (auto& it: m_attributes)
+        it.second->begin();
+    for (auto const& it: m_listUniforms)
+        it->begin();
+    for (auto& it: m_samplers)
+        it.second->begin();
+    for (auto& it: m_vao->m_listTextures)
+        it->begin();
+    throw_if_odd_vao();
+    m_vao->end();
+
+    return false;
+}
+
+//--------------------------------------------------------------------------
+void GLProgram::onActivate()
+{
+    std::cout << "onActivate() handle " << m_handle << "\n";
+    glCheck(glUseProgram(m_handle));
+}
+
+//--------------------------------------------------------------------------
+void GLProgram::onDeactivate()
+{std::cout << "onDeactivate()\n";
+    glCheck(glUseProgram(0U));
 }
 
 //----------------------------------------------------------------------------
@@ -225,9 +270,17 @@ bool GLProgram::checkLinkageStatus(GLuint handle)
 //----------------------------------------------------------------------------
 void GLProgram::detachAllShaders()
 {
+    m_failedShaders.clear();
     for (auto& it: m_shaders)
     {
-        glCheck(glDetachShader(m_handle, it->handle()));
+        if (it->compiled())
+        {
+            glCheck(glDetachShader(m_handle, it->handle()));
+        }
+        else
+        {
+            m_failedShaders.push_back(it->name());
+        }
     }
     m_shaders.clear();
 }
@@ -250,7 +303,6 @@ void GLProgram::generateLocations()
         glCheck(glGetActiveUniform(m_handle, location, BUFFER_SIZE, nullptr,
                                    &size, &type, name));
         createUniform(type, name, handle());
-        // TODO
     }
 
     // Create the list of attributes
@@ -270,6 +322,7 @@ void GLProgram::createAttribute(GLenum type, const char *name, const GLuint prog
     switch (type)
     {
     case GL_FLOAT:
+        // TODO if (!m_attributes.has<T>(name) {
         m_attributes[name] = std::make_shared<GLAttribute>(name, 1, GL_FLOAT, prog);
         break;
     case GL_FLOAT_VEC2:
@@ -293,58 +346,73 @@ void GLProgram::createAttribute(GLenum type, const char *name, const GLuint prog
 void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
 {
     std::cout << "GLProgram::createUniform " << name << std::endl;
+
+    // TODO: if uniform already bound => do nothing
+
+    std::shared_ptr<GLObject<GLint>> ptr;
     switch (type)
     {
     case GL_FLOAT:
-        m_uniforms.add(name,
-            std::make_shared<GLUniform<float>>(name, 1, GL_FLOAT, prog));
+        // TODO if (!m_uniforms.has<T>(name) {
+        ptr = std::make_shared<GLUniform<float>>(name, 1, GL_FLOAT, prog);
+        m_uniforms.add(name, ptr);
+        m_listUniforms.push_back(ptr);
         break;
     case GL_FLOAT_VEC2:
-        m_uniforms.add(name,
-            std::make_shared<GLUniform<Vector2f>>(name, 2, GL_FLOAT, prog));
+        ptr = std::make_shared<GLUniform<Vector2f>>(name, 2, GL_FLOAT, prog);
+        m_uniforms.add(name, ptr);
+        m_listUniforms.push_back(ptr);
         break;
     case GL_FLOAT_VEC3:
-        m_uniforms.add(name,
-            std::make_shared<GLUniform<Vector3f>>(name, 3, GL_FLOAT, prog));
+        ptr = std::make_shared<GLUniform<Vector3f>>(name, 3, GL_FLOAT, prog);
+        m_uniforms.add(name, ptr);
+        m_listUniforms.push_back(ptr);
         break;
     case GL_FLOAT_VEC4:
-        m_uniforms.add(name,
-            std::make_shared<GLUniform<Vector4f>>(name, 4, GL_FLOAT, prog));
+        ptr = std::make_shared<GLUniform<Vector4f>>(name, 4, GL_FLOAT, prog);
+        m_uniforms.add(name, ptr);
+        m_listUniforms.push_back(ptr);
         break;
     case GL_INT:
-        m_uniforms.add(name,
-            std::make_shared<GLUniform<int>>(name, 1, GL_INT, prog));
+        ptr = std::make_shared<GLUniform<int>>(name, 1, GL_INT, prog);
+        m_uniforms.add(name, ptr);
+        m_listUniforms.push_back(ptr);
         break;
     case GL_INT_VEC2:
-        m_uniforms.add(name,
-            std::make_shared<GLUniform<Vector2i>>(name, 2, GL_INT, prog));
+        ptr = std::make_shared<GLUniform<Vector2i>>(name, 2, GL_INT, prog);
+        m_uniforms.add(name, ptr);
+        m_listUniforms.push_back(ptr);
         break;
     case GL_INT_VEC3:
-        m_uniforms.add(name,
-            std::make_shared<GLUniform<Vector3i>>(name, 3, GL_INT, prog));
+        ptr = std::make_shared<GLUniform<Vector3i>>(name, 3, GL_INT, prog);
+        m_uniforms.add(name, ptr);
+        m_listUniforms.push_back(ptr);
         break;
     case GL_INT_VEC4:
-        m_uniforms.add(name,
-            std::make_shared<GLUniform<Vector4i>>(name, 4, GL_INT, prog));
+        ptr = std::make_shared<GLUniform<Vector4i>>(name, 4, GL_INT, prog);
+        m_uniforms.add(name, ptr);
+        m_listUniforms.push_back(ptr);
         break;
     case GL_FLOAT_MAT2:
-        m_uniforms.add(name,
-            std::make_shared<GLUniform<Matrix22f>>(name, 4, GL_FLOAT, prog));
+        ptr = std::make_shared<GLUniform<Matrix22f>>(name, 4, GL_FLOAT, prog);
+        m_uniforms.add(name, ptr);
+        m_listUniforms.push_back(ptr);
         break;
     case GL_FLOAT_MAT3:
-        m_uniforms.add(name,
-            std::make_shared<GLUniform<Matrix33f>>(name, 9, GL_FLOAT, prog));
+        ptr = std::make_shared<GLUniform<Matrix33f>>(name, 9, GL_FLOAT, prog);
+        m_uniforms.add(name, ptr);
+        m_listUniforms.push_back(ptr);
         break;
     case GL_FLOAT_MAT4:
-        m_uniforms.add(name,
-            std::make_shared<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, prog));
+        ptr = std::make_shared<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, prog);
+        m_uniforms.add(name, ptr);
+        m_listUniforms.push_back(ptr);
         break;
     case GL_SAMPLER_1D:
         m_samplers[name]
                 = std::make_shared<GLSampler1D>(name, m_samplers.size(), prog);
         break;
-    case GL_SAMPLER_2D:
-        m_samplers[name]
+    case GL_SAMPLER_2D:    m_samplers[name]
                 = std::make_shared<GLSampler2D>(name, m_samplers.size(), prog);
         break;
     case GL_SAMPLER_3D:
@@ -367,44 +435,17 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
 size_t GLProgram::failedShaders(std::vector<std::string>& list, bool const clear)
 {
     if (clear) { list.clear(); }
-    list.reserve(m_shaders.size());
-    for (auto const& it: m_shaders)
-    {
-        if (!it->hasBeenCompiled())
-        {
-            list.push_back(it->name());
-        }
-    }
-    return m_shaders.size();
+    list = m_failedShaders;
+    return list.size();
 }
 
 //----------------------------------------------------------------------------
 size_t GLProgram::getUniformNames(std::vector<std::string>& list, bool const clear)
 {
     if (clear) { list.clear(); }
-    list.reserve(m_uniforms.size());
-    for (auto const& it: m_uniforms.map<std::shared_ptr<GLUniform<float>>>())
-        list.push_back(it.first);
-    for (auto const& it: m_uniforms.map<std::shared_ptr<GLUniform<Vector2f>>>())
-        list.push_back(it.first);
-    for (auto const& it: m_uniforms.map<std::shared_ptr<GLUniform<Vector3f>>>())
-        list.push_back(it.first);
-    for (auto const& it: m_uniforms.map<std::shared_ptr<GLUniform<Vector4f>>>())
-        list.push_back(it.first);
-    for (auto const& it: m_uniforms.map<std::shared_ptr<GLUniform<Matrix22f>>>())
-        list.push_back(it.first);
-    for (auto const& it: m_uniforms.map<std::shared_ptr<GLUniform<Matrix33f>>>())
-        list.push_back(it.first);
-    for (auto const& it: m_uniforms.map<std::shared_ptr<GLUniform<Matrix44f>>>())
-        list.push_back(it.first);
-    for (auto const& it: m_uniforms.map<std::shared_ptr<GLUniform<int>>>())
-        list.push_back(it.first);
-    for (auto const& it: m_uniforms.map<std::shared_ptr<GLUniform<Vector2i>>>())
-        list.push_back(it.first);
-    for (auto const& it: m_uniforms.map<std::shared_ptr<GLUniform<Vector3i>>>())
-        list.push_back(it.first);
-    for (auto const& it: m_uniforms.map<std::shared_ptr<GLUniform<Vector4i>>>())
-        list.push_back(it.first);
+    list.reserve(m_listUniforms.size());
+    for (auto const& it: m_listUniforms)
+        list.push_back(it->name());
     return list.size();
 }
 
@@ -426,48 +467,6 @@ size_t GLProgram::getSamplerNames(std::vector<std::string>& list, bool const cle
     for (auto const& it: m_samplers)
         list.push_back(it.first);
     return list.size();
-}
-
-//--------------------------------------------------------------------------
-void GLProgram::onActivate()
-{
-#if 0
-    glCheck(glUseProgram(m_handle));
-    if (m_vao->needCreate())
-    {
-        m_vao->begin();
-        for (auto& it: m_attributes)
-        {
-            m_vao->m_vbos[it.first]->begin();
-            it.second->begin();
-        }
-
-        for (auto& it: m_uniforms)
-        {
-            it.second->begin();
-        }
-
-        for (auto& it: m_samplers)
-        {
-            // Important: Contrary to attributes, activate the texture units first
-            // before binding textures.
-            it.second->begin();
-            m_vao->m_textures[it.first]->begin();
-        }
-
-        throw_if_inconsitency_attrib_sizes();
-    }
-    else
-    {
-        m_vao->activate();
-    }
-#endif
-}
-
-//--------------------------------------------------------------------------
-void GLProgram::onDeactivate()
-{
-    glCheck(glUseProgram(0U));
 }
 
 //--------------------------------------------------------------------------
@@ -497,23 +496,23 @@ void GLProgram::draw(GLVAO& vao, Mode const mode, size_t const first, size_t con
 }
 
 //--------------------------------------------------------------------------
-void GLProgram::draw(GLVAO& /*vao*/, Mode const /*mode*/)
+void GLProgram::draw(GLVAO& vao, Mode const mode)
 {
-    //    throw_if_not_compiled();
-    //    throw_if_vao_cannot_be_bound(vao);
-    //    doDraw(mode, 0, m_vao->count());
+    throw_if_not_compiled();
+    throw_if_vao_cannot_be_bound(vao);
+    doDraw(mode, 0u, m_vao->count());
 }
 
 //--------------------------------------------------------------------------
-void GLProgram::draw(Mode const /*mode*/)
+void GLProgram::draw(Mode const mode)
 {
-    //    throw_if_not_compiled();
-    //    throw_if_vao_not_bound();
-    //    doDraw(mode, 0, m_vao->count());
+    throw_if_not_compiled();
+    throw_if_vao_not_bound();
+    doDraw(mode, 0u, m_vao->count());
 }
 
 //----------------------------------------------------------------------------
-void GLProgram::throw_if_inconsitency_attrib_sizes()
+void GLProgram::throw_if_odd_vao()
 {
 #if 0
     if (!m_vao->checkVBOSizes())
@@ -530,7 +529,7 @@ void GLProgram::throw_if_inconsitency_attrib_sizes()
 //----------------------------------------------------------------------------
 void GLProgram::throw_if_not_compiled()
 {
-    if (unlikely(!hasBeenCompiled()))
+    if (unlikely(!compiled()))
     {
         throw GL::Exception("Failed OpenGL program has not been compiled");
     }

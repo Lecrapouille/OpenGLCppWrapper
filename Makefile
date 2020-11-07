@@ -29,7 +29,7 @@ M := $(P)/.makefile
 #
 TARGET = $(PROJECT)
 DESCRIPTION = C++11 API wrapping Core Profile OpenGL routines and allowing to write applications in few lines of code
-BUILD_TYPE = release
+BUILD_TYPE = debug
 
 include $(P)/Makefile.common
 

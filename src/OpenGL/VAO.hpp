@@ -32,10 +32,13 @@
 #  include "OpenGL/Texture1D.hpp"
 #  include "OpenGL/Texture2D.hpp"
 #  include "OpenGL/Texture3D.hpp"
+//#  include "OpenGL/Program.hpp"
 #  include "Math/Vector.hpp"
 #  include "Common/Any.hpp"
 
 class GLProgram;
+
+// TODO index
 
 class GLVAO: public GLObject<GLenum>
 {
@@ -67,18 +70,12 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    inline bool isBound(GLenum const prog_id) const
-    {
-        return m_prog_id == prog_id;
-    }
+    bool bound(GLenum const prog_id) const;
 
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    inline bool isBound() const
-    {
-        return m_prog_id != 0u;
-    }
+    bool bound() const;
 
     //--------------------------------------------------------------------------
     //! \brief Check if this instance has VBOs.
@@ -90,7 +87,97 @@ public:
     //--------------------------------------------------------------------------
     inline bool hasVBOs() const
     {
-        return 0_z != m_vbos.size();
+        return 0_z != m_VBOs.size();
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Check if this instance has textures.
+    //!
+    //! \note Having no textures generally means that the shader has no sampler or
+    //! this instance of VAO have not yet been bound to a GLProgram. See the bind()
+    //! method.
+    //!
+    //! \return true if this instance has textures.
+    //--------------------------------------------------------------------------
+    inline bool hasTextures() const
+    {
+        return 0_z != m_textures.size();
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Alias for hasTextures()
+    //--------------------------------------------------------------------------
+    inline bool hasSamplers() const
+    {
+        return 0_z != m_textures.size();
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the list of VBO names. VBO names come from names of
+    //! attributes variables used inside GLSL shaders. This method is mainly
+    //! used for debug purpose.
+    //!
+    //! \note if the VAO has never been bound to a GLProgram this method will
+    //! return an empty list.
+    //!
+    //! \param[in,out] list the list where to insert VBO names.
+    //! \param[in] if the list has to be cleared before being filled.
+    //!
+    //! \return the number of inserted elements.
+    //--------------------------------------------------------------------------
+    size_t getVBONames(std::vector<std::string> &list, bool const clear = true)
+    {
+        if (clear) { list.clear(); }
+        list.reserve(m_listBuffers.size());
+        for (auto& it: m_listBuffers)
+        {
+            list.push_back(it->name());
+        }
+        return list.size();
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the list of sampler names. Samplers come from names of
+    //! uniform variables used in GLSL shaders. This is method is mainly used for
+    //! debug purpose.
+    //!
+    //! \note if the VAO has never been bound to a GLProgram this method will
+    //! return an empty list.
+    //!
+    //! \param[in,out] list the list where to insert sampler names.
+    //! \param[in] if the list has to be cleared before being filled.
+    //!
+    //! \note Do not be confused with the sense of 'sampler name'. We do not refer
+    //! to the name of the jpeg, png or bmp file. We refer to the shader sampler
+    //! name (GLSL code). The GLTexture holds the acces of the file. To access to
+    //! it do this VAO.texture2D["sampler_name"].name().
+    //!
+    //! \todo: get the tuple sampler name and texture name ?
+    //! \return the number of inserted elements.
+    //--------------------------------------------------------------------------
+    size_t getSamplerNames(std::vector<std::string>& list, bool const clear = true)
+    {
+        if (clear) { list.clear(); }
+        list.reserve(m_listTextures.size());
+        for (auto& it: m_listTextures)
+        {
+            list.push_back(it->name());
+        }
+        return list.size();
+    }
+
+    size_t getFailedSamplers(std::vector<std::string>& list, bool const clear = true)
+    {
+        if (clear) { list.clear(); }
+        list.reserve(m_listTextures.size());
+        for (auto& it: m_listTextures)
+        {
+            if (!it->loaded())
+            {
+                list.push_back(it->name()); // TODO filename()
+            }
+        }
+        return list.size();
     }
 
     //--------------------------------------------------------------------------
@@ -204,7 +291,38 @@ public:
         return getTexture<GLTextureCube>(name);
     }
 
+    /*
+      void draw(Mode const mode, size_t const first, size_t const count)
+      {
+      throw_if_vao_not_bound();
+      m_program->draw(*this, mode, first, count);
+      }
+
+      void draw(Mode const mode)
+      {
+      throw_if_vao_not_bound();
+      m_program->draw(*this, mode);
+      }
+    */
+
 private:
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the number of elements in buffers.
+    //--------------------------------------------------------------------------
+    inline size_t count() const
+    {
+        return m_count;
+    }
+
+    //--------------------------------------------------------------------------
+    void throw_if_vao_not_bound()
+    {
+        if (unlikely(m_program == nullptr))
+        {
+            throw GL::Exception("Failed OpenGL VAO has not been bound to a GLProgram");
+        }
+    }
 
     void init(GLProgram& prog, BufferUsage const usage, size_t const vbo_size);
 
@@ -266,21 +384,20 @@ private:
         if (unlikely(nullptr == name))
             throw GL::Exception("nullptr passed to uniform");
 
-        if (likely(isBound()))
+        if (likely(!bound()))
         {
-            try
-            {
-                return *(m_vbos.get<std::shared_ptr<GLVertexBuffer<T>>>(name));
-            }
-            catch (std::exception&)
-            {
-                throw GL::Exception("GLUniform '" + std::string(name) + "' does not exist");
-            }
+            m_VBOs.add(name, std::make_shared<GLVertexBuffer<T>>
+                       (name, 3_z, BufferUsage::STATIC_DRAW)); // TODO: could be better
         }
-        //else
-        //{
-        //    return m_vbos.add<GLVertexBuffer<T>>(name, T{});
-        //}
+
+        try
+        {
+            return *(m_VBOs.get<std::shared_ptr<GLVertexBuffer<T>>>(name));
+        }
+        catch (std::exception&)
+        {
+            throw GL::Exception("GLUniform '" + std::string(name) + "' does not exist");
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -292,31 +409,40 @@ private:
         if (unlikely(nullptr == name))
             throw GL::Exception("nullptr passed to uniform");
 
-        if (likely(isBound()))
-        {
-            try
-            {
-                return *(m_textures.at(name));
-            }
-            catch (std::exception&)
-            {
-                throw GL::Exception("GLTexture '" + std::string(name) + "' does not exist");
-            }
+        if (likely(!bound()))
+        {std::cout << "!bound => getTexture add " << name << "\n";
+            m_textures.add(name, std::make_shared<T>(name));
         }
-        //else
-        //{
-        //    return m_textures.add<GLVertexBuffer<T>>(name, T{});
-        //}
+
+        try
+        {std::cout << "getTexture get " << name << "\n";
+            return *(m_textures.get<std::shared_ptr<T>>(name));
+        }
+        catch (std::exception&)
+        {
+            assert(false);
+            throw GL::Exception("GLTexture '" + std::string(name) + "' does not exist");
+        }
     }
 
 private:
 
     using VBOs = Any;
-    using Textures = std::map<std::string, std::shared_ptr<GLTexture>>;
+    using Textures = Any;
+    using ListBuffers = std::vector<std::shared_ptr<GLObject<GLenum>>>;
+    using ListTextures = std::vector<std::shared_ptr<GLTexture>>;
 
-    VBOs     m_vbos;
-    Textures m_textures;
-    GLenum   m_prog_id = 0;
+    VBOs         m_VBOs;
+    Textures     m_textures;
+    ListBuffers  m_listBuffers;
+    ListTextures m_listTextures;
+    GLProgram*   m_program = nullptr;
+    size_t       m_count = 0u;
 };
 
 #endif // OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
+
+
+#if 0
+
+#endif

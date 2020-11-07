@@ -564,8 +564,8 @@ public:
     //! \throw std::out_of_range if initializer list has more elements and the
     //! container cannot be resized.
     //--------------------------------------------------------------------------
-    //template<class U>
-    PendingContainer<T>& operator=(std::initializer_list<T> il)
+    template<class U>
+    PendingContainer<T>& operator=(std::initializer_list<U> il)
     {
         const size_t my_size = m_container.size();
         const size_t other_size = il.size();

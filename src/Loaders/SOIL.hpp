@@ -21,8 +21,9 @@
 #ifndef OPENGLCPPWRAPPER_SOIL_TEXTURES_LOADER_HPP
 #  define OPENGLCPPWRAPPER_SOIL_TEXTURES_LOADER_HPP
 
-#  include "Loaders/TextureLoader.hpp"
+#  include "Loaders/Texture.hpp"
 #  include "external/SOIL/SOIL.h"
+#  include <iostream>
 
 // *****************************************************************************
 //! \brief Class wrapping SOIL library for loading and saving textures
@@ -49,11 +50,11 @@ public:
             m_nbpixel = 3_z;
             return true;
         case GLTexture::PixelFormat::LUMINANCE:
-            //ERROR("LUMINANCE_ALPHA not yet managed");
+            std::cerr << "LUMINANCE_ALPHA not managed" << std::endl;
             m_soilformat = SOIL_LOAD_L;
             return false;
         case GLTexture::PixelFormat::LUMINANCE_ALPHA:
-            //ERROR("LUMINANCE_ALPHA not yet managed");
+            std::cerr << "LUMINANCE_ALPHA not yet managed" << std::endl;
             m_soilformat = SOIL_LOAD_LA;
             return false;
         case GLTexture::PixelFormat::BGR:
@@ -65,7 +66,8 @@ public:
         case GLTexture::PixelFormat::ALPHA:
         case GLTexture::PixelFormat::DEPTH_STENCIL:
         default:
-            //ERROR("SOIL does not surport the given pixel format");
+            std::cerr << "SOIL does not surport the given pixel format"
+                      << std::endl;
             m_soilformat = SOIL_LOAD_AUTO;
             return false;
         }
@@ -105,8 +107,10 @@ public:
         }
         else
         {
-            //ERROR("Failed loading picture file '%s'. Reason was '%s'",
-            //      filename, SOIL_last_result());
+            std::cerr << "Failed loading picture file '"
+                      << filename << "'. Reason was '"
+                      << SOIL_last_result()
+                      << "'" << std::endl;
             width = height = 0;
             buffer.clear();
             return false;
@@ -119,7 +123,8 @@ public:
         const unsigned char* buffer = texture_buffer.to_array();
         if (unlikely(nullptr == buffer))
         {
-            //ERROR("Cannot save a texture with no buffer");
+            std::cerr << "Cannot save a texture with no buffer"
+                      << std::endl;
             return false;
         }
 
@@ -132,8 +137,8 @@ public:
             m_soilformat = SOIL_SAVE_TYPE_DDS;
         else
         {
-            //ERROR("Cannot save a texture into the given file format '%s'",
-            //      ext.c_str());
+            std::cerr << "Cannot save a texture into the given file format '"
+                      << ext << std::endl;
             return false;
         }
 
@@ -143,8 +148,10 @@ public:
                                      static_cast<int>(m_nbpixel), buffer);
         if (unlikely(!res))
         {
-            //   ERROR("Failed saving the texture in the file '%s'. Reason was '%s'",
-            //      filename, SOIL_last_result());
+            std::cerr << "Failed saving the texture in the file '"
+                      << filename << "'. Reason was '"
+                      << SOIL_last_result()
+                      << "'" << std::endl;
         }
         return res;
     }

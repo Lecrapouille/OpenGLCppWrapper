@@ -129,13 +129,13 @@ public:
     bool read(std::string const& path);
 
     //--------------------------------------------------------------------------
-    //! \brief Return the shader error message. member variable is then
-    //! cleared.
+    //! \brief Return the shader error message. Calling this method makes clear
+    //! the error.
     //--------------------------------------------------------------------------
     std::string strerror();
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Return in read only mode the code source of the shader.
     //--------------------------------------------------------------------------
     std::string const& code() const
     {
@@ -143,21 +143,23 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Compile the shader.
+    //! \return true if shader has been compiled, else return false. You also
+    //! call compiled() after to get this information back. You call strerror()
+    //! in case of failure to get the reason in human readable format.
     //--------------------------------------------------------------------------
     bool compile();
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Return if the shader has been compiled ?
+    //! \return true if shader has been compiled, else return false.
     //--------------------------------------------------------------------------
-    bool hasBeenCompiled() const
+    bool compiled() const
     {
         return !needSetup();
     }
 
 private:
-
-    void bind(GLenum prog);
 
     // TODO solveIncludes()
 
