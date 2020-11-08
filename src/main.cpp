@@ -21,169 +21,128 @@
 #include "main.hpp"
 #include <iostream>
 
-TexturedTriangle::TexturedTriangle()
+//------------------------------------------------------------------------------
+// \brief GLObjects instance have a name. This name is usually used for logs and
+// debug purpose such as GL*Shader, GLProgram, GLVAO, GLTexture* but some
+// GLObjects have name used as key for hash maps. In this case these instance
+// are internally (privately used) and their name managed automatically such
+// GLVBO, GLAttributes, GLSamplers).
+//------------------------------------------------------------------------------
+Example::Example()
     : m_prog("Prog"),
       m_mesh("VAO_triangle")
 {
-    std::cout << "Hello TexturedTriangle" << std::endl;
+    std::cout << "Hello Example" << std::endl;
 }
 
-TexturedTriangle::~TexturedTriangle()
+Example::~Example()
 {
-    std::cout << "Bye TexturedTriangle" << std::endl;
+    std::cout << "Bye Example" << std::endl;
 }
 
-//------------------------------------------------------------------
-//! \brief Callback when the window changed its size.
-//------------------------------------------------------------------
-void TexturedTriangle::onWindowSizeChanged()
+//------------------------------------------------------------------------------
+//! \brief Vertices of the triangle.
+//------------------------------------------------------------------------------
+static std::vector<Vector2f> initial_position =
 {
-    // Make the viewport matches the new window dimensions.
-    glCheck(glViewport(0, 0, width<int>(), height<int>()));
-}
+    Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f), Vector2f(0.0f, 1.0f)
+};
 
-//------------------------------------------------------------------
-//! \brief Make the instropection of VAO and program shader.
-//! \note From the previous example we add sampler lists.
-//------------------------------------------------------------------
-void TexturedTriangle::onDebug()
-{
-    // Display the list of VBOs hold by the VAO
-    {
-        std::vector<std::string> vbo_names;
-        size_t count = m_mesh.getVBONames(vbo_names);
-        std::cout << "VAO '" << m_mesh.name() << "' has "
-                  << count << " VBO: " << std::endl;
-        for (auto& it: vbo_names)
-        {
-            std::cout << "  '" << it << "'" << std::endl;
-        }
-    }
-
-    // Display the list of Uniforms hold by the program
-    {
-        std::vector<std::string> uniform_names;
-        size_t count = m_prog.getUniformNames(uniform_names);
-        std::cout << "Prog '" << m_prog.name() << "' has "
-                  << count << " uniforms: " << std::endl;
-        for (auto& it: uniform_names)
-        {
-            std::cout << "  '" << it << "'" << std::endl;
-        }
-    }
-
-    // Display the list of Samplers hold by the program
-    {
-        std::vector<std::string> sampler_names;
-        size_t count = m_prog.getSamplerNames(sampler_names);
-        std::cout << "Prog '" << m_prog.name() << "' has "
-                  << count << " samplers: " << std::endl;
-        for (auto& it: sampler_names)
-        {
-            std::cout << "  '" << it << "'" << std::endl;
-        }
-    }
-}
-
-//------------------------------------------------------------------
-//! \brief
-//------------------------------------------------------------------
-bool TexturedTriangle::loadTextures()
-{
-    GLTexture2D& texture = m_mesh.texture2D("texID");
-    texture.interpolation(GLTexture::Minification::LINEAR,
-                          GLTexture::Magnification::LINEAR);
-    texture.wrap(GLTexture::Wrap::MIRRORED_REPEAT);
-    return texture.load("/home/qq/MyGitHub/OpenGLCppWrapper/examples/textures/hazard.png");
-}
-
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //! \brief Load vertex and fragment shaders. Create a VAO and fill
-//! its VBOs (vertex and texture position). Load all textures.
-//------------------------------------------------------------------
-bool TexturedTriangle::onSetup()
+//! its VBO (position).
+//------------------------------------------------------------------------------
+    GLVertexShader     vertexShader;
+    GLFragmentShader   fragmentShader; // FIXME: GLdeleteShaders() apres compile()
+bool Example::onSetup()
 {
-    // Load vertex and fragment shaders with GLSL code.
-    GLVertexShader     vertex_shader;
-    GLFragmentShader   fragment_shader;
-    vertex_shader.read("/home/qq/MyGitHub/OpenGLCppWrapper/src/shaders/02_TexturedTriangle.vs");
-    fragment_shader.read("/home/qq/MyGitHub/OpenGLCppWrapper/src/shaders/02_TexturedTriangle.fs");
+    // Load vertex and fragment shaders (GLSL code) as string. There are two type
+    // of strings: -- classic string but you need to add explicitly chars such as
+    // '"' '\n' -- C++11 raw string litterals avoid to add '\n' chars. In this
+    // function, we will show the two ways. In next examples you will see how to
+    // load shader from file.
 
-    // Compile the shader program
-    if (!m_prog.compile(vertex_shader, fragment_shader))
+    // Load vertex shader from a classic string.
+    vertexShader << "#version 330 core                        \n"
+            "in vec2      position;                   \n"
+            "void main() {                            \n"
+            "  gl_Position = vec4(position, 0.0, 1.0);\n"
+            "}";
+
+    // Load fragment shader from C++11 raw string.
+    fragmentShader << R"GLSL(#version 330 core
+                               out vec4 fragColor;
+                               void main() {
+                                 fragColor = vec4(1, 0, 0, 1);
+                               })GLSL";
+
+    // You have to compile and link shaders into the class GLProgram. If shaders
+    // contained syntax errors the compile() will return false and errors can be
+    // shown with gerError(). If your OpenGL has been compiled with success, the
+    // GLProgram will create its own list of shader uniforms, attributes, and
+    // samplers from shaders. In this example, shader only use the attribute
+    // position.
+    if (!m_prog.compile(vertexShader, fragmentShader))
     {
         std::cerr << "Failed compiling OpenGL program. Reason was '"
                   << m_prog.strerror() << "'" << std::endl;
         return false;
     }
 
-    // Create VBOs of the VAO.
+    // To initialize your 3D model, you have to use a VAO and bind it to the
+    // desired GLProgram. This last, helped with its internal list of shader
+    // attributes and samplers, will populate VBOs and textures inside the VAO
+    // instance. Shader attributes and samplers give their name to VBOs and
+    // textures. In our example, the VAO will have a single VBO named position.
     m_prog.bind(m_mesh);
 
-    // Fill VBOs of the VAO: init triangle vertex positions.
-    m_mesh.vector3f("position") =
-    {
-        Vector3f(-1.0f, -1.0f, 0.0f),
-        Vector3f(1.0f, -1.0f, 0.0f),
-        Vector3f(0.0f, 1.0f, 0.0f)
-    };
-
-    // Fill VBOs of the VAO: init triangle texture positions.
-    m_mesh.vector2f("UV") =
-    {
-        Vector2f(0.0f, 0.0f),
-        Vector2f(1.0f, 0.0f),
-        Vector2f(0.5f, 1.0f)
-    };
-
-    // Repeat the texture motif
-    m_mesh.vector2f("UV") *= 4.0f;
-
-    // Fill Load texture files
-    if (!loadTextures())
-    {/*
-        // In case of failure show which textures has failed.
-        std::vector<std::string> list;
-        size_t count = m_mesh.getFailedTextures(list);
-        std::cerr << "Failed loading " << count << " textures:" << std::endl;
-        for (auto& it: list)
-        {
-            std::cerr << " " << it;
-        }
-        std::cerr << std::endl;*/
-        std::cerr << "Failed loading textures:" << std::endl;
-        return false;
-    }
-
-    // Helper for debugging states of your program
-    onDebug();
+    // Fill VBOs of the VAO: init triangle vertex positions. Note "position" shall
+    // refer to the variable position in the GLSL code. If you rename it in the
+    // sahder you will have to rename here too. Beware name are case sensitive.
+    m_mesh.vector2f("position") = initial_position;
 
     return true;
 }
 
-//------------------------------------------------------------------
+void Example::onSetupFailed()
+{}
+
+void Example::onPaintFailed()
+{}
+
+void Example::onWindowSizeChanged()
+{
+    // Make the viewport matches the new window dimensions.
+    glCheck(glViewport(0, 0, width<int>(), height<int>()));
+}
+
+//------------------------------------------------------------------------------
 //! \brief Paint our scene. Here we are using the delta time to
-//------------------------------------------------------------------
-bool TexturedTriangle::onPaint()
+//------------------------------------------------------------------------------
+bool Example::onPaint()
 {
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-    //m_mesh.draw(Mode::TRIANGLES, 0, 3);
+    // Use time for dynamicaly change values
+    static float time = 0.0f;
+    time += dt();
+
+    GLVertexBuffer<Vector2f>& position = m_mesh.vector2f("position");
+    position = initial_position;
+    position *= cosf(time);
+    //std::cout << m_mesh.vector2f("position") << std::endl;
+
+    // Render a triangle from 3 vertices, starting from the first (0th).
+    m_prog.draw(m_mesh, Mode::TRIANGLES, 0, 3);
 
     return true;
 }
 
-void TexturedTriangle::onSetupFailed()
-{}
-
-void TexturedTriangle::onPaintFailed()
-{}
-
 int main()
 {
     std::unique_ptr<IGLWindow> win;
-    win = std::make_unique<TexturedTriangle>();
+    win = std::make_unique<Example>();
 
     return win->start() ? EXIT_SUCCESS : EXIT_FAILURE;
 }

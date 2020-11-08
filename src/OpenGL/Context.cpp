@@ -107,7 +107,7 @@ void checkError(const char* filename, const uint32_t line, const char* expressio
         //       expression, error);
         std::cerr << "GLERR: " << filename << " " << line << ": Failed executing "
                   << expression << ". Reason was " << error << std::endl;
-        assert(false);
+        //assert(false);
     }
 }
 #  endif // CHECK_OPENGL

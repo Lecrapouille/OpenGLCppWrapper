@@ -65,6 +65,13 @@ public:
         PendingContainer<T>::operator=(il);
         return *this;
     }
+
+    template<typename U>
+    inline GLVertexBuffer<T>& operator=(std::vector<U> const& other)
+    {
+        PendingContainer<T>::operator=(other);
+        return *this;
+    }
 };
 
 // *****************************************************************************

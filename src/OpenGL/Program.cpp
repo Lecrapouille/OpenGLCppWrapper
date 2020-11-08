@@ -60,6 +60,9 @@ void GLProgram::concatError(std::string const& msg)
 //----------------------------------------------------------------------------
 bool GLProgram::bind(GLVAO& vao, BufferUsage const usage, size_t const vbo_size)
 {
+    std::cout << "-----------------------------\n";
+    std::cout << "bind VAO " << vao.name() << " to GLProgram " << name() << std::endl;
+
     // Try compile the GLProgram if not previously compiled
     if (unlikely(!compiled()))
     {
@@ -79,6 +82,7 @@ bool GLProgram::bind(GLVAO& vao, BufferUsage const usage, size_t const vbo_size)
         // When binding the VAO to GLProgram for the first time:
         // populate VBOs and textures in the VAO.
         vao.init(*this, usage, vbo_size);
+        m_need_update = true;
     }
     else if (unlikely(!vao.bound(m_handle)))
     {
@@ -153,7 +157,7 @@ bool GLProgram::compile()
 
 //--------------------------------------------------------------------------
 bool GLProgram::onCreate()
-{
+{std::cout << "onCreate()\n";
     m_handle = glCheck(glCreateProgram());
     // Hack: setup() has to be called before activate() contrary to VBO, VAO
     m_need_setup = onSetup();
@@ -162,7 +166,7 @@ bool GLProgram::onCreate()
 
 //--------------------------------------------------------------------------
 bool GLProgram::onSetup()
-{
+{std::cout << "onSetup()\n";
     // Compile shaders if they have not yet compiled
     for (auto& it: m_shaders)
     {
@@ -202,20 +206,28 @@ bool GLProgram::onSetup()
         // Release shaders stored in GPU.
         detachAllShaders();
         // Success
+        glCheck(glClearColor(0.7f, 0.3f, 0.7f, 0.3f)); // TODO
         return false;
     }
     else
     {
         // Release shaders stored in GPU.
         detachAllShaders();
+        // Failure
+        return true;
     }
+}
 
-    return true;
+//--------------------------------------------------------------------------
+bool GLProgram::needUpdate() const
+{
+    return (m_vao != nullptr) && (m_vao->needUpdate());
 }
 
 //--------------------------------------------------------------------------
 bool GLProgram::onUpdate()
-{std::cout << "onUpdate() handle " << m_handle << "\n";
+{std::cout << "onUpdate()\n";
+    assert(m_vao != nullptr);
     m_vao->begin();
     for (auto& it: m_vao->m_listBuffers)
         it->begin();
@@ -228,8 +240,9 @@ bool GLProgram::onUpdate()
     for (auto& it: m_vao->m_listTextures)
         it->begin();
     throw_if_odd_vao();
-    m_vao->end();
+    //m_vao->end();
 
+    std::cout << "onUpdate() done\n";
     return false;
 }
 

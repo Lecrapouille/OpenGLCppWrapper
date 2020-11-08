@@ -30,7 +30,7 @@
 #  include "Common/NonCppStd.hpp"
 #  include "OpenGL/Context.hpp"
 #  include <string>
-
+#include <iostream>
 // ***************************************************************************
 //! \class GLObject GLObject.hpp
 //! \ingroup OpenGL
@@ -151,8 +151,6 @@ public:
     //! \return false if the object has been transferred to the GPU and
     //! does not need to transferred again. Return true if the object has
     //! to be transferred again.
-    //!
-    //! \fixme not in double with isValid() ?
     //--------------------------------------------------------------------------
     virtual inline bool needUpdate() const
     {
@@ -177,26 +175,23 @@ public:
             m_need_create = onCreate();
         }
 
-        if (likely(isValid()))
+        // Usually call glBindXXX()
+        onActivate();
+
+        // Configure (shaders, textures, VBOs ...)
+        if (unlikely(needSetup()))
         {
-            // Usually call glBindXXX()
-            onActivate();
-
-            // Configure (shaders, textures, VBOs ...)
-            if (unlikely(needSetup()))
+            m_need_setup = onSetup();
+            if (unlikely(m_need_setup))
             {
-                m_need_setup = onSetup();
-                if (unlikely(m_need_setup))
-                {
-                    return ;
-                }
+                return ;
             }
+        }
 
-            // Transfer CPU data to GPU data (texture, VBOs ...)
-            if (unlikely(needUpdate()))
-            {
-                m_need_update = onUpdate();
-            }
+        // Transfer CPU data to GPU data (texture, VBOs ...)
+        if (unlikely(needUpdate()))
+        {
+            m_need_update = onUpdate();
         }
     }
 
@@ -205,8 +200,10 @@ public:
     //--------------------------------------------------------------------------
     inline void end()
     {
-        // if (likely(isValid()))
-        onDeactivate();
+        if (likely(m_handle > initialHandleValue()))
+        {
+            onDeactivate();
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -219,7 +216,7 @@ public:
     {
         if (likely(GL::Context::isCreated()))
         {
-            if (likely(isValid()))
+            if (likely(m_handle > initialHandleValue()))
             {
                 onDeactivate();
                 onRelease();
@@ -231,15 +228,6 @@ public:
         m_need_setup = true;
         m_need_create = true;
         m_need_update = false;
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Check if object is a valid OpenGL object (meaning which
-    //! has created with success by the GPU).
-    //--------------------------------------------------------------------------
-    inline bool isValid() const
-    {
-        return m_handle > initialHandleValue();
     }
 
 private:

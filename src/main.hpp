@@ -26,12 +26,12 @@
 // *****************************************************************************
 //! \brief This example shows how to create a simple textured triangle.
 // *****************************************************************************
-class TexturedTriangle: public IGLWindow
+class Example: public IGLWindow
 {
 public:
 
-    TexturedTriangle();
-    ~TexturedTriangle();
+    Example();
+    ~Example();
 
 private:
 

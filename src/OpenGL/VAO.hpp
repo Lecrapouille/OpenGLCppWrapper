@@ -379,7 +379,7 @@ private:
     //! \brief
     //--------------------------------------------------------------------------
     template<class T>
-    GLVertexBuffer<T>& getVBO(const char *name)
+    GLVertexBuffer<T>& getVBO(const char *name)  // TODO const:  foo = getVBO(()
     {
         if (unlikely(nullptr == name))
             throw GL::Exception("nullptr passed to uniform");
@@ -392,6 +392,7 @@ private:
 
         try
         {
+            m_need_update = true;// TODO const:  foo = getVBO(()
             return *(m_VBOs.get<std::shared_ptr<GLVertexBuffer<T>>>(name));
         }
         catch (std::exception&)
@@ -404,7 +405,7 @@ private:
     //! \brief
     //--------------------------------------------------------------------------
     template<class T>
-    T& getTexture(const char *name)
+    T& getTexture(const char *name) // TODO const:  foo = getTexture()
     {
         if (unlikely(nullptr == name))
             throw GL::Exception("nullptr passed to uniform");
@@ -416,6 +417,7 @@ private:
 
         try
         {std::cout << "getTexture get " << name << "\n";
+            m_need_update = true; // TODO gerer foo = getTexture()
             return *(m_textures.get<std::shared_ptr<T>>(name));
         }
         catch (std::exception&)
