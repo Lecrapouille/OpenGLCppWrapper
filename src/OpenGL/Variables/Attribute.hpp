@@ -27,11 +27,11 @@
 #ifndef OPENGLCPPWRAPPER_GLATTRIBUTES_HPP
 #  define OPENGLCPPWRAPPER_GLATTRIBUTES_HPP
 
-#  include "OpenGL/Location.hpp"
+#  include "OpenGL/Variables/Location.hpp"
 #  include <cassert>
 
 // *****************************************************************************
-//! \class GLAttribute LocationAttribute.hpp
+//! \class GLAttribute Attribute.hpp
 //! \ingroup OpenGL
 //!
 //! \brief Represent an attribute variable used in a GLSL shader program.
@@ -47,8 +47,8 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief See GLLocation constructor.
-    //! \param[in] name Give a name to the instance. GLProgram uses these names in
-    //! their internal hash table.
+    //! \param[in] name Give a name to the instance. GLProgram uses these names
+    //! in their internal hash table.
     //! \param[in] size set the dimension of variable (1 for scalar else the
     //! dimension for vector)
     //! \param[in] gltype set the OpenGL type of data (GL_FLOAT ...)
@@ -86,13 +86,7 @@ private:
     //--------------------------------------------------------------------------
     virtual void onActivate() override
     {
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wold-style-cast"
-        glCheck(glEnableVertexAttribArray(m_index)); // FIXME avant ou apres ?
-        glCheck(glVertexAttribPointer(m_index, m_size, m_target, GL_FALSE,
-                                      static_cast<GLsizei>(m_stride),
-                                      (void*) m_offset));
-#  pragma GCC diagnostic pop
+        glCheck(glEnableVertexAttribArray(m_index));
     }
 
     //--------------------------------------------------------------------------
@@ -101,6 +95,13 @@ private:
     //--------------------------------------------------------------------------
     virtual bool onSetup() override
     {
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wold-style-cast"
+        glCheck(glVertexAttribPointer(m_index, m_size, m_target, GL_FALSE,
+                                      static_cast<GLsizei>(m_stride),
+                                      (void*) m_offset));
+#  pragma GCC diagnostic pop
+
         return false;
     }
 

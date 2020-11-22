@@ -24,70 +24,54 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_GLUNIFORM_HPP
-#  define OPENGLCPPWRAPPER_GLUNIFORM_HPP
+#ifndef OPENGLCPPWRAPPER_GLSAMPLER_HPP
+#  define OPENGLCPPWRAPPER_GLSAMPLER_HPP
 
 // *****************************************************************************
-//! \file Uniform.hpp file implements:
-//!   - GLUniform:
+//! \file Sampler.hpp file implements:
+//!   - GLSampler:
+//!   - GLSampler1D:
+//!   - GLSampler2D:
+//!   - GLSampler3D:
+//!   - GLSamplerCube:
 // *****************************************************************************
 
-#  include "OpenGL/Location.hpp"
-#  include "Math/Matrix.hpp"
+#  include "OpenGL/Variables/Location.hpp"
 
 // *****************************************************************************
-//! \brief GLUniform represents a program uniform variable.
-//! \tparam T float or int or VectorXf or VectorXi or MatrixXXf with X = [2 .. 4]
-//! or GLSamplerXD with X = [1 .. 3] or GLSamplerCube.
+//! \brief A GLSampler is an OpenGL uniform for texture.
 // *****************************************************************************
-template<class T>
-class GLUniform: public GLLocation
+class GLSampler: public GLLocation
 {
 public:
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief See GLLocation constructor.
+    //! \param name
+    //! \param gltype
+    //! \param texture_id count texture.
+    //! \param prog
     //--------------------------------------------------------------------------
-    GLUniform(const char *name, const GLint dim, const GLint gltype, const GLuint prog)
-        : GLLocation(name, dim, static_cast<GLenum>(gltype), prog)
+    GLSampler(const char *name, const GLint gltype, const size_t texture_id,
+              const GLuint prog)
+        : GLLocation(name, 0, static_cast<GLenum>(gltype), prog),
+          m_texture_id(GLenum(texture_id))
     {}
 
     //--------------------------------------------------------------------------
     //! \brief Destructor. Release elements from CPU and GPU.
     //--------------------------------------------------------------------------
-    virtual ~GLUniform() override
+    virtual ~GLSampler() override
     {
         release();
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Change the CPU data. It will be automatically transfered to the GPU.
+    //! \brief Return the texture identifier.
     //--------------------------------------------------------------------------
-    template<class U>
-    GLUniform<T>& operator=(const U& val)
+    inline GLint textureID() const
     {
-        GLUniform<T>::m_data = T(val);
-        m_need_update = false;
-        return *this;
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Getter. Return the reference of the CPU data in read only mode.
-    //--------------------------------------------------------------------------
-    inline operator const T&() const
-    {
-        return m_data;
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Setter. Return the reference of CPU data in write mode. New value
-    //! will be transfered to GPU memory.
-    //! \fixme Could be nice to avoid transfering to the GPU if we set the same val
-    //--------------------------------------------------------------------------
-    inline operator T&()
-    {
-        m_need_update = false;
-        return m_data;
+        return static_cast<GLint>(m_texture_id);
     }
 
 private:
@@ -106,7 +90,9 @@ private:
     //! action is made.
     //--------------------------------------------------------------------------
     virtual void onActivate() override
-    {}
+    {
+        glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_id));
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Setup the behavior of the instance. This is a dummy
@@ -118,11 +104,11 @@ private:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Transfer the CPU data to the GPU data.
+    //! \brief This is a dummy method. No action is made.
     //--------------------------------------------------------------------------
     virtual bool onUpdate() override
     {
-        setValue(GLUniform<T>::m_data);
+        glCheck(glUniform1i(m_handle, textureID()));
         return false;
     }
 
@@ -142,80 +128,9 @@ private:
         //GLLocation::onRelease();
     }
 
-    //--------------------------------------------------------------------------
-    //! \brief Transfer the CPU data to the GPU data.
-    //--------------------------------------------------------------------------
-    inline void setValue(const T& value) const;
-
 protected:
 
-    T m_data {};
+    const GLenum m_texture_id;
 };
 
-template<>
-inline void GLUniform<int>::setValue(const int& value) const
-{
-    glCheck(glUniform1i(m_handle, value));
-}
-
-template<>
-inline void GLUniform<float>::setValue(const float& value) const
-{
-    glCheck(glUniform1f(m_handle, value));
-}
-
-template<>
-inline void GLUniform<Vector2f>::setValue(const Vector2f& value) const
-{
-    glCheck(glUniform2f(m_handle, value.x, value.y));
-}
-
-template<>
-inline void GLUniform<Vector3f>::setValue(const Vector3f& value) const
-{
-    glCheck(glUniform3f(m_handle, value.x, value.y, value.z));
-}
-
-template<>
-inline void GLUniform<Vector4f>::setValue(const Vector4f& value) const
-{
-    glCheck(glUniform4f(m_handle, value.x, value.y, value.z, value.w));
-}
-
-template<>
-inline void GLUniform<Vector2i>::setValue(const Vector2i& value) const
-{
-    glCheck(glUniform2i(m_handle, value.x, value.y));
-}
-
-template<>
-inline void GLUniform<Vector3i>::setValue(const Vector3i& value) const
-{
-    glCheck(glUniform3i(m_handle, value.x, value.y, value.z));
-}
-
-template<>
-inline void GLUniform<Vector4i>::setValue(const Vector4i& value) const
-{
-    glCheck(glUniform4i(m_handle, value.x, value.y, value.z, value.w));
-}
-
-template<>
-inline void GLUniform<Matrix22f>::setValue(const Matrix22f& m) const
-{
-    glCheck(glUniformMatrix2fv(m_handle, 1, GL_FALSE, m));
-}
-
-template<>
-inline void GLUniform<Matrix33f>::setValue(const Matrix33f& m) const
-{
-    glCheck(glUniformMatrix3fv(m_handle, 1, GL_FALSE, m));
-}
-
-template<>
-inline void GLUniform<Matrix44f>::setValue(const Matrix44f& m) const
-{
-    glCheck(glUniformMatrix4fv(m_handle, 1, GL_FALSE, m));
-}
-
-#endif // OPENGLCPPWRAPPER_GLUNIFORM_HPP
+#endif // OPENGLCPPWRAPPER_GLSAMPLER_HPP

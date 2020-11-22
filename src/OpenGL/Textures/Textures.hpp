@@ -17,11 +17,19 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
+//
+// This file is a derived work of https://github.com/glumpy/glumpy
+//
+// Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
+// Distributed under the (new) BSD License.
+//=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_INCLUDE_OPENGL_HPP
-#  define OPENGLCPPWRAPPER_INCLUDE_OPENGL_HPP
+#ifndef OPENGLCPPWRAPPER_GLTEXTURES_HPP
+#  define OPENGLCPPWRAPPER_GLTEXTURES_HPP
 
-#  include "OpenGL/Shaders/Program.hpp"
-//#  include "OpenGL/FrameBuffers.hpp"
+#  include "OpenGL/Textures/Texture1D.hpp"
+#  include "OpenGL/Textures/Texture2D.hpp"
+#  include "OpenGL/Textures/Texture3D.hpp"
+#  include "OpenGL/Textures/TextureCube.hpp"
 
-#endif // OPENGLCPPWRAPPER_INCLUDE_OPENGL_HPP
+#endif // OPENGLCPPWRAPPER_GLTEXTURES_HPP

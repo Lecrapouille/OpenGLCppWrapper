@@ -17,11 +17,18 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
+//
+// This file is a derived work of https://github.com/glumpy/glumpy
+//
+// Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
+// Distributed under the (new) BSD License.
+//=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_INCLUDE_OPENGL_HPP
-#  define OPENGLCPPWRAPPER_INCLUDE_OPENGL_HPP
+#ifndef OPENGLCPPWRAPPER_GLVARIABLES_HPP
+#  define OPENGLCPPWRAPPER_GLVARIABLES_HPP
 
-#  include "OpenGL/Shaders/Program.hpp"
-//#  include "OpenGL/FrameBuffers.hpp"
+#  include "OpenGL/Variables/Attribute.hpp"
+#  include "OpenGL/Variables/Uniform.hpp"
+#  include "OpenGL/Variables/Samplers.hpp"
 
-#endif // OPENGLCPPWRAPPER_INCLUDE_OPENGL_HPP
+#endif // OPENGLCPPWRAPPER_GLVARIABLES_HPP

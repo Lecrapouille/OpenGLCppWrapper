@@ -40,10 +40,11 @@ enum class BufferUsage : GLenum
 };
 
 // *****************************************************************************
-//! \brief GLBuffer is a class of contigous elements CPU side that is aware of
-//! area of dirty elements that needs to be updated to the GPU. GLBuffer can be
-//! used to store vertex data (VBO), pixel data retrieved from images (texture)
-//! or for framebuffer.
+//! \brief GLBuffer is a class of contigous elements (array) CPU side that is
+//! aware of area of dirty elements that needs to be updated to the GPU. GLBuffer
+//! can be used to store vertex data in Vertex Buffer Object (VBO), pixels data
+//! retrieved from images (texture) or for framebuffer. Mostly of time vertices
+//! in a VBO are indexed by a Element Buffer Object (EBO) which is also a GLBuffer.
 // *****************************************************************************
 template<typename T>
 class GLBuffer: public GLObject<GLenum>, public PendingContainer<T>

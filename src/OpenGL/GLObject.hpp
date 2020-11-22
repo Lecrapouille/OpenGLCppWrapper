@@ -28,9 +28,11 @@
 #  define OPENGLCPPWRAPPER_GLOBJECT_HPP
 
 #  include "Common/NonCppStd.hpp"
-#  include "OpenGL/Context.hpp"
+#  include "OpenGL/Context/OpenGL.hpp"
 #  include <string>
-#include <iostream>
+
+#include <iostream> // TODO temporary
+
 // ***************************************************************************
 //! \class GLObject GLObject.hpp
 //! \ingroup OpenGL

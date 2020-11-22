@@ -25,7 +25,7 @@
 //! \file GLWindow.hpp manages a window and its i/o for drawing OpenGL scenes.
 // *****************************************************************************
 
-#  include "OpenGL/Context.hpp"
+#  include "OpenGL/Context/OpenGL.hpp"
 #  include "Math/Vector.hpp"
 #  include <GLFW/glfw3.h>
 #  include <mutex>

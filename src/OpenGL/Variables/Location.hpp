@@ -28,8 +28,8 @@
 #  define OPENGLCPPWRAPPER_GLLOCATION_HPP
 
 // *****************************************************************************
-//! \file GLLocation.hpp manages shader variables (Uniforms, Samplers
-//! and Attributes).
+//! \file Location.hpp manages shader variables (Uniforms, Samplers and
+//! Attributes).
 // *****************************************************************************
 
 #  include "OpenGL/GLObject.hpp"
@@ -39,7 +39,7 @@
 //! \ingroup OpenGL
 //!
 //! \brief This abstract class shall stay private and shall not be used directly
-//! by the developper. Indeed this class is only managed by \c GLProgramthey and
+//! by the developper. Indeed this class is only managed by \c GLProgram and they
 //! are created automatically when shader code is parsed. It serves as link
 //! between a shader variable and your C++ variable and therefore Locations are
 //! entry points in the shader that allow to upload CPU data to the GPU. There

@@ -36,7 +36,7 @@
 //!   - GLSamplerCube:
 // *****************************************************************************
 
-#  include "OpenGL/Sampler.hpp"
+#  include "OpenGL/Variables/Sampler.hpp"
 
 // *****************************************************************************
 //! \brief Sampler for 1D texture.

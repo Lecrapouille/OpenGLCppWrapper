@@ -24,8 +24,8 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#include "OpenGL/VAO.hpp"
-#include "OpenGL/Program.hpp"
+#include "OpenGL/Buffers/VAO.hpp"
+#include "OpenGL/Shaders/Program.hpp"
 
 //uint32_t count() { return static_cast<uint32_t>(m_VBOs.begin()->second->size())); }
 

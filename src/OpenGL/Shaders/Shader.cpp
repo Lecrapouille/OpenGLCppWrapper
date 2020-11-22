@@ -24,7 +24,7 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#include "OpenGL/Shader.hpp"
+#include "OpenGL/Shaders/Shader.hpp"
 
 GLShader::GLShader(std::string const& name, const GLenum target)
     : GLObject(name, target)

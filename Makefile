@@ -19,33 +19,42 @@
 ##=====================================================================
 
 ###################################################
+# Project definition
+#
+TARGET = $(PROJECT)
+DESCRIPTION = C++ Wrapper allowing to write OpenGL Core applications in few lines
+BUILD_TYPE = release
+
+###################################################
 # Location of the project directory and Makefiles
 #
 P := .
 M := $(P)/.makefile
-
-###################################################
-# Project definition
-#
-TARGET = $(PROJECT)
-DESCRIPTION = C++11 API wrapping Core Profile OpenGL routines and allowing to write applications in few lines of code
-BUILD_TYPE = debug
-
 include $(P)/Makefile.common
 
 ###################################################
-# Make the list of compiled files
+# Project specific
 #
-OBJ_COMMON = Exception.o
-OBJ_OPENGL = Context.o Shader.o Buffer.o Program.o VAO.o
-OBJ_UI = Window.o # DearImGui.o
-OBJS += $(OBJ_COMMON) $(OBJ_OPENGL) $(OBJ_UI) main.o # TEMPORARY
-
 ifeq ($(ARCHI),Darwin)
-THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/*.o)
+OBJ_OPENGL_TEXTURES = $(abspath $(THIRDPART)/SOIL/*.o)
 else
-THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/obj/*.o)
+OBJ_OPENGL_TEXTURES = $(abspath $(THIRDPART)/SOIL/obj/*.o)
 endif
+
+OBJ_COMMON = Exception.o
+OBJ_OPENGL_CONTEXT = OpenGL.o
+OBJ_OPENGL_VARIABLES = Variables.o
+OBJ_OPENGL_BUFFERS = EBO.o VBO.o VAO.o
+OBJ_OPENGL_TEXTURES += Textures.o
+OBJ_OPENGL_SHADERS = Shader.o Program.o
+OBJ_GUI = Window.o DearImGui.o
+
+OBJS += $(THIRDPART_OBJS)
+OBJS += $(OBJ_COMMON) $(OBJ_OPENGL_CONTEXT) $(OBJ_OPENGL_VARIABLES)
+OBJS += $(OBJ_OPENGL_BUFFERS) $(OBJ_OPENGL_TEXTURES) $(OBJ_OPENGL_SHADERS)
+OBJS += $(OBJ_GUI)
+
+OBJS += main.o # TODO TEMPORARY
 
 ###################################################
 # Compile static and shared libraries

@@ -27,11 +27,9 @@
 #ifndef OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
 #  define OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
 
-#  include "OpenGL/Uniform.hpp"
-#  include "OpenGL/Buffers.hpp"
-#  include "OpenGL/Texture1D.hpp"
-#  include "OpenGL/Texture2D.hpp"
-#  include "OpenGL/Texture3D.hpp"
+#  include "OpenGL/Variables/Uniform.hpp"
+#  include "OpenGL/Buffers/VBO.hpp"
+#  include "OpenGL/Textures/Textures.hpp"
 //#  include "OpenGL/Program.hpp"
 #  include "Math/Vector.hpp"
 #  include "Common/Any.hpp"

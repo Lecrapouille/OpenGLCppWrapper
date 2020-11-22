@@ -1,5 +1,5 @@
-#ifndef GLCONTEXT_HPP
-#  define GLCONTEXT_HPP
+#ifndef GL_OPENGL_CONTEXT_HPP
+#  define GL_OPENGL_CONTEXT_HPP
 
 #  include <GL/glew.h>
 #  include "Common/Exception.hpp"
@@ -37,4 +37,4 @@ void checkError(const char* filename, const uint32_t line, const char* expressio
 
 } // namespace GL
 
-#endif
+#endif // GL_OPENGL_CONTEXT_HPP

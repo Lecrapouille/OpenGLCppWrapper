@@ -24,4 +24,4 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#include "OpenGL/Buffer.hpp"
+#include "OpenGL/Buffers/EBO.hpp"

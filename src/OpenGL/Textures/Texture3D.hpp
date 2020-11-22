@@ -33,7 +33,7 @@
 //!   - GLTextureCube: A 3D Texture specialized for rendering skybox.
 // *****************************************************************************
 
-#  include "OpenGL/Texture2D.hpp"
+#  include "OpenGL/Textures/Texture2D.hpp"
 
 // *****************************************************************************
 //! \brief A 3D Texture.

@@ -27,11 +27,11 @@
 #ifndef OPENGLCPPWRAPPER_GLPROGRAM_HPP
 #  define OPENGLCPPWRAPPER_GLPROGRAM_HPP
 
-#  include "OpenGL/Shaders.hpp"
-#  include "OpenGL/Attribute.hpp"
-#  include "OpenGL/Uniform.hpp"
-#  include "OpenGL/Samplers.hpp"
-#  include "OpenGL/VAO.hpp"
+#  include "OpenGL/Shaders/Shaders.hpp"
+#  include "OpenGL/Variables/Attribute.hpp"
+#  include "OpenGL/Variables/Uniform.hpp"
+#  include "OpenGL/Variables/Samplers.hpp"
+#  include "OpenGL/Buffers/VAO.hpp"
 #  include "Common/Any.hpp"
 
 //! \brief Mode for drawing primitives (points, lines, triangles ...)

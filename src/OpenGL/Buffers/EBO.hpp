@@ -24,68 +24,23 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_GLBUFFERS_HPP
-#  define OPENGLCPPWRAPPER_GLBUFFERS_HPP
+#ifndef OPENGLCPPWRAPPER_ELEMENT_BUFFER_OBJECT_HPP
+#  define OPENGLCPPWRAPPER_ELEMENT_BUFFER_OBJECT_HPP
 
-#  include "OpenGL/Buffer.hpp"
-
-// *****************************************************************************
-//! \brief Buffer for vertex attribute data.
-// *****************************************************************************
-template<typename T>
-class GLVertexBuffer: public GLBuffer<T>
-{
-public:
-
-    //--------------------------------------------------------------------------
-    //! \brief Allows:
-    //! \code
-    //!   GLVertexBuffer<float> vbo;
-    //!   vbo = { 1.0f, 2.0f };
-    //! \endcode
-    //! Else GLVertexBuffer define a couple of operator=() that hide the
-    //! operators inherited from GLBuffer. See
-    //! https://stackoverflow.com/questions/64633899/no-inheritance-found-with-
-    //! operator-and-initializer-list
-    //--------------------------------------------------------------------------
-    //using GLBuffer<T>::operator=;
-
-    //--------------------------------------------------------------------------
-    //! \brief Constructor with the object name and reserved number of
-    //! elements.
-    //--------------------------------------------------------------------------
-    explicit GLVertexBuffer(std::string const& name, size_t const size,
-                            BufferUsage const usage)
-        : GLBuffer<T>(name, GL_ARRAY_BUFFER, size, usage)
-    {}
-
-    template<typename U>
-    inline GLVertexBuffer<T>& operator=(std::initializer_list<U> il)
-    {
-        PendingContainer<T>::operator=(il);
-        return *this;
-    }
-
-    template<typename U>
-    inline GLVertexBuffer<T>& operator=(std::vector<U> const& other)
-    {
-        PendingContainer<T>::operator=(other);
-        return *this;
-    }
-};
+#  include "OpenGL/Buffers/Buffer.hpp"
 
 // *****************************************************************************
-//! \brief Buffer for index data.
+//! \brief Element Buffer Object
 // *****************************************************************************
 template<typename T>
-class GLIndexBuffer: public GLBuffer<T>
+class GLElementBuffer: public GLBuffer<T>
 {
 public:
 
     //--------------------------------------------------------------------------
     //! \brief Constructor with the object name
     //--------------------------------------------------------------------------
-    explicit GLIndexBuffer(std::string const& name, BufferUsage const usage)
+    explicit GLElementBuffer(std::string const& name, BufferUsage const usage)
         : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
     {}
 
@@ -93,13 +48,13 @@ public:
     //! \brief Constructor with the object name and reserved number of
     //! elements.
     //--------------------------------------------------------------------------
-    explicit GLIndexBuffer(std::string const& name, const size_t size,
+    explicit GLElementBuffer(std::string const& name, const size_t size,
                            BufferUsage const usage)
         : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, size, usage)
     {}
 
     template<typename U>
-    inline GLIndexBuffer<T>& operator=(std::initializer_list<U> il)
+    inline GLElementBuffer<T>& operator=(std::initializer_list<U> il)
     {
         PendingContainer<T>::operator=(il);
         return *this;
@@ -112,25 +67,25 @@ public:
 };
 
 template<>
-inline GLenum GLIndexBuffer<uint32_t>::type() const { return GL_UNSIGNED_INT; }
+inline GLenum GLElementBuffer<uint32_t>::type() const { return GL_UNSIGNED_INT; }
 
 template<>
-inline GLenum GLIndexBuffer<uint16_t>::type() const { return GL_UNSIGNED_SHORT; }
+inline GLenum GLElementBuffer<uint16_t>::type() const { return GL_UNSIGNED_SHORT; }
 
 template<>
-inline GLenum GLIndexBuffer<uint8_t>::type() const { return GL_UNSIGNED_BYTE; }
+inline GLenum GLElementBuffer<uint8_t>::type() const { return GL_UNSIGNED_BYTE; }
 
 // *****************************************************************************
 //! \brief
 // *****************************************************************************
 
 //! \brief Human Friendly name (hide template misery)
-using GLIndexBuffer32 = GLIndexBuffer<uint32_t>;
+using GLIndex32 = GLElementBuffer<uint32_t>;
 
 //! \brief Human Friendly name (hide template misery)
-using GLIndexBuffer16 = GLIndexBuffer<uint16_t>;
+using GLIndex16 = GLElementBuffer<uint16_t>;
 
 //! \brief Human Friendly name (hide template misery)
-using GLIndexBuffer8 = GLIndexBuffer<uint8_t>;
+using GLIndex8 = GLElementBuffer<uint8_t>;
 
-#endif // OPENGLCPPWRAPPER_GLBUFFERS_HPP
+#endif // OPENGLCPPWRAPPER_ELEMENT_BUFFER_OBJECT_HPP

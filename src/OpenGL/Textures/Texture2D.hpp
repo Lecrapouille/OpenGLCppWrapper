@@ -33,8 +33,8 @@
 //!   - GLTextureDepth2D:
 // *****************************************************************************
 
-#  include "OpenGL/Textures.hpp"
-#  include "Loaders/SOIL.hpp"
+#  include "OpenGL/Textures/Texture.hpp"
+#  include "Loaders/Textures/SOIL.hpp"
 
 // *****************************************************************************
 //! \brief A 2D Texture.
@@ -95,11 +95,10 @@ public:
     //--------------------------------------------------------------------------
     virtual inline bool loaded() const override
     {
-        return
-                // Texture loaded from a file (jpeg ...)
-                GLTexture::loaded() ||
-                // Dummy textures accepted by FrameBuffer
-                ((0 != m_width) && (0 != m_height));
+        return // Texture loaded from a file (jpeg ...)
+               GLTexture::loaded() ||
+               // Dummy textures accepted by FrameBuffer
+               ((0 != m_width) && (0 != m_height));
     }
 
     //--------------------------------------------------------------------------

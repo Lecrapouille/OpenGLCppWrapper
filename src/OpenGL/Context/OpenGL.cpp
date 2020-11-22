@@ -18,7 +18,7 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "OpenGL/Context.hpp"
+#include "OpenGL/Context/OpenGL.hpp"
 #include <atomic>
 #include <iostream>
 #include <cassert>

@@ -21,7 +21,6 @@
 
 PROJECT = OpenGLCppWrapper
 STANDARD = --std=c++14
-
 include $(M)/Makefile.header
 
 ###################################################
@@ -46,10 +45,9 @@ THIRDPART_LIBS +=
 #
 ifeq ($(ARCHI),Darwin)
 INCLUDES += -I/usr/local/include -I/opt/local/include
-LINKER_FLAGS += \
-  -framework OpenGL -framework Cocoa                                    \
-  -framework IOKit -framework CoreVideo                                 \
-  -L/usr/local/lib -L/opt/local/lib
+LINKER_FLAGS += -framework OpenGL -framework Cocoa
+LINKER_FLAGS += -framework IOKit -framework CoreVideo
+LINKER_FLAGS += -L/usr/local/lib -L/opt/local/lib
 LINKER_FLAGS += -lGLEW -lglfw
 else ifeq ($(ARCHI),Linux)
 PKG_LIBS += glew --static glfw3
@@ -61,11 +59,14 @@ endif
 # Inform Makefile where to find header files
 #
 INCLUDES += -I$(P)/include -I$(P)/. -I$(P)/src -I$(THIRDPART)
+INCLUDES += -I$(THIRDPART)/imgui
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
 #
-VPATH += $(P)/src $(P)/src/Common $(P)/src/Math \
-         $(P)/src/Camera $(P)/src/OpenGL \
-         $(P)/src/Geometry $(P)/src/Scene $(P)/src/UI \
-         $(THIRDPART) $(THIRDPART)/imgui $(THIRDPART)/SOIL/obj
+VPATH += $(P)/src $(P)/src/Common $(P)/src/Math
+VPATH += $(P)/src/OpenGL $(P)/src/OpenGL/Buffers
+VPATH += $(P)/src/OpenGL/Context $(P)/src/OpenGL/Shaders
+VPATH += $(P)/src/OpenGL/Textures $(P)/src/OpenGL/Variables
+VPATH += $(P)/src/UI
+VPATH += $(THIRDPART) $(THIRDPART)/imgui $(THIRDPART)/SOIL/obj

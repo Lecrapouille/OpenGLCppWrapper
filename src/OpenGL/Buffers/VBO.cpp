@@ -17,5 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
+//
+// This file is a derived work of https://github.com/glumpy/glumpy
+//
+// Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
+// Distributed under the (new) BSD License.
+//=====================================================================
 
-#  include "OpenGLCppWrapper/OpenGL/OpenGL.hpp"
+#include "OpenGL/Buffers/VBO.hpp"

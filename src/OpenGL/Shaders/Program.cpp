@@ -24,7 +24,7 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#include "OpenGL/Program.hpp"
+#include "OpenGL/Shaders/Program.hpp"
 
 //--------------------------------------------------------------------------
 GLProgram::GLProgram(std::string const& name)
@@ -240,7 +240,6 @@ bool GLProgram::onUpdate()
     for (auto& it: m_vao->m_listTextures)
         it->begin();
     throw_if_odd_vao();
-    //m_vao->end();
 
     std::cout << "onUpdate() done\n";
     return false;
@@ -486,11 +485,12 @@ size_t GLProgram::getSamplerNames(std::vector<std::string>& list, bool const cle
 void GLProgram::doDraw(Mode const mode, size_t const first, size_t const count)
 {
     begin();
+    m_vao->begin(); // Optim: glBindVertexArray(m_vao->handle());
     glCheck(glDrawArrays(static_cast<GLenum>(mode),
                          static_cast<GLint>(first),
                          static_cast<GLsizei>(count)));
-    glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    end();
+    //glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    //end();
 }
 
 //--------------------------------------------------------------------------

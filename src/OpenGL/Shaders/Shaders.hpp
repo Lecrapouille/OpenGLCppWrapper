@@ -27,7 +27,7 @@
 #ifndef OPENGLCPPWRAPPER_GLSHADERS_HPP
 #  define OPENGLCPPWRAPPER_GLSHADERS_HPP
 
-#  include "OpenGL/Shader.hpp"
+#  include "OpenGL/Shaders/Shader.hpp"
 
 // *****************************************************************************
 //!
