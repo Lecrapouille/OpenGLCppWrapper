@@ -126,12 +126,26 @@ public:
     //!
     //! \return true if texture data have been loaded.
     //--------------------------------------------------------------------------
-    inline bool load(const char *const filename)
+    bool load(const char *const filename, TextureLoader& loader)
     {
+        if (!loader.setPixelFormat(m_cpuPixelFormat))
+            return false;
+
+        m_cpuPixelCount = loader.getPixelCount();
+        m_cpuPixelType = loader.getPixelType();
+        m_gpuPixelFormat = CPU2GPUFormat(GLenum(m_cpuPixelFormat), GLenum(m_cpuPixelType));
+        if (m_gpuPixelFormat < 0)
+            return false;
+
         m_buffer.clear();
         m_width = m_height = 0;
-        SOIL soil(m_cpuPixelFormat);
-        return soil.load(filename, m_buffer, m_width, m_height);
+        return loader.load(filename, m_buffer, m_width, m_height);
+    }
+
+    inline bool load(const char *const filename)
+    {
+        SOIL soil;
+        return load(filename, soil);
     }
 
     //--------------------------------------------------------------------------
@@ -142,10 +156,17 @@ public:
     //!
     //! \return true if texture data have been writen in the file, else false.
     //--------------------------------------------------------------------------
-    inline bool save(const char *const filename)
+    bool save(const char *const filename, TextureLoader& loader)
     {
-        SOIL soil(m_cpuPixelFormat);
-        return soil.save(filename, m_buffer, m_width, m_height);
+        if (loader.setPixelFormat(m_cpuPixelFormat))
+            return loader.save(filename, m_buffer, m_width, m_height);
+        return false;
+    }
+
+    bool save(const char *const filename)
+    {
+        SOIL soil;
+        return save(filename, soil);
     }
 
     //--------------------------------------------------------------------------
@@ -201,7 +222,7 @@ private:
                              static_cast<GLsizei>(m_height),
                              0,
                              static_cast<GLenum>(m_cpuPixelFormat),
-                             static_cast<GLenum>(m_options.pixelType),
+                             static_cast<GLenum>(m_cpuPixelType),
                              m_buffer.to_array()));
     }
 
@@ -237,24 +258,47 @@ private:
         size_t start, stop;
         m_buffer.getPending(start, stop);
 
-        start = start / 4; //TODO 4 because RGBA
-        stop = stop / 4;
+        start = start / m_cpuPixelCount;
+        stop = stop / m_cpuPixelCount;
         const GLint x = start / m_width;
         const GLint y = start % m_width;
         const GLsizei width = (stop / m_width) - x;
         const GLsizei height = (stop % m_width) - y;
 
-        // FIXME: not working if width and height are not the txture size
-        glCheck(glBindTexture(m_target, m_handle));
+        // FIXME: not working if width and height are not the texture size
         glCheck(glTexSubImage2D(m_target, 0, x, y, width, height,
                                 static_cast<GLenum>(m_cpuPixelFormat),
-                                static_cast<GLenum>(m_options.pixelType),
+                                static_cast<GLenum>(m_cpuPixelType),
                                 m_buffer.to_array()));
 
         m_buffer.clearPending();
         return false;
 #  pragma GCC diagnostic pop
     };
+};
+
+// *****************************************************************************
+//! \brief a 2D Texture Float
+// *****************************************************************************
+class GLTextureFloat2D: public GLTexture2D
+{
+public:
+
+    //--------------------------------------------------------------------------
+    //! \brief Constructor.
+    //!
+    //! Give a name to the instance. This constructor makes no other
+    //! actions.
+    //!
+    //! \param name the name of this instance used by GLProgram and GLVAO.
+    //--------------------------------------------------------------------------
+    GLTextureFloat2D(std::string const& name)
+        : GLTexture2D(name)
+    {
+        m_cpuPixelFormat = PixelFormat::RGBA;
+        m_cpuPixelType = GL_FLOAT;
+        m_gpuPixelFormat = GL_RGBA32F;
+    }
 };
 
 // *****************************************************************************
@@ -275,8 +319,9 @@ public:
     GLTextureDepth2D(std::string const& name)
         : GLTexture2D(name)
     {
-        m_gpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
         m_cpuPixelFormat = PixelFormat::DEPTH_COMPONENT;
+        m_cpuPixelType = GL_UNSIGNED_SHORT;
+        m_gpuPixelFormat = GL_DEPTH_COMPONENT16;
     }
 };
 

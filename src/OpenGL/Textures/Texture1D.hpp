@@ -68,7 +68,7 @@ private:
                              static_cast<GLsizei>(m_width),
                              0,
                              static_cast<GLenum>(m_cpuPixelFormat),
-                             static_cast<GLenum>(m_options.pixelType),
+                             static_cast<GLenum>(m_cpuPixelType),
                              nullptr));
         applyTextureParam();
         return false;
@@ -89,10 +89,9 @@ private:
         const GLint x = 0U;
         const GLsizei width = static_cast<GLsizei>(m_width);
 
-        glCheck(glBindTexture(m_target, m_handle));
         glCheck(glTexSubImage1D(m_target, 0, x, width,
                                 static_cast<GLenum>(m_cpuPixelFormat),
-                                static_cast<GLenum>(m_options.pixelType),
+                                static_cast<GLenum>(m_cpuPixelType),
                                 m_buffer.to_array()));
 
         m_buffer.clearPending();

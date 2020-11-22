@@ -32,45 +32,60 @@ class SOIL: public TextureLoader
 {
 public:
 
-    SOIL(GLTexture::PixelFormat const cpuformat)
-    {
-        m_isvalid = setPixelFormat(cpuformat);
-    }
-
     virtual bool setPixelFormat(GLTexture::PixelFormat const cpuformat) override
     {
         switch (cpuformat)
         {
         case GLTexture::PixelFormat::RGBA:
-            m_soilformat = SOIL_LOAD_RGBA;
-            m_nbpixel = 4_z;
-            return true;
+            m_soilFormat = SOIL_LOAD_RGBA;
+            m_pixelCount = 4_z;
+            m_isValid = true;
+            break;
         case GLTexture::PixelFormat::RGB:
-            m_soilformat = SOIL_LOAD_RGB;
-            m_nbpixel = 3_z;
-            return true;
+            m_soilFormat = SOIL_LOAD_RGB;
+            m_pixelCount = 3_z;
+            m_isValid = true;
+            break;
         case GLTexture::PixelFormat::LUMINANCE:
-            std::cerr << "LUMINANCE_ALPHA not managed" << std::endl;
-            m_soilformat = SOIL_LOAD_L;
-            return false;
+            m_soilFormat = SOIL_LOAD_L;
+            m_pixelCount = 1_z;
+            m_isValid = true;
+            break;
         case GLTexture::PixelFormat::LUMINANCE_ALPHA:
-            std::cerr << "LUMINANCE_ALPHA not yet managed" << std::endl;
-            m_soilformat = SOIL_LOAD_LA;
-            return false;
-        case GLTexture::PixelFormat::BGR:
+            m_soilFormat = SOIL_LOAD_LA;
+            m_pixelCount = 2_z;
+            m_isValid = true;
+            break;
         case GLTexture::PixelFormat::STENCIL_INDEX:
         case GLTexture::PixelFormat::DEPTH_COMPONENT:
         case GLTexture::PixelFormat::RED:
-        case GLTexture::PixelFormat::GREEN:
-        case GLTexture::PixelFormat::BLUE:
         case GLTexture::PixelFormat::ALPHA:
         case GLTexture::PixelFormat::DEPTH_STENCIL:
         default:
             std::cerr << "SOIL does not surport the given pixel format"
                       << std::endl;
-            m_soilformat = SOIL_LOAD_AUTO;
-            return false;
+            m_soilFormat = SOIL_LOAD_AUTO;
+            m_isValid = false;
+            break;
         }
+
+        return m_isValid;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual GLenum getPixelType() const override
+    {
+        return m_pixelType;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual size_t getPixelCount() const override
+    {
+        return m_pixelCount;
     }
 
     //--------------------------------------------------------------------------
@@ -86,13 +101,13 @@ public:
     {
         if (unlikely(nullptr == filename))
             return false;
-        if (unlikely(!m_isvalid))
+        if (unlikely(!m_isValid))
             return false;
 
         // Load the image as a C array.
         int w, h;
         unsigned char* image = SOIL_load_image(filename, &w, &h, 0,
-                                               static_cast<int>(m_soilformat));
+                                               static_cast<int>(m_soilFormat));
         if (likely(nullptr != image))
         {
             // Use the max because with framebuffer we can resize texture
@@ -100,7 +115,7 @@ public:
             height = std::max(height, static_cast<size_t>(h));
 
             // Convert it as std::vector
-            size_t size = static_cast<size_t>(w * h) * m_nbpixel * sizeof(unsigned char);
+            size_t size = static_cast<size_t>(w * h) * m_pixelCount * sizeof(unsigned char);
             buffer.append(image, size); // FIXME: not working with preallocated size
             SOIL_free_image_data(image);
             return true;
@@ -130,11 +145,11 @@ public:
 
         std::string ext = getExtension(filename);
         if (ext == "bmp")
-            m_soilformat = SOIL_SAVE_TYPE_BMP;
+            m_soilFormat = SOIL_SAVE_TYPE_BMP;
         else if (ext == "tga")
-            m_soilformat = SOIL_SAVE_TYPE_TGA;
+            m_soilFormat = SOIL_SAVE_TYPE_TGA;
         else if (ext == "dds")
-            m_soilformat = SOIL_SAVE_TYPE_DDS;
+            m_soilFormat = SOIL_SAVE_TYPE_DDS;
         else
         {
             std::cerr << "Cannot save a texture into the given file format '"
@@ -142,10 +157,12 @@ public:
             return false;
         }
 
-        bool res = !!SOIL_save_image(filename, m_soilformat,
+        bool res = !!SOIL_save_image(filename,
+                                     m_soilFormat,
                                      static_cast<int>(width),
                                      static_cast<int>(height),
-                                     static_cast<int>(m_nbpixel), buffer);
+                                     static_cast<int>(m_pixelCount),
+                                     buffer);
         if (unlikely(!res))
         {
             std::cerr << "Failed saving the texture in the file '"
@@ -158,9 +175,10 @@ public:
 
 private:
 
-    size_t m_nbpixel;
-    int    m_soilformat;
-    bool   m_isvalid;
+    size_t m_pixelCount;
+    int    m_soilFormat;
+    GLenum m_pixelType = GL_UNSIGNED_BYTE; // Only managed by SOIL
+    bool   m_isValid;
 };
 
 #endif // OPENGLCPPWRAPPER_SOIL_TEXTURES_LOADER_HPP

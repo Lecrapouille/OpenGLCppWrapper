@@ -40,6 +40,12 @@
 #  include "Common/PendingContainer.hpp"
 
 // *****************************************************************************
+//! \brief Helper converter CPU to GPU pixel format.
+// See OpenGL documentation concerning glTexImage2D()
+// *****************************************************************************
+GLint CPU2GPUFormat(GLenum format, GLenum type);
+
+// *****************************************************************************
 //! \brief Generic Texture.
 //!
 //! A texture is an OpenGL Object that contains one or more images
@@ -82,27 +88,18 @@ public:
         /* 0x8370 */ MIRRORED_REPEAT = GL_MIRRORED_REPEAT,
     };
 
-    //! \brief Texture Pixel Format.
+    //! \brief Texture Pixel Format (CPU side).
     enum class PixelFormat : GLenum
     {
         /* 0x1901 */ STENCIL_INDEX = GL_STENCIL_INDEX,
         /* 0x1902 */ DEPTH_COMPONENT = GL_DEPTH_COMPONENT,
         /* 0x1903 */ RED = GL_RED,
-        /* 0x1904 */ GREEN = GL_GREEN,
-        /* 0x1905 */ BLUE = GL_BLUE,
         /* 0x1906 */ ALPHA = GL_ALPHA,
         /* 0x1907 */ RGB = GL_RGB,
         /* 0x1908 */ RGBA = GL_RGBA,
         /* 0x1909 */ LUMINANCE = GL_LUMINANCE, // Greyscale
         /* 0x190A */ LUMINANCE_ALPHA = GL_LUMINANCE_ALPHA, // Luminance with alpha
-        /* 0x80E0 */ BGR = GL_BGR,
         /* 0x84F9 */ DEPTH_STENCIL = GL_DEPTH_STENCIL,
-    };
-
-    //! \brief Texture Pixel Type.
-    enum class PixelType : GLenum
-    {
-        /* 0x1401 */ UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
     };
 
     // *****************************************************************************
@@ -115,7 +112,6 @@ public:
         Wrap wrapS = Wrap::REPEAT;
         Wrap wrapT = Wrap::REPEAT;
         Wrap wrapR = Wrap::REPEAT;
-        PixelType pixelType = PixelType::UNSIGNED_BYTE;
         bool generateMipmaps = false;
     };
 
@@ -259,6 +255,19 @@ public:
         return m_depth;
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Read the texture data back into CPU memory
+    //--------------------------------------------------------------------------
+    void repatriate()
+    {
+        glCheck(glBindTexture(m_target, m_handle));
+        glCheck(glGetTexImage(m_target,
+                              0,
+                              static_cast<GLenum>(m_cpuPixelFormat),
+                              static_cast<GLenum>(m_cpuPixelType),
+                              m_buffer.to_array()));
+    }
+
 protected:
 
     //--------------------------------------------------------------------------
@@ -326,26 +335,31 @@ private:
         glCheck(glDeleteTextures(1U, &m_handle));
         m_buffer.clear();
         m_width = m_height = m_depth = 0;
+        m_cpuPixelFormat = PixelFormat::RGBA;
+        m_cpuPixelType = GL_UNSIGNED_BYTE;
     }
 
 protected:
 
     //! \brief Options to pass to OpenGL
-    Options m_options;
+    Options      m_options;
     //! \brief Hold the texture (CPU side)
-    Buffer         m_buffer;
+    Buffer       m_buffer;
     //! \brief For Texture1D, Texture2D, Texture3D, TextureCube
-    size_t         m_width = 0u;
+    size_t       m_width = 0u;
     //! \brief For Texture2D, Texture3D, TextureCube
-    size_t         m_height = 0u;
+    size_t       m_height = 0u;
     //! \brief For Texture3D, TextureCube
-    size_t         m_depth = 0u;
+    size_t       m_depth = 0u;
     //! \brief Desired format of texture once loaded from the picture file (CPU
     //! side).  \note Beware all format are not supported by loaders: ie SOIL only
     //! manages RGB, RGBA, luminance greyscale and luminance with alpha.
-    PixelFormat    m_cpuPixelFormat = PixelFormat::RGBA;
+    PixelFormat  m_cpuPixelFormat = PixelFormat::RGBA;
+    size_t       m_cpuPixelCount = 4u;
+    //! \brief Specify the data type of the GPU pixel data
+    GLenum       m_cpuPixelType = GL_UNSIGNED_BYTE;
     //! \brief Desired format of texture once loaded into the GPU.
-    PixelFormat    m_gpuPixelFormat = PixelFormat::RGBA;
+    GLint        m_gpuPixelFormat = GL_RGBA;
 
 private:
 

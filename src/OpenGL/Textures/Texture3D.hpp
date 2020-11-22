@@ -54,18 +54,35 @@ public:
     //--------------------------------------------------------------------------
     bool load(std::vector<std::string> const& filenames)
     {
+        SOIL soil;
+        return load(filenames, soil);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    bool load(std::vector<std::string> const& filenames, TextureLoader& loader)
+    {
         m_width = m_height = m_depth = 0u;
         size_t prevWidth = 0;
         size_t prevHeight = 0;
-        SOIL soil(m_cpuPixelFormat);
+
+        if (!loader.setPixelFormat(m_cpuPixelFormat))
+            return false;
+
+        m_cpuPixelCount = loader.getPixelCount();
+        m_cpuPixelType = loader.getPixelType();
+        m_gpuPixelFormat = CPU2GPUFormat(GLenum(m_cpuPixelFormat), GLenum(m_cpuPixelType));
+        if (m_gpuPixelFormat < 0)
+            return false;
 
         m_buffer.clear();
-        size_t i = m_depth;
+        size_t i = filenames.size();
         while (i--)
         {
             // Load a Texture2D and pack it subsequently into a large 2D texture
             m_width = m_height = 0;
-            if (unlikely(!soil.load(filenames[i].c_str(), m_buffer, m_width, m_height)))
+            if (unlikely(!loader.load(filenames[i].c_str(), m_buffer, m_width, m_height)))
                 return false;
 
             // Check consistency of Texture2D dimension
@@ -80,10 +97,10 @@ public:
 
             prevWidth = m_width;
             prevHeight = m_height;
-            m_depth = filenames.size();
         }
 
         // Success
+        m_depth = filenames.size();
         return true;
     }
 
@@ -101,7 +118,7 @@ private:
                              static_cast<GLsizei>(m_depth),
                              0,
                              static_cast<GLenum>(m_cpuPixelFormat),
-                             static_cast<GLenum>(m_options.pixelType),
+                             static_cast<GLenum>(m_cpuPixelType),
                              m_buffer.to_array()));
     }
 

@@ -36,6 +36,10 @@ public:
     virtual bool save(const char *const filename, GLTexture::Buffer const& buffer,
                       size_t const width, size_t const height) = 0;
 
+    virtual GLenum getPixelType() const = 0;
+
+    virtual size_t getPixelCount() const = 0;
+
     static std::string getExtension(std::string const& path)
     {
         std::string::size_type pos = path.find_last_of(".");
