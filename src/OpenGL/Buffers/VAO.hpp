@@ -129,7 +129,7 @@ public:
         list.reserve(m_listBuffers.size());
         for (auto& it: m_listBuffers)
         {
-            list.push_back(it->name());
+            list.push_back(it.second->name());
         }
         return list.size();
     }
@@ -159,7 +159,7 @@ public:
         list.reserve(m_listTextures.size());
         for (auto& it: m_listTextures)
         {
-            list.push_back(it->name());
+            list.push_back(it.second->name());
         }
         return list.size();
     }
@@ -170,9 +170,9 @@ public:
         list.reserve(m_listTextures.size());
         for (auto& it: m_listTextures)
         {
-            if (!it->loaded())
+            if (!it.second->loaded())
             {
-                list.push_back(it->name()); // TODO filename()
+                list.push_back(it.second->name()); // TODO filename()
             }
         }
         return list.size();
@@ -429,8 +429,8 @@ private:
 
     using VBOs = Any;
     using Textures = Any;
-    using ListBuffers = std::vector<std::shared_ptr<GLObject<GLenum>>>;
-    using ListTextures = std::vector<std::shared_ptr<GLTexture>>;
+    using ListBuffers = std::map<std::string, std::shared_ptr<GLObject<GLenum>>>;
+    using ListTextures = std::map<std::string, std::shared_ptr<GLTexture>>;
 
     VBOs         m_VBOs;
     Textures     m_textures;

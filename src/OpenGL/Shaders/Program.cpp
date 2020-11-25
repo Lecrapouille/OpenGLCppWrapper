@@ -42,7 +42,7 @@ void GLProgram::onRelease()
 {
     glCheck(glDeleteProgram(m_handle));
     m_uniforms.clear();
-    m_listUniforms.clear();
+    m_uniformLocations.clear();
     m_samplers.clear();
     m_attributes.clear();
     m_vao = nullptr;
@@ -167,55 +167,49 @@ bool GLProgram::onCreate()
 //--------------------------------------------------------------------------
 bool GLProgram::onSetup()
 {std::cout << "onSetup()\n";
-    // Compile shaders if they have not yet compiled
+    bool success = true;
+
+    // Compile shaders if they have not yet been compiled
     for (auto& it: m_shaders)
     {
         if (it->code().size() == 0u)
         {
             std::string msg = "  - " + it->name() + ":\nhas empty code source\n";
             concatError(msg);
-            // Release shaders stored in GPU.
-            detachAllShaders();
-            return true;
+            success = false;
         }
-
-        if (!it->compile())
+        else if (!it->compile())
         {
             std::string msg = "  - " + it->name() + ":\n" + it->strerror();
             concatError(msg);
-            // Release shaders stored in GPU.
-            detachAllShaders();
-            return true;
+            success = false;
         }
     }
 
-    // Attach shaders to program
-    for (auto& it: m_shaders)
+    if (success)
     {
-        glCheck(glAttachShader(m_handle, it->handle()));
-        //it->bind(m_handle);
+        // Attach shaders to program
+        for (auto& it: m_shaders)
+        {
+            glCheck(glAttachShader(m_handle, it->handle()));
+        }
+
+        // Link shaders to the program
+        glCheck(glLinkProgram(m_handle));
+        success = checkLinkageStatus(m_handle);
+
+        // Create the list of attributes and uniforms
+        if (success)
+        {
+            std::cout << "GLProgram::onSetup: llllll" << std::endl;
+            generateLocations();
+            m_error.clear();
+        }
     }
 
-    // Link shaders to the program
-    glCheck(glLinkProgram(m_handle));
-    if (checkLinkageStatus(m_handle))
-    {
-        m_error.clear();
-        // Create the list of attributes and uniforms
-        generateLocations();
-        // Release shaders stored in GPU.
-        detachAllShaders();
-        // Success
-        glCheck(glClearColor(0.7f, 0.3f, 0.7f, 0.3f)); // TODO
-        return false;
-    }
-    else
-    {
-        // Release shaders stored in GPU.
-        detachAllShaders();
-        // Failure
-        return true;
-    }
+    // Release shaders stored in GPU.
+    detachAllShaders();
+    return !success;
 }
 
 //--------------------------------------------------------------------------
@@ -227,20 +221,28 @@ bool GLProgram::needUpdate() const
 //--------------------------------------------------------------------------
 bool GLProgram::onUpdate()
 {std::cout << "onUpdate()\n";
+
     assert(m_vao != nullptr);
     m_vao->begin();
-    for (auto& it: m_vao->m_listBuffers)
-        it->begin();
-    for (auto& it: m_attributes)
-        it.second->begin();
-    for (auto const& it: m_listUniforms)
-        it->begin();
-    for (auto& it: m_samplers)
-        it.second->begin();
-    for (auto& it: m_vao->m_listTextures)
-        it->begin();
-    throw_if_odd_vao();
 
+    for (auto& it: m_attributes)
+    {
+        m_vao->m_listBuffers[it.first]->begin();
+        it.second->begin();
+    }
+
+    for (auto const& it: m_uniformLocations)
+    {
+        it.second->begin();
+    }
+
+    for (auto& it: m_samplers)
+    {
+        it.second->begin();
+        m_vao->m_listTextures[it.first]->begin();
+    }
+
+    throw_if_odd_vao();
     std::cout << "onUpdate() done\n";
     return false;
 }
@@ -271,12 +273,13 @@ bool GLProgram::checkLinkageStatus(GLuint handle)
         std::vector<char> log(static_cast<size_t>(length));
         glCheck(glGetProgramInfoLog(handle, length - 1, &length, &log[0U]));
         concatError(&log[0U]);
+        return false;
     }
     else
     {
         m_error.clear();
+        return true;
     }
-    return !!status;
 }
 
 //----------------------------------------------------------------------------
@@ -361,70 +364,71 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
 
     // TODO: if uniform already bound => do nothing
 
-    std::shared_ptr<GLObject<GLint>> ptr;
+    std::shared_ptr<GLLocation> ptr;
     switch (type)
     {
     case GL_FLOAT:
         // TODO if (!m_uniforms.has<T>(name) {
         ptr = std::make_shared<GLUniform<float>>(name, 1, GL_FLOAT, prog);
         m_uniforms.add(name, ptr);
-        m_listUniforms.push_back(ptr);
+        m_uniformLocations[name] = ptr;
         break;
     case GL_FLOAT_VEC2:
         ptr = std::make_shared<GLUniform<Vector2f>>(name, 2, GL_FLOAT, prog);
         m_uniforms.add(name, ptr);
-        m_listUniforms.push_back(ptr);
+        m_uniformLocations[name] = ptr;
         break;
     case GL_FLOAT_VEC3:
         ptr = std::make_shared<GLUniform<Vector3f>>(name, 3, GL_FLOAT, prog);
         m_uniforms.add(name, ptr);
-        m_listUniforms.push_back(ptr);
+        m_uniformLocations[name] = ptr;
         break;
     case GL_FLOAT_VEC4:
         ptr = std::make_shared<GLUniform<Vector4f>>(name, 4, GL_FLOAT, prog);
         m_uniforms.add(name, ptr);
-        m_listUniforms.push_back(ptr);
+        m_uniformLocations[name] = ptr;
         break;
     case GL_INT:
         ptr = std::make_shared<GLUniform<int>>(name, 1, GL_INT, prog);
         m_uniforms.add(name, ptr);
-        m_listUniforms.push_back(ptr);
+        m_uniformLocations[name] = ptr;
         break;
     case GL_INT_VEC2:
         ptr = std::make_shared<GLUniform<Vector2i>>(name, 2, GL_INT, prog);
         m_uniforms.add(name, ptr);
-        m_listUniforms.push_back(ptr);
+        m_uniformLocations[name] = ptr;
         break;
     case GL_INT_VEC3:
         ptr = std::make_shared<GLUniform<Vector3i>>(name, 3, GL_INT, prog);
         m_uniforms.add(name, ptr);
-        m_listUniforms.push_back(ptr);
+        m_uniformLocations[name] = ptr;
         break;
     case GL_INT_VEC4:
         ptr = std::make_shared<GLUniform<Vector4i>>(name, 4, GL_INT, prog);
         m_uniforms.add(name, ptr);
-        m_listUniforms.push_back(ptr);
+        m_uniformLocations[name] = ptr;
         break;
     case GL_FLOAT_MAT2:
         ptr = std::make_shared<GLUniform<Matrix22f>>(name, 4, GL_FLOAT, prog);
         m_uniforms.add(name, ptr);
-        m_listUniforms.push_back(ptr);
+        m_uniformLocations[name] = ptr;
         break;
     case GL_FLOAT_MAT3:
         ptr = std::make_shared<GLUniform<Matrix33f>>(name, 9, GL_FLOAT, prog);
         m_uniforms.add(name, ptr);
-        m_listUniforms.push_back(ptr);
+        m_uniformLocations[name] = ptr;
         break;
     case GL_FLOAT_MAT4:
         ptr = std::make_shared<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, prog);
         m_uniforms.add(name, ptr);
-        m_listUniforms.push_back(ptr);
+        m_uniformLocations[name] = ptr;
         break;
     case GL_SAMPLER_1D:
         m_samplers[name]
                 = std::make_shared<GLSampler1D>(name, m_samplers.size(), prog);
         break;
-    case GL_SAMPLER_2D:    m_samplers[name]
+    case GL_SAMPLER_2D:
+        m_samplers[name]
                 = std::make_shared<GLSampler2D>(name, m_samplers.size(), prog);
         break;
     case GL_SAMPLER_3D:
@@ -455,9 +459,9 @@ size_t GLProgram::failedShaders(std::vector<std::string>& list, bool const clear
 size_t GLProgram::getUniformNames(std::vector<std::string>& list, bool const clear)
 {
     if (clear) { list.clear(); }
-    list.reserve(m_listUniforms.size());
-    for (auto const& it: m_listUniforms)
-        list.push_back(it->name());
+    list.reserve(m_uniformLocations.size());
+    for (auto const& it: m_uniformLocations)
+        list.push_back(it.second->name());
     return list.size();
 }
 

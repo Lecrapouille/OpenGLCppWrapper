@@ -62,6 +62,7 @@ class GLProgram: public GLObject<GLenum>
     using Attributes = std::map<std::string, std::shared_ptr<GLAttribute>>;
     using Samplers = std::map<std::string, std::shared_ptr<GLSampler>>;
     using Uniforms = Any;
+    using UniformLocations = std::map<std::string, std::shared_ptr<GLLocation>>;
 
 public:
 
@@ -546,23 +547,15 @@ private:
 
 private:
 
-    //! \brief Hold class holding shader code source.
-    //! \note pointer is to avoid copy because of deleted copy constructor.
-    Shaders      m_shaders;
+    Shaders    m_shaders;
+    Attributes m_attributes;
+    Samplers   m_samplers;
+    Uniforms   m_uniforms;
+    UniformLocations m_uniformLocations;
+    GLVAO     *m_vao = nullptr;
+
     std::vector<std::string> m_failedShaders;
-    //! \brief Collection of GLUniform<T>
-    Uniforms     m_uniforms;
-    std::vector<std::shared_ptr<GLObject<GLint>>> m_listUniforms;
-    //! \brief Collection of GLSampler. While samplers are considered as
-    //! uniforms I prefer to separate containers to make the code easier to
-    //! write.
-    Samplers     m_samplers;
-    //! \brief Collection GLAttribute.
-    Attributes   m_attributes;
-    //! \brief Bind VAO (when not null)
-    GLVAO       *m_vao = nullptr;
-    //! \brier Internal errno.
-    std::string  m_error;
+    std::string m_error;
 };
 
 template<> inline GLenum GLProgram::getGLType<float>() { return GL_FLOAT; }
