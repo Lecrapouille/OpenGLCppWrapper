@@ -59,7 +59,7 @@ endif
 ###################################################
 # Inform Makefile where to find header files
 #
-INCLUDES += -I$(P)/include -I$(P)/. -I$(P)/src -I$(THIRDPART)
+INCLUDES += -I$(P)/include -I$(P)/. -I$(P)/src -I$(THIRDPART) -I$(THIRDPART)/imgui
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files

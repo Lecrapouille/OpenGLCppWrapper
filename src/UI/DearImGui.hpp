@@ -40,8 +40,8 @@
 #  pragma GCC diagnostic ignored "-Wsign-conversion"
 #  pragma GCC diagnostic ignored "-Wconversion"
 #    include "external/imgui/imgui.h"
-#    include "external/imgui/imgui_impl_glfw.h"
-#    include "external/imgui/imgui_impl_opengl3.h"
+#    include "external/imgui/backends/imgui_impl_glfw.h"
+#    include "external/imgui/backends/imgui_impl_opengl3.h"
 # pragma GCC diagnostic pop
 
 namespace glwrap

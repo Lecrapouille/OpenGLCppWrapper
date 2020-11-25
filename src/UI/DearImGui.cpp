@@ -37,11 +37,12 @@
 #  pragma GCC diagnostic ignored "-Wconversion"
 #  pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #  pragma GCC diagnostic ignored "-Wunused-function"
+#    pragma GCC diagnostic ignored "-Wunused-variable"
 
-#include "external/imgui/imgui_draw.cpp"
-#include "external/imgui/imgui_widgets.cpp"
-#include "external/imgui/imgui.cpp"
-#include "external/imgui/imgui_impl_glfw.cpp"
-#include "external/imgui/imgui_impl_opengl3.cpp"
+#      include "external/imgui/backends/imgui_impl_glfw.cpp"
+#      include "external/imgui/backends/imgui_impl_opengl3.cpp"
+#      include "external/imgui/imgui_draw.cpp"
+#      include "external/imgui/imgui_widgets.cpp"
+#      include "external/imgui/imgui.cpp"
 
-# pragma GCC diagnostic pop
+#   pragma GCC diagnostic pop
