@@ -60,9 +60,6 @@ void GLProgram::concatError(std::string const& msg)
 //----------------------------------------------------------------------------
 bool GLProgram::bind(GLVAO& vao, BufferUsage const usage, size_t const vbo_size)
 {
-    std::cout << "-----------------------------\n";
-    std::cout << "bind VAO " << vao.name() << " to GLProgram " << name() << std::endl;
-
     // Try compile the GLProgram if not previously compiled
     if (unlikely(!compiled()))
     {
@@ -79,6 +76,8 @@ bool GLProgram::bind(GLVAO& vao, BufferUsage const usage, size_t const vbo_size)
 
     if (unlikely(!vao.bound()))
     {
+        std::cout << "bind VAO " << vao.name() << " to GLProgram " << name() << std::endl;
+
         // When binding the VAO to GLProgram for the first time:
         // populate VBOs and textures in the VAO.
         vao.init(*this, usage, vbo_size);
@@ -157,7 +156,7 @@ bool GLProgram::compile()
 
 //--------------------------------------------------------------------------
 bool GLProgram::onCreate()
-{std::cout << "onCreate()\n";
+{
     m_handle = glCheck(glCreateProgram());
     // Hack: setup() has to be called before activate() contrary to VBO, VAO
     m_need_setup = onSetup();
@@ -166,7 +165,7 @@ bool GLProgram::onCreate()
 
 //--------------------------------------------------------------------------
 bool GLProgram::onSetup()
-{std::cout << "onSetup()\n";
+{
     bool success = true;
 
     // Compile shaders if they have not yet been compiled
@@ -201,7 +200,6 @@ bool GLProgram::onSetup()
         // Create the list of attributes and uniforms
         if (success)
         {
-            std::cout << "GLProgram::onSetup: llllll" << std::endl;
             generateLocations();
             m_error.clear();
         }
@@ -220,8 +218,7 @@ bool GLProgram::needUpdate() const
 
 //--------------------------------------------------------------------------
 bool GLProgram::onUpdate()
-{std::cout << "onUpdate()\n";
-
+{
     assert(m_vao != nullptr);
     m_vao->begin();
 
@@ -243,20 +240,19 @@ bool GLProgram::onUpdate()
     }
 
     throw_if_odd_vao();
-    std::cout << "onUpdate() done\n";
+
     return false;
 }
 
 //--------------------------------------------------------------------------
 void GLProgram::onActivate()
 {
-    std::cout << "onActivate() handle " << m_handle << "\n";
     glCheck(glUseProgram(m_handle));
 }
 
 //--------------------------------------------------------------------------
 void GLProgram::onDeactivate()
-{std::cout << "onDeactivate()\n";
+{
     glCheck(glUseProgram(0U));
 }
 
@@ -360,8 +356,6 @@ void GLProgram::createAttribute(GLenum type, const char *name, const GLuint prog
 //----------------------------------------------------------------------------
 void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
 {
-    std::cout << "GLProgram::createUniform " << name << std::endl;
-
     // TODO: if uniform already bound => do nothing
 
     std::shared_ptr<GLLocation> ptr;

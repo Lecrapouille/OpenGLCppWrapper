@@ -52,7 +52,6 @@ void GLVAO::init(GLProgram& program, BufferUsage const usage, size_t const vbo_s
     for (auto& it: program.attributes())
     {
         const char *name = it.first.c_str();
-        std::cout << "GLVAO::init attribute " << name << std::endl;
         switch (it.second->size())
         {
         case 1:
@@ -94,7 +93,6 @@ void GLVAO::init(GLProgram& program, BufferUsage const usage, size_t const vbo_s
     for (auto& it: program.samplers())
     {
         const char *name = it.first.c_str();
-        std::cout << "GLVAO::init sampler " << name << std::endl;
         const GLenum gltype = it.second->target();
         switch (gltype)
         {

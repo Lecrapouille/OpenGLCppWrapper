@@ -409,12 +409,12 @@ private:
             throw GL::Exception("nullptr passed to uniform");
 
         if (likely(!bound()))
-        {std::cout << "!bound => getTexture add " << name << "\n";
+        {
             m_textures.add(name, std::make_shared<T>(name));
         }
 
         try
-        {std::cout << "getTexture get " << name << "\n";
+        {
             m_need_update = true; // TODO gerer foo = getTexture()
             return *(m_textures.get<std::shared_ptr<T>>(name));
         }
