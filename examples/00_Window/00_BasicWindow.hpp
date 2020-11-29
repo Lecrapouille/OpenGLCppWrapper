@@ -18,33 +18,30 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_00_BASIC_WINDOW_HPP
-#  define EXAMPLE_00_BASIC_WINDOW_HPP
+#ifndef EXAMPLE_00_WINDOW_00_BASIC_WINDOW_HPP
+#  define EXAMPLE_00_WINDOW_00_BASIC_WINDOW_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
-using namespace glwrap;
-using namespace glwrap::window;
-
 //------------------------------------------------------------------------------
-//! \brief This example shows how to create a window instanciating an OpenGL
-//! context. No OpenGL stuffs are rendered here for the moment. The basic OpenGL
-//! routine called here is just to clear the window. No input/ouput events (IO)
-//! are observed for the moment.
+//! \brief This example shows how to create a single window instanciating an
+//! OpenGL context. No OpenGL object are rendered here for the moment. The basic
+//! OpenGL routine called here is just to clear the window. No input/ouput
+//! events (IO) are observed for this basic example.
 //------------------------------------------------------------------------------
-class BasicWindow: public IGLWindow
+class BasicWindow: public GLWindow
 {
 public:
 
-  BasicWindow();
-  ~BasicWindow();
+    BasicWindow(uint32_t const width, uint32_t const height);
+    ~BasicWindow();
 
 private:
 
-  virtual bool setup() override;
-  virtual bool draw() override;
-  virtual void onSetupFailed() override;
-  virtual void onDrawFailed() override;
+    virtual bool setup() override;
+    virtual bool draw() override;
+    virtual void onSetupFailed() override;
+    virtual void onDrawFailed() override;
 };
 
-#endif // EXAMPLE_00_BASIC_WINDOW_HPP
+#endif // EXAMPLE_00_WINDOW_00_BASIC_WINDOW_HPP

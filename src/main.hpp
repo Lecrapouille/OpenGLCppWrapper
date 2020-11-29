@@ -26,21 +26,21 @@
 // *****************************************************************************
 //! \brief This example shows how to create a simple textured triangle.
 // *****************************************************************************
-class Example: public IGLWindow
+class Example: public GLWindow
 {
 public:
 
-    Example();
+    Example(uint32_t const width, uint32_t const height, const char *title);
     ~Example();
 
 private:
 
     bool loadTextures();
-    virtual void onWindowSizeChanged() override;
+    virtual void onResized() override;
     virtual bool onSetup() override;
-    virtual void onSetupFailed() override;
+    virtual void onSetupFailed(std::string const& reason) override;
     virtual bool onPaint() override;
-    virtual void onPaintFailed() override;
+    virtual void onPaintFailed(std::string const& reason) override;
     void onDebug();
 
 private:

@@ -19,223 +19,64 @@
 //=====================================================================
 
 #include "UI/Window.hpp"
+#include "UI/Application.hpp"
+#include "Common/GPUMemory.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
 #include <cassert>
 
 //------------------------------------------------------------------------------
-//! \brief Callback triggered when GLFW failed.
-//------------------------------------------------------------------------------
-__attribute__((__noreturn__))
-static void on_GLFW_error(int /*errorCode*/, const char* msg)
-{
-    throw GL::Exception(msg);
-}
-
-//------------------------------------------------------------------------------
-//! \brief Display the GPU memory consumption in human readable format
-//------------------------------------------------------------------------------
-// static void display_gpu_memory()
-// {
-//   static size_t previous_gpu_mem = 0_z;
-//   size_t current_gpu_mem = GPUMemory();
-
-//   if (previous_gpu_mem != current_gpu_mem)
-//     {
-//       previous_gpu_mem = current_gpu_mem;
-
-//       std::cout << "Estimated GPU memory usage: "
-//                 << current_gpu_mem << " bytes"
-//                 << std::endl;
-//     }
-// }
-
-//------------------------------------------------------------------------------
-//! \brief Static function allowing to "cast" a function pointer to a
-//! method pointer. This function is triggered when the mouse is
-//! moved.
-//------------------------------------------------------------------------------
-static void on_mouse_moved(GLFWwindow* obj, double xpos, double ypos)
-{
-    static double m_lastX = 0.0;
-    static double m_lastY = 0.0;
-    static bool m_firstMouse = true;
-
-    assert(nullptr != obj);
-    IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
-    window::Mouse& mouse = window->mouse();
-
-    mouse.position = Vector2g(xpos, ypos);
-
-    if (m_firstMouse)
-    {
-        m_lastX = xpos;
-        m_lastY = ypos;
-        m_firstMouse = false;
-    }
-
-    // Reversed since y-coordinates go from bottom to top
-    mouse.displacement = Vector2g(xpos - m_lastX, m_lastY - ypos);
-
-    m_lastX = xpos;
-    m_lastY = ypos;
-
-    window->onMouseMoved(mouse);
-}
-
-//------------------------------------------------------------------------------
-//! \brief Static function allowing to "cast" a function pointer to a
-//! method pointer. This function is triggered when the mouse button
-//! is scrolled.
-//------------------------------------------------------------------------------
-static void on_mouse_scrolled(GLFWwindow* obj, double xoffset, double yoffset)
-{
-    assert(nullptr != obj);
-    IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
-    window::Mouse& mouse = window->mouse();
-
-    mouse.scroll = Vector2g(xoffset, yoffset);
-    window->onMouseScrolled(mouse);
-}
-
-//------------------------------------------------------------------------------
-//! \brief Static function allowing to "cast" a function pointer to a
-//! method pointer. This function is triggered when the mouse has been pressed.
-//------------------------------------------------------------------------------
-static void on_mouse_button_pressed(GLFWwindow* obj, int button, int action, int /*mods*/)
-{
-    assert(nullptr != obj);
-    IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
-    window::Mouse& mouse = window->mouse();
-
-    mouse.button = static_cast<window::ButtonType>(button);
-    mouse.pressed = (action == GLFW_PRESS); // else GLFW_RELEASE
-    window->onMouseButtonPressed(mouse);
-}
-
-//------------------------------------------------------------------------------
-//! \brief
-//------------------------------------------------------------------------------
-static void on_keyboard_event(GLFWwindow* obj, int key, int /*scancode*/, int action, int /*mods*/)
-{
-    assert(nullptr != obj);
-    IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
-    if (action == GLFW_PRESS)
-        window->onSetKeyAction(static_cast<size_t>(key), window::KEY_PRESS);
-    else if (action == GLFW_RELEASE)
-        window->onSetKeyAction(static_cast<size_t>(key), window::KEY_RELEASE);
-}
-
-//------------------------------------------------------------------------------
-//! \brief Static function allowing to "cast" a function pointer to
-//! a method pointer. This function is triggered when the window
-//! has been resized.
-//------------------------------------------------------------------------------
-static void on_window_resized(GLFWwindow* obj, int width, int height)
-{
-    assert(nullptr != obj);
-    IGLWindow* window = static_cast<IGLWindow*>(glfwGetWindowUserPointer(obj));
-    if (unlikely(0 >= width)) { width = 1; }
-    if (unlikely(0 >= height)) { height = 1; }
-    window->setWindowSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
-}
-
-//------------------------------------------------------------------------------
-IGLWindow::IGLWindow(uint32_t const width, uint32_t const height, const char *title)
+GLWindow::GLWindow(uint32_t const width, uint32_t const height, const char *title)
     : m_width(width),
       m_height(height),
       m_title(title),
       m_lastKeys(GLFW_KEY_LAST + 1),
       m_currentKeys(GLFW_KEY_LAST + 1)
 {
-    if (unlikely(nullptr == m_title)) { m_title = ""; }
-    if (unlikely(0u == m_width)) { m_width = 1u; }
-    if (unlikely(0u == m_height)) { m_height = 1u; }
-
-    // Initialise GLFW
-    glfwSetErrorCallback(on_GLFW_error);
-    if (!glfwInit())
-        throw GL::Exception("Failed to initialize GLFW");
-
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-
-    // Open a window and create its OpenGL context
-    m_main_window = glfwCreateWindow(static_cast<int>(m_width),
-                                     static_cast<int>(m_height),
-                                     m_title, nullptr, nullptr);
-    if (nullptr == m_main_window)
+    m_context = glfwCreateWindow(static_cast<int>(m_width),
+                                 static_cast<int>(m_height),
+                                 m_title,
+                                 nullptr,
+                                 nullptr);
+    if (m_context == nullptr)
         throw GL::Exception("Failed to open GLFW window");
-
-    glfwMakeContextCurrent(m_main_window);
-    glfwSwapInterval(1); // Enable vsync
-
-    // Initialize GLEW
-    glewExperimental = GL_TRUE; // stops glew crashing on OSX :-/
-    if (GLEW_OK != glewInit())
-        throw GL::Exception("Failed to initialize GLFW");
-
-    // Print out some info about the graphics drivers
-    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-
-    // Make sure OpenGL version 3.2 API is available
-    if (!GLEW_VERSION_3_2)
-        throw GL::Exception("OpenGL 3.2 API is not available!");
-
-    GL::Context::setCreated();
 }
 
 //------------------------------------------------------------------------------
-IGLWindow::~IGLWindow()
+GLWindow::~GLWindow()
 {
-    if (nullptr != m_main_window)
-        glfwDestroyWindow(m_main_window);
-    glfwTerminate();
+    GLApplication::makeContextCurrent(this);
+    glfwDestroyWindow(m_context);
 }
 
 //------------------------------------------------------------------------------
-void IGLWindow::hideMouseCursor()
+void GLWindow::hideCursor()
 {
-    if (likely(nullptr != m_main_window))
-    {
-        m_mouse.visible = false;
-        glfwSetInputMode(m_main_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
+    m_mouse.visible = false;
+    glfwSetInputMode(m_context, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 //------------------------------------------------------------------------------
-void IGLWindow::showMouseCursor()
+void GLWindow::showCursor()
 {
-    if (likely(nullptr != m_main_window))
-    {
-        m_mouse.visible = true;
-        glfwSetInputMode(m_main_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
+    m_mouse.visible = true;
+    glfwSetInputMode(m_context, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 //------------------------------------------------------------------------------
-void IGLWindow::setWindowSize(uint32_t const width, uint32_t const height)
+void GLWindow::resize(uint32_t const width, uint32_t const height)
 {
-    m_width = width;
-    m_height = height;
-
-    if (unlikely(0u == m_width)) { m_width = 1u; }
-    if (unlikely(0u == m_height)) { m_height = 1u; }
+    m_width = std::max(16u, width);
+    m_height = std::max(16u, height);
 
     // Callback to be implemented by the derived class
-    onWindowSizeChanged();
+    onResized();
 }
 
 //------------------------------------------------------------------------------
-void IGLWindow::computeFPS()
+void GLWindow::computeFPS()
 {
-    static uint32_t nbFrames = 0u;
     double currentTime = glfwGetTime();
     m_deltaTime = static_cast<float>(currentTime - m_lastFrameTime);
     m_lastFrameTime = currentTime;
@@ -248,76 +89,231 @@ void IGLWindow::computeFPS()
         m_fps = nbFrames;
         int ms_by_frame = static_cast<int>(1000.0f / static_cast<float>(m_fps));
         oss << '[' << m_fps << " FPS, " << ms_by_frame << " ms] " << m_title;
-        glfwSetWindowTitle(m_main_window, oss.str().c_str());
+        glfwSetWindowTitle(m_context, oss.str().c_str());
         nbFrames = 0u;
         m_lastTime += 1.0;
     }
 }
 
 //------------------------------------------------------------------------------
-static window::Event operator&(window::Event lhs, window::Event rhs)
+//! \brief Display the GPU memory consumption in human readable format
+//------------------------------------------------------------------------------
+void GLWindow::monitorGPUMemory()
 {
-    return static_cast<window::Event>(
-        static_cast<std::underlying_type<window::Event>::type>(lhs) &
-        static_cast<std::underlying_type<window::Event>::type>(rhs));
+    size_t current_gpu_mem = GPUMemory();
+
+    if (previous_gpu_mem != current_gpu_mem)
+    {
+        previous_gpu_mem = current_gpu_mem;
+        onGPUMemoryChanged(current_gpu_mem);
+    }
 }
 
 //------------------------------------------------------------------------------
+//! \brief Allow to do AND operations on Events to separate several GLWindow
+//! events.
+//------------------------------------------------------------------------------
+static GLWindow::Event operator&(GLWindow::Event lhs, GLWindow::Event rhs)
+{
+    return static_cast<GLWindow::Event>(
+        static_cast<std::underlying_type<GLWindow::Event>::type>(lhs) &
+        static_cast<std::underlying_type<GLWindow::Event>::type>(rhs));
+}
+
+//------------------------------------------------------------------------------
+// \note we use lambda functions in the aim to make private GLWindow callbacks.
+// Else, if using static function, we could not reach private methods.
 // \fixme callbacksOn(Event::All) + callbacksOn(Event::None) => callbacks are
 // not removed.
-void IGLWindow::enableCallbacks(window::Event const events)
+void GLWindow::makeReactOn(GLWindow::Event const events)
 {
-    if ((events & window::Event::MouseMove) != window::Event::None)
-        glfwSetCursorPosCallback(m_main_window, on_mouse_moved);
-    if ((events & window::Event::MouseScroll) != window::Event::None)
-        glfwSetScrollCallback(m_main_window, on_mouse_scrolled);
-    if ((events & window::Event::MouseButton) != window::Event::None)
-        glfwSetMouseButtonCallback(m_main_window, on_mouse_button_pressed);
-    if ((events & window::Event::Keyboard) != window::Event::None)
-        glfwSetKeyCallback(m_main_window, on_keyboard_event);
+    // Note I use lambda functions instead of static functions to access to
+    // private methods.
+
+    if ((events & GLWindow::Event::MouseMove) != GLWindow::Event::None)
+    {
+        // Mouse moved event
+        glfwSetCursorPosCallback(m_context, [](GLFWwindow* obj, double xpos, double ypos)
+        {
+            static double lastX = xpos;
+            static double lastY = ypos;
+
+            // Get the window.
+            assert(nullptr != obj);
+            GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
+
+            // Save context.
+            GLWindow* previous_context = GLApplication::window();
+            GLApplication::makeContextCurrent(window);
+
+            // Update mouse states
+            window->m_mouse.position.x = xpos;
+            window->m_mouse.position.y = ypos;
+            window->m_mouse.displacement.x = xpos - lastX;
+            window->m_mouse.displacement.y = lastY - ypos; // Reversed since
+                                                           // y-coordinates go
+                                                           // from bottom to top
+            lastX = xpos;
+            lastY = ypos;
+
+            // Callback to be implemented by the derived class
+            window->onMouseMoved();
+
+            // Clear states
+            window->m_mouse.displacement.x = 0.0;
+            window->m_mouse.displacement.y = 0.0;
+
+            // Restore context.
+            GLApplication::makeContextCurrent(previous_context);
+        });
+    }
+
+    // Mouse scroll event
+    if ((events & GLWindow::Event::MouseScroll) != GLWindow::Event::None)
+    {
+        glfwSetScrollCallback(m_context, [](GLFWwindow* obj, double xoffset, double yoffset)
+        {
+            // Get the window.
+            assert(nullptr != obj);
+            GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
+
+            // Save context.
+            GLWindow* previous_context = GLApplication::window();
+            GLApplication::makeContextCurrent(window);
+
+            // Update mouse states
+            window->m_mouse.scroll.x = xoffset;
+            window->m_mouse.scroll.y = yoffset;
+
+            // Callback to be implemented by the derived class
+            window->onMouseScrolled();
+
+            // Clear states
+            window->m_mouse.scroll.x = 0.0;
+            window->m_mouse.scroll.y = 0.0;
+
+            // Restore context.
+            GLApplication::makeContextCurrent(previous_context);
+        });
+    }
+
+    // Mouse click event
+    if ((events & GLWindow::Event::MouseButton) != GLWindow::Event::None)
+    {
+        glfwSetMouseButtonCallback(m_context, [](GLFWwindow* obj, int button, int action, int /*mods*/)
+        {
+            // Get the window.
+            assert(nullptr != obj);
+            GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
+
+            // Save context.
+            GLWindow* previous_context = GLApplication::window();
+            GLApplication::makeContextCurrent(window);
+
+            // Update mouse states
+            window->m_mouse.button = static_cast<GLWindow::Mouse::Button>(button);
+            window->m_mouse.pressed = (action == GLFW_PRESS); // else GLFW_RELEASE
+
+            // Callback to be implemented by the derived class
+            window->onMouseButtonPressed();
+
+            // Clear states
+            window->m_mouse.button = GLWindow::Mouse::Button::NONE;
+            window->m_mouse.pressed = false;
+
+            // Restore context.
+            GLApplication::makeContextCurrent(previous_context);
+        });
+    }
+
+    // Key pressed or released events
+    if ((events & GLWindow::Event::Keyboard) != GLWindow::Event::None)
+    {
+        glfwSetKeyCallback(m_context, [](GLFWwindow* obj, int key, int /*scancode*/, int action, int /*mods*/)
+        {
+            // Get the window.
+            assert(nullptr != obj);
+            GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
+
+            // Save context.
+            GLWindow* previous_context = GLApplication::window();
+            GLApplication::makeContextCurrent(window);
+
+            // Update keyboard states
+            {
+                const std::lock_guard<std::mutex> lock(window->m_mutex);
+                window->m_currentKeys[static_cast<size_t>(key)] =
+                        (action == GLFW_PRESS) ? GLWindow::KEY_PRESS : GLWindow::KEY_RELEASE;
+            }
+
+            // Restore context.
+            GLApplication::makeContextCurrent(previous_context);
+        });
+    }
 }
 
 //------------------------------------------------------------------------------
-bool IGLWindow::start()
+bool GLWindow::setup()
 {
-    // Save the class address to "cast" function callback into a method
-    // callback
-    glfwSetWindowUserPointer(m_main_window, this);
+    // Set this window as active context
+    GLApplication::makeContextCurrent(this);
 
-    // I/O callbacks
-    glfwSetFramebufferSizeCallback(m_main_window, on_window_resized);
+    // Save the context address: it will be passed as parameter in glfw callbacks
+    glfwSetWindowUserPointer(m_context, this);
 
-    // Ensure we can capture keyboard being pressed below
-    glfwSetInputMode(m_main_window, GLFW_STICKY_KEYS, GL_TRUE);
+    // Set the windows resized callback. I use lambda function instead of static
+    // function to access to private methods.
+    glfwSetFramebufferSizeCallback(m_context, [](GLFWwindow* obj, int width, int height)
+    {
+        // Get the window.
+        assert(nullptr != obj);
+        GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
 
-    for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
-        m_lastKeys[i] = m_currentKeys[i] = window::KEY_RELEASE;
+        // Save context.
+        GLWindow* previous_context = GLApplication::window();
+        GLApplication::makeContextCurrent(window);
+
+        // Call the GLWindow callback that has to be implemented by the derived
+        // class.
+        window->m_width = std::max(16u, static_cast<uint32_t>(width));
+        window->m_height = std::max(16u, static_cast<uint32_t>(height));
+        window->onResized();
+
+        // Restore context.
+        GLApplication::makeContextCurrent(previous_context);
+    });
+
+    // Ensure we can capture keyboard being pressed below.
+    glfwSetInputMode(m_context, GLFW_STICKY_KEYS, GL_TRUE);
+    {
+        const std::lock_guard<std::mutex> lock(m_mutex);
+        for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
+        {
+            m_lastKeys[i] = m_currentKeys[i] = GLWindow::KEY_RELEASE;
+        }
+    }
 
     // Flush OpenGL errors before using this function on real OpenGL
     // routines else a fake error is returned on the first OpenGL
     // routines while valid.
     glCheck();
 
-    // Init OpenGL states of the user application
     try
     {
+        // Init OpenGL stats as well as user application states.
         if (unlikely(!onSetup()))
         {
-            //ERROR("Failed setting-up graphics");
-            onSetupFailed();
+            // Aborted explicitely by the developper
+            onSetupFailed("Has returned false");
             return false;
         }
 
         // Force refreshing computation made when window changed
-        onWindowSizeChanged();
+        onResized();
     }
     catch (const GL::Exception& e)
     {
-        //ERROR("Caught exception during setting-up graphics: '%s'",
-        //      e.message().c_str());
-        std::cerr << "Caught exception during setting-up graphics: "
-                  << e.message() << std::endl;
-        onSetupFailed();
+        onSetupFailed(e.message());
         return false;
     }
 
@@ -327,50 +323,54 @@ bool IGLWindow::start()
     m_fps = 0;
 
     // Draw OpenGL scene
-    return loop();
+    return true;
 }
 
 //------------------------------------------------------------------------------
-bool IGLWindow::loop()
+bool GLWindow::update()
 {
-    do
-    {
-        // display_gpu_memory();
-        computeFPS();
+    // Set this window as active context
+    GLApplication::makeContextCurrent(this);
 
-        try
+    computeFPS();
+    monitorGPUMemory();
+
+    try
+    {
+        // Render the scene
+        if (likely(false == onPaint()))
         {
-            if (likely(false == onPaint()))
-            {
-                //ERROR("Failed drawing graphics");
-                onPaintFailed();
-                return false;
-            }
-        }
-        catch (const GL::Exception& e)
-        {
-            //ERROR("Caught exception during drawing graphics: '%s'",
-            //      e.message().c_str());
-            onPaintFailed();
+            onPaintFailed("Has returned false");
             return false;
         }
-
-        // Swap buffers
-        glfwSwapBuffers(m_main_window);
-
-        // Update window events (input etc)
-        {
-            glfwPollEvents();
-            const std::lock_guard<std::mutex> lock(m_mutex);
-            onKeyboardEvent();
-            for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
-                m_lastKeys[i] = m_currentKeys[i];
-        }
     }
+    catch (const GL::Exception& e)
+    {
+        onPaintFailed(e.message());
+        return false;
+    }
+
+    // Swap buffers
+    glfwSwapBuffers(m_context);
+
+    // Update window events (input etc)
+    glfwPollEvents();
+    {
+        const std::lock_guard<std::mutex> lock(m_mutex);
+        onKeyboardEvent();
+        for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
+            m_lastKeys[i] = m_currentKeys[i];
+    }
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+bool GLWindow::shouldHalt()
+{
     // Check if the ESC key was pressed or the window was closed
     // Note: use keyPressed() not isKeyDown() because if Event::Keyboard is not we
     // no longer can halt the window.
-    while ((GLFW_PRESS != glfwGetKey(m_main_window, GLFW_KEY_ESCAPE)) &&
-           (0 == glfwWindowShouldClose(m_main_window)));
-    return true;
+    return (GLFW_PRESS == glfwGetKey(m_context, GLFW_KEY_ESCAPE)) ||
+            (glfwWindowShouldClose(m_context));
 }

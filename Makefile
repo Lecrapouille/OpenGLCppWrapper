@@ -47,7 +47,7 @@ OBJ_OPENGL_VARIABLES = Variables.o
 OBJ_OPENGL_BUFFERS = EBO.o VBO.o VAO.o
 OBJ_OPENGL_TEXTURES += Textures.o
 OBJ_OPENGL_SHADERS = Shader.o Program.o
-OBJ_GUI = Window.o DearImGui.o
+OBJ_GUI = Window.o Application.o DearImGui.o
 
 OBJS += $(THIRDPART_OBJS)
 OBJS += $(OBJ_COMMON) $(OBJ_OPENGL_CONTEXT) $(OBJ_OPENGL_VARIABLES)

@@ -22,6 +22,7 @@
 #  define OPENGLCPPWRAPPER_INCLUDE_UI_HPP
 
 //#  include "UI/DearImGui.hpp"
-#  include "UI/Window.hpp"
+//#  include "UI/Window.hpp"
+#  include "UI/Application.hpp"
 
 #endif // OPENGLCPPWRAPPER_INCLUDE_UI_HPP

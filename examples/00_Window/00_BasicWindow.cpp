@@ -18,17 +18,24 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "00_BasicWindow.hpp"
+#include "00_Window/00_BasicWindow.hpp"
 #include <iostream>
 
-BasicWindow::BasicWindow()
+//------------------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------------------
+BasicWindow::BasicWindow(uint32_t const width, uint32_t const height)
+    : GLWindow(width, height, "00_BasicWindow")
 {
-  std::cout << "Hello BasicWindow" << std::endl;
+    std::cout << "Hello BasicWindow" << std::endl;
 }
 
+//------------------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------------------
 BasicWindow::~BasicWindow()
 {
-  std::cout << "Bye BasicWindow" << std::endl;
+    std::cout << "Bye BasicWindow" << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -36,13 +43,25 @@ BasicWindow::~BasicWindow()
 //------------------------------------------------------------------------------
 bool BasicWindow::setup()
 {
-  // Two cases:
-  // - setup ends with success => return true. In this case the function draw()
-  //   will be called periodically.
-  // - setup reaches an error => return false. In case, the draw() function will
-  //   not be called and instead the function onSetupFailed() is called and the
-  //   program immediatley exit (and release CPU and GPU memory before).
-  return true;
+    // Add here you code for initializing your game.
+    std::cout << "Setup BasicWindow" << std::endl;
+
+    // Two cases:
+    // - setup ends with success => return true. In this case the function draw()
+    //   will be called periodically.
+    // - setup reaches an error => return false. In case, the draw() function will
+    //   not be called and instead the function onSetupFailed() is called and the
+    //   program immediatley exit (and release CPU and GPU memory before).
+    return true;
+}
+
+//------------------------------------------------------------------------------
+//! \brief Callback when setup() failed.
+//------------------------------------------------------------------------------
+void BasicWindow::onSetupFailed(std::string const& reason)
+{
+    // To reach this code make setup() return false;
+    std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -51,39 +70,30 @@ bool BasicWindow::setup()
 //------------------------------------------------------------------------------
 bool BasicWindow::draw()
 {
-  // Note: wrap each OpenGL function with the glCheck() to check everything is
-  // alright.
-  glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
-  glCheck(glClear(GL_COLOR_BUFFER_BIT));
+    // Note: this is not mandatory but you can wrap each OpenGL function with
+    // the glCheck() to verify if everything is alright.
+    glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
+    glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-  // The delta time (in seconds) from the previous draw() and frames per seconds
-  // (FPS) are automatically computed.
-  std::cout << "DT: " << dt() << " seconds. FPS=" << fps() << "        \r" << std::flush;
+    // The delta time (in seconds) from the previous draw() and frames per
+    // seconds (FPS) are automatically computed.
+    std::cout << "DT: " << dt() << " seconds. FPS=" << fps() << "        \r" << std::flush;
 
-  // Two cases:
-  // - draw() ends with success => return true. In this case the function draw()
-  //   will be keep be called periodically.
-  // - draw() reaches an error => return false. In case, the next draw()
-  //   function will not be called and instead the function onDrawFailed() is
-  //   called and the program immediatley exit (and release CPU and GPU memory
-  //   before).
-  return true;
-}
-
-//------------------------------------------------------------------------------
-//! \brief Callback when setup() failed.
-//------------------------------------------------------------------------------
-void BasicWindow::onSetupFailed()
-{
-  // To reach this code make setup() return false;
-  std::cerr << "onSetupFailed() called" << std::endl;
+    // Two cases:
+    // - draw() ends with success => return true. In this case the function draw()
+    //   will be keep be called periodically.
+    // - draw() reaches an error => return false. In case, the next draw()
+    //   function will not be called and instead the function onDrawFailed() is
+    //   called and the program immediatley exit (and release CPU and GPU memory
+    //   before).
+    return true;
 }
 
 //------------------------------------------------------------------------------
 //! \brief Callback when draw() failed.
 //------------------------------------------------------------------------------
-void BasicWindow::onDrawFailed()
+void BasicWindow::onDrawFailed(std::string const& reason)
 {
-  // To reach this code make draw() return false;
-  std::cerr << "onDrawFailed() called" << std::endl;
+    // To reach this code make draw() return false;
+    std::cerr << "Failure during rendering. Reason: " << reason << std::endl;
 }

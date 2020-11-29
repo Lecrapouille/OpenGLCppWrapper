@@ -28,107 +28,98 @@
 #  include "OpenGL/Context/OpenGL.hpp"
 #  include "Math/Vector.hpp"
 #  include <GLFW/glfw3.h>
+//#  include <GL/glew.h>
 #  include <mutex>
 
-namespace window
+class GLWindow
 {
-static bool const KEY_PRESS = true;
-static bool const KEY_RELEASE = false;
+    friend class GLApplication;
 
-//! \brief Button type
-enum ButtonType
-{
-    LEFT = GLFW_MOUSE_BUTTON_LEFT,
-    RIGHT = GLFW_MOUSE_BUTTON_RIGHT,
-    MIDDLE = GLFW_MOUSE_BUTTON_MIDDLE,
-    ONE = GLFW_MOUSE_BUTTON_1,
-    TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT
-};
-
-//! \brief Structure holding mouse states used by IGLWindow callbacks.
-struct Mouse
-{
-    //! \brief position (x and y coordinate)
-    Vector2g position;
-    //! \brief displacement (delta position)
-    Vector2g displacement;
-    //! \brief scrolling
-    Vector2g scroll;
-    //! \brief is cursor visible ?
-    bool visible;
-    //! \brief button pressed or released ?
-    bool pressed;
-    //! \brief which button was pressed or released.
-    ButtonType button;
-};
-
-//! \brief Define IO callbacks for IGLWindow
-enum class Event : unsigned
-{
-    //! \brief No callback
-    None = 0x0,
-    //! \brief Keyboard event (pressed and released)
-    Keyboard = 0x01,
-    //! \brief Mouse button event (pressed and released)
-    MouseButton = 0x2,
-    //! \brief Mouse motion event (X and Y axis)
-    MouseMove = 0x4,
-    //! \brief Mouse scroll event
-    MouseScroll = 0x8,
-    //! \brief All events
-    All = 0xFFFF
-};
-
-constexpr Event operator|(Event lhs, Event rhs)
-{
-    return static_cast<Event>(
-        static_cast<std::underlying_type<Event>::type>(lhs) |
-        static_cast<std::underlying_type<Event>::type>(rhs));
-}
-
-} // namespace window
-
-// *****************************************************************************
-//! \class GLWindow GLWindow.hpp
-//!
-//! \brief GLWindow manages a window for OpenGL. This class is not copyable.
-// *****************************************************************************
-class IGLWindow : private NonCopyable
-{
 public:
 
     //--------------------------------------------------------------------------
-    //! \brief Dummy constructor. Does not start the OpenGL context by
-    //! security. To do it call start()
+    //! \brief Structure holding mouse states used by GLApplication callbacks.
     //--------------------------------------------------------------------------
-    IGLWindow(uint32_t const width = 1024u, uint32_t const height = 768u,
-              const char *title = "");
+    struct Mouse
+    {
+        //----------------------------------------------------------------------
+        //! \brief Button type
+        //----------------------------------------------------------------------
+        enum Button
+        {
+            LEFT = GLFW_MOUSE_BUTTON_LEFT,
+            RIGHT = GLFW_MOUSE_BUTTON_RIGHT,
+            MIDDLE = GLFW_MOUSE_BUTTON_MIDDLE,
+            ONE = GLFW_MOUSE_BUTTON_1,
+            TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT,
+            NONE = GLFW_MOUSE_BUTTON_LAST + 1u,
+        };
+
+        //! \brief position (x and y coordinate)
+        Vector2g position = {0.0};
+        //! \brief displacement (delta position)
+        Vector2g displacement = {0.0};
+        //! \brief scrolling
+        Vector2g scroll = {0.0};
+        //! \brief is cursor visible ?
+        bool visible = true;
+        //! \brief button pressed or released ?
+        bool pressed = false;
+        //! \brief which button was pressed or released.
+        GLWindow::Mouse::Button button = GLWindow::Mouse::Button::NONE;
+    };
 
     //--------------------------------------------------------------------------
-    //! \brief Destructor. Release the OpenGL context.
+    //! \brief Define IO callbacks for GLApplication
     //--------------------------------------------------------------------------
-    virtual ~IGLWindow();
+    enum class Event : unsigned
+    {
+        //! \brief No callback
+        None = 0x0,
+        //! \brief Keyboard event (pressed and released)
+        Keyboard = 0x01,
+        //! \brief Mouse button event (pressed and released)
+        MouseButton = 0x2,
+        //! \brief Mouse motion event (X and Y axis)
+        MouseMove = 0x4,
+        //! \brief Mouse scroll event
+        MouseScroll = 0x8,
+        //! \brief All events
+        All = 0xFFFF
+    };
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    GLWindow(uint32_t const width, uint32_t const height, const char *title);
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual ~GLWindow();
 
     //--------------------------------------------------------------------------
     //! \brief Enable IO callbacks (ie mouse boutton, mouse scroll, mouse
     //! motion, keyboard).
     //--------------------------------------------------------------------------
-    void enableCallbacks(window::Event const events = window::Event::All);
+    void makeReactOn(GLWindow::Event const events = GLWindow::Event::All);
 
     //--------------------------------------------------------------------------
     //! \brief Start the OpenGL context and starts the rendering loop.
     //--------------------------------------------------------------------------
-    bool start();
+    bool setup();
+    bool update();
+    bool shouldHalt();
 
     //--------------------------------------------------------------------------
     //! \brief Hide and grab the mouse cursor.
     //--------------------------------------------------------------------------
-    void hideMouseCursor();
+    void hideCursor();
 
     //--------------------------------------------------------------------------
     //! \brief Make the cursor visible.
     //--------------------------------------------------------------------------
-    void showMouseCursor();
+    void showCursor();
 
     //--------------------------------------------------------------------------
     //! \brief Return the delta time (in ms) with.
@@ -143,13 +134,13 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Return the address of the GLFW window.
     //--------------------------------------------------------------------------
-    inline GLFWwindow *window() { return m_main_window; }
+    inline GLFWwindow& context() { return *m_context; }
 
     //--------------------------------------------------------------------------
     //! \brief Return the structure holding mouse states.
     //! \note this method shall not be called directly.
     //--------------------------------------------------------------------------
-    inline window::Mouse& mouse() { return m_mouse; }
+    inline GLWindow::Mouse& mouse() { return m_mouse; }
 
     //--------------------------------------------------------------------------
     //! \brief Return the current width of the window.
@@ -164,79 +155,40 @@ public:
     inline T height() const { return static_cast<T>(m_height); }
 
     //--------------------------------------------------------------------------
-    //! \brief Change the position of the window.
+    //! \brief Change the size of the window. Do not call this method if you
+    //! are resizing the windows manually: this is already done ineternally.
     //--------------------------------------------------------------------------
-    void setWindowSize(uint32_t const width, uint32_t const height);
-
-    //private: // FIXME
-
-    //--------------------------------------------------------------------------
-    //! \brief Callback when a key of the keyboard has been pressed or released.
-    //--------------------------------------------------------------------------
-    inline void onSetKeyAction(size_t const key, bool const action)
-    {
-        const std::lock_guard<std::mutex> lock(m_mutex);
-        m_currentKeys[key] = action;
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Callback when a key of the keyboard has been pressed or released.
-    //--------------------------------------------------------------------------
-    virtual void onKeyboardEvent()
-    {}
-
-    //--------------------------------------------------------------------------
-    //! \brief Callback when the mouse has been moved. Default behavior
-    //! is to do nothing.
-    //--------------------------------------------------------------------------
-    virtual void onMouseMoved(window::Mouse const& /*mouse*/)
-    {}
-
-    //--------------------------------------------------------------------------
-    //! \brief Callback when the mouse has been scrolled. Default behavior
-    //! is to do nothing.
-    //--------------------------------------------------------------------------
-    virtual void onMouseScrolled(window::Mouse const& /*mouse*/)
-    {}
-
-    //--------------------------------------------------------------------------
-    //! \brief Callback when the mouse has been pressed. Default behavior
-    //! is to do nothing.
-    //--------------------------------------------------------------------------
-    virtual void onMouseButtonPressed(window::Mouse const& /*mouse*/)
-    {}
-
-public:
+    void resize(uint32_t const width, uint32_t const height);
 
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
     inline bool isFullscreen() const
     {
-        return (m_main_window != nullptr) &&
-                (glfwGetWindowMonitor(m_main_window) != nullptr);
+        return (m_context != nullptr) &&
+                (glfwGetWindowMonitor(m_context) != nullptr);
     }
 
     inline bool isKeyDown(size_t const key)
     {
-        return window::KEY_PRESS == m_currentKeys[key];
+        return GLWindow::KEY_PRESS == m_currentKeys[key];
     }
 
     inline bool isKeyUp(size_t const key)
     {
-        return window::KEY_RELEASE == m_currentKeys[key];
+        return GLWindow::KEY_RELEASE == m_currentKeys[key];
     }
 
     inline bool wasKeyPressed(size_t const key)
     {
-        return window::KEY_PRESS == m_currentKeys[key] &&
-                window::KEY_RELEASE == m_lastKeys[key];
+        return GLWindow::KEY_PRESS == m_currentKeys[key] &&
+                GLWindow::KEY_RELEASE == m_lastKeys[key];
     }
 
     inline bool wasKeyReleased(size_t const key)
     {
-        return window::KEY_RELEASE == m_currentKeys[key] &&
-                window::KEY_PRESS == m_lastKeys[key];
+        return GLWindow::KEY_RELEASE == m_currentKeys[key] &&
+                GLWindow::KEY_PRESS == m_lastKeys[key];
     }
 
 private:
@@ -248,12 +200,51 @@ private:
     //--------------------------------------------------------------------------
     void computeFPS();
 
+    void monitorGPUMemory();
+
     //--------------------------------------------------------------------------
-    //! \brief Callback when the window has its size changed
-    //! \param width is never <= 0
-    //! \param height is never <= 0
+    //! \brief Callback when the GPU received new data. Default behavior
+    //! is to do nothing.
     //--------------------------------------------------------------------------
-    virtual void onWindowSizeChanged()
+    virtual void onGPUMemoryChanged(size_t /*bytes*/)
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Callback when a key of the keyboard has been pressed or released.
+    //! Enable event reaction throught makeReactOn();
+    //--------------------------------------------------------------------------
+    virtual void onKeyboardEvent()
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Callback when the mouse has been moved. Default behavior
+    //! is to do nothing. Call mouse() to get mouse states.
+    //! Enable event reaction throught makeReactOn();
+    //--------------------------------------------------------------------------
+    virtual void onMouseMoved()
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Callback when the mouse has been scrolled. Default behavior
+    //! is to do nothing. Call mouse() to get mouse states.
+    //! Enable event reaction throught makeReactOn();
+    //--------------------------------------------------------------------------
+    virtual void onMouseScrolled()
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Callback when the mouse has been pressed. Default behavior
+    //! is to do nothing. Call mouse() to get mouse states.
+    //! Enable event reaction throught makeReactOn();
+    //--------------------------------------------------------------------------
+    virtual void onMouseButtonPressed()
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Callback when the window has its size changed.
+    //! Use template mtthods width<T>(), height<T>() to get new size.
+    //--------------------------------------------------------------------------
+    virtual void onResized()
     {}
 
     //--------------------------------------------------------------------------
@@ -266,7 +257,7 @@ private:
     //! \brief Callback triggered when the method setup() failed. By default this
     //! method does nothing.
     //--------------------------------------------------------------------------
-    virtual void onSetupFailed() = 0;
+    virtual void onSetupFailed(std::string const& reason) = 0;
 
     //--------------------------------------------------------------------------
     //! \brief Add here all stuffs painting your 3D world to be
@@ -279,15 +270,21 @@ private:
     //! \brief Callback triggered when the method draw() failed. By default this
     //! method does nothing.
     //--------------------------------------------------------------------------
-    virtual void onPaintFailed() = 0;
-
-    //--------------------------------------------------------------------------
-    //! \brief Main loop for displaying the 3D world. Call draw().
-    //--------------------------------------------------------------------------
-    virtual bool loop();
+    virtual void onPaintFailed(std::string const& reason) = 0;
 
 private:
 
+    static bool const KEY_PRESS = true;
+    static bool const KEY_RELEASE = false;
+
+    //! \brief GLF window context
+    GLFWwindow* m_context = nullptr;
+    //! \brief Windows current width
+    uint32_t m_width;
+    //! \brief Windows current height
+    uint32_t m_height;
+    //! \brief Windows title
+    const char *m_title = nullptr;
     //! \brief
     double m_lastTime = 0.0;
     //! \brief
@@ -296,21 +293,29 @@ private:
     uint32_t m_fps = 0;
     //! \brief
     float m_deltaTime = 0.0f;
-    //! \brief Windows current width
-    uint32_t m_width;
-    //! \brief Windows current height
-    uint32_t m_height;
-    //! \brief Windows title
-    const char *m_title = nullptr;
-    //! \brief window::Mouse states
-    window::Mouse m_mouse;
-    //! \brief GLF window context
-    GLFWwindow *m_main_window = nullptr;
-
-    //! \brief Keyboard map
+    //! \brief GLWindow::Mouse states
+    GLWindow::Mouse m_mouse;
+    //! \brief Previous keyboard map
     std::vector<char> m_lastKeys;
+    //! \brief Current keyboard map
     std::vector<char> m_currentKeys;
+    //! \brief
+    size_t previous_gpu_mem = 0_z;
+    //! \brief
+    uint32_t nbFrames = 0u;
+    //! \brief
     mutable std::mutex m_mutex;
 };
+
+//--------------------------------------------------------------------------
+//! \brief Allow to do OR operations on Events to enable several GLWindow
+//! events.
+//--------------------------------------------------------------------------
+constexpr GLWindow::Event operator|(GLWindow::Event lhs, GLWindow::Event rhs)
+{
+    return static_cast<GLWindow::Event>(
+        static_cast<std::underlying_type<GLWindow::Event>::type>(lhs) |
+        static_cast<std::underlying_type<GLWindow::Event>::type>(rhs));
+}
 
 #endif // OPENGLCPPWRAPPER_GLWINDOW_HPP

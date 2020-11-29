@@ -75,10 +75,10 @@ public:
     //! \brief Start Dear imgui context. Use glfw routines.
     //! \param window the OpenGL window
     //--------------------------------------------------------------------------
-    bool setup(IGLWindow &window)
+    bool setup(GLWindow &window)
     {
         ImGui::CreateContext();
-        ImGui_ImplGlfw_InitForOpenGL(window.window(), true);
+        ImGui_ImplGlfw_InitForOpenGL(&window.context(), true);
         ImGui_ImplOpenGL3_Init(NULL);
         ImGui::StyleColorsDark();
         m_init = true;
@@ -94,7 +94,7 @@ public:
     {
         if (unlikely(!m_init))
         {
-            std::cerr << "It seems that bool setup(IGLWindow &window) has never been called." << std::endl;
+            std::cerr << "It seems that bool setup(GLWindow &window) has never been called." << std::endl;
             return false;
         }
 
@@ -115,7 +115,7 @@ private:
     //! the derived class. Derived class shall override this method for
     //! drawing ImGUI objects.
     //! \return false if the rendering encountered an problem. As effect
-    //! this will prevent IGLWindow calling draw() which can react to
+    //! this will prevent GLWindow calling draw() which can react to
     //! this problem.
     //--------------------------------------------------------------------------
     virtual bool render() = 0;

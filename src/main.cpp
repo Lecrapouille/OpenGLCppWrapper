@@ -21,8 +21,9 @@
 #include "main.hpp"
 #include <iostream>
 
-Example::Example()
-    : m_prog("Prog"),
+Example::Example(uint32_t const width, uint32_t const height, const char *title)
+    : GLWindow(width, height, title),
+      m_prog("Prog"),
       m_mesh("VAO_triangle")
 {
     std::cout << "Hello Example" << std::endl;
@@ -36,7 +37,7 @@ Example::~Example()
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void Example::onWindowSizeChanged()
+void Example::onResized()
 {
     // Make the viewport matches the new window dimensions.
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
@@ -156,10 +157,10 @@ bool Example::onSetup()
     }
 
     // Helper for debugging states of your program
-    onDebug();
+    //onDebug();
 
-    std::cout << m_mesh.vector3f("position") << std::endl;
-    std::cout << m_mesh.vector2f("UV") << std::endl;
+    //std::cout << m_mesh.vector3f("position") << std::endl;
+    //std::cout << m_mesh.vector2f("UV") << std::endl;
 
     return true;
 }
@@ -178,16 +179,32 @@ bool Example::onPaint()
     return true;
 }
 
-void Example::onSetupFailed()
-{}
+void Example::onSetupFailed(std::string const& reason)
+{
+    std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
+}
 
-void Example::onPaintFailed()
-{}
+void Example::onPaintFailed(std::string const& reason)
+{
+    std::cerr << "Failure during rendering. Reason: " << reason << std::endl;
+}
 
 int main()
 {
-    std::unique_ptr<IGLWindow> win;
-    win = std::make_unique<Example>();
+    bool res;
 
-    return win->start() ? EXIT_SUCCESS : EXIT_FAILURE;
+    try
+    {
+        GLApplication app;
+        app.create<Example>(800u, 600u, "example1");
+        app.create<Example>(800u, 600u, "example2");
+        res = app.start() ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+    catch (const GL::Exception& e)
+    {
+        std::cerr << e.message() << std::endl;
+        res = EXIT_FAILURE;
+    }
+
+    return res;
 }
