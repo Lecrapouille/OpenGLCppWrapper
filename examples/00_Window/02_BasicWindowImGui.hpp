@@ -23,52 +23,64 @@
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
-using namespace glwrap;
-using namespace glwrap::window;
-
 // *****************************************************************************
 //! \brief This example shows how to add and use Dear ImGui widgets.
 //! For more information see: https://github.com/ocornut/imgui
 // *****************************************************************************
-class WindowImGui: public IGLWindow
+class BasicWindowImGui: public GLWindow
 {
 public:
 
-  WindowImGui();
-  ~WindowImGui();
+    BasicWindowImGui(uint32_t const width, uint32_t const height,
+                const char *title);
+    ~BasicWindowImGui();
+
+    static std::string info()
+    {
+        return "Empty window with dear a Dear ImGui widget.";
+    }
 
 private:
 
-  virtual bool setup() override;
-  virtual bool draw() override;
+    // Same from the initial example:
+
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
+
+    // Added to this new example:
 
 private:
 
-  //----------------------------------------------------------------------------
-  //! \brief Sub class managing Dear ImGui context and allowing to draw widgets.
-  //! \note this class can be place outside \c WindowImGui
-  //----------------------------------------------------------------------------
-  class GUI: public DearImGui
-  {
-  public:
+    //--------------------------------------------------------------------------
+    //! \brief Sub class managing Dear ImGui context and allowing to draw
+    //! widgets.
+    //! \note this class can be place outside \c BasicWindowImGui
+    //--------------------------------------------------------------------------
+    class GUI: public DearImGui
+    {
+    public:
 
-    GUI(WindowImGui& window)
-      : m_window(window)
-    {}
+        GUI(BasicWindowImGui& window)
+            : m_window(window)
+        {}
 
-  protected:
+    protected:
 
-    virtual bool render() override;
+        virtual bool render() override;
 
-  private:
+    private:
 
-    WindowImGui& m_window;
-  };
+        BasicWindowImGui& m_window;
+    };
 
 private:
 
-  static float color[4];
-  GUI   m_imgui;
+    // \brief Background color changed through DearImGui buttons
+    static float color[4];
+    //! \brief DearImGui gui
+    GUI m_imgui;
 };
 
 #endif // EXAMPLE_02_EMPTY_WINDOW_WITH_DEAR_IMGUI_HPP

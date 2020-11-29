@@ -78,6 +78,22 @@ public:
         glfwSwapInterval(1); // Enable vsync
         GL::Context::setCreated();
 
+        initGlew();
+
+        m_windows.push_back(std::move(win));
+
+        // Restore context
+        makeContextCurrent(previous_context);
+
+        // Return the index
+        return m_windows.size() - 1u;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    static void initGlew()
+    {
         glewExperimental = GL_TRUE;
         if (glewInit() != GLEW_OK)
             throw GL::Exception("Failed to initialize GLFW");
@@ -91,14 +107,6 @@ public:
         // Make sure OpenGL version 3.3 API is available
         if (!GLEW_VERSION_3_3)
             throw GL::Exception("OpenGL 3.3 API is not available!");
-
-        m_windows.push_back(std::move(win));
-
-        // Restore context
-        makeContextCurrent(previous_context);
-
-        // Return the index
-        return m_windows.size() - 1u;
     }
 
 private:

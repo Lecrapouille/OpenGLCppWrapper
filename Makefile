@@ -54,12 +54,9 @@ OBJS += $(OBJ_COMMON) $(OBJ_OPENGL_CONTEXT) $(OBJ_OPENGL_VARIABLES)
 OBJS += $(OBJ_OPENGL_BUFFERS) $(OBJ_OPENGL_TEXTURES) $(OBJ_OPENGL_SHADERS)
 OBJS += $(OBJ_GUI)
 
-OBJS += main.o # TODO TEMPORARY
-
 ###################################################
 # Compile static and shared libraries
-all: $(TARGET)
-# TODO TEMPORARY $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
+all: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
 
 ###################################################
 # Compile and launch unit tests and generate the code coverage html report.

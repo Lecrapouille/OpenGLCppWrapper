@@ -18,14 +18,15 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "00_Window/00_BasicWindow.hpp"
+#include "00_BasicWindow.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
 //! \brief
 //------------------------------------------------------------------------------
-BasicWindow::BasicWindow(uint32_t const width, uint32_t const height)
-    : GLWindow(width, height, "00_BasicWindow")
+BasicWindow::BasicWindow(uint32_t const width, uint32_t const height,
+                         const char *title)
+    : GLWindow(width, height, title)
 {
     std::cout << "Hello BasicWindow" << std::endl;
 }
@@ -35,13 +36,14 @@ BasicWindow::BasicWindow(uint32_t const width, uint32_t const height)
 //------------------------------------------------------------------------------
 BasicWindow::~BasicWindow()
 {
+    std::cout << std::endl; // flush the \r char
     std::cout << "Bye BasicWindow" << std::endl;
 }
 
 //------------------------------------------------------------------------------
 //! \brief Add your C++/OpenGL code here for initializing your scene.
 //------------------------------------------------------------------------------
-bool BasicWindow::setup()
+bool BasicWindow::onSetup()
 {
     // Add here you code for initializing your game.
     std::cout << "Setup BasicWindow" << std::endl;
@@ -56,11 +58,11 @@ bool BasicWindow::setup()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Callback when setup() failed.
+//! \brief Callback when onSetup() failed.
 //------------------------------------------------------------------------------
 void BasicWindow::onSetupFailed(std::string const& reason)
 {
-    // To reach this code make setup() return false;
+    // To reach this code make onSetup() return false;
     std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
 }
 
@@ -68,7 +70,7 @@ void BasicWindow::onSetupFailed(std::string const& reason)
 //! \brief Callback for painting our scene. Note that swap buffer are called
 //! automaticaly.
 //------------------------------------------------------------------------------
-bool BasicWindow::draw()
+bool BasicWindow::onPaint()
 {
     // Note: this is not mandatory but you can wrap each OpenGL function with
     // the glCheck() to verify if everything is alright.
@@ -77,7 +79,10 @@ bool BasicWindow::draw()
 
     // The delta time (in seconds) from the previous draw() and frames per
     // seconds (FPS) are automatically computed.
-    std::cout << "DT: " << dt() << " seconds. FPS=" << fps() << "        \r" << std::flush;
+    std::cout << "Delta time: " << uint32_t(dt() * 1000.0f) << " ms."
+              << "   FPS: " << fps()
+              << "        \r"
+              << std::flush;
 
     // Two cases:
     // - draw() ends with success => return true. In this case the function draw()
@@ -90,10 +95,10 @@ bool BasicWindow::draw()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Callback when draw() failed.
+//! \brief Callback when onPaint() failed.
 //------------------------------------------------------------------------------
-void BasicWindow::onDrawFailed(std::string const& reason)
+void BasicWindow::onPaintFailed(std::string const& reason)
 {
-    // To reach this code make draw() return false;
+    // To reach this code make onPaint() return false;
     std::cerr << "Failure during rendering. Reason: " << reason << std::endl;
 }

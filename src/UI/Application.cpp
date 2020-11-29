@@ -68,10 +68,40 @@ bool GLApplication::start()
     {
         for (auto& window : m_windows)
         {
+            // TODO if one of the window is full screen, do not update other
+            // windows ?
             if (!window->update())
                 return false;
             if (window->shouldHalt())
                 return true;
+        }
+    }
+
+    return true;
+}
+
+// ***************************************************************************
+//!
+// ***************************************************************************
+StandAloneGLWindow::StandAloneGLWindow(uint32_t const width, uint32_t const height, const char *title)
+    : GLWindow(width, height, title)
+{
+    GLApplication::initGlew();
+}
+
+//--------------------------------------------------------------------------
+bool StandAloneGLWindow::start()
+{
+    if (!setup())
+    {
+        return false;
+    }
+
+    while (!shouldHalt())
+    {
+        if (!update())
+        {
+            return false;
         }
     }
 

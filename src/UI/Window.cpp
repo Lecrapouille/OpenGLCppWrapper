@@ -46,8 +46,10 @@ GLWindow::GLWindow(uint32_t const width, uint32_t const height, const char *titl
 //------------------------------------------------------------------------------
 GLWindow::~GLWindow()
 {
+    GLWindow* previous_context = GLApplication::window();
     GLApplication::makeContextCurrent(this);
     glfwDestroyWindow(m_context);
+    GLApplication::makeContextCurrent(previous_context);
 }
 
 //------------------------------------------------------------------------------
@@ -277,7 +279,7 @@ bool GLWindow::setup()
         // class.
         window->m_width = std::max(16u, static_cast<uint32_t>(width));
         window->m_height = std::max(16u, static_cast<uint32_t>(height));
-        window->onResized();
+        window->onWindowResized();
 
         // Restore context.
         GLApplication::makeContextCurrent(previous_context);

@@ -38,37 +38,37 @@ include $(P)/Makefile.common
 #
 OBJS_WINDOW = \
   00_BasicWindow.o \
-  01_WindowIOEvents.o \
-  02_WindowImGui.o
+  01_BasicWindowIOEvents.o \
+  02_BasicWindowImGui.o
 
-OBJS_CORE = \
-  00_SimpleTriangle.o \
-  01_DynamicTriangle.o \
-  02_TexturedTriangle.o \
-  03_MultiTexturedTriangle.o \
-  04_TexturedBox.o \
-  05_MVPTexturedBox.o \
-  06_MultipleObjects.o \
-  07_IndexedVBO.o \
-  08_TerrainTexture3D.o \
-  09_SkyBoxTextureCube.o \
-  10_SkyBoxShapeCamera.o \
-  11_SimpleFrameBuffer.o \
-  12_PostProdFrameBuffer.o \
-  13_ComplexShader.o \
-  14_BasicLighting.o
+#OBJS_CORE = \
+#  00_SimpleTriangle.o \
+#  01_DynamicTriangle.o \
+#  02_TexturedTriangle.o \
+#  03_MultiTexturedTriangle.o \
+#  04_TexturedBox.o \
+#  05_MVPTexturedBox.o \
+#  06_MultipleObjects.o \
+#  07_IndexedVBO.o \
+#  08_TerrainTexture3D.o \
+#  09_SkyBoxTextureCube.o \
+#  10_SkyBoxShapeCamera.o \
+#  11_SimpleFrameBuffer.o \
+#  12_PostProdFrameBuffer.o \
+#  13_ComplexShader.o \
+#  14_BasicLighting.o
 
-OBJS_SCENE = \
-  00_BasicMaterial.o \
-  01_DepthMaterial.o \
-  02_NormalsMaterial.o \
-  03_SceneNodes.o \
-  04_SceneGraph.o \
-  05_SceneFog.o \
-  07_AlphaTest.o
+#OBJS_SCENE = \
+#  00_BasicMaterial.o \
+#  01_DepthMaterial.o \
+#  02_NormalsMaterial.o \
+#  03_SceneNodes.o \
+#  04_SceneGraph.o \
+#  05_SceneFog.o \
+#  07_AlphaTest.o
 
-OBJS_THREE = \
-  00_MiscLookAt.o
+#OBJS_THREE = \
+#  00_MiscLookAt.o
 
 #  06_SceneLighting.o \
 

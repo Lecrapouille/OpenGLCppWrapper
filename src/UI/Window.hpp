@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2020 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -28,9 +28,23 @@
 #  include "OpenGL/Context/OpenGL.hpp"
 #  include "Math/Vector.hpp"
 #  include <GLFW/glfw3.h>
-//#  include <GL/glew.h>
 #  include <mutex>
 
+// ***************************************************************************
+//! \class GLWindow Window.hpp
+//! \ingroup UI
+//!
+//! \brief GLWindow is an abstract window class for displaying OpenGL
+//! application. This class wrappes the glfw3 window creation which initializes
+//! OpenGL context. This class offers callbacks for the setup, update and manage
+//! windows events (resize, mouse, keyboard). These callbacks have to be
+//! implemented in derived class.
+//!
+//! GLWindow needs to be created by GLApplication. From GLApplication you can
+//! create several independent GLWindow at the same time. If you want a single
+//! windows, please use instead StandAloneGLWindow it does not need
+//! GLApplication.
+// ***************************************************************************
 class GLWindow
 {
     friend class GLApplication;
@@ -70,7 +84,7 @@ public:
     };
 
     //--------------------------------------------------------------------------
-    //! \brief Define IO callbacks for GLApplication
+    //! \brief Define window events that you can enable. Default is None.
     //--------------------------------------------------------------------------
     enum class Event : unsigned
     {
@@ -89,27 +103,40 @@ public:
     };
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Create a glfw3 window.
     //--------------------------------------------------------------------------
     GLWindow(uint32_t const width, uint32_t const height, const char *title);
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Destroy the glfw3 window.
     //--------------------------------------------------------------------------
     virtual ~GLWindow();
 
     //--------------------------------------------------------------------------
-    //! \brief Enable IO callbacks (ie mouse boutton, mouse scroll, mouse
-    //! motion, keyboard).
+    //! \brief Enable reactions to window events (ie mouse boutton, mouse
+    //! scroll, mouse motion, keyboard).
     //--------------------------------------------------------------------------
     void makeReactOn(GLWindow::Event const events = GLWindow::Event::All);
 
     //--------------------------------------------------------------------------
-    //! \brief Start the OpenGL context and starts the rendering loop.
+    //! \brief Graphics setup. This method will call onSetup() on success or
+    //! call onSetupFailed() on failure.
+    //! \return true on success, false on failure.
     //--------------------------------------------------------------------------
     bool setup();
+
+    //--------------------------------------------------------------------------
+    //! \brief Paint, manage window events. This method will call
+    //! onPaintFailed() on failure.
+    //! \return true on success, false on failure.
+    //--------------------------------------------------------------------------
     bool update();
-    bool shouldHalt();
+
+    //--------------------------------------------------------------------------
+    //! \brief Condition for halting the window loop. By default when the ESC
+    //! key has been pressed or when the user has clicked on the X button.
+    //--------------------------------------------------------------------------
+    virtual bool shouldHalt();
 
     //--------------------------------------------------------------------------
     //! \brief Hide and grab the mouse cursor.
@@ -122,12 +149,13 @@ public:
     void showCursor();
 
     //--------------------------------------------------------------------------
-    //! \brief Return the delta time (in ms) with.
+    //! \brief Return the delta time (in ms) from the previous update() call.
     //--------------------------------------------------------------------------
     inline float dt() const { return m_deltaTime; }
 
     //--------------------------------------------------------------------------
-    //! \brief Return the number of frame per seconds.
+    //! \brief Return the number of frame per seconds from the previous update()
+    //! call. The value is averaged along 1 second.
     //--------------------------------------------------------------------------
     inline uint32_t fps() const { return m_fps; }
 
@@ -137,13 +165,15 @@ public:
     inline GLFWwindow& context() { return *m_context; }
 
     //--------------------------------------------------------------------------
-    //! \brief Return the structure holding mouse states.
-    //! \note this method shall not be called directly.
+    //! \brief Return the structure holding mouse states. To be used from
+    //! mouse callback functions onMouseButtonPressed(), onMouseScrolled(),
+    //! onMouseMoved().
     //--------------------------------------------------------------------------
     inline GLWindow::Mouse& mouse() { return m_mouse; }
 
     //--------------------------------------------------------------------------
-    //! \brief Return the current width of the window.
+    //! \brief Return the current width of the window. To be used from mouse
+    //! callback functions onResized().
     //--------------------------------------------------------------------------
     template<typename T>
     inline T width() const { return static_cast<T>(m_width); }
@@ -156,12 +186,13 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Change the size of the window. Do not call this method if you
-    //! are resizing the windows manually: this is already done ineternally.
+    //! are resizing the windows manually: this is already done internally.
     //--------------------------------------------------------------------------
     void resize(uint32_t const width, uint32_t const height);
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Is the window is on full screen or not.
+    //! \return true if the windows is in full screen, return false else.
     //--------------------------------------------------------------------------
     inline bool isFullscreen() const
     {
@@ -169,22 +200,38 @@ public:
                 (glfwGetWindowMonitor(m_context) != nullptr);
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Is the key is currently pressed ?
+    //! \return true if pressed, false else.
+    //--------------------------------------------------------------------------
     inline bool isKeyDown(size_t const key)
     {
         return GLWindow::KEY_PRESS == m_currentKeys[key];
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Is the key is currently released ?
+    //! \return true if released, false else.
+    //--------------------------------------------------------------------------
     inline bool isKeyUp(size_t const key)
     {
         return GLWindow::KEY_RELEASE == m_currentKeys[key];
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Has the key been pressed ?
+    //! \return true if currently pressed and was released the state before.
+    //--------------------------------------------------------------------------
     inline bool wasKeyPressed(size_t const key)
     {
         return GLWindow::KEY_PRESS == m_currentKeys[key] &&
                 GLWindow::KEY_RELEASE == m_lastKeys[key];
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Has the key been pressed ?
+    //! \return true if currently released and was pressed the state before.
+    //--------------------------------------------------------------------------
     inline bool wasKeyReleased(size_t const key)
     {
         return GLWindow::KEY_RELEASE == m_currentKeys[key] &&
@@ -200,6 +247,11 @@ private:
     //--------------------------------------------------------------------------
     void computeFPS();
 
+    //--------------------------------------------------------------------------
+    //! \brief Get the GPU Memory usage. This method returns an estimated usage
+    //! for the current application. Trigger the method onGPUMemoryChanged()
+    //! that needs to be implemented on derived class.
+    //--------------------------------------------------------------------------
     void monitorGPUMemory();
 
     //--------------------------------------------------------------------------
@@ -244,7 +296,7 @@ private:
     //! \brief Callback when the window has its size changed.
     //! Use template mtthods width<T>(), height<T>() to get new size.
     //--------------------------------------------------------------------------
-    virtual void onResized()
+    virtual void onWindowResized()
     {}
 
     //--------------------------------------------------------------------------
