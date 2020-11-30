@@ -79,31 +79,3 @@ bool GLApplication::start()
 
     return true;
 }
-
-// ***************************************************************************
-//!
-// ***************************************************************************
-StandAloneGLWindow::StandAloneGLWindow(uint32_t const width, uint32_t const height, const char *title)
-    : GLWindow(width, height, title)
-{
-    GLApplication::initGlew();
-}
-
-//--------------------------------------------------------------------------
-bool StandAloneGLWindow::start()
-{
-    if (!setup())
-    {
-        return false;
-    }
-
-    while (!shouldHalt())
-    {
-        if (!update())
-        {
-            return false;
-        }
-    }
-
-    return true;
-}

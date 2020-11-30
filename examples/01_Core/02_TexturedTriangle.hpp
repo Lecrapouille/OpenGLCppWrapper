@@ -22,33 +22,38 @@
 #  define EXAMPLE_02_TEXTURED_TRIANGLE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-
-using namespace glwrap;
+#  include "../debug.hpp"
 
 // *****************************************************************************
 //! \brief This example shows how to create a simple textured triangle.
 // *****************************************************************************
-class TexturedTriangle: public IGLWindow
+class TexturedTriangle: public GLWindow
 {
 public:
 
-  TexturedTriangle();
-  ~TexturedTriangle();
+    TexturedTriangle(uint32_t const width, uint32_t const height, const char *title);
+    ~TexturedTriangle();
+
+    static std::string info()
+    {
+        return "Render a textured triangle";
+    }
 
 private:
 
-  void debug();
-  bool loadTextures();
-  virtual void onWindowSizeChanged() override;
-  virtual bool setup() override;
-  virtual bool draw() override;
+    bool loadTextures();
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
+    virtual void onWindowResized() override;
 
 private:
 
-  GLVertexShader     m_vertex_shader;
-  GLFragmentShader   m_fragment_shader;
-  GLProgram          m_prog;
-  GLVAO              m_mesh;
+    GLVertexShader     m_vertex_shader;
+    GLFragmentShader   m_fragment_shader;
+    GLProgram          m_prog;
+    GLVAO              m_triangle;
 };
 
 #endif // EXAMPLE_02_TEXTURED_TRIANGLE_HPP

@@ -22,35 +22,41 @@
 #  define EXAMPLE_01_DYNAMIC_TRIANGLE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include <iostream>
-
-using namespace glwrap;
+#  include "../debug.hpp"
 
 // *****************************************************************************
 //! \brief This example shows how to create a simple triangle and how we can
 //! changes its attribute and uniform data from CPU and how dirty data are
 //! automatically transfered to GPU.
 // *****************************************************************************
-class DynamicTriangle: public IGLWindow
+class DynamicTriangle: public GLWindow
 {
 public:
 
-  DynamicTriangle();
-  ~DynamicTriangle();
+    DynamicTriangle(uint32_t const width, uint32_t const height, const char *title);
+    ~DynamicTriangle();
+
+    static std::string info()
+    {
+        return "Render a triangle with vertex positions changing over time";
+    }
 
 private:
 
-  void debug();
-  virtual void onWindowSizeChanged() override;
-  virtual bool setup() override;
-  virtual bool draw() override;
+    // Same from the initial example:
+
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
+    virtual void onWindowResized() override;
 
 private:
 
-  GLVertexShader     m_vertex_shader;
-  GLFragmentShader   m_fragment_shader;
-  GLProgram          m_prog;
-  GLVAO              m_mesh;
+    GLVertexShader     m_vertex_shader;
+    GLFragmentShader   m_fragment_shader;
+    GLProgram          m_prog;
+    GLVAO              m_triangle;
 };
 
 #endif // EXAMPLE_01_DYNAMIC_TRIANGLE_HPP

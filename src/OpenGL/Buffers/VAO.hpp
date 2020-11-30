@@ -123,7 +123,7 @@ public:
     //!
     //! \return the number of inserted elements.
     //--------------------------------------------------------------------------
-    size_t getVBONames(std::vector<std::string> &list, bool const clear = true)
+    size_t getVBONames(std::vector<std::string> &list, bool const clear = true) const
     {
         if (clear) { list.clear(); }
         list.reserve(m_listBuffers.size());
@@ -153,18 +153,18 @@ public:
     //! \todo: get the tuple sampler name and texture name ?
     //! \return the number of inserted elements.
     //--------------------------------------------------------------------------
-    size_t getSamplerNames(std::vector<std::string>& list, bool const clear = true)
+    size_t getTexturesNames(std::vector<std::string>& list, bool const clear = true) const
     {
         if (clear) { list.clear(); }
         list.reserve(m_listTextures.size());
         for (auto& it: m_listTextures)
         {
-            list.push_back(it.second->name());
+            list.push_back(it.second->name()); // FIXME filename
         }
         return list.size();
     }
 
-    size_t getFailedSamplers(std::vector<std::string>& list, bool const clear = true)
+    size_t getUnloadedTextures(std::vector<std::string>& list, bool const clear = true) const
     {
         if (clear) { list.clear(); }
         list.reserve(m_listTextures.size());

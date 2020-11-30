@@ -188,7 +188,7 @@ public:
     //!
     //! \return the number of inserted elements.
     //--------------------------------------------------------------------------
-    size_t failedShaders(std::vector<std::string>& list, bool const clear = true);
+    size_t getFailedShaders(std::vector<std::string>& list, bool const clear = true) const;
 
     //--------------------------------------------------------------------------
     //! \brief Return the list of uniform names. This is method is mainly used for
@@ -203,7 +203,7 @@ public:
     //!
     //! \return the number of inserted elements.
     //--------------------------------------------------------------------------
-    size_t getUniformNames(std::vector<std::string>& list, bool const clear = true);
+    size_t getUniformNames(std::vector<std::string>& list, bool const clear = true) const;
 
     //--------------------------------------------------------------------------
     //! \brief Return the list of attributes names. This is method is mainly
@@ -218,7 +218,7 @@ public:
     //!
     //! \return the number of inserted elements.
     //--------------------------------------------------------------------------
-    size_t getAttributeNames(std::vector<std::string>& list, bool const clear = true);
+    size_t getAttributeNames(std::vector<std::string>& list, bool const clear = true) const;
 
     //--------------------------------------------------------------------------
     //! \brief Return the list of texture names. This is method is mainly
@@ -237,7 +237,7 @@ public:
     //!
     //! \return the number of inserted elements.
     //--------------------------------------------------------------------------
-    size_t getSamplerNames(std::vector<std::string>& list, bool const clear = true);
+    size_t getSamplerNames(std::vector<std::string>& list, bool const clear = true) const;
 
     //--------------------------------------------------------------------------
     //! \brief Check if program has a non empty list of shader attributes.

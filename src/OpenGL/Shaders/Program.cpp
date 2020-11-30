@@ -358,64 +358,85 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
 {
     // TODO: if uniform already bound => do nothing
 
-    std::shared_ptr<GLLocation> ptr;
     switch (type)
     {
     case GL_FLOAT:
         // TODO if (!m_uniforms.has<T>(name) {
-        ptr = std::make_shared<GLUniform<float>>(name, 1, GL_FLOAT, prog);
-        m_uniforms.add(name, ptr);
-        m_uniformLocations[name] = ptr;
+        {
+            auto ptr = std::make_shared<GLUniform<float>>(name, 1, GL_FLOAT, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
+        }
         break;
     case GL_FLOAT_VEC2:
-        ptr = std::make_shared<GLUniform<Vector2f>>(name, 2, GL_FLOAT, prog);
-        m_uniforms.add(name, ptr);
-        m_uniformLocations[name] = ptr;
+        {
+            auto ptr = std::make_shared<GLUniform<Vector2f>>(name, 2, GL_FLOAT, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
+        }
         break;
     case GL_FLOAT_VEC3:
-        ptr = std::make_shared<GLUniform<Vector3f>>(name, 3, GL_FLOAT, prog);
-        m_uniforms.add(name, ptr);
-        m_uniformLocations[name] = ptr;
+        {
+            auto ptr = std::make_shared<GLUniform<Vector3f>>(name, 3, GL_FLOAT, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
+        }
         break;
     case GL_FLOAT_VEC4:
-        ptr = std::make_shared<GLUniform<Vector4f>>(name, 4, GL_FLOAT, prog);
-        m_uniforms.add(name, ptr);
-        m_uniformLocations[name] = ptr;
+        {
+            auto ptr = std::make_shared<GLUniform<Vector4f>>(name, 4, GL_FLOAT, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
+        }
         break;
     case GL_INT:
-        ptr = std::make_shared<GLUniform<int>>(name, 1, GL_INT, prog);
-        m_uniforms.add(name, ptr);
-        m_uniformLocations[name] = ptr;
+        {
+            auto ptr = std::make_shared<GLUniform<int>>(name, 1, GL_INT, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
+        }
         break;
     case GL_INT_VEC2:
-        ptr = std::make_shared<GLUniform<Vector2i>>(name, 2, GL_INT, prog);
-        m_uniforms.add(name, ptr);
-        m_uniformLocations[name] = ptr;
+        {
+            auto ptr = std::make_shared<GLUniform<Vector2i>>(name, 2, GL_INT, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
+        }
         break;
     case GL_INT_VEC3:
-        ptr = std::make_shared<GLUniform<Vector3i>>(name, 3, GL_INT, prog);
-        m_uniforms.add(name, ptr);
-        m_uniformLocations[name] = ptr;
+        {
+            auto ptr = std::make_shared<GLUniform<Vector3i>>(name, 3, GL_INT, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
+        }
         break;
     case GL_INT_VEC4:
-        ptr = std::make_shared<GLUniform<Vector4i>>(name, 4, GL_INT, prog);
-        m_uniforms.add(name, ptr);
-        m_uniformLocations[name] = ptr;
+        {
+            auto ptr = std::make_shared<GLUniform<Vector4i>>(name, 4, GL_INT, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
+        }
         break;
     case GL_FLOAT_MAT2:
-        ptr = std::make_shared<GLUniform<Matrix22f>>(name, 4, GL_FLOAT, prog);
+        {
+        auto ptr = std::make_shared<GLUniform<Matrix22f>>(name, 4, GL_FLOAT, prog);
         m_uniforms.add(name, ptr);
         m_uniformLocations[name] = ptr;
+        }
         break;
     case GL_FLOAT_MAT3:
-        ptr = std::make_shared<GLUniform<Matrix33f>>(name, 9, GL_FLOAT, prog);
-        m_uniforms.add(name, ptr);
-        m_uniformLocations[name] = ptr;
+        {
+            auto ptr = std::make_shared<GLUniform<Matrix33f>>(name, 9, GL_FLOAT, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
+        }
         break;
     case GL_FLOAT_MAT4:
-        ptr = std::make_shared<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, prog);
-        m_uniforms.add(name, ptr);
-        m_uniformLocations[name] = ptr;
+        {
+            auto ptr = std::make_shared<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
+        }
         break;
     case GL_SAMPLER_1D:
         m_samplers[name]
@@ -442,7 +463,7 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
 }
 
 //----------------------------------------------------------------------------
-size_t GLProgram::failedShaders(std::vector<std::string>& list, bool const clear)
+size_t GLProgram::getFailedShaders(std::vector<std::string>& list, bool const clear) const
 {
     if (clear) { list.clear(); }
     list = m_failedShaders;
@@ -450,7 +471,7 @@ size_t GLProgram::failedShaders(std::vector<std::string>& list, bool const clear
 }
 
 //----------------------------------------------------------------------------
-size_t GLProgram::getUniformNames(std::vector<std::string>& list, bool const clear)
+size_t GLProgram::getUniformNames(std::vector<std::string>& list, bool const clear) const
 {
     if (clear) { list.clear(); }
     list.reserve(m_uniformLocations.size());
@@ -460,7 +481,7 @@ size_t GLProgram::getUniformNames(std::vector<std::string>& list, bool const cle
 }
 
 //----------------------------------------------------------------------------
-size_t GLProgram::getAttributeNames(std::vector<std::string>& list, bool const clear)
+size_t GLProgram::getAttributeNames(std::vector<std::string>& list, bool const clear) const
 {
     if (clear) { list.clear(); }
     list.reserve(m_attributes.size());
@@ -470,7 +491,7 @@ size_t GLProgram::getAttributeNames(std::vector<std::string>& list, bool const c
 }
 
 //----------------------------------------------------------------------------
-size_t GLProgram::getSamplerNames(std::vector<std::string>& list, bool const clear)
+size_t GLProgram::getSamplerNames(std::vector<std::string>& list, bool const clear) const
 {
     if (clear) { list.clear(); }
     list.reserve(m_samplers.size());

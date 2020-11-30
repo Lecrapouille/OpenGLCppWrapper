@@ -86,7 +86,7 @@ public:
     //--------------------------------------------------------------------------
     inline operator T&()
     {
-        m_need_update = false;
+        m_need_update = true;
         return m_data;
     }
 

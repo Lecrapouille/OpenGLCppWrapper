@@ -18,35 +18,15 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_00_WINDOW_00_BASIC_WINDOW_HPP
-#  define EXAMPLE_00_WINDOW_00_BASIC_WINDOW_HPP
+#ifndef DEBUG_HPP
+#  define DEBUG_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
 //------------------------------------------------------------------------------
-//! \brief This example shows how to create a single window instanciating an
-//! OpenGL context. No OpenGL objects are rendered here for the moment. The basic
-//! OpenGL routine called here is just to clear the window. No input/ouput
-//! events (IO) are observed for this basic example.
+//! \brief Make the instropection of VAO and program shader.
 //------------------------------------------------------------------------------
-class BasicWindow: public GLWindow
-{
-public:
+void debug(GLProgram const& prog);
+void debug(GLVAO const& vao);
 
-    BasicWindow(uint32_t const width, uint32_t const height, const char *title);
-    ~BasicWindow();
-
-    static std::string info()
-    {
-        return "Empty window rendering nothing";
-    }
-
-private:
-
-    virtual bool onSetup() override;
-    virtual bool onPaint() override;
-    virtual void onSetupFailed(std::string const& reason) override;
-    virtual void onPaintFailed(std::string const& reason) override;
-};
-
-#endif // EXAMPLE_00_WINDOW_00_BASIC_WINDOW_HPP
+#endif

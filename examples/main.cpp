@@ -18,9 +18,14 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
+#include "debug.hpp"
+
 #include "00_Window/00_BasicWindow.hpp"
 #include "00_Window/01_BasicWindowIOEvents.hpp"
 #include "00_Window/02_BasicWindowImGui.hpp"
+#include "01_Core/00_SimpleTriangle.hpp"
+#include "01_Core/01_DynamicTriangle.hpp"
+#include "01_Core/02_TexturedTriangle.hpp"
 
 #include <iostream>
 #include <stdlib.h>
@@ -42,9 +47,9 @@ static void usage(char *argv[])
     std::cout << "  1: " << BasicWindowIOEvents::info() << std::endl;
     std::cout << "  2: " << BasicWindowImGui::info() << std::endl;
     std::cout << "Core API/OpenGL wrapper:" << std::endl;
-    std::cout << "  3: Render a simple mono-color triangle." << std::endl;
-    std::cout << "  4: Render a triangle with vertex positions changing over time." << std::endl;
-    std::cout << "  5: Render a textured triangle." << std::endl;
+    std::cout << "  3: " << SimpleTriangle::info() << std::endl;
+    std::cout << "  4: " << DynamicTriangle::info() << std::endl;
+    std::cout << "  5: " << TexturedTriangle::info() << std::endl;
     std::cout << "  6: Render a multi-textured triangle." << std::endl;
     std::cout << "  7: Render a textured box without model-view-project (MVP) transformation." << std::endl;
     std::cout << "  8: Render a rotating textured Box using MVP transformation." << std::endl;
@@ -104,6 +109,15 @@ int main(int argc, char *argv[])
             break;
         case 2:
             app.create<BasicWindowImGui>(WIDTH, HEIGHT, "DearImGui");
+            break;
+        case 3:
+            app.create<SimpleTriangle>(WIDTH, HEIGHT, "Simple Triangle");
+            break;
+        case 4:
+            app.create<DynamicTriangle>(WIDTH, HEIGHT, "Dynamic Triangle");
+            break;
+        case 5:
+            app.create<TexturedTriangle>(WIDTH, HEIGHT, "Textured Triangle");
             break;
         default:
             std::cerr << "Incorrect example id !" << std::endl;

@@ -22,45 +22,51 @@
 #  define EXAMPLE_00_SIMPLE_TRIANGLE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include <iostream>
-
-using namespace glwrap;
+#  include "../debug.hpp"
 
 // *****************************************************************************
 //! \brief This example shows how to create a simple colorful triangle
 //! and how we can modify VBO data from CPU and how dirty data are
 //! automatically transfered to GPU.
 // *****************************************************************************
-class SimpleTriangle: public IGLWindow
+class SimpleTriangle: public GLWindow
 {
 public:
 
-  SimpleTriangle();
-  ~SimpleTriangle();
+    SimpleTriangle(uint32_t const width, uint32_t const height, const char *title);
+    ~SimpleTriangle();
+
+    static std::string info()
+    {
+        return "Render a simple mono-color triangle";
+    }
 
 private:
 
-  virtual bool setup() override;
-  virtual bool draw() override;
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
+    virtual void onWindowResized() override;
 
 private:
 
-  //! \brief A GL*x*Shader holds the GLSL code source and compile it (in future
-  //! it will may offer macro processing features).
-  GLVertexShader     m_vertex_shader;
-  GLFragmentShader   m_fragment_shader;
+    //! \brief A GL*x*Shader holds the GLSL code source and compile it (in future
+    //! it will may offer macro processing features).
+    GLVertexShader m_vertex_shader;
+    GLFragmentShader m_fragment_shader;
 
-  //! \brief A GLProgram holds at least two GLxShaders (vertex and fragment) and
-  //! links them. Once compiled, a GLProgram holds internally and in privacy
-  //! locations of shader uniforms, shader attributes and texture samplers.
-  GLProgram          m_prog;
+    //! \brief A GLProgram holds at least two GLxShaders (vertex and fragment) and
+    //! links them. Once compiled, a GLProgram holds internally and in privacy
+    //! locations of shader uniforms, shader attributes and texture samplers.
+    GLProgram m_prog;
 
-  //! \brief A GLVAO can be considered as the OpenGL handler to your 3D model:
-  //! it is an interface between CPU data and GPU data by holding VBOs and
-  //! textures. You can modify data of textures and data of VBOs: the API will
-  //! automatically transfer modified values to your graphical card (VBOs,
-  //! samplers).
-  GLVAO              m_mesh;
+    //! \brief A GLVAO can be considered as the OpenGL handler to your 3D model:
+    //! it is an interface between CPU data and GPU data by holding VBOs and
+    //! textures. You can modify data of textures and data of VBOs: the API will
+    //! automatically transfer modified values to your graphical card (VBOs,
+    //! samplers).
+    GLVAO m_triangle;
 };
 
 #endif // EXAMPLE_00_SIMPLE_TRIANGLE_HPP

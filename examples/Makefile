@@ -41,10 +41,10 @@ OBJS_WINDOW = \
   01_BasicWindowIOEvents.o \
   02_BasicWindowImGui.o
 
-#OBJS_CORE = \
-#  00_SimpleTriangle.o \
-#  01_DynamicTriangle.o \
-#  02_TexturedTriangle.o \
+OBJS_CORE = \
+  00_SimpleTriangle.o \
+  01_DynamicTriangle.o \
+  02_TexturedTriangle.o \
 #  03_MultiTexturedTriangle.o \
 #  04_TexturedBox.o \
 #  05_MVPTexturedBox.o \
@@ -73,7 +73,7 @@ OBJS_WINDOW = \
 #  06_SceneLighting.o \
 
 OBJS += \
-  $(OBJS_WINDOW) $(OBJS_CORE) $(OBJS_SCENE) $(OBJS_THREE) main.o
+  $(OBJS_WINDOW) $(OBJS_CORE) $(OBJS_SCENE) $(OBJS_THREE) debug.o main.o
 
 VPATH += \
   00_Window 01_Core 02_Scene 03_ThreeJs

@@ -73,7 +73,7 @@ void GLWindow::resize(uint32_t const width, uint32_t const height)
     m_height = std::max(16u, height);
 
     // Callback to be implemented by the derived class
-    onResized();
+    onWindowResized();
 }
 
 //------------------------------------------------------------------------------
@@ -311,7 +311,7 @@ bool GLWindow::setup()
         }
 
         // Force refreshing computation made when window changed
-        onResized();
+        onWindowResized();
     }
     catch (const GL::Exception& e)
     {
