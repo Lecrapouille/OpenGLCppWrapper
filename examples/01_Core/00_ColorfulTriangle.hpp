@@ -18,27 +18,27 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_00_SIMPLE_TRIANGLE_HPP
-#  define EXAMPLE_00_SIMPLE_TRIANGLE_HPP
+#ifndef EXAMPLE_00_COLORFUL_TRIANGLE_HPP
+#  define EXAMPLE_00_COLORFUL_TRIANGLE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include "../debug.hpp"
 
-// *****************************************************************************
-//! \brief This example shows how to create a simple colorful triangle
-//! and how we can modify VBO data from CPU and how dirty data are
-//! automatically transfered to GPU.
-// *****************************************************************************
-class SimpleTriangle: public GLWindow
+//------------------------------------------------------------------------------
+//! \brief This example shows how to create a simple colorful triangle and how
+//! we can modify VBO data from CPU and how dirty data are automatically
+//! transfered to GPU.
+//------------------------------------------------------------------------------
+class ColorfulTriangle: public GLWindow
 {
 public:
 
-    SimpleTriangle(uint32_t const width, uint32_t const height, const char *title);
-    ~SimpleTriangle();
+    ColorfulTriangle(uint32_t const width, uint32_t const height, const char *title);
+    ~ColorfulTriangle();
 
     static std::string info()
     {
-        return "Render a simple mono-color triangle";
+        return "Render a colorful triangle";
     }
 
 private:
@@ -69,4 +69,4 @@ private:
     GLVAO m_triangle;
 };
 
-#endif // EXAMPLE_00_SIMPLE_TRIANGLE_HPP
+#endif // EXAMPLE_00_COLORFUL_TRIANGLE_HPP

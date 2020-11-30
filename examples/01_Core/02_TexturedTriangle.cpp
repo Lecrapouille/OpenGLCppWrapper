@@ -22,50 +22,47 @@
 #include <iostream>
 
 //------------------------------------------------------------------------------
-//! \brief
-//------------------------------------------------------------------------------
 TexturedTriangle::TexturedTriangle(uint32_t const width, uint32_t const height,
                                    const char *title)
     : GLWindow(width, height, title),
       m_prog("Prog"),
       m_triangle("triangle")
 {
-    std::cout << "Hello TexturedTriangle" << std::endl;
+    std::cout << "Hello TexturedTriangle: " << info() << std::endl;
 }
 
-//------------------------------------------------------------------------------
-//! \brief
 //------------------------------------------------------------------------------
 TexturedTriangle::~TexturedTriangle()
 {
     std::cout << "Bye TexturedTriangle" << std::endl;
 }
 
-//------------------------------------------------------------------
-//! \brief Callback when the window changed its size.
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void TexturedTriangle::onWindowResized()
 {
-    // Make the viewport matches the new window dimensions.
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 }
 
-//------------------------------------------------------------------
-//! \brief
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//! \brief Load a texture
+//------------------------------------------------------------------------------
 bool TexturedTriangle::loadTextures()
 {
+    // Get the texture from its sampler name.
     GLTexture2D& texture = m_triangle.texture2D("texID");
+
+    // Configurate the texture
     texture.interpolation(GLTexture::Minification::LINEAR,
                           GLTexture::Magnification::LINEAR);
     texture.wrap(GLTexture::Wrap::MIRRORED_REPEAT);
+
+    // Read the png file and load data on the texture (CPU side). Dirty data
+    // will be automaticaly transfered to the GPU. Note that the loader is by
+    // default SOIL but you can pass it your own load as 2nd parameter.
     return texture.load("textures/hazard.png");
 }
 
-//------------------------------------------------------------------
-//! \brief Load vertex and fragment shaders. Create a VAO and fill
-//! its VBOs (vertex and texture position). Load all textures.
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool TexturedTriangle::onSetup()
 {
     // Load vertex and fragment shaders with GLSL code.
@@ -99,21 +96,13 @@ bool TexturedTriangle::onSetup()
         Vector2f(0.5f, 1.0f)
     };
 
-    // Repeat the texture motif
+    // Repeat the texture motif (if wanted)
     m_triangle.vector2f("UV") *= 4.0f;
 
-    // Fill Load texture files
+    // Load textures
     if (!loadTextures())
     {
-        // In case of failure show which textures has failed.
-        std::vector<std::string> list;
-        size_t count = m_triangle.getUnloadedTextures(list);
-        std::cerr << "Failed loading " << count << " textures:" << std::endl;
-        for (auto& it: list)
-        {
-            std::cerr << " " << it;
-        }
-        std::cerr << std::endl;
+        showUnloadedTextures(m_triangle);
         return false;
     }
 
@@ -124,9 +113,7 @@ bool TexturedTriangle::onSetup()
     return true;
 }
 
-//------------------------------------------------------------------
-//! \brief Paint our scene. Here we are using the delta time to
-//------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool TexturedTriangle::onPaint()
 {
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
@@ -138,15 +125,11 @@ bool TexturedTriangle::onPaint()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Callback when onSetup() failed.
-//------------------------------------------------------------------------------
 void TexturedTriangle::onSetupFailed(std::string const& reason)
 {
     std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
 }
 
-//------------------------------------------------------------------------------
-//! \brief Callback when onPaint() failed.
 //------------------------------------------------------------------------------
 void TexturedTriangle::onPaintFailed(std::string const& reason)
 {

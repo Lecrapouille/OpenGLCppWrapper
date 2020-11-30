@@ -23,10 +23,10 @@
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
-// *****************************************************************************
+//------------------------------------------------------------------------------
 //! \brief This example shows how to add and use Dear ImGui widgets.
 //! For more information see: https://github.com/ocornut/imgui
-// *****************************************************************************
+//------------------------------------------------------------------------------
 class BasicWindowImGui: public GLWindow
 {
 public:
@@ -37,7 +37,7 @@ public:
 
     static std::string info()
     {
-        return "Empty window with dear a Dear ImGui widget.";
+        return "Window using Dear ImGui widgets";
     }
 
 private:

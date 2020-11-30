@@ -27,8 +27,7 @@
 //! \brief This example shows how to create a window for OpenGL reacting to
 //! input/ouput (IO) events: keyboard pressed, mouse moved, button
 //! pressed/released, scrolled, window size changed. No OpenGL objects are
-//! rendered here for the moment. The basic OpenGL routine called here is just
-//! to clear the window with a different color depending the time.
+//! rendered here for the moment.
 //------------------------------------------------------------------------------
 class BasicWindowIOEvents: public GLWindow
 {
@@ -40,17 +39,10 @@ public:
 
     static std::string info()
     {
-        return "Empty window reacting to window events.";
+        return "Dummy window reacting to window events.";
     }
 
 private:
-
-    // Same from the initial example:
-
-    virtual bool onSetup() override;
-    virtual bool onPaint() override;
-    virtual void onSetupFailed(std::string const& reason) override;
-    virtual void onPaintFailed(std::string const& reason) override;
 
     // Added to this new example:
 
@@ -60,6 +52,13 @@ private:
     virtual void onMouseScrolled() override;
     virtual void onKeyboardEvent() override;
     virtual void onGPUMemoryChanged(size_t size) override;
+
+    // Same from the initial example:
+
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
 };
 
 #endif // EXAMPLE_01_EMPTY_WINDOW_WITH_IO_EVENTS_HPP

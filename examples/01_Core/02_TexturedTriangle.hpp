@@ -24,9 +24,9 @@
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include "../debug.hpp"
 
-// *****************************************************************************
+//------------------------------------------------------------------------------
 //! \brief This example shows how to create a simple textured triangle.
-// *****************************************************************************
+//------------------------------------------------------------------------------
 class TexturedTriangle: public GLWindow
 {
 public:
@@ -36,7 +36,7 @@ public:
 
     static std::string info()
     {
-        return "Render a textured triangle";
+        return "Render a multi-textured triangle";
     }
 
 private:

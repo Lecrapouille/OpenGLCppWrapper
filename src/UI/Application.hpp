@@ -99,10 +99,12 @@ public:
             throw GL::Exception("Failed to initialize GLFW");
 
         // Print out some info about the graphics drivers
+        std::cout << std::endl;
         std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
         std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
         std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
         std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << std::endl;
 
         // Make sure OpenGL version 3.3 API is available
         if (!GLEW_VERSION_3_3)

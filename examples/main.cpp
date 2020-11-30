@@ -23,9 +23,10 @@
 #include "00_Window/00_BasicWindow.hpp"
 #include "00_Window/01_BasicWindowIOEvents.hpp"
 #include "00_Window/02_BasicWindowImGui.hpp"
-#include "01_Core/00_SimpleTriangle.hpp"
+#include "01_Core/00_ColorfulTriangle.hpp"
 #include "01_Core/01_DynamicTriangle.hpp"
 #include "01_Core/02_TexturedTriangle.hpp"
+#include "01_Core/03_MultiTexturedTriangle.hpp"
 
 #include <iostream>
 #include <stdlib.h>
@@ -47,10 +48,10 @@ static void usage(char *argv[])
     std::cout << "  1: " << BasicWindowIOEvents::info() << std::endl;
     std::cout << "  2: " << BasicWindowImGui::info() << std::endl;
     std::cout << "Core API/OpenGL wrapper:" << std::endl;
-    std::cout << "  3: " << SimpleTriangle::info() << std::endl;
+    std::cout << "  3: " << ColorfulTriangle::info() << std::endl;
     std::cout << "  4: " << DynamicTriangle::info() << std::endl;
     std::cout << "  5: " << TexturedTriangle::info() << std::endl;
-    std::cout << "  6: Render a multi-textured triangle." << std::endl;
+    std::cout << "  6: " << MultiTexturedTriangle::info() << std::endl;
     std::cout << "  7: Render a textured box without model-view-project (MVP) transformation." << std::endl;
     std::cout << "  8: Render a rotating textured Box using MVP transformation." << std::endl;
     std::cout << "  9: Render multiple objects (VAO vs VBO)." << std::endl;
@@ -111,13 +112,16 @@ int main(int argc, char *argv[])
             app.create<BasicWindowImGui>(WIDTH, HEIGHT, "DearImGui");
             break;
         case 3:
-            app.create<SimpleTriangle>(WIDTH, HEIGHT, "Simple Triangle");
+            app.create<ColorfulTriangle>(WIDTH, HEIGHT, "Colorful Triangle");
             break;
         case 4:
             app.create<DynamicTriangle>(WIDTH, HEIGHT, "Dynamic Triangle");
             break;
         case 5:
             app.create<TexturedTriangle>(WIDTH, HEIGHT, "Textured Triangle");
+            break;
+        case 6:
+            app.create<MultiTexturedTriangle>(WIDTH, HEIGHT, "Multi Textured Triangle");
             break;
         default:
             std::cerr << "Incorrect example id !" << std::endl;

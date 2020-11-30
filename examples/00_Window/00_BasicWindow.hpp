@@ -24,10 +24,11 @@
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
 //------------------------------------------------------------------------------
-//! \brief This example shows how to create a single window instanciating an
-//! OpenGL context. No OpenGL objects are rendered here for the moment. The basic
-//! OpenGL routine called here is just to clear the window. No input/ouput
-//! events (IO) are observed for this basic example.
+//! \brief This example shows how to create a basic window instanciating an
+//! OpenGL context. No OpenGL objects are rendered here for the moment. The
+//! single OpenGL code called here is to clear the window ith a different color
+//! depending the time. No input/ouput events are observed for this basic
+//! example.
 //------------------------------------------------------------------------------
 class BasicWindow: public GLWindow
 {
@@ -38,7 +39,7 @@ public:
 
     static std::string info()
     {
-        return "Empty window rendering nothing";
+        return "Dummy window clearing background color over time";
     }
 
 private:

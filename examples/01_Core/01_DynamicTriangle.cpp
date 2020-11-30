@@ -22,19 +22,15 @@
 #include <iostream>
 
 //------------------------------------------------------------------------------
-//! \brief
-//------------------------------------------------------------------------------
 DynamicTriangle::DynamicTriangle(uint32_t const width, uint32_t const height,
                                  const char *title)
     : GLWindow(width, height, title),
       m_prog("Prog"),
       m_triangle("triangle")
 {
-    std::cout << "Hello DynamicTriangle" << std::endl;
+    std::cout << "Hello DynamicTriangle: " << info() << std::endl;
 }
 
-//------------------------------------------------------------------------------
-//! \brief
 //------------------------------------------------------------------------------
 DynamicTriangle::~DynamicTriangle()
 {
@@ -42,11 +38,8 @@ DynamicTriangle::~DynamicTriangle()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Callback when the window changed its size.
-//------------------------------------------------------------------------------
 void DynamicTriangle::onWindowResized()
 {
-    // Make the viewport matches the new window dimensions.
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 }
 
@@ -58,9 +51,6 @@ static std::vector<Vector2f> initial_position =
     Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f), Vector2f(0.0f, 1.0f)
 };
 
-//------------------------------------------------------------------------------
-//! \brief Load vertex and fragment shaders. Create a VAO and fill its VBO
-//! (position) and uniform (color).
 //------------------------------------------------------------------------------
 bool DynamicTriangle::onSetup()
 {
@@ -86,14 +76,11 @@ bool DynamicTriangle::onSetup()
         return false;
     }
 
-    // Create VBOs inside the VAO.
     m_prog.bind(m_triangle);
 
-    // Helper for debugging states of your program
-    debug(m_prog);
-    debug(m_triangle);
-
-    // Init shader uniforms with a RGB color
+    // Fill program uniform with a RGB color. Note "color" shall refer to the
+    // variable color inside the GLSL code. If you rename it in the shader you
+    // will have to rename here too. Beware name are case sensitive.
     m_prog.vector3f("color") = Vector3f(1.0f, 0.0f, 0.0f);
 
     // Fill VBOs of the VAO: init triangle vertex positions.
@@ -103,7 +90,8 @@ bool DynamicTriangle::onSetup()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Paint our scene. Here we are using the delta time to
+//! \brief Paint our scene. Here we are using the delta time to modify positions
+//! of the triangle CPU side. Dirty data are automaticaly transfered to the GPU.
 //------------------------------------------------------------------------------
 bool DynamicTriangle::onPaint()
 {
@@ -125,22 +113,18 @@ bool DynamicTriangle::onPaint()
     // Change color over time. Dirty CPU data are transmitted to GPU.
     m_prog.vector3f("color") = Vector3f(st, ct, 0.0f);
 
-    // Draw the VAO bound to the shader program. Dirty data are transfered to GPU.
+    // Draw the VAO bound to the shader program.
     m_prog.draw(m_triangle, Mode::TRIANGLES, 0, 3);
 
     return true;
 }
 
 //------------------------------------------------------------------------------
-//! \brief Callback when onSetup() failed.
-//------------------------------------------------------------------------------
 void DynamicTriangle::onSetupFailed(std::string const& reason)
 {
     std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
 }
 
-//------------------------------------------------------------------------------
-//! \brief Callback when onPaint() failed.
 //------------------------------------------------------------------------------
 void DynamicTriangle::onPaintFailed(std::string const& reason)
 {

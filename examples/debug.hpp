@@ -28,5 +28,6 @@
 //------------------------------------------------------------------------------
 void debug(GLProgram const& prog);
 void debug(GLVAO const& vao);
+void showUnloadedTextures(GLVAO const& vao);
 
 #endif

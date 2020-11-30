@@ -42,10 +42,10 @@ OBJS_WINDOW = \
   02_BasicWindowImGui.o
 
 OBJS_CORE = \
-  00_SimpleTriangle.o \
+  00_ColorfulTriangle.o \
   01_DynamicTriangle.o \
   02_TexturedTriangle.o \
-#  03_MultiTexturedTriangle.o \
+  03_MultiTexturedTriangle.o \
 #  04_TexturedBox.o \
 #  05_MVPTexturedBox.o \
 #  06_MultipleObjects.o \

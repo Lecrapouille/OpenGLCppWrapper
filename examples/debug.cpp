@@ -19,6 +19,20 @@
 //=====================================================================
 
 #include "debug.hpp"
+#include <iostream>
+
+//------------------------------------------------------------------------------
+void showUnloadedTextures(GLVAO const& vao)
+{
+    std::vector<std::string> list;
+    size_t count = vao.getUnloadedTextures(list);
+    std::cerr << "Failed loading " << count << " textures:" << std::endl;
+    for (auto& it: list)
+    {
+        std::cerr << " " << it;
+    }
+    std::cerr << std::endl;
+}
 
 //------------------------------------------------------------------------------
 void debug(GLProgram const& prog)

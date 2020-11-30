@@ -22,17 +22,13 @@
 #include <iostream>
 
 //------------------------------------------------------------------------------
-//! \brief
-//------------------------------------------------------------------------------
 BasicWindowIOEvents::BasicWindowIOEvents(uint32_t const width, uint32_t const height,
                                          const char *title)
     : GLWindow(width, height, title)
 {
-    std::cout << "Hello BasicWindowIOEvents" << std::endl;
+    std::cout << "Hello BasicWindowIOEvents: " << info() << std::endl;
 }
 
-//------------------------------------------------------------------------------
-//! \brief
 //------------------------------------------------------------------------------
 BasicWindowIOEvents::~BasicWindowIOEvents()
 {
@@ -41,16 +37,17 @@ BasicWindowIOEvents::~BasicWindowIOEvents()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Callback when the window changed its size. Use template methods
-//! width<T>(), height<T>() to get windows inforamtion. T is the destination type.
+//! \brief Callback when the window has been resized. Use template methods
+//! width<T>(), height<T>() to get windows inforamtion where T is the
+//! destination type (float, double, int). Note that height is never zero !
 //------------------------------------------------------------------------------
 void BasicWindowIOEvents::onWindowResized()
 {
-    // Note: height is never zero !
-    float ratio = width<float>() / height<float>();
-
     // Make the viewport matches the new window dimensions.
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
+
+    // Note: height is never zero !
+    float ratio = width<float>() / height<float>();
 
     std::cout << "New Window dimension "
               << width<int>() << " x " << height<int>()
@@ -58,8 +55,9 @@ void BasicWindowIOEvents::onWindowResized()
 }
 
 // -----------------------------------------------------------------------------
-//! \brief Keyboard event (Note Escape key is already map to kill the
-//! application).
+//! \brief Keyboard pressed or released events. Note the escape key is already
+//! map to kill the application but you can override shouldHalt() to reuse this
+//! key).
 // -----------------------------------------------------------------------------
 void BasicWindowIOEvents::onKeyboardEvent()
 {
@@ -83,10 +81,9 @@ void BasicWindowIOEvents::onKeyboardEvent()
 }
 
 // -----------------------------------------------------------------------------
-//! \brief Callback on mouse pressed or release event.
-//!
-//! This example display the mouse status and hide/show the mouse
-//! cursor.
+//! \brief Callback on mouse pressed or release event. In this example show the
+//! mouse cursor when the mouse is pressed or hide the cursor when the mouse is
+//! released.
 // -----------------------------------------------------------------------------
 void BasicWindowIOEvents::onMouseButtonPressed()
 {
@@ -96,16 +93,7 @@ void BasicWindowIOEvents::onMouseButtonPressed()
 
     static bool state = true;
     state ^= true;
-    (false == state) ? hideCursor() : showCursor();
-}
-
-// -----------------------------------------------------------------------------
-//! \brief Callback on mouse scroll event.
-// -----------------------------------------------------------------------------
-void BasicWindowIOEvents::onMouseScrolled()
-{
-    std::cout << "Mouse scrolled: " << mouse().scroll.x << " x "
-              << mouse().scroll.y << std::endl;
+    (false == state) ? showCursor() : hideCursor();
 }
 
 // -----------------------------------------------------------------------------
@@ -118,12 +106,22 @@ void BasicWindowIOEvents::onMouseMoved()
               << static_cast<int>(mouse().position.y) << std::endl;
 
     std::cout << "Mouse delta movement: "
-              << mouse().displacement.x << " x "
-              << mouse().displacement.y << std::endl;
+             << mouse().displacement.x << " x "
+             << mouse().displacement.y << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+//! \brief Callback on mouse scroll event.
+// -----------------------------------------------------------------------------
+void BasicWindowIOEvents::onMouseScrolled()
+{
+    std::cout << "Mouse scrolled: " << mouse().scroll.x << " x "
+              << mouse().scroll.y << std::endl;
 }
 
 //------------------------------------------------------------------
-//! \brief Display the GPU memory usage.
+//! \brief Display the GPU memory usage. triggered when new data
+//! are sent to the GPU.
 //------------------------------------------------------------------
 void BasicWindowIOEvents::onGPUMemoryChanged(size_t size)
 {
@@ -133,47 +131,23 @@ void BasicWindowIOEvents::onGPUMemoryChanged(size_t size)
 }
 
 //------------------------------------------------------------------
-//! \brief Add your OpenGL code here for initializing your scene.
-//------------------------------------------------------------------
 bool BasicWindowIOEvents::onSetup()
 {
     // Enable IO callbacks. Without this method: no events are triggered.
     makeReactOn(Event::MouseMove | Event::MouseScroll |
                 Event::MouseButton | Event::Keyboard);
 
-    // Do not show the mouse cursor
+    // Do not show the mouse cursor.
     hideCursor();
 
     // Success
     return true;
 }
 
-//------------------------------------------------------------------------------
-//! \brief Callback when onSetup() failed.
-//------------------------------------------------------------------------------
-void BasicWindowIOEvents::onSetupFailed(std::string const& reason)
-{
-    // To reach this code make setup() return false;
-    std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
-}
-
-//------------------------------------------------------------------
-//! \brief Callback for painting our scene.
-//!
-//! In this example, we are using the delta time between the previous
-//! rendering frame for changing dynamically the background color of
-//! the window.
 //------------------------------------------------------------------
 bool BasicWindowIOEvents::onPaint()
 {
-    // Cumulate the time
-    static float time = 0.0f;
-    time += dt();
-
-    // Change the background color
-    float ct = cosf(time) * 0.5f + 0.5f;
-    float st = sinf(time) * 0.5f + 0.5f;
-    glCheck(glClearColor(st, ct, 0.0f, 1.0f));
+    glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
     // Success
@@ -181,7 +155,12 @@ bool BasicWindowIOEvents::onPaint()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Callback when onPaint() failed.
+void BasicWindowIOEvents::onSetupFailed(std::string const& reason)
+{
+    // To reach this code make setup() return false;
+    std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
+}
+
 //------------------------------------------------------------------------------
 void BasicWindowIOEvents::onPaintFailed(std::string const& reason)
 {

@@ -56,7 +56,9 @@ public:
               const GLuint prog)
         : GLLocation(name, 0, static_cast<GLenum>(gltype), prog),
           m_texture_id(GLenum(texture_id))
-    {}
+    {
+        m_need_update = true;
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Destructor. Release elements from CPU and GPU.

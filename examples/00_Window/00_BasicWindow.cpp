@@ -22,17 +22,18 @@
 #include <iostream>
 
 //------------------------------------------------------------------------------
-//! \brief
+//! \brief Constructor. You need to pass the window size and title to base
+//! Window.
 //------------------------------------------------------------------------------
 BasicWindow::BasicWindow(uint32_t const width, uint32_t const height,
                          const char *title)
     : GLWindow(width, height, title)
 {
-    std::cout << "Hello BasicWindow" << std::endl;
+    std::cout << "Hello BasicWindow: " << info() << std::endl;
 }
 
 //------------------------------------------------------------------------------
-//! \brief
+//! \brief Destructor. Do nothing.
 //------------------------------------------------------------------------------
 BasicWindow::~BasicWindow()
 {
@@ -41,19 +42,21 @@ BasicWindow::~BasicWindow()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Add your C++/OpenGL code here for initializing your scene.
+//! \brief Callback method triggered by GLWindow. Add in this method C++/OpenGL
+//! code to initialize graphics and states for your application.
 //------------------------------------------------------------------------------
 bool BasicWindow::onSetup()
 {
-    // Add here you code for initializing your game.
     std::cout << "Setup BasicWindow" << std::endl;
 
-    // Two cases:
-    // - setup ends with success => return true. In this case the function draw()
-    //   will be called periodically.
-    // - setup reaches an error => return false. In case, the draw() function will
+    // Three cases:
+    // - setup ends with success => return true. In this case the function onPaint()
+    //   will be called periodically by GLWindow.
+    // - setup reaches an error => return false. In case, the onPaint() function will
     //   not be called and instead the function onSetupFailed() is called and the
     //   program immediatley exit (and release CPU and GPU memory before).
+    // - Throw GL::Exception it will be catck by GLWindow and onSetupFailed()
+    //   will be called before ending the application.
     return true;
 }
 
@@ -62,35 +65,46 @@ bool BasicWindow::onSetup()
 //------------------------------------------------------------------------------
 void BasicWindow::onSetupFailed(std::string const& reason)
 {
-    // To reach this code make onSetup() return false;
+    // To reach this code make onSetup() return false or throw an GL::Exception.
     std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
 }
 
 //------------------------------------------------------------------------------
-//! \brief Callback for painting our scene. Note that swap buffer are called
-//! automaticaly.
+//! \brief Callback method triggered by GLWindow. Add in this method C++/OpenGL
+//! code to paint your scene. Note that swap buffer are called automaticaly by
+//! GLProgram, so you do not have to call it.
 //------------------------------------------------------------------------------
 bool BasicWindow::onPaint()
 {
-    // Note: this is not mandatory but you can wrap each OpenGL function with
-    // the glCheck() to verify if everything is alright.
-    glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
-    glCheck(glClear(GL_COLOR_BUFFER_BIT));
-
-    // The delta time (in seconds) from the previous draw() and frames per
+    // The delta time (in seconds) from the previous onPaint() and frames per
     // seconds (FPS) are automatically computed.
     std::cout << "Delta time: " << uint32_t(dt() * 1000.0f) << " ms."
               << "   FPS: " << fps()
               << "        \r"
               << std::flush;
 
-    // Two cases:
-    // - draw() ends with success => return true. In this case the function draw()
-    //   will be keep be called periodically.
-    // - draw() reaches an error => return false. In case, the next draw()
+    // Change the background color over time
+
+    // Cumulate the time
+    static float time = 0.0f;
+    time += dt();
+
+    // Note: this is not mandatory but you can wrap each OpenGL function with
+    // the glCheck() to verify if everything is alright.
+    float ct = cosf(time) * 0.5f + 0.5f;
+    float st = sinf(time) * 0.5f + 0.5f;
+    glCheck(glClearColor(st, ct, 0.0f, 1.0f));
+    glCheck(glClear(GL_COLOR_BUFFER_BIT));
+
+    // Three cases:
+    // - onPaint() ends with success => return true. In this case the function
+    //   onPaint() will be keep be called periodically by GLWindow.
+    // - onPaint() reaches an error => return false. In case, the next onPaint()
     //   function will not be called and instead the function onDrawFailed() is
     //   called and the program immediatley exit (and release CPU and GPU memory
     //   before).
+    // - Throw GL::Exception it will be catck by GLWindow and onPaintFailed()
+    //   will be called before ending the application.
     return true;
 }
 
@@ -99,6 +113,6 @@ bool BasicWindow::onPaint()
 //------------------------------------------------------------------------------
 void BasicWindow::onPaintFailed(std::string const& reason)
 {
-    // To reach this code make onPaint() return false;
+    // To reach this code make onPaint() return false or throw an GL::Exception.
     std::cerr << "Failure during rendering. Reason: " << reason << std::endl;
 }

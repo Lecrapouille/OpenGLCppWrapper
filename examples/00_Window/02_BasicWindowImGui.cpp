@@ -24,18 +24,14 @@
 float BasicWindowImGui::color[4] = { 0.5f, 0.5f, 1.0f, 1.0f };
 
 //------------------------------------------------------------------------------
-//! \brief
-//------------------------------------------------------------------------------
 BasicWindowImGui::BasicWindowImGui(uint32_t const width, uint32_t const height,
                          const char *title)
     : GLWindow(width, height, title),
       m_imgui(*this)
 {
-    std::cout << "Hello BasicWindowImGui" << std::endl;
+    std::cout << "Hello BasicWindowImGui: " << info() << std::endl;
 }
 
-//------------------------------------------------------------------------------
-//! \brief
 //------------------------------------------------------------------------------
 BasicWindowImGui::~BasicWindowImGui()
 {
@@ -43,15 +39,27 @@ BasicWindowImGui::~BasicWindowImGui()
 }
 
 //------------------------------------------------------------------
-//! \brief Init the context of the DearImGui library
-//------------------------------------------------------------------
 bool BasicWindowImGui::onSetup()
 {
     return m_imgui.setup(*this);
 }
 
 //------------------------------------------------------------------
-//! \brief Paint some DearImGui widgets.
+//! \brief Paint our scene. Here we are using the delta time to
+//------------------------------------------------------------------
+bool BasicWindowImGui::onPaint()
+{
+    // First draw your OpenGL scene
+    glCheck(glClear(GL_COLOR_BUFFER_BIT));
+    glCheck(glClearColor(color[0], color[1], color[2], color[3]));
+
+    // Then DearImGui
+    return m_imgui.draw();
+}
+
+//------------------------------------------------------------------
+//! \brief Paint some DearImGui widgets. In this example change the
+//! background color.
 //------------------------------------------------------------------
 bool BasicWindowImGui::GUI::render()
 {
@@ -68,29 +76,12 @@ bool BasicWindowImGui::GUI::render()
     return true;
 }
 
-//------------------------------------------------------------------
-//! \brief Paint our scene. Here we are using the delta time to
-//------------------------------------------------------------------
-bool BasicWindowImGui::onPaint()
-{
-    // First draw your OpenGL scene
-    glCheck(glClear(GL_COLOR_BUFFER_BIT));
-    glCheck(glClearColor(color[0], color[1], color[2], color[3]));
-
-    // Then DearImGui
-    return m_imgui.draw();
-}
-
-//------------------------------------------------------------------------------
-//! \brief Callback when onSetup() failed.
 //------------------------------------------------------------------------------
 void BasicWindowImGui::onSetupFailed(std::string const& reason)
 {
     std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
 }
 
-//------------------------------------------------------------------------------
-//! \brief Callback when onPaint() failed.
 //------------------------------------------------------------------------------
 void BasicWindowImGui::onPaintFailed(std::string const& reason)
 {

@@ -22,34 +22,43 @@
 #  define EXAMPLE_03_MULTI_TEXTURED_TRIANGLE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include <iostream>
+#  include "../debug.hpp"
 
-using namespace glwrap;
-
-// *****************************************************************
-//! \brief
-// *****************************************************************
-class MultiTexturedTriangle: public IGLWindow
+//------------------------------------------------------------------------------
+//! \brief This example shows how to create a simple multi-textured triangle.
+//! This method maybe be used to create terrain textures.
+//!
+//! \note This example takes its inspiration from the Youtube video
+//! "OpenGL 3D Game Tutorial 17: Multitexturing" made by ThinMatrix
+//! https://youtu.be/-kbal7aGUpk
+//------------------------------------------------------------------------------
+class MultiTexturedTriangle: public GLWindow
 {
 public:
 
-  MultiTexturedTriangle();
-  ~MultiTexturedTriangle();
+    MultiTexturedTriangle(uint32_t const width, uint32_t const height, const char *title);
+    ~MultiTexturedTriangle();
+
+    static std::string info()
+    {
+        return "Render a textured triangle";
+    }
 
 private:
 
-  void debug();
-  bool loadTextures();
-  virtual void onWindowSizeChanged() override;
-  virtual bool setup() override;
-  virtual bool draw() override;
+    bool loadTextures();
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
+    virtual void onWindowResized() override;
 
 private:
 
-  GLVertexShader     m_vertex_shader;
-  GLFragmentShader   m_fragment_shader;
-  GLProgram          m_prog;
-  GLVAO              m_mesh;
+    GLVertexShader     m_vertex_shader;
+    GLFragmentShader   m_fragment_shader;
+    GLProgram          m_prog;
+    GLVAO              m_triangle;
 };
 
 #endif // EXAMPLE_03_MULTI_TEXTURED_TRIANGLE_HPP

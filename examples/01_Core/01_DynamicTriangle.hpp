@@ -24,11 +24,11 @@
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include "../debug.hpp"
 
-// *****************************************************************************
+//------------------------------------------------------------------------------
 //! \brief This example shows how to create a simple triangle and how we can
 //! changes its attribute and uniform data from CPU and how dirty data are
 //! automatically transfered to GPU.
-// *****************************************************************************
+//------------------------------------------------------------------------------
 class DynamicTriangle: public GLWindow
 {
 public:
