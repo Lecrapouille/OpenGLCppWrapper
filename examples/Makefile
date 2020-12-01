@@ -47,10 +47,12 @@ OBJS_CORE = \
   02_TexturedTriangle.o \
   03_MultiTexturedTriangle.o \
   04_IndexedQuad.o \
-#  04_TexturedBox.o \
-#  05_MVPTexturedBox.o \
-#  06_MultipleObjects.o \
-#  07_IndexedVBO.o \
+  05_RotatingQuad.o \
+  06_IndexedSphere.o \
+
+#  06_IndexedSphere.o \
+#  07_MultipleObjects.o \
+
 #  08_TerrainTexture3D.o \
 #  09_SkyBoxTextureCube.o \
 #  10_SkyBoxShapeCamera.o \
@@ -58,6 +60,15 @@ OBJS_CORE = \
 #  12_PostProdFrameBuffer.o \
 #  13_ComplexShader.o \
 #  14_BasicLighting.o
+
+
+#  04_TexturedBox.o \
+#  05_MVPTexturedBox.o \
+#  06_MultipleObjects.o \
+
+
+
+
 
 #OBJS_SCENE = \
 #  00_BasicMaterial.o \

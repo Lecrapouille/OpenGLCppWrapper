@@ -26,8 +26,6 @@
 
 #  include "Math/Matrix.hpp"
 
-namespace glwrap
-{
 namespace matrix
 {
 
@@ -178,6 +176,5 @@ namespace matrix
   }
 
 } // namespace matrix
-} // namespace glwrap
 
 #endif // OPENGLCPPWRAPPER_TRANSFORMATION_HPP

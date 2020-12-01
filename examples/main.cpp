@@ -28,6 +28,8 @@
 #include "01_Core/02_TexturedTriangle.hpp"
 #include "01_Core/03_MultiTexturedTriangle.hpp"
 #include "01_Core/04_IndexedQuad.hpp"
+#include "01_Core/05_RotatingQuad.hpp"
+#include "01_Core/06_IndexedSphere.hpp"
 
 #include <iostream>
 #include <stdlib.h>
@@ -54,9 +56,11 @@ static void usage(char *argv[])
     std::cout << "  5: " << TexturedTriangle::info() << std::endl;
     std::cout << "  6: " << MultiTexturedTriangle::info() << std::endl;
     std::cout << "  7: " << IndexedQuad::info() << std::endl;
+    std::cout << "  8: " << RotatingQuad::info() << std::endl;
+    std::cout << "  9: " << IndexedSphere::info() << std::endl;
 
 
-
+    /*
     std::cout << "  7: Render a textured box without model-view-project (MVP) transformation." << std::endl;
     std::cout << "  8: Render a rotating textured Box using MVP transformation." << std::endl;
     std::cout << "  9: Render multiple objects (VAO vs VBO)." << std::endl;
@@ -78,7 +82,7 @@ static void usage(char *argv[])
     std::cout << " 24: Show a tree with alpha testing." << std::endl;
     std::cout << " 25: Show a scene graph with lights." << std::endl;
     std::cout << "Examples from ThreeJs:" << std::endl;
-    std::cout << " 26: Cones pointing to a moving cube." << std::endl;
+    std::cout << " 26: Cones pointing to a moving cube." << std::endl;*/
     exit(EXIT_FAILURE);
 }
 
@@ -130,6 +134,12 @@ int main(int argc, char *argv[])
             break;
         case 7:
             app.create<IndexedQuad>(WIDTH, HEIGHT, "EBO Quad");
+            break;
+        case 8:
+            app.create<RotatingQuad>(WIDTH, HEIGHT, "Rotating Quad");
+            break;
+        case 9:
+            app.create<IndexedSphere>(WIDTH, HEIGHT, "EBO Sphere");
             break;
         default:
             std::cerr << "Incorrect example id !" << std::endl;

@@ -18,37 +18,57 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_04_TEXTURED_BOX_HPP
-#  define EXAMPLE_04_TEXTURED_BOX_HPP
+#ifndef EXAMPLE_05_ROTATING_BOX_HPP
+#  define EXAMPLE_05_ROTATING_BOX_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-
-using namespace glwrap;
+#  include "Math/Transformable.hpp"
+#  include "../debug.hpp"
 
 // *****************************************************************************
 //! \brief This example shows how to create a simple textured triangle.
 // *****************************************************************************
-class TexturedBox: public IGLWindow
+class RotatingQuad: public GLWindow
 {
 public:
 
-  TexturedBox();
-  ~TexturedBox();
+    RotatingQuad(uint32_t const width, uint32_t const height, const char *title);
+    ~RotatingQuad();
+
+    static std::string info()
+    {
+        return "Render an rotating box";
+    }
 
 private:
 
-  void debug();
-  bool loadTextures();
-  virtual void onWindowSizeChanged() override;
-  virtual bool setup() override;
-  virtual bool draw() override;
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
+    virtual void onWindowResized() override;
 
 private:
 
-  GLVertexShader     m_vertex_shader;
-  GLFragmentShader   m_fragment_shader;
-  GLProgram          m_prog;
-  GLVAO              m_mesh;
+    struct Box
+    {
+        Box()
+            : vao("vao")
+        {}
+
+        GLVAO32 vao;
+
+        //! \brief Allow to specify and combine several transformation (translation,
+        //! scaling, rotation) and get the transformation matrix 4x4 to apply to the
+        //! shader.
+        //! \note you can use the alias Transformable3D
+        Transformable<float, 3U> transform;
+    };
+
+    GLVertexShader     m_vertex_shader;
+    GLFragmentShader   m_fragment_shader;
+    GLProgram          m_prog;
+    Box                m_box;
 };
 
-#endif // EXAMPLE_04_TEXTURED_BOX_HPP
+#endif // EXAMPLE_05_ROTATING_BOX_HPP
