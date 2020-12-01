@@ -53,8 +53,14 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Constructor with the object name.
-    //! \param target: GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER ...
-    //! \param usage: GL_STATIC_DRAW, GL_DYNAMIC_DRAW ...
+    //! \param target: specialization into GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER ...
+    //! \param[in] usage:
+    //!   - BufferUsage::STREAM_DRAW: The data store contents will be modified once and
+    //!     used at most a few times.
+    //!   - BufferUsage::STATIC_DRAW: The data store contents will be modified once and
+    //!     used many times.
+    //!   - BufferUsage::DYNAMIC_DRAW: The data store contents will be modified repeatedly
+    //!     and used many times.
     //--------------------------------------------------------------------------
     explicit GLBuffer(std::string const& name, GLenum const target,
                       BufferUsage const usage)
@@ -84,11 +90,19 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Set the usage for VBOs when they are created:
+    //!   - BufferUsage::STREAM_DRAW: The data store contents will be modified once and
+    //!     used at most a few times.
+    //!   - BufferUsage::STATIC_DRAW: The data store contents will be modified once and
+    //!     used many times.
+    //!   - BufferUsage::DYNAMIC_DRAW: The data store contents will be modified repeatedly
+    //!     and used many times.
+    //! \note: to be called before calling begin(), else it will not talen into
+    //! account.
     //--------------------------------------------------------------------------
-    inline GLenum usage() const
+    void usage(BufferUsage const type)
     {
-        return m_usage;
+        m_usage = static_cast<GLenum>(usage);
     }
 
 private:

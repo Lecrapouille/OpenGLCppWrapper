@@ -31,7 +31,7 @@
 #  include "OpenGL/Variables/Attribute.hpp"
 #  include "OpenGL/Variables/Uniform.hpp"
 #  include "OpenGL/Variables/Samplers.hpp"
-#  include "OpenGL/Buffers/VAO.hpp"
+#  include "OpenGL/Buffers/iVAO.hpp"
 #  include "Common/Any.hpp"
 
 //! \brief Mode for drawing primitives (points, lines, triangles ...)
@@ -145,8 +145,7 @@ public:
     //! compiled (syntax errors in shader code) or if the VOA has already been
     //! bound by another GLProgram (incompatibility).
     //--------------------------------------------------------------------------
-    bool bind(GLVAO& vao, BufferUsage const usage = BufferUsage::STATIC_DRAW,
-              size_t const size = 0u);
+    bool bind(GLVAO& vao);
 
     //--------------------------------------------------------------------------
     //! \brief Check if a VAO is bound with this GLProgram.
@@ -162,7 +161,17 @@ public:
     void draw(GLVAO& vao, Mode const mode, size_t const first, size_t const count);
     void draw(GLVAO& vao, Mode const mode);
     void draw(Mode const mode);
-    // TODO void draw(GLVAO& vao, Mode const mode, GLIndexBuffer<T>& index)
+
+    template<class T>
+    void draw(GLVAOi<T>& vao, Mode const mode)
+    {
+        begin();
+        vao.begin();
+        vao.index().begin();
+        glCheck(glDrawElements(static_cast<GLenum>(mode),
+                               static_cast<GLsizei>(vao.index().size()),
+                               vao.index().type(), 0));
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Return all error messages (concated by '\\n' char) produced either

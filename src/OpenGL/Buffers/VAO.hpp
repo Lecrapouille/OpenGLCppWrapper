@@ -50,11 +50,21 @@ public:
     //! for logs as debug purpose. This constructor makes no other actions.
     //!
     //! \param[in] name the name of the VAO instance.
+    //! \param[in] usage for VBOs when they are created:
+    //!   - BufferUsage::STREAM_DRAW: The data store contents will be modified once and
+    //!     used at most a few times.
+    //!   - BufferUsage::STATIC_DRAW: The data store contents will be modified once and
+    //!     used many times.
+    //!   - BufferUsage::DYNAMIC_DRAW: The data store contents will be modified repeatedly
+    //!     and used many times.
+    //! \param[in] reserve the number of elements when creating VBOs.
     //--------------------------------------------------------------------------
-    GLVAO(std::string const& name)
-        : GLObject(name)
+    GLVAO(std::string const& name, BufferUsage const usage = BufferUsage::DYNAMIC_DRAW,
+          size_t const reserve = 3u)
+        : GLObject(name, GL_ARRAY_BUFFER)
     {
-        m_target = GL_ARRAY_BUFFER;
+        m_usage = usage;
+        m_reserve = reserve;
     }
 
     //--------------------------------------------------------------------------
@@ -62,7 +72,29 @@ public:
     //--------------------------------------------------------------------------
     virtual ~GLVAO() override
     {
-        release();
+       release();
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Set the usage for VBOs when they are created:
+    //!   - BufferUsage::STREAM_DRAW: The data store contents will be modified once and
+    //!     used at most a few times.
+    //!   - BufferUsage::STATIC_DRAW: The data store contents will be modified once and
+    //!     used many times.
+    //!   - BufferUsage::DYNAMIC_DRAW: The data store contents will be modified repeatedly
+    //!     and used many times.
+    //--------------------------------------------------------------------------
+    void usage(BufferUsage const usage_)
+    {
+       m_usage = usage_;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Set the number of elements to reserve when creating VBOs.
+    //--------------------------------------------------------------------------
+    void reserve(size_t const reserve_)
+    {
+       m_reserve = reserve_;
     }
 
     //--------------------------------------------------------------------------
@@ -322,7 +354,10 @@ private:
         }
     }
 
-    void init(GLProgram& prog, BufferUsage const usage, size_t const vbo_size);
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    void init(GLProgram& prog);
 
     //--------------------------------------------------------------------------
     //! \brief Create a new OpenGL VAO.
@@ -438,11 +473,9 @@ private:
     ListTextures m_listTextures;
     GLProgram*   m_program = nullptr;
     size_t       m_count = 0u;
+
+    BufferUsage  m_usage;
+    size_t       m_reserve;
 };
 
 #endif // OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
-
-
-#if 0
-
-#endif

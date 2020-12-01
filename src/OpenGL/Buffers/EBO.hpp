@@ -60,6 +60,13 @@ public:
         return *this;
     }
 
+    template<typename U>
+    inline GLElementBuffer<T>& operator=(std::vector<U> const& other)
+    {
+        PendingContainer<T>::operator=(other);
+        return *this;
+    }
+
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------

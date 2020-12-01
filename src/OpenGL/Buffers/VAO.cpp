@@ -46,7 +46,7 @@ bool GLVAO::bound() const
 //! number depends on the number of shader attributes and uniform
 //! texture samplers.
 //----------------------------------------------------------------------------
-void GLVAO::init(GLProgram& program, BufferUsage const usage, size_t const vbo_size)
+void GLVAO::init(GLProgram& program)
 {
     // Create a list of VBOs. TODO: manage integers
     for (auto& it: program.attributes())
@@ -56,28 +56,28 @@ void GLVAO::init(GLProgram& program, BufferUsage const usage, size_t const vbo_s
         {
         case 1:
             {
-                auto ptr = std::make_shared<GLVertexBuffer<float>>(name, vbo_size, usage);
+                auto ptr = std::make_shared<GLVertexBuffer<float>>(name, m_reserve, m_usage);
                 m_VBOs.add(name, ptr);
                 m_listBuffers[name] = ptr;
             }
             break;
         case 2:
             {
-                auto ptr = std::make_shared<GLVertexBuffer<Vector2f>>(name, vbo_size, usage);
+                auto ptr = std::make_shared<GLVertexBuffer<Vector2f>>(name, m_reserve, m_usage);
                 m_VBOs.add(name, ptr);
                 m_listBuffers[name] = ptr;
             }
             break;
         case 3:
             {
-                auto ptr = std::make_shared<GLVertexBuffer<Vector3f>>(name, vbo_size, usage);
+                auto ptr = std::make_shared<GLVertexBuffer<Vector3f>>(name, m_reserve, m_usage);
                 m_VBOs.add(name, ptr);
                 m_listBuffers[name] = ptr;
             }
             break;
         case 4:
             {
-                auto ptr = std::make_shared<GLVertexBuffer<Vector4f>>(name, vbo_size, usage);
+                auto ptr = std::make_shared<GLVertexBuffer<Vector4f>>(name, m_reserve, m_usage);
                 m_VBOs.add(name, ptr);
                 m_listBuffers[name] = ptr;
             }

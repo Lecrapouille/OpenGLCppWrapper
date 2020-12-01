@@ -58,7 +58,7 @@ void GLProgram::concatError(std::string const& msg)
 }
 
 //----------------------------------------------------------------------------
-bool GLProgram::bind(GLVAO& vao, BufferUsage const usage, size_t const vbo_size)
+bool GLProgram::bind(GLVAO& vao)
 {
     // Try compile the GLProgram if not previously compiled
     if (unlikely(!compiled()))
@@ -80,7 +80,7 @@ bool GLProgram::bind(GLVAO& vao, BufferUsage const usage, size_t const vbo_size)
 
         // When binding the VAO to GLProgram for the first time:
         // populate VBOs and textures in the VAO.
-        vao.init(*this, usage, vbo_size);
+        vao.init(*this);
         m_need_update = true;
     }
     else if (unlikely(!vao.bound(m_handle)))

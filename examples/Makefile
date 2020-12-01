@@ -46,6 +46,7 @@ OBJS_CORE = \
   01_DynamicTriangle.o \
   02_TexturedTriangle.o \
   03_MultiTexturedTriangle.o \
+  04_IndexedQuad.o \
 #  04_TexturedBox.o \
 #  05_MVPTexturedBox.o \
 #  06_MultipleObjects.o \
