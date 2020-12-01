@@ -26,7 +26,7 @@
 #include "01_Core/00_ColorfulTriangle.hpp"
 #include "01_Core/01_DynamicTriangle.hpp"
 #include "01_Core/02_TexturedTriangle.hpp"
-#include "01_Core/03_MultiTexturedTriangle.hpp"
+#include "01_Core/03_MultiTexturedSquare.hpp"
 #include "01_Core/04_IndexedQuad.hpp"
 #include "01_Core/05_RotatingQuad.hpp"
 #include "01_Core/06_IndexedSphere.hpp"
@@ -54,7 +54,7 @@ static void usage(char *argv[])
     std::cout << "  3: " << ColorfulTriangle::info() << std::endl;
     std::cout << "  4: " << DynamicTriangle::info() << std::endl;
     std::cout << "  5: " << TexturedTriangle::info() << std::endl;
-    std::cout << "  6: " << MultiTexturedTriangle::info() << std::endl;
+    std::cout << "  6: " << MultiTexturedSquare::info() << std::endl;
     std::cout << "  7: " << IndexedQuad::info() << std::endl;
     std::cout << "  8: " << RotatingQuad::info() << std::endl;
     std::cout << "  9: " << IndexedSphere::info() << std::endl;
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
             app.create<TexturedTriangle>(WIDTH, HEIGHT, "Textured Triangle");
             break;
         case 6:
-            app.create<MultiTexturedTriangle>(WIDTH, HEIGHT, "Multi Textured Triangle");
+            app.create<MultiTexturedSquare>(WIDTH, HEIGHT, "Multi Textured Triangle");
             break;
         case 7:
             app.create<IndexedQuad>(WIDTH, HEIGHT, "EBO Quad");

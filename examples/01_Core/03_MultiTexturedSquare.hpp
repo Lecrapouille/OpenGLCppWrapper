@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_03_MULTI_TEXTURED_TRIANGLE_HPP
-#  define EXAMPLE_03_MULTI_TEXTURED_TRIANGLE_HPP
+#ifndef EXAMPLE_03_MULTI_TEXTURED_SQUARE_HPP
+#  define EXAMPLE_03_MULTI_TEXTURED_SQUARE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include "../debug.hpp"
@@ -32,12 +32,12 @@
 //! "OpenGL 3D Game Tutorial 17: Multitexturing" made by ThinMatrix
 //! https://youtu.be/-kbal7aGUpk
 //------------------------------------------------------------------------------
-class MultiTexturedTriangle: public GLWindow
+class MultiTexturedSquare: public GLWindow
 {
 public:
 
-    MultiTexturedTriangle(uint32_t const width, uint32_t const height, const char *title);
-    ~MultiTexturedTriangle();
+    MultiTexturedSquare(uint32_t const width, uint32_t const height, const char *title);
+    ~MultiTexturedSquare();
 
     static std::string info()
     {
@@ -58,7 +58,7 @@ private:
     GLVertexShader     m_vertex_shader;
     GLFragmentShader   m_fragment_shader;
     GLProgram          m_prog;
-    GLVAO              m_triangle;
+    GLVAO              m_square;
 };
 
-#endif // EXAMPLE_03_MULTI_TEXTURED_TRIANGLE_HPP
+#endif // EXAMPLE_03_MULTI_TEXTURED_SQUARE_HPP

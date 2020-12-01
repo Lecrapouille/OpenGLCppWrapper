@@ -45,7 +45,7 @@ OBJS_CORE = \
   00_ColorfulTriangle.o \
   01_DynamicTriangle.o \
   02_TexturedTriangle.o \
-  03_MultiTexturedTriangle.o \
+  03_MultiTexturedSquare.o \
   04_IndexedQuad.o \
   05_RotatingQuad.o \
   06_IndexedSphere.o \

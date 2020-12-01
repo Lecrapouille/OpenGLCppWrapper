@@ -18,50 +18,50 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "03_MultiTexturedTriangle.hpp"
+#include "03_MultiTexturedSquare.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
-MultiTexturedTriangle::MultiTexturedTriangle(uint32_t const width, uint32_t const height,
+MultiTexturedSquare::MultiTexturedSquare(uint32_t const width, uint32_t const height,
                                              const char *title)
     : GLWindow(width, height, title),
       m_prog("Prog"),
-      m_triangle("triangle")
+      m_square("square")
 {
-    std::cout << "Hello MultiTexturedTriangle: " << info() << std::endl;
+    std::cout << "Hello MultiTexturedSquare: " << info() << std::endl;
 }
 
 //------------------------------------------------------------------------------
-MultiTexturedTriangle::~MultiTexturedTriangle()
+MultiTexturedSquare::~MultiTexturedSquare()
 {
-    std::cout << "Bye MultiTexturedTriangle" << std::endl;
+    std::cout << "Bye MultiTexturedSquare" << std::endl;
 }
 
 //------------------------------------------------------------------------------
-void MultiTexturedTriangle::onWindowResized()
+void MultiTexturedSquare::onWindowResized()
 {
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 }
 
 //------------------------------------------------------------------------------
-bool MultiTexturedTriangle::loadTextures()
+bool MultiTexturedSquare::loadTextures()
 {
-    if (!m_triangle.texture2D("blendMap").load("textures/blendMap.png"))
+    if (!m_square.texture2D("blendMap").load("textures/blendMap.png"))
         return false;
-    if (!m_triangle.texture2D("backgroundTexture").load("textures/grassy2.png"))
+    if (!m_square.texture2D("backgroundTexture").load("textures/grassy2.png"))
         return false;
-    if (!m_triangle.texture2D("rTexture").load("textures/mud.png"))
+    if (!m_square.texture2D("rTexture").load("textures/mud.png"))
         return false;
-    if (!m_triangle.texture2D("gTexture").load("textures/grassFlowers.png"))
+    if (!m_square.texture2D("gTexture").load("textures/grassFlowers.png"))
         return false;
-    if (!m_triangle.texture2D("bTexture").load("textures/path.png"))
+    if (!m_square.texture2D("bTexture").load("textures/path.png"))
         return false;
 
     return true;
 }
 
 //------------------------------------------------------------------------------
-bool MultiTexturedTriangle::onSetup()
+bool MultiTexturedSquare::onSetup()
 {
     // Load vertex and fragment shaders with GLSL code.
     m_vertex_shader.read("01_Core/shaders/03_MultiTexturedTriangle.vs");
@@ -76,57 +76,69 @@ bool MultiTexturedTriangle::onSetup()
     }
 
     // Create VBOs of the VAO.
-    m_prog.bind(m_triangle);
+    m_prog.bind(m_square);
 
-    // Fill VBOs of the VAO: init triangle vertex positions.
-    m_triangle.vector3f("position") =
+    // Fill VBOs of the VAO: init square vertex positions.
+    m_square.vector3f("position") =
     {
-        Vector3f(-1.0f, -1.0f, 0.0f),
+        // Triangle 1
+        Vector3f(1.0f,  1.0f, 0.0f),
         Vector3f(1.0f, -1.0f, 0.0f),
-        Vector3f(0.0f, 1.0f, 0.0f)
+        Vector3f(-1.0f,  1.0f, 0.0f),
+
+        // Triangle 2
+        Vector3f(1.0f, -1.0f, 0.0f),
+        Vector3f(-1.0f, -1.0f, 0.0f),
+        Vector3f(-1.0f,  1.0f, 0.0f),
     };
 
-    // Fill VBOs of the VAO: init triangle texture positions.
-    m_triangle.vector2f("UV") =
+    // Fill VBOs of the VAO: init square texture positions.
+    m_square.vector2f("UV") =
     {
-        Vector2f(0.0f, 0.0f),
+        // Triangle 1
+        Vector2f(1.0f, 1.0f),
         Vector2f(1.0f, 0.0f),
-        Vector2f(0.5f, 1.0f)
+        Vector2f(0.0f, 1.0f),
+
+        // Triangle 2
+        Vector2f(1.0f, 0.0f),
+        Vector2f(0.0f, 0.0f),
+        Vector2f(0.0f, 1.0f),
     };
 
     // Fill Load texture files
     if (!loadTextures())
     {
-        showUnloadedTextures(m_triangle);
+        showUnloadedTextures(m_square);
         return false;
     }
 
     // Helper for debugging states of your program
     debug(m_prog);
-    debug(m_triangle);
+    debug(m_square);
 
     return true;
 }
 
 //------------------------------------------------------------------------------
-bool MultiTexturedTriangle::onPaint()
+bool MultiTexturedSquare::onPaint()
 {
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-    m_prog.draw(m_triangle, Mode::TRIANGLES, 0, 3);
+    m_prog.draw(m_square, Mode::TRIANGLES, 0, 6);
 
     return true;
 }
 
 //------------------------------------------------------------------------------
-void MultiTexturedTriangle::onSetupFailed(std::string const& reason)
+void MultiTexturedSquare::onSetupFailed(std::string const& reason)
 {
     std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
 }
 
 //------------------------------------------------------------------------------
-void MultiTexturedTriangle::onPaintFailed(std::string const& reason)
+void MultiTexturedSquare::onPaintFailed(std::string const& reason)
 {
     std::cerr << "Failure during rendering. Reason: " << reason << std::endl;
 }
