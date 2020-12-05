@@ -417,19 +417,26 @@ private:
         if (unlikely(nullptr == name))
             throw GL::Exception("nullptr passed to uniform");
 
-        if (likely(!bound()))
-        {
-            m_VBOs.add(name, std::make_shared<GLVertexBuffer<T>>
-                       (name, 3_z, BufferUsage::STATIC_DRAW)); // TODO: could be better
-        }
-
         try
         {
+            GLVertexBuffer<T>& vbo = *(m_VBOs.get<std::shared_ptr<GLVertexBuffer<T>>>(name));
             m_need_update = true;// TODO const:  foo = getVBO(()
-            return *(m_VBOs.get<std::shared_ptr<GLVertexBuffer<T>>>(name));
+
+            std::cout << m_name << " getVBO " << name << ": " << &vbo << std::endl;
+            return vbo;
         }
         catch (std::exception&)
         {
+            if (likely(!bound()))
+            {
+                auto vbo = std::make_shared<GLVertexBuffer<T>>(name, 3_z, m_usage);
+                m_VBOs.add(name, vbo);
+                m_listBuffers[name] = vbo;
+
+                std::cout << m_name << " getVBO !bound " << name << ": " << vbo.get() << std::endl;
+                return *vbo;
+            }
+
             throw GL::Exception("GLUniform '" + std::string(name) + "' does not exist");
         }
     }

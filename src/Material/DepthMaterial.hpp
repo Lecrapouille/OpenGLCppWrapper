@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2020 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -18,66 +18,69 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_MATERIALDEPTH_HPP
-#  define OPENGLCPPWRAPPER_MATERIALDEPTH_HPP
+#ifndef DEPTH_MATERIAL_HPP
+#  define DEPTH_MATERIAL_HPP
 
 #  include "Material/Material.hpp"
+#  include "Material/ShaderLib.hpp"
 
-namespace glwrap
-{
-
-DECLARE_CLASS(DepthMaterial);
-
-// *****************************************************************************
-//! \brief
-// *****************************************************************************
-class DepthMaterial : public Material
+class DepthMaterial : public IMaterial
 {
 public:
 
-  DepthMaterial(std::string const& name = "depth")
-    : Material(name, Material::Type::Depth)
-  {
-    createDepthMaterialShader(m_vertexShader, m_fragmentShader);
-    debug();
-    m_program.attachShaders(m_vertexShader, m_fragmentShader);
+    DepthMaterial()
+        : IMaterial("DepthMaterial")
+    {}
 
-    near() = 1.0f;
-    far() = 100.0f;
-    opacity() = 1.0f;
-  }
+    float& near()
+    {
+        return program.scalarf("near");
+    }
 
-  static DepthMaterial_SP create(std::string const& name = "depth")
-  {
-    return std::make_shared<DepthMaterial>(name);
-    /* Not working beacuse we do not want to change a uniform for all materials
-    auto& it = materials.find(type());
-    if (it == materials.end())
-      {
-        DepthMaterial_SP m = std::make_shared<DepthMaterial>();
-        materials[type()] = m;
-        return m;
-      }
-    return it->second;
-    */
-  }
+    float& far()
+    {
+        return program.scalarf("far");
+    }
 
-  inline float& near()
-  {
-    return m_program.scalarf("near");
-  }
+    float& opacity()
+    {
+        return program.scalarf("opacity");
+    }
 
-  inline float& far()
-  {
-    return m_program.scalarf("far");
-  }
+private:
 
-  inline float& opacity()
-  {
-    return m_program.scalarf("opacity");
-  }
+    virtual void createShaders(GLVertexShader& vertexShader,
+                               GLFragmentShader& fragmentShader) override
+    {
+        vertexShader
+            << shaders::common::version()
+            << shaders::common::vertex::params()
+            << "\nvoid main()\n{\n"
+            << "  gl_Position = projectionMatrix"
+            << "              * modelMatrix"
+            << "              * viewMatrix"
+            << "              * vec4(position, 1.0);\n"
+            << "}\n";
+
+        fragmentShader
+            << shaders::common::version()
+            << shaders::common::fragment::params()
+            << "uniform float near;\n"
+            << "uniform float far;\n"
+            << "uniform float opacity;\n"
+            << "\nvoid main()\n{\n"
+            << "  float depth = gl_FragCoord.z / gl_FragCoord.w;\n"
+            << "  float color = 1.0 - smoothstep(near, far, depth);\n"
+            << "  FragColor = vec4(vec3(color), opacity);\n"
+            << "}\n";
+    }
+
+    void init() override
+    {
+        near() = 1.0f;
+        far() = 100.0f;
+        opacity() = 1.0f;
+    }
 };
 
-} // namespace glwrap
-
-#endif // OPENGLCPPWRAPPER_MATERIALDEPTH_HPP
+#endif

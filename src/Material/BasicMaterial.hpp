@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2020 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -18,133 +18,82 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_BASIC_MATERIAL_HPP
-#  define OPENGLCPPWRAPPER_BASIC_MATERIAL_HPP
+#ifndef BASIC_MATERIAL_HPP
+#  define BASIC_MATERIAL_HPP
 
 #  include "Material/Material.hpp"
 
-namespace glwrap
-{
-
-DECLARE_CLASS(BasicMaterial);
-
-// *****************************************************************************
-//! \brief
-// *****************************************************************************
-class BasicMaterial : public Material
+class BasicMaterial: public IMaterial
 {
 public:
 
-  BasicMaterial(std::string const& name = "basic")
-    : BasicMaterial(BasicMaterialConfig(), name)
-  {}
+    struct Config
+    {
+        //! \brief If true then allow to drop fragment colors if lower than a
+        //! given threshold.
+        bool useAlphaTest = false;
+        //! \brief If true then taken into account gamma correction.
+        bool useGammaInput = false;
+        //! \brief If true then taken into account gamma correction.
+        bool useGammaOutput = false;
+        //! \brief If true then apply a texture to the object.
+        bool useMap = false;
+        //! \brief If true then apply a bump mapping texture to the object.
+        bool useBumpMap = false;
+        //! \brief If true then simulate the bright spot of a light that appears
+        //! on shiny objects. Specular highlights are often more inclined to the
+        //! color of the light than the color of the object.
+        bool useSpecularMap = false;
+        //! \brief If true then apply a color to the object.
+        bool useColor = true;
+    };
 
-  BasicMaterial(BasicMaterialConfig const& config, std::string const& name = "basic")
-    : Material(name, Material::Type::Basic),
-      m_config(config)
-  {
-    createBasicMaterialShader(m_vertexShader, m_fragmentShader, config);
-    debug();
-    m_program.attachShaders(m_vertexShader, m_fragmentShader);
+    BasicMaterial(GLProgram& prog, BasicMaterial::Config const& config = BasicMaterial::Config())
+        : IMaterial("BasicMaterial", prog),
+          m_config(config)
+    {
 
-    diffuse() = Color().toVector3f();
-    opacity() = 1.0f;
+    }
 
-    if (m_config.useColor)
-      color() = diffuse();
+    Vector3f& diffuse()
+    {
+        return m_program.vector3f("diffuse");
+    }
 
-    if (m_config.useAlphaTest)
-      alphaTest() = 0.5f;
+    float& opacity()
+    {
+        return m_program.scalarf("opacity");
+    }
 
-    if ((m_config.useMap) || (m_config.useBumpMap) || (m_config.useSpecularMap))
-      offsetTexture() = Vector4f(0.0f, 0.0f, 1.0f, 1.0f);
+    float& alphaTest()
+    {
+        return m_program.scalarf("ALPHATEST");
+    }
 
-    // Material flags useExpFog and useFog are exclusive. Disable useFog
-    if ((m_config.useExpFog) && (m_config.useFog))
-      m_config.useFog = false;
+    Vector4f& offsetTexture()
+    {
+        return m_program.vector4f("offsetRepeat");
+    }
 
-    if (m_config.useFog)
-      {
-        fogColor() = Vector3f(0.5f, 0.5f, 0.5f);
-        fogNear() = 1.0f;
-        fogFar() = 10.0f;
-      }
+    float& fogDensity()
+    {
+        return m_program.scalarf("fogDensity");
+    }
 
-    if (m_config.useExpFog)
-      fogDensity() = 0.00025f;
-  }
+    float& fogNear()
+    {
+        return m_program.scalarf("fogNear");
+    }
 
+    float& fogFar()
+    {
+        return m_program.scalarf("fogFar");
+    }
 
-  static BasicMaterial_SP create(BasicMaterialConfig const config, std::string const& name = "basic")
-  {
-    return glwrap::make_shared<BasicMaterial>(config, name);
-  }
-
-  static BasicMaterial_SP create(std::string const& name = "basic")
-  {
-    return std::make_shared<BasicMaterial>(name);
-    /*auto& it = materials.find(m_specialization);
-    if (it == materials.end())
-      {
-        BasicMaterial_SP m = std::make_shared<BasicMaterial>();
-        materials[m_specialization] = m;
-        return m;
-      }
-    return it->second;
-    */
-  }
-
-  //FIXME "Color3 et m_program.color3 .color4"
-  inline Vector3f& diffuse()
-  {
-    return m_program.vector3f("diffuse");
-  }
-
-  inline float& opacity()
-  {
-    return m_program.scalarf("opacity");
-  }
-
-  inline Vector3f& color() // alias to diffuse() ???
-  {
-    return m_program.vector3f("color");
-  }
-
-  inline float& alphaTest()
-  {
-    return m_program.scalarf("ALPHATEST");
-  }
-
-  inline Vector4f& offsetTexture()
-  {
-    return m_program.vector4f("offsetRepeat");
-  }
-
-  inline float& fogDensity()
-  {
-    return m_program.scalarf("fogDensity");
-  }
-
-  inline float& fogNear()
-  {
-    return m_program.scalarf("fogNear");
-  }
-
-  inline float& fogFar()
-  {
-    return m_program.scalarf("fogFar");
-  }
-
-  inline Vector3f& fogColor()
-  {
-    return m_program.vector3f("fogColor");
-  }
-
-protected:
-
-  BasicMaterialConfig m_config;
+    Vector3f& fogColor()
+    {
+        return m_program.vector3f("fogColor");
+    }
 };
 
-} // namespace glwrap
-
-#endif // OPENGLCPPWRAPPER_BASIC_MATERIAL_HPP
+#endif

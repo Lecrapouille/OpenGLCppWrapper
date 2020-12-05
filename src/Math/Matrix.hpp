@@ -208,6 +208,18 @@ typedef Matrix<float, 2_z, 2_z> Matrix22f;
 typedef Matrix<float, 3_z, 3_z> Matrix33f;
 typedef Matrix<float, 4_z, 4_z> Matrix44f;
 
+#define Identity22i Matrix22i(matrix::Identity)
+#define Identity33i Matrix33i(matrix::Identity)
+#define Identity44i Matrix44i(matrix::Identity)
+
+#define Identity22f Matrix22f(matrix::Identity)
+#define Identity33f Matrix33f(matrix::Identity)
+#define Identity44f Matrix44f(matrix::Identity)
+
+#define Identity22g Matrix22g(matrix::Identity)
+#define Identity33g Matrix33g(matrix::Identity)
+#define Identity44g Matrix44g(matrix::Identity)
+
 // Overloaded math operators
 #  define DEFINE_UNARY_OPERATOR(op)                                     \
   template <typename T, size_t rows, size_t cols>                   \

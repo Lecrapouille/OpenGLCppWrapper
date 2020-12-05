@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2020 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -18,93 +18,55 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_MATERIAL_HPP
-#  define OPENGLCPPWRAPPER_MATERIAL_HPP
+#ifndef MATERIAL_HPP
+#  define MATERIAL_HPP
 
-#  include "OpenGL/Program.hpp"
-#  include "Material/ShaderLib.hpp"
-#  include "Material/Color.hpp"
-#  include "Common/Verbose.hpp"
+#  include "OpenGLCppWrapper/OpenGL.hpp"
 
-namespace glwrap
-{
-
-DECLARE_CLASS(Material);
-
-// *****************************************************************************
-//! \brief
-// *****************************************************************************
-class Material //TBD :public GLObject or Program ???
+class IMaterial
 {
 public:
 
-   // ---------------------------------------------------------------------------
-   //! \brief
-   // ---------------------------------------------------------------------------
-   enum class Type { Depth, Normals, Basic };//, Phong, Particle };
+    IMaterial(std::string const& name)
+        : m_name(name),
+          program("Prog_" + name),
+          m_vert_shader("VS_" + name),
+          m_frag_shader("FS_" + name)
+    {}
 
-  // ---------------------------------------------------------------------------
-  //! \brief
-  // ---------------------------------------------------------------------------
-  Material(std::string const& name, Type const type)
-    : m_name("material_" + name),
-      m_type(type),
-      m_vertexShader("VS_material_" + name),
-      m_fragmentShader("FS_material_" + name),
-      m_program("prog_material_" + name)
-  {
-    DEBUG("Create material '%s'", m_name.c_str());
-  }
+    virtual ~IMaterial() = default;
 
-  virtual ~Material()
-  {
-    ERROR("Destroy material '%s'", m_name.c_str());
-  }
+    bool compile()
+    {
+        createShaders(m_vert_shader, m_frag_shader);
+        if (!program.compile(m_vert_shader, m_frag_shader))
+        {
+            std::cerr << "Failed compiling Material " << name()
+                      << ". Reason was '" << program.strerror()
+                      << "'" << std::endl;
+            return false;
+        }
 
-  inline GLProgram& program()
-  {
-    return m_program;
-  }
+        init();
+        return true;
+    }
 
-  inline std::string const& name() const
-  {
-    return m_name;
-  }
+    std::string const& name() { return m_name; }
 
-  inline Type type() const
-  {
-    return m_type;
-  }
+private:
 
-protected:
+    virtual void init() = 0;
+    virtual void createShaders(GLVertexShader& vert,
+                               GLFragmentShader& frag) = 0;
 
-  void debug()
-  {
-    std::cerr
-      << "Shaders for Material '" << m_name << "'" << std::endl
-      << "---------------------" << std::endl
-      << "Vertex Shader:" << std::endl
-      << m_vertexShader << std::endl
-      << "---------------------" << std::endl
-      << "Fragment Shader:" << std::endl
-      << m_fragmentShader << std::endl
-      << "---------------------" << std::endl;
-  }
+    std::string m_name;
 
-// TODO: flyweigh factory ?
-//protected:
-//
-  //static std::map<std::string, Material_SP> materials;
+public:
 
-protected:
-
-  std::string      m_name;
-  Type             m_type;
-  GLVertexShader   m_vertexShader;
-  GLFragmentShader m_fragmentShader;
-  GLProgram        m_program;
+    // static: inutile d'avoir plusieurs fois la meme chose
+    GLProgram        program;
+    GLVertexShader   m_vert_shader;
+    GLFragmentShader m_frag_shader;
 };
 
-} // namespace glwrap
-
-#endif // OPENGLCPPWRAPPER_MATERIAL_HPP
+#endif
