@@ -30,6 +30,7 @@
 #include "01_Core/04_IndexedQuad.hpp"
 #include "01_Core/05_RotatingQuad.hpp"
 #include "01_Core/06_IndexedSphere.hpp"
+#include "01_Core/07_MultipleObjects.hpp"
 
 #include <iostream>
 #include <stdlib.h>
@@ -58,6 +59,7 @@ static void usage(char *argv[])
     std::cout << "  7: " << IndexedQuad::info() << std::endl;
     std::cout << "  8: " << RotatingQuad::info() << std::endl;
     std::cout << "  9: " << IndexedSphere::info() << std::endl;
+    std::cout << " 10: " << MultipleObjects::info() << std::endl;
 
 
     /*
@@ -140,6 +142,9 @@ int main(int argc, char *argv[])
             break;
         case 9:
             app.create<IndexedSphere>(WIDTH, HEIGHT, "EBO Sphere");
+            break;
+        case 10:
+            app.create<MultipleObjects>(WIDTH, HEIGHT, "Multiple Objects");
             break;
         default:
             std::cerr << "Incorrect example id !" << std::endl;

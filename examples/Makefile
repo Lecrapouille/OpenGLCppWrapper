@@ -29,7 +29,7 @@ M=$(P)/.makefile
 #
 TARGET = OpenGLExamples
 DESCRIPTION = Unit tests for $(PROJECT)
-BUILD_TYPE = release
+BUILD_TYPE = debug
 
 include $(P)/Makefile.common
 
@@ -49,9 +49,7 @@ OBJS_CORE = \
   04_IndexedQuad.o \
   05_RotatingQuad.o \
   06_IndexedSphere.o \
-
-#  06_IndexedSphere.o \
-#  07_MultipleObjects.o \
+  07_MultipleObjects.o \
 
 #  08_TerrainTexture3D.o \
 #  09_SkyBoxTextureCube.o \

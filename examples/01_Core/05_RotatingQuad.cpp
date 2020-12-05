@@ -141,6 +141,9 @@ bool RotatingQuad::onSetup()
     m_prog.matrix44f("view") = matrix::lookAt(Vector3f(3,3,3),
                                               Vector3f(1,1,1),
                                               Vector3f(0,1,0));
+
+    // Helper for debugging states of your program
+    debug(m_vertex_shader, m_fragment_shader);
     debug(m_prog);
     debug(m_box.vao);
 

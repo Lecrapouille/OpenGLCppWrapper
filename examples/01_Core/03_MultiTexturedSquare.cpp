@@ -114,6 +114,7 @@ bool MultiTexturedSquare::onSetup()
     }
 
     // Helper for debugging states of your program
+    debug(m_vertex_shader, m_fragment_shader);
     debug(m_prog);
     debug(m_square);
 

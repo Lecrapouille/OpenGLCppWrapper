@@ -18,29 +18,51 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_04_INDEXED_BOX_HPP
-#  define EXAMPLE_04_INDEXED_BOX_HPP
+#ifndef EXAMPLE_07_MULTIPLE_MOVING_OBJECTS_HPP
+#  define EXAMPLE_07_MULTIPLE_MOVING_OBJECTS_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
-// *****************************************************************************
-//! \brief This example shows how to create a simple textured triangle.
-// *****************************************************************************
-class IndexedQuad: public GLWindow
+//------------------------------------------------------------------------------
+//! \brief This example show differences between drawing multiple VAOs versus
+//! drawing multiple VBOs. This example also shows diiferents way to draw an
+//! object.
+//------------------------------------------------------------------------------
+class MultipleObjects: public GLWindow
 {
 public:
 
-    IndexedQuad(uint32_t const width, uint32_t const height, const char *title);
-    ~IndexedQuad();
+    struct Shape
+    {
+        Shape(std::string const& name)
+            : vao(name)
+        {}
+
+        GLVAO vao;
+
+        //! \brief Allow to specify and combine several transformation
+        //! (translation, scaling, rotation) and get the transformation matrix
+        //! 4x4 to apply to the shader.
+        //! \note you can use the alias Transformable3D
+        Transformable<float, 3U> transform;
+    };
+
+public:
+
+    MultipleObjects(uint32_t const width, uint32_t const height, const char *title);
+    ~MultipleObjects();
 
     static std::string info()
     {
-        return "Render an indexed box";
+        return "Render multiple moving objects";
     }
 
 private:
 
+    bool initCube(Shape& cube, const char* texture_path);
+    bool initFloor(Shape& floor, const char* texture_path);
     virtual bool onSetup() override;
     virtual bool onPaint() override;
     virtual void onSetupFailed(std::string const& reason) override;
@@ -51,12 +73,10 @@ private:
 
     GLVertexShader     m_vertex_shader;
     GLFragmentShader   m_fragment_shader;
+    Shape              m_cube1;
+    Shape              m_cube2;
+    Shape              m_floor;
     GLProgram          m_prog;
-
-    //! \brief Indexed VAO where indices are uint32_t.
-    //! You can use instead GLVAO16 where indices are uint16_t.
-    //! You can use instead GLVAO8 where indices are uint8_t.
-    GLVAO32            m_box;
 };
 
-#endif // EXAMPLE_04_INDEXED_BOX_HPP
+#endif // EXAMPLE_07_MULTIPLE_MOVING_OBJECTS_HPP

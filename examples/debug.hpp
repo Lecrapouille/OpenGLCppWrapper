@@ -28,6 +28,7 @@
 //------------------------------------------------------------------------------
 void debug(GLProgram const& prog);
 void debug(GLVAO const& vao);
+void debug(GLVertexShader const& vertex, GLFragmentShader const& fragment);
 void showUnloadedTextures(GLVAO const& vao);
 
 #endif

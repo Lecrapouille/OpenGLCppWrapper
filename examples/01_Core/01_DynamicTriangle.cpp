@@ -86,6 +86,11 @@ bool DynamicTriangle::onSetup()
     // Fill VBOs of the VAO: init triangle vertex positions.
     m_triangle.vector2f("position") = initial_position;
 
+    // debug
+    debug(m_vertex_shader, m_fragment_shader);
+    debug(m_prog);
+    debug(m_triangle);
+
     return true;
 }
 

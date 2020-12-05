@@ -35,6 +35,17 @@ void showUnloadedTextures(GLVAO const& vao)
 }
 
 //------------------------------------------------------------------------------
+void debug(GLVertexShader const& vertex, GLFragmentShader const& fragment)
+{
+    std::cout << "Shader program " << vertex.name()
+              << ":" << std::endl;
+    std::cout << vertex << std::endl << std::endl;
+    std::cout << "Fragment program " << fragment.name()
+              << ":" << std::endl;
+    std::cout << fragment << std::endl << std::endl;
+}
+
+//------------------------------------------------------------------------------
 void debug(GLProgram const& prog)
 {
     std::cout << "Debug GLProgram " << prog.name() << ":" << std::endl;

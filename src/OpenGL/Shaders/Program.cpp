@@ -213,15 +213,18 @@ bool GLProgram::onSetup()
 //--------------------------------------------------------------------------
 bool GLProgram::needUpdate() const
 {
-    return (m_vao != nullptr) && (m_vao->needUpdate());
+    return true;//(m_vao != nullptr) && (m_vao->needUpdate());
 }
 
 //--------------------------------------------------------------------------
 bool GLProgram::onUpdate()
 {
-    assert(m_vao != nullptr);
+    for (auto const& it: m_uniformLocations)
+    {
+        it.second->begin();
+    }
 
-    if (m_vao->needUpdate())
+    if ((m_vao != nullptr) && (m_vao->needUpdate()))
     {
         m_vao->begin();
 
@@ -237,14 +240,10 @@ bool GLProgram::onUpdate()
             m_vao->m_listTextures[it.first]->begin();
         }
 
+        //m_vao->end();
+
         throw_if_odd_vao();
     }
-
-    // TODO call uniforms ?
-    //for (auto const& it: m_uniformLocations)
-    //{
-    //    it.second->begin();
-    //}
 
     return false;
 }
@@ -252,12 +251,6 @@ bool GLProgram::onUpdate()
 //--------------------------------------------------------------------------
 void GLProgram::onActivate()
 {
-    // FIXME should be on activate
-    for (auto const& it: m_uniformLocations)
-    {
-        it.second->begin();
-    }
-
     glCheck(glUseProgram(m_handle));
 }
 

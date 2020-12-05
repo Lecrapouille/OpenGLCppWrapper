@@ -46,10 +46,8 @@ GLWindow::GLWindow(uint32_t const width, uint32_t const height, const char *titl
 //------------------------------------------------------------------------------
 GLWindow::~GLWindow()
 {
-    GLWindow* previous_context = GLApplication::window();
     GLApplication::makeContextCurrent(this);
     glfwDestroyWindow(m_context);
-    GLApplication::makeContextCurrent(previous_context);
 }
 
 //------------------------------------------------------------------------------

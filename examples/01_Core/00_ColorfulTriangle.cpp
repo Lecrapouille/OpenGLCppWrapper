@@ -92,7 +92,7 @@ bool ColorfulTriangle::onSetup()
                        fragColor = vec4(v2f.color, 1);
                    })GLSL";
 
-    // Shaders can be displayed
+    // Shaders can be displayed with:
     std::cout << "Shader program " << m_vertex_shader.name()
               << ":" << std::endl;
     std::cout << m_vertex_shader << std::endl << std::endl;
@@ -113,6 +113,9 @@ bool ColorfulTriangle::onSetup()
         return false;
     }
 
+    // Helper for debugging states of your program.
+    debug(m_prog);
+
     // To initialize your 3D model, you have to use a VAO and bind it to the
     // desired GLProgram. This last, helped with its internal list of shader
     // attributes and samplers, will populate VBOs and textures inside the VAO
@@ -121,7 +124,6 @@ bool ColorfulTriangle::onSetup()
     m_prog.bind(m_triangle);
 
     // Helper for debugging states of your program.
-    debug(m_prog);
     debug(m_triangle);
 
     // Fill VBOs of the VAO: init triangle vertex positions. Note "position"
