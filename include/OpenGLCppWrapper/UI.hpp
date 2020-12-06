@@ -18,10 +18,10 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_INCLUDE_UI_HPP
-#  define OPENGLCPPWRAPPER_INCLUDE_UI_HPP
+#ifndef OPENGLCPPWRAPPER_INCLUDE_WINDOW_HPP
+#  define OPENGLCPPWRAPPER_INCLUDE_WINDOW_HPP
 
 #  include "UI/DearImGui.hpp"
 #  include "UI/Application.hpp"
 
-#endif // OPENGLCPPWRAPPER_INCLUDE_UI_HPP
+#endif // OPENGLCPPWRAPPER_INCLUDE_WINDOW_HPP

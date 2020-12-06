@@ -70,12 +70,14 @@ class PendingContainer: public Pending
         //! \brief Getter method.
         inline operator T() const
         {
+            std::cout << "Getter" << std::endl;
             return m_ref.get(m_index);
         }
 
         //! \brief Setter method.
         inline T& operator=(T const& other)
         {
+            std::cout << "Setter" << std::endl;
             return m_ref.set(m_index) = other;
         }
 

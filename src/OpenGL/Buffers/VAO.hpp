@@ -30,13 +30,10 @@
 #  include "OpenGL/Variables/Uniform.hpp"
 #  include "OpenGL/Buffers/VBO.hpp"
 #  include "OpenGL/Textures/Textures.hpp"
-//#  include "OpenGL/Program.hpp"
 #  include "Math/Vector.hpp"
 #  include "Common/Any.hpp"
 
 class GLProgram;
-
-// TODO index
 
 class GLVAO: public GLObject<GLenum>
 {

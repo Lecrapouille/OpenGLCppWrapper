@@ -55,6 +55,7 @@ void GLVAO::init(GLProgram& program)
         switch (it.second->size())
         {
         case 1:
+            if (!m_VBOs.has<std::shared_ptr<GLVertexBuffer<float>>>(name))
             {
                 auto ptr = std::make_shared<GLVertexBuffer<float>>(name, m_reserve, m_usage);
                 m_VBOs.add(name, ptr);
@@ -62,6 +63,7 @@ void GLVAO::init(GLProgram& program)
             }
             break;
         case 2:
+            if (!m_VBOs.has<std::shared_ptr<GLVertexBuffer<Vector2f>>>(name))
             {
                 auto ptr = std::make_shared<GLVertexBuffer<Vector2f>>(name, m_reserve, m_usage);
                 m_VBOs.add(name, ptr);
@@ -69,13 +71,16 @@ void GLVAO::init(GLProgram& program)
             }
             break;
         case 3:
+            if (!m_VBOs.has<std::shared_ptr<GLVertexBuffer<Vector3f>>>(name))
             {
                 auto ptr = std::make_shared<GLVertexBuffer<Vector3f>>(name, m_reserve, m_usage);
+                std::cout << "GLVAO::init: " << name << " "  << ptr.get() << std::endl;
                 m_VBOs.add(name, ptr);
                 m_listBuffers[name] = ptr;
             }
             break;
         case 4:
+            if (!m_VBOs.has<std::shared_ptr<GLVertexBuffer<Vector4f>>>(name))
             {
                 auto ptr = std::make_shared<GLVertexBuffer<Vector4f>>(name, m_reserve, m_usage);
                 m_VBOs.add(name, ptr);

@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2020 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -23,6 +23,7 @@
 #include "00_Window/00_BasicWindow.hpp"
 #include "00_Window/01_BasicWindowIOEvents.hpp"
 #include "00_Window/02_BasicWindowImGui.hpp"
+
 #include "01_Core/00_ColorfulTriangle.hpp"
 #include "01_Core/01_DynamicTriangle.hpp"
 #include "01_Core/02_TexturedTriangle.hpp"
@@ -31,6 +32,8 @@
 #include "01_Core/05_RotatingQuad.hpp"
 #include "01_Core/06_IndexedSphere.hpp"
 #include "01_Core/07_MultipleObjects.hpp"
+
+#include "02_Scene/00_DepthMaterial.hpp"
 
 #include <iostream>
 #include <stdlib.h>
@@ -47,11 +50,11 @@ static void usage(char *argv[])
     std::cout << "Usage: " << std::endl
               << "  " << argv[0] << " <integer>" << std::endl;
     std::cout << "Where: <integer> is the example id (0 .. " << MAX_EXAMPLES << "): " << std::endl;
-    std::cout << "Window:" << std::endl;
+    std::cout << "Window API:" << std::endl;
     std::cout << "  0: " << BasicWindow::info() << std::endl;
     std::cout << "  1: " << BasicWindowIOEvents::info() << std::endl;
     std::cout << "  2: " << BasicWindowImGui::info() << std::endl;
-    std::cout << "Core API/OpenGL wrapper:" << std::endl;
+    std::cout << "OpenGL wrapper API:" << std::endl;
     std::cout << "  3: " << ColorfulTriangle::info() << std::endl;
     std::cout << "  4: " << DynamicTriangle::info() << std::endl;
     std::cout << "  5: " << TexturedTriangle::info() << std::endl;
@@ -60,6 +63,8 @@ static void usage(char *argv[])
     std::cout << "  8: " << RotatingQuad::info() << std::endl;
     std::cout << "  9: " << IndexedSphere::info() << std::endl;
     std::cout << " 10: " << MultipleObjects::info() << std::endl;
+    std::cout << "SceneGraph API:" << std::endl;
+    std::cout << " 11: " << ShapeDepthMaterial::info() << std::endl;
 
 
     /*
@@ -145,6 +150,9 @@ int main(int argc, char *argv[])
             break;
         case 10:
             app.create<MultipleObjects>(WIDTH, HEIGHT, "Multiple Objects");
+            break;
+        case 11:
+            app.create<ShapeDepthMaterial>(WIDTH, HEIGHT, "Depth Material");
             break;
         default:
             std::cerr << "Incorrect example id !" << std::endl;

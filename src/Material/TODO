@@ -1,6 +1,0 @@
-CombinedMaterials = set of predefined materials
-CustomMaterial = write your own material
-Material still needs texture while not needed.
-Move VAO->texture() to Material->texture()
-Fog not working
-Not tested MaterialConfig

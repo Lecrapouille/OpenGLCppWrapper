@@ -59,18 +59,9 @@ OBJS_CORE = \
 #  13_ComplexShader.o \
 #  14_BasicLighting.o
 
-
-#  04_TexturedBox.o \
-#  05_MVPTexturedBox.o \
-#  06_MultipleObjects.o \
-
-
-
-
-
-#OBJS_SCENE = \
-#  00_BasicMaterial.o \
-#  01_DepthMaterial.o \
+OBJS_SCENE = \
+  00_DepthMaterial.o \
+#  01_BasicMaterial.o \
 #  02_NormalsMaterial.o \
 #  03_SceneNodes.o \
 #  04_SceneGraph.o \

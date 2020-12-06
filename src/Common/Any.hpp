@@ -207,6 +207,12 @@ public:
         return s_items<T>[this].at(key);
     }
 
+    template <class T>
+    bool has(const char* key)
+    {
+        return s_items<T>[this].find(key) != s_items<T>[this].end();
+    }
+
 private:
 
     //--------------------------------------------------------------------------
