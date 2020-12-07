@@ -56,16 +56,13 @@ public:
         // position so normals ans uv are useless
         // FIXME because of that generate() has to be placed before binding VAO but
         // should be after.
-        geometry.generate(m_vao.vector3f("position"),
-                          m_vao.vector3f("normals"),
-                          m_vao.vector2f("uv"),
-                          m_vao.index());
-
-        std::cout << "Position: " << m_vao.vector3f("position") << std::endl;
-        std::cout << "Normals: " << m_vao.vector3f("normals") << std::endl;
-        std::cout << "UV: " << m_vao.vector2f("uv") << std::endl;
-        std::cout << "index: " << m_vao.index() << std::endl;
-        //exit(0);
+        if (!geometry.generate(m_vao.vector3f("position"),
+                               m_vao.vector3f("normals"),
+                               m_vao.vector2f("uv"),
+                               m_vao.index()))
+        {
+            return false;
+        }
 
         // Populate VBOs in the VAO (note: should be before geometry.generate()
         material.program.bind(m_vao);
@@ -77,7 +74,6 @@ public:
     //--------------------------------------------------------------------------
     void draw()
     {
-        std::cout << m_vao.vector3f("position") << std::endl;
         material.program.draw(m_vao, Mode::TRIANGLES);
     }
 

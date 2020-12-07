@@ -18,11 +18,11 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef TEXTURE_LOADER_HPP
-#  define TEXTURE_LOADER_HPP
+#ifndef TEXTURES_LOADER_HPP
+#  define TEXTURES_LOADER_HPP
 
 #  include "OpenGL/Textures/Texture.hpp"
-#  include <algorithm>
+//#  include <algorithm>
 
 class TextureLoader
 {

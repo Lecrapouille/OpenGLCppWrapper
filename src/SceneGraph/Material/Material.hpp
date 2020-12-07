@@ -52,20 +52,7 @@ public:
     //! (uniform glsl variables) with default values.
     //! \return true if shader have been compiled, else return false.
     //--------------------------------------------------------------------------
-    bool create()
-    {
-        createShaders(m_vert_shader, m_frag_shader);
-        if (!program.compile(m_vert_shader, m_frag_shader))
-        {
-            std::cerr << "Failed compiling Material " << name()
-                      << ". Reason was '" << program.strerror()
-                      << "'" << std::endl;
-            return false;
-        }
-
-        init();
-        return true;
-    }
+    bool create();
 
     //--------------------------------------------------------------------------
     //! \brief Return the material name.

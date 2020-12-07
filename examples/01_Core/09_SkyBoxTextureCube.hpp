@@ -22,9 +22,7 @@
 #  define EXAMPLE_09_SKYBOX_TEXTURECUBE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-
-using namespace glwrap;
-using namespace glwrap::window;
+#  include "../debug.hpp"
 
 //------------------------------------------------------------------------------
 //! \brief this example renders a skybox. A skybox is cubic texture simuling a
@@ -33,30 +31,36 @@ using namespace glwrap::window;
 //! \note This example takes its inspiration from:
 //! https://learnopengl.com/Advanced-OpenGL/Cubemaps
 //------------------------------------------------------------------------------
-class SkyBox: public IGLWindow
+class SkyBox: public GLWindow
 {
 public:
 
-  SkyBox();
-  ~SkyBox();
+    SkyBox();
+    ~SkyBox();
+
+    static std::string info()
+    {
+        return "Render a basic skybox (texture cube)";
+    }
 
 private:
 
-  bool createSkyBox();
-  void drawSkyBox();
-  virtual void onKeyboardEvent() override;
-  virtual void onWindowSizeChanged() override;
-  virtual bool setup() override;
-  virtual bool draw() override;
+    bool createSkyBox();
+    void drawSkyBox();
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
+    virtual void onWindowResized() override;
 
 private:
 
-  GLVertexShader     vs1;
-  GLFragmentShader   fs1;
-  GLVAO              m_skybox;
-  GLProgram          m_prog;
-  Transformable<float, 3U> m_transformable;
-  Vector3f           m_lookat;
+    GLVertexShader     vs1;
+    GLFragmentShader   fs1;
+    GLVAO              m_skybox;
+    GLProgram          m_prog;
+    Transformable<float, 3U> m_transformable;
+    Vector3f           m_lookat;
 };
 
 #endif // EXAMPLE_09_SKYBOX_TEXTURECUBE_HPP

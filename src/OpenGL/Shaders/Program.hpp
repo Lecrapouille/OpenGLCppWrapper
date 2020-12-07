@@ -170,7 +170,7 @@ public:
         vao.index().begin();
         glCheck(glDrawElements(static_cast<GLenum>(mode),
                                static_cast<GLsizei>(vao.index().size()),
-                               vao.index().type(), 0));
+                               vao.index().gltype(), 0));
     }
 
     //--------------------------------------------------------------------------

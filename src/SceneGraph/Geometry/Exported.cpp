@@ -18,33 +18,25 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_02_TEXTURED_TRIANGLE_HPP
-#  define EXAMPLE_02_TEXTURED_TRIANGLE_HPP
+#include "SceneGraph/Geometry/Exported.hpp"
+#include "Loaders/3D/OBJ.hpp"
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Material/Shape.hpp"
-#  include "Material/Tube.hpp"
-#  include "Material/DepthMaterial.hpp"
-
-// *****************************************************************************
-//! \brief This example shows how to create a simple textured triangle.
-// *****************************************************************************
-class Example: public GLWindow
+//--------------------------------------------------------------------------
+    Exported& Exported::select(std::string const& filename)
 {
-public:
+    m_filename = filename;
+    return *this;
+}
 
-    Example(uint32_t const width, uint32_t const height, const char *title);
-    ~Example();
+//--------------------------------------------------------------------------
+bool Exported::doGenerate(GLVertexBuffer<Vector3f>& vertices,
+                          GLVertexBuffer<Vector3f>& normals,
+                          GLVertexBuffer<Vector2f>& uv,
+                          GLIndex32& index)
+{
+    if (m_filename.size() == 0u)
+        return false;
 
-private:
-
-    virtual void onWindowResized() override;
-    virtual bool onSetup() override;
-    virtual void onSetupFailed(std::string const& reason) override;
-    virtual bool onPaint() override;
-    virtual void onPaintFailed(std::string const& reason) override;
-
-    Shape<Tube, DepthMaterial> m_shape;
-};
-
-#endif // EXAMPLE_02_TEXTURED_TRIANGLE_HPP
+    OBJFileLoader loader;
+    return loader.load(m_filename, vertices, normals, uv, index);
+}

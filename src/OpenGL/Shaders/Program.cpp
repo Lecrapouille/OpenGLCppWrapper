@@ -353,7 +353,6 @@ void GLProgram::createAttribute(GLenum type, const char *name, const GLuint prog
         std::string msg = "The type of Attribute for " + std::string(name)
                           + " is not managed";
         throw GL::Exception(msg);
-        break;
     }
 }
 
@@ -462,7 +461,6 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
         std::string msg = "The type of Uniform for " + std::string(name)
                           + " is not managed";
         throw GL::Exception(msg);
-        break;
     }
 }
 

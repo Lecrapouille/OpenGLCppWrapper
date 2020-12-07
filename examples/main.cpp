@@ -33,6 +33,12 @@
 #include "01_Core/06_IndexedSphere.hpp"
 #include "01_Core/07_MultipleObjects.hpp"
 
+/*#include "01_Core/08_TerrainTexture3D.hpp"
+#include "01_Core/09_SkyBoxTextureCube.hpp"
+#include "01_Core/10_PostProdFrameBuffer.hpp"
+#include "01_Core/11_ComplexShader.hpp"
+#include "01_Core/12_BasicLighting.hpp"*/
+
 #include "02_Scene/00_DepthMaterial.hpp"
 
 #include <iostream>
@@ -63,33 +69,13 @@ static void usage(char *argv[])
     std::cout << "  8: " << RotatingQuad::info() << std::endl;
     std::cout << "  9: " << IndexedSphere::info() << std::endl;
     std::cout << " 10: " << MultipleObjects::info() << std::endl;
+    /*std::cout << " 11: " << TerrainTexture3D::info() << std::endl;
+    std::cout << " 12: " << SkyBoxTextureCube::info() << std::endl;
+    std::cout << " 13: " << PostProdFrameBuffer::info() << std::endl;
+    std::cout << " 14: " << ComplexShader::info() << std::endl;
+    std::cout << " 15: " << BasicLighting::info() << std::endl;*/
     std::cout << "SceneGraph API:" << std::endl;
-    std::cout << " 11: " << ShapeDepthMaterial::info() << std::endl;
-
-
-    /*
-    std::cout << "  7: Render a textured box without model-view-project (MVP) transformation." << std::endl;
-    std::cout << "  8: Render a rotating textured Box using MVP transformation." << std::endl;
-    std::cout << "  9: Render multiple objects (VAO vs VBO)." << std::endl;
-    std::cout << " 10: Render a sphere using an indexed VBO." << std::endl;
-    std::cout << " 11: Render a terrain built from a texture 3D." << std::endl;
-    std::cout << " 12: Render a basic skybox (texture cube)." << std::endl;
-    std::cout << " 13: Render a rotating box inside a skybox and controled by a camera." << std::endl;
-    std::cout << " 14: Render a 2D black screen from framebuffer" << std::endl;
-    std::cout << " 15: Render a box an apply a 2D post-production effect." << std::endl;
-    std::cout << " 16: Run a complex shader found on https://shaderfrog.com." << std::endl;
-    std::cout << " 17: Basic light." << std::endl;
-    std::cout << "Scene Graph:" << std::endl;
-    std::cout << " 18: Display a geometry primitive with a basic material." << std::endl;
-    std::cout << " 19: Display a geometry primitive with a depth material." << std::endl;
-    std::cout << " 20: Display a geometry primitive with a normal material." << std::endl;
-    std::cout << " 21: Show different scene nodes." << std::endl;
-    std::cout << " 22: Show different way to create a scene graph." << std::endl;
-    std::cout << " 23: Show a scene graph with fog." << std::endl;
-    std::cout << " 24: Show a tree with alpha testing." << std::endl;
-    std::cout << " 25: Show a scene graph with lights." << std::endl;
-    std::cout << "Examples from ThreeJs:" << std::endl;
-    std::cout << " 26: Cones pointing to a moving cube." << std::endl;*/
+    std::cout << " 16: " << ShapeDepthMaterial::info() << std::endl;
     exit(EXIT_FAILURE);
 }
 
@@ -152,6 +138,21 @@ int main(int argc, char *argv[])
             app.create<MultipleObjects>(WIDTH, HEIGHT, "Multiple Objects");
             break;
         case 11:
+            app.create<ShapeDepthMaterial>(WIDTH, HEIGHT, "Depth Material");
+            break;
+  /*      case 12:
+            app.create<TerrainTexture3D>(WIDTH, HEIGHT, "Terrain 3D Texture");
+            break;
+        case 13:
+            app.create<SkyBoxTextureCube>(WIDTH, HEIGHT, "SkyBox Cube Texture");
+            break;
+        case 14:
+            app.create<PostProdFrameBuffer>(WIDTH, HEIGHT, "PostProd FrameBuffer");
+            break;
+        case 15:
+            app.create<ComplexShaderl>(WIDTH, HEIGHT, "Complex Shader");
+            break;*/
+        case 16:
             app.create<ShapeDepthMaterial>(WIDTH, HEIGHT, "Depth Material");
             break;
         default:

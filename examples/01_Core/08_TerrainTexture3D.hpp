@@ -22,8 +22,7 @@
 #  define EXAMPLE_08_TERRAIN_TEXTURE3D_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-
-using namespace glwrap;
+#  include "../debug.hpp"
 
 //------------------------------------------------------------------------------
 //! \file this example paints a 3d lanscape from a 3d texture.
@@ -33,30 +32,38 @@ using namespace glwrap;
 //! and:
 //! https://www.uni-marburg.de/fb12/en/researchgroups/grafikmultimedia/lectures/graphics
 //------------------------------------------------------------------------------
-class TerrainTexture3D: public IGLWindow
+class TerrainTexture3D: public GLWindow
 {
 public:
 
-  TerrainTexture3D();
-  ~TerrainTexture3D();
+    TerrainTexture3D();
+    ~TerrainTexture3D();
+
+    static std::string info()
+    {
+        return "Render a terrain built from a texture 3D";
+    }
 
 private:
 
-  bool createTerrain();
-  void generateAltitudes(const uint32_t dim);
-  void loadTerrain(const uint32_t dim);
-  virtual void onWindowSizeChanged() override;
-  virtual bool setup() override;
-  virtual bool draw() override;
+    bool createTerrain();
+    void generateAltitudes(const uint32_t dim);
+    void loadTerrain(const uint32_t dim);
+
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
+    virtual void onWindowResized() override;
 
 private:
 
-  GLVertexShader      m_vertex_shader;
-  GLFragmentShader    m_fragment_shader;
-  GLVAO               m_vao;
-  GLProgram           m_prog;
-  std::vector<float>  m_altitudes;
-  uint32_t            m_nbVertices = 0;
+    GLVertexShader      m_vertex_shader;
+    GLFragmentShader    m_fragment_shader;
+    GLVAO               m_vao;
+    GLProgram           m_prog;
+    std::vector<float>  m_altitudes;
+    uint32_t            m_nbVertices = 0;
 };
 
 #endif // EXAMPLE_08_TERRAIN_TEXTURE3D_HPP

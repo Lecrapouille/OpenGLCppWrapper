@@ -4,32 +4,31 @@
 // Data from C++ program
 // ----------------------------------------------------------------------------
 
-// Vertex position
-in vec3 position;
-// Vertex texture coordinates
-in vec2 UV;
-// View-Projection matrices (no Model matrix needed here)
-uniform mat4 projection;
-uniform mat4 view;
+// Texture sampler
+uniform sampler2D screenTexture;
 
 // ----------------------------------------------------------------------------
-// Data to fragment program
+// Data from vertex program
 // ----------------------------------------------------------------------------
-out struct v2f_s
+in struct v2f_s
 {
    // Interpolated fragment texture coordinates
    vec2 UV;
 } v2f;
 
 // ----------------------------------------------------------------------------
-// Vertex program
+// Fragment program output
+// ----------------------------------------------------------------------------
+out vec4 fragColor;
+
+// ----------------------------------------------------------------------------
+// Fragment program
 // ----------------------------------------------------------------------------
 void main()
 {
-    // To fragment program
-    v2f.UV = UV;
-
-    // Final position
-    vec4 pos = projection * view * vec4(aPos, 1.0);
-    gl_Position = pos.xyww;
+    // Final color
+    fragColor = vec4(texture(screenTexture, v2f.UV +
+                             0.005 * vec2(sin(time+1024.0*TexCoords.x),
+                             cos(time+768.0*TexCoords.y))
+                            ).xyz, 1.0);
 }

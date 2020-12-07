@@ -37,6 +37,8 @@ class GLElementBuffer: public GLBuffer<T>
 {
 public:
 
+    using Type = T;
+
     //--------------------------------------------------------------------------
     //! \brief Constructor with the object name
     //--------------------------------------------------------------------------
@@ -70,17 +72,17 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    inline GLenum type() const;
+    inline GLenum gltype() const;
 };
 
 template<>
-inline GLenum GLElementBuffer<uint32_t>::type() const { return GL_UNSIGNED_INT; }
+inline GLenum GLElementBuffer<uint32_t>::gltype() const { return GL_UNSIGNED_INT; }
 
 template<>
-inline GLenum GLElementBuffer<uint16_t>::type() const { return GL_UNSIGNED_SHORT; }
+inline GLenum GLElementBuffer<uint16_t>::gltype() const { return GL_UNSIGNED_SHORT; }
 
 template<>
-inline GLenum GLElementBuffer<uint8_t>::type() const { return GL_UNSIGNED_BYTE; }
+inline GLenum GLElementBuffer<uint8_t>::gltype() const { return GL_UNSIGNED_BYTE; }
 
 // *****************************************************************************
 //! \brief

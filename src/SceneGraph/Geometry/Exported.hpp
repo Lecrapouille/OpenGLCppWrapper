@@ -18,42 +18,36 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_06_MULTIPLE_OBJECTS_HPP
-#  define EXAMPLE_06_MULTIPLE_OBJECTS_HPP
+#ifndef EXPORTED_GEO_HPP
+#  define EXPORTED_GEO_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-
-using namespace glwrap;
+#  include "SceneGraph/Geometry/Geometry.hpp"
 
 // *****************************************************************************
-//! \brief This example show differences between drawing multiple VAOs versus
-//! drawing multiple VBOs. This example also shows diiferents way to draw an
-//! object.
+//! \brief Generate the geomatry of a plane.
 // *****************************************************************************
-class MultipleObjects: public IGLWindow
+class Exported: public Geometry
 {
 public:
 
-  MultipleObjects();
-  ~MultipleObjects();
+    //--------------------------------------------------------------------------
+    //! \brief Select the loader
+    //--------------------------------------------------------------------------
+    Exported& select(std::string const& filename);
 
 private:
 
-  bool cubeSetup(GLVAO& cube, const char* texturepath);
-  bool floorSetup();
-  virtual void onWindowSizeChanged() override;
-  virtual bool setup() override;
-  virtual bool draw() override;
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    virtual bool doGenerate(GLVertexBuffer<Vector3f>& vertices,
+                            GLVertexBuffer<Vector3f>& normals,
+                            GLVertexBuffer<Vector2f>& uv,
+                            GLIndex32& index) override;
 
 private:
 
-  GLVertexShader     m_vertex_shader;
-  GLFragmentShader   m_fragment_shader;
-  GLVAO              m_cube1;
-  GLVAO              m_cube2;
-  GLVAO              m_floor;
-  GLProgram          m_prog;
-  Transformable<float, 3U> m_transformable;
+    std::string m_filename;
 };
 
-#endif // EXAMPLE_06_MULTIPLE_OBJECTS_HPP
+#endif

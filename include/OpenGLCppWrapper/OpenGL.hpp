@@ -22,6 +22,6 @@
 #  define OPENGLCPPWRAPPER_INCLUDE_OPENGL_HPP
 
 #  include "OpenGL/Shaders/Program.hpp"
-//#  include "OpenGL/FrameBuffers.hpp"
+#  include "OpenGL/Buffers/FrameBuffers.hpp"
 
 #endif // OPENGLCPPWRAPPER_INCLUDE_OPENGL_HPP

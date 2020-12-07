@@ -28,7 +28,7 @@ IndexedSphere::IndexedSphere(uint32_t const width, uint32_t const height,
       m_sphere("sphere"),
       m_prog("prog")
 {
-    std::cout << "Hello IndexedSphere" << std::endl;
+    std::cout << "Hello IndexedSphere: " << info() << std::endl;
 }
 
 //------------------------------------------------------------------------------

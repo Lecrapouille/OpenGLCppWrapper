@@ -18,41 +18,43 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_07_INDEXED_VBO_HPP
-#  define EXAMPLE_07_INDEXED_VBO_HPP
+#ifndef EXAMPLE_13_COMPLEX_SHADER_HPP
+#define EXAMPLE_13_COMPLEX_SHADER_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "../debug.hpp"
 
-//------------------------------------------------------------------------------
-//! \file this example paints a sphere made of points. For drawing the VAO we
-//! pass an index of vertices to OpenGL.
-//!
-//! \note This example takes its inspiration from
-//! https://github.com/invor/simplestGraphRendering
-//------------------------------------------------------------------------------
-using namespace glwrap;
-
-class IndexedVBO: public IGLWindow
+// *****************************************************************************
+//! \brief A complex shader that I found on https://shaderfrog.com/ and wanted
+//! to check if my API was able to make it run.
+// *****************************************************************************
+class ComplexShader: public GLWindow
 {
 public:
 
-  IndexedVBO();
-  ~IndexedVBO();
+    ComplexShader();
+    ~ComplexShader();
+
+    static std::string info()
+    {
+        return "Run a complex shader found on https://shaderfrog.com";
+    }
 
 private:
 
-  void createSphere();
-  virtual void onWindowSizeChanged() override;
-  virtual bool setup() override;
-  virtual bool draw() override;
+    void settings();
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
+    virtual void onWindowResized() override;
 
 private:
 
-  GLVertexShader     m_vertex_shader;
-  GLFragmentShader   m_fragment_shader;
-  GLVAO              m_sphere;
-  GLProgram          m_prog;
-  Transformable<float, 3U> m_transformable;
+    GLVertexShader     m_vertex_shader;
+    GLFragmentShader   m_fragment_shader;
+    GLVAO              m_quad;
+    GLProgram          m_prog;
 };
 
-#endif // EXAMPLE_07_INDEXED_VBO_HPP
+#endif

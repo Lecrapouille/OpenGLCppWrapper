@@ -419,7 +419,6 @@ private:
             GLVertexBuffer<T>& vbo = *(m_VBOs.get<std::shared_ptr<GLVertexBuffer<T>>>(name));
             m_need_update = true;// TODO const:  foo = getVBO(()
 
-            std::cout << m_name << " getVBO " << name << ": " << &vbo << std::endl;
             return vbo;
         }
         catch (std::exception&)
@@ -430,7 +429,6 @@ private:
                 m_VBOs.add(name, vbo);
                 m_listBuffers[name] = vbo;
 
-                std::cout << m_name << " getVBO !bound " << name << ": " << vbo.get() << std::endl;
                 return *vbo;
             }
 

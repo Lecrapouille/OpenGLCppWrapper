@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2020 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -18,37 +18,20 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_13_COMPLEX_SHADER_HPP
-#define EXAMPLE_13_COMPLEX_SHADER_HPP
+#ifndef OBJ_LOADER__HPP
+#  define OBJ_LOADER__HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "Loaders/3DLoader.hpp"
 
-using namespace glwrap;
-
-// *****************************************************************************
-//! \brief A complex shader that I found on https://shaderfrog.com/ and wanted
-//! to check if my API was able to make it run.
-// *****************************************************************************
-class ComplexShader: public IGLWindow
+class OBJFileLoader: public ShapeLoader
 {
 public:
 
-  ComplexShader();
-  ~ComplexShader();
-
-private:
-
-  void settings();
-  virtual void onWindowSizeChanged() override;
-  virtual bool setup() override;
-  virtual bool draw() override;
-
-private:
-
-  GLVertexShader     m_vertex_shader;
-  GLFragmentShader   m_fragment_shader;
-  GLVAO              m_quad;
-  GLProgram          m_prog;
+    virtual bool load(std::string const& fileName,
+                      GLVertexBuffer<Vector3f>& vertices,
+                      GLVertexBuffer<Vector3f>& normals,
+                      GLVertexBuffer<Vector2f>& uv,
+                      GLIndex32& indices) override;
 };
 
 #endif

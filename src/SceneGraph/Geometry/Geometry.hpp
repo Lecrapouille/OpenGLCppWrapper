@@ -21,7 +21,9 @@
 #ifndef GEOMETRY_HPP
 #  define GEOMETRY_HPP
 
+#  include "OpenGL/Buffers/VBO.hpp"
 #  include "OpenGL/Buffers/EBO.hpp"
+#  include "Math/Vector.hpp"
 
 // *****************************************************************************
 //! \brief Base class for generating vertex positions, normals, texture
@@ -34,8 +36,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Needed because of virtual methods
     //--------------------------------------------------------------------------
-    virtual ~Geometry()
-    {}
+    virtual ~Geometry() = default;
 
     //--------------------------------------------------------------------------
     //! \brief Entry point method for generating the geometry of the shape.
@@ -44,14 +45,7 @@ public:
     bool generate(GLVertexBuffer<Vector3f>& vertices,
                   GLVertexBuffer<Vector3f>& normals,
                   GLVertexBuffer<Vector2f>& uv,
-                  GLIndex32&                index)
-    {
-        m_vertices = &vertices;
-        m_normals = &normals;
-        m_uv = &uv;
-        m_index = &index;
-        return doGenerate(vertices, normals, uv, index);
-    }
+                  GLIndex32&                index);
 
     //--------------------------------------------------------------------------
     //! \brief Return the VBO holding vertex positions.

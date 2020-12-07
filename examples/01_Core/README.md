@@ -17,7 +17,7 @@ Example 01:
 ===========
 
 Following the previous example, this example show you that you can modify vertices of your
-triangles from CPU side and modified vertices are transfered to GPU. 
+triangles from CPU side and modified vertices are transfered to GPU.
 
 Example 02:
 ===========
@@ -71,9 +71,9 @@ Show post production effect using a framebuffer.
 Example 11:
 ===========
 
-Show basic light implementation
+Show a complex shader example.
 
 Example 12:
 ===========
 
-Show a complex shader example.
+Show basic light implementation

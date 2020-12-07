@@ -102,7 +102,7 @@ public:
     //--------------------------------------------------------------------------
     void usage(BufferUsage const type)
     {
-        m_usage = static_cast<GLenum>(usage);
+        m_usage = static_cast<GLenum>(type);
     }
 
 private:

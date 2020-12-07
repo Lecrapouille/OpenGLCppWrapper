@@ -23,7 +23,7 @@
 #
 TARGET = $(PROJECT)
 DESCRIPTION = C++ Wrapper allowing to write OpenGL Core applications in few lines
-BUILD_TYPE = release
+BUILD_TYPE = debug
 
 ###################################################
 # Location of the project directory and Makefiles
@@ -48,11 +48,14 @@ OBJ_OPENGL_BUFFERS = EBO.o VBO.o VAO.o
 OBJ_OPENGL_TEXTURES += Textures.o
 OBJ_OPENGL_SHADERS = Shader.o Program.o
 OBJ_GUI = Window.o Application.o DearImGui.o
+OBJ_MATERIALS = Material.o DepthMaterial.o
+OBJ_GEOMETRIES = Geometry.o Exported.o Plane.o Tube.o
+OBJ_LOADERS = OBJ.o SOIL.o
 
-OBJS += $(THIRDPART_OBJS)
-OBJS += $(OBJ_COMMON) $(OBJ_OPENGL_CONTEXT) $(OBJ_OPENGL_VARIABLES)
+OBJS += $(THIRDPART_OBJS) $(OBJ_COMMON)
+OBJS += $(OBJ_OPENGL_CONTEXT) $(OBJ_OPENGL_VARIABLES)
 OBJS += $(OBJ_OPENGL_BUFFERS) $(OBJ_OPENGL_TEXTURES) $(OBJ_OPENGL_SHADERS)
-OBJS += $(OBJ_GUI)
+OBJS += $(OBJ_GUI) $(OBJ_LOADERS) $(OBJ_MATERIALS) $(OBJ_GEOMETRIES)
 
 ###################################################
 # Compile static and shared libraries

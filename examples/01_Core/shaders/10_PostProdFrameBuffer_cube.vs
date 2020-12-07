@@ -8,9 +8,10 @@
 in vec3 position;
 // Vertex texture coordinates
 in vec2 UV;
-// View-Projection matrices (no Model matrix needed here)
-uniform mat4 projection;
+// Model-View-Projection matrices
+uniform mat4 model;
 uniform mat4 view;
+uniform mat4 projection;
 
 // ----------------------------------------------------------------------------
 // Data to fragment program
@@ -30,6 +31,5 @@ void main()
     v2f.UV = UV;
 
     // Final position
-    vec4 pos = projection * view * vec4(aPos, 1.0);
-    gl_Position = pos.xyww;
+    gl_Position = projection * view * model * vec4(position, 1.0);
 }

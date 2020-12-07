@@ -18,45 +18,64 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_14_BASIC_LIGHTING_HPP
-#define EXAMPLE_14_BASIC_LIGHTING_HPP
+#ifndef EXAMPLE_12_BASIC_LIGHTING_HPP
+#  define EXAMPLE_12_BASIC_LIGHTING_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-
-using namespace glwrap;
-using namespace glwrap::window;
 
 // *****************************************************************************
 //! \brief This example shows how to create a basic light.
 // *****************************************************************************
-class BasicLighting: public IGLWindow
+class BasicLighting: public GLWindow
 {
 public:
 
-  BasicLighting();
-  ~BasicLighting();
+    BasicLighting(uint32_t const width, uint32_t const height, const char *title);
+    ~BasicLighting();
+
+    static std::string info()
+    {
+        return "Basic lighting";
+    }
 
 private:
 
-  bool createCube();
-  bool createLamp();
-  void changeLightProperties(float const time);
-  virtual void onMouseScrolled(Mouse const& mouse) override;
-  virtual void onMouseMoved(Mouse const& mouse) override;
-  virtual void onKeyboardEvent() override;
-  virtual void onWindowSizeChanged() override;
-  virtual bool setup() override;
-  virtual bool draw() override;
+    bool createCube();
+    bool createLamp();
+    void changeLightProperties(float const time);
+
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
+    virtual void onWindowResized() override;
 
 private:
 
-  GLVertexShader     m_vs1, m_vs2;
-  GLFragmentShader   m_fs1, m_fs2;
-  GLVAO              m_cube;
-  GLVAO              m_lamp;
-  GLProgram          m_prog_cube;
-  GLProgram          m_prog_lamp;
-  CameraController   m_cameraController;
+    // Quick and dirty camera
+    class Camera
+    {
+    public:
+
+        Camera()
+        {
+            model = Identity44f;
+            view = ;
+            projection = ;
+        }
+
+        Matrix44f model;
+        Matrix44f view;
+        Matrix44f projection;
+    };
+
+    GLVertexShader     m_vs1, m_vs2;
+    GLFragmentShader   m_fs1, m_fs2;
+    GLVAO              m_cube;
+    GLVAO              m_lamp;
+    GLProgram          m_prog_cube;
+    GLProgram          m_prog_lamp;
+    Camera             m_camera;
 };
 
-#endif // EXAMPLE_14_BASIC_LIGHTING_HPP
+#endif // EXAMPLE_12_BASIC_LIGHTING_HPP

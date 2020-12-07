@@ -18,40 +18,21 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef DEPTH_MATERIAL_HPP
-#  define DEPTH_MATERIAL_HPP
+#ifndef SHAPE_LOADER_HPP
+#  define SHAPE_LOADER_HPP
 
-#  include "SceneGraph/Material/Material.hpp"
+#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
-class DepthMaterial : public Material
+class ShapeLoader
 {
 public:
 
-    DepthMaterial()
-        : Material("DepthMaterial")
-    {}
-
-    float& near()
-    {
-        return program.scalarf("near");
-    }
-
-    float& far()
-    {
-        return program.scalarf("far");
-    }
-
-    float& opacity()
-    {
-        return program.scalarf("opacity");
-    }
-
-private:
-
-    virtual void createShaders(GLVertexShader& vertexShader,
-                               GLFragmentShader& fragmentShader) override;
-
-    virtual void init() override;
+    virtual ~ShapeLoader() = default;
+    virtual bool load(std::string const& fileName,
+                      GLVertexBuffer<Vector3f>& vertices,
+                      GLVertexBuffer<Vector3f>& normals,
+                      GLVertexBuffer<Vector2f>& uv,
+                      GLIndex32& indices) = 0;
 };
 
 #endif

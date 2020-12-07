@@ -74,7 +74,6 @@ void GLVAO::init(GLProgram& program)
             if (!m_VBOs.has<std::shared_ptr<GLVertexBuffer<Vector3f>>>(name))
             {
                 auto ptr = std::make_shared<GLVertexBuffer<Vector3f>>(name, m_reserve, m_usage);
-                std::cout << "GLVAO::init: " << name << " "  << ptr.get() << std::endl;
                 m_VBOs.add(name, ptr);
                 m_listBuffers[name] = ptr;
             }
@@ -89,7 +88,6 @@ void GLVAO::init(GLProgram& program)
             break;
         default:
             throw GL::Exception("Attribute with dimension > 4 is not managed");
-            break;
         }
     }
 
@@ -132,7 +130,6 @@ void GLVAO::init(GLProgram& program)
         default:
             throw GL::Exception("This kind of sampler is not managed: "
                                 + std::to_string(gltype));
-            break;
         }
     }
 

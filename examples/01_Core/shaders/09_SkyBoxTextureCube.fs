@@ -1,11 +1,31 @@
 #version 330 core
 
-in vec3 TexCoords;
-out vec4 FragColor;
+// ----------------------------------------------------------------------------
+// Data from C++ program
+// ----------------------------------------------------------------------------
 
-uniform samplerCube skybox;
+// Texture sampler
+uniform samplerCube texID;
 
+// ----------------------------------------------------------------------------
+// Data from vertex program
+// ----------------------------------------------------------------------------
+in struct v2f_s
+{
+   // Interpolated fragment texture coordinates
+   vec2 UV;
+} v2f;
+
+// ----------------------------------------------------------------------------
+// Fragment program output
+// ----------------------------------------------------------------------------
+out vec4 fragColor;
+
+// ----------------------------------------------------------------------------
+// Fragment program
+// ----------------------------------------------------------------------------
 void main()
 {
-    FragColor = texture(skybox, TexCoords);
+    // Final color
+    fragColor = texture(texID, v2f.UV);
 }

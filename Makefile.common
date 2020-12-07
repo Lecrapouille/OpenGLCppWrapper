@@ -59,7 +59,7 @@ endif
 # Inform Makefile where to find header files
 #
 INCLUDES += -I$(P)/include -I$(P)/. -I$(P)/src -I$(THIRDPART)
-INCLUDES += -I$(THIRDPART)/imgui
+INCLUDES += -I$(THIRDPART)/imgui -I$(P)/src/Loaders/3D
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
@@ -68,5 +68,6 @@ VPATH += $(P)/src $(P)/src/Common $(P)/src/Math
 VPATH += $(P)/src/OpenGL $(P)/src/OpenGL/Buffers
 VPATH += $(P)/src/OpenGL/Context $(P)/src/OpenGL/Shaders
 VPATH += $(P)/src/OpenGL/Textures $(P)/src/OpenGL/Variables
-VPATH += $(P)/src/UI
+VPATH += $(P)/src/UI $(P)/src/Loaders/Textures $(P)/src/Loaders/3D
+VPATH += $(P)/src/SceneGraph/Material $(P)/src/SceneGraph/Geometry
 VPATH += $(THIRDPART) $(THIRDPART)/imgui $(THIRDPART)/SOIL/obj
