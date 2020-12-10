@@ -51,8 +51,8 @@ OBJS_CORE = \
   06_IndexedSphere.o \
   07_MultipleObjects.o \
   08_TerrainTexture3D.o \
+  09_SkyBoxTextureCube.o \
 
-#  09_SkyBoxTextureCube.o \
 #  10_SkyBoxShapeCamera.o \
 #  11_SimpleFrameBuffer.o \
 #  12_PostProdFrameBuffer.o \

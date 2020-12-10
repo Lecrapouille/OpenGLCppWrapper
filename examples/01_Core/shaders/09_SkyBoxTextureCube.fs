@@ -5,7 +5,7 @@
 // ----------------------------------------------------------------------------
 
 // Texture sampler
-uniform samplerCube texID;
+uniform samplerCube skybox;
 
 // ----------------------------------------------------------------------------
 // Data from vertex program
@@ -13,7 +13,7 @@ uniform samplerCube texID;
 in struct v2f_s
 {
    // Interpolated fragment texture coordinates
-   vec2 UV;
+   vec3 UV;
 } v2f;
 
 // ----------------------------------------------------------------------------
@@ -27,5 +27,5 @@ out vec4 fragColor;
 void main()
 {
     // Final color
-    fragColor = texture(texID, v2f.UV);
+    fragColor = texture(skybox, v2f.UV);
 }

@@ -22,23 +22,22 @@
 #include <iostream>
 
 //------------------------------------------------------------------------------
-SkyBox::SkyBox(uint32_t const width, uint32_t const height,
-               const char *title)
+SkyBoxTextureCube::SkyBoxTextureCube(uint32_t const width, uint32_t const height, const char *title)
     : GLWindow(width, height, title),
-      m_skybox("SkyBox"),
+      m_skybox("SkyBoxTextureCube"),
       m_prog("progSkyBox")
 {
-    std::cout << "Hello SkyBox: " << info() << std::endl;
+    std::cout << "Hello SkyBoxTextureCube: " << info() << std::endl;
 }
 
 //------------------------------------------------------------------------------
-SkyBox::~SkyBox()
+SkyBoxTextureCube::~SkyBoxTextureCube()
 {
-    std::cout << "Hello SkyBox: " << info() << std::endl;
+    std::cout << "Hello SkyBoxTextureCube: " << info() << std::endl;
 }
 
 //------------------------------------------------------------------------------
-void SkyBox::onWindowSizeChanged()
+void SkyBoxTextureCube::onWindowResized()
 {
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
@@ -46,33 +45,18 @@ void SkyBox::onWindowSizeChanged()
             matrix::perspective(maths::toRadian(60.0f),
                                 width<float>() / height<float>(),
                                 0.1f,
-                                10.0f);
-}
-
-// -----------------------------------------------------------------------------
-//! \brief Keyboard event
-// -----------------------------------------------------------------------------
-void SkyBox::onKeyboardEvent()
-{
-    if (isKeyDown(GLFW_KEY_W) || isKeyDown(GLFW_KEY_UP))
-        m_lookat += Vector3f(0.0f, 0.0f, 0.1f);
-    if (isKeyDown(GLFW_KEY_S) || isKeyDown(GLFW_KEY_DOWN))
-        m_lookat -= Vector3f(0.0f, 0.0f, 0.1f);
-    if (isKeyDown(GLFW_KEY_A) || isKeyDown(GLFW_KEY_LEFT))
-        m_lookat += Vector3f(0.1f, 0.0f, 0.0f);
-    if (isKeyDown(GLFW_KEY_D) || isKeyDown(GLFW_KEY_RIGHT))
-        m_lookat -= Vector3f(0.1f, 0.0f, 0.0f);
+                                100.0f);
 }
 
 //------------------------------------------------------------------------------
 //! \brief Create a skybox.
 //------------------------------------------------------------------------------
-bool SkyBox::createSkyBox()
+bool SkyBoxTextureCube::createSkyBox()
 {
     vs1.read("01_Core/shaders/09_SkyBoxTextureCube.vs");
     fs1.read("01_Core/shaders/09_SkyBoxTextureCube.fs");
 
-    if (!m_prog.attachShaders(vs1, fs1).compile())
+    if (!m_prog.compile(vs1, fs1))
     {
         std::cerr << "Failed compiling OpenGL program. Reason was '"
                   << m_prog.strerror() << "'" << std::endl;
@@ -81,18 +65,18 @@ bool SkyBox::createSkyBox()
 
     m_prog.bind(m_skybox);
 
-    m_skybox.vector3f("aPos") =
+    m_skybox.vector3f("position") =
     {
 #include "geometry/cube_position.txt"
     };
 
     // Add 6 textures to the sky box
-    if (!m_skybox.textureCube("skybox").load(CubeMap::POSITIVE_X, "textures/right.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(CubeMap::NEGATIVE_X, "textures/left.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(CubeMap::POSITIVE_Y, "textures/top.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(CubeMap::NEGATIVE_Y, "textures/bottom.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(CubeMap::POSITIVE_Z, "textures/front.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(CubeMap::NEGATIVE_Z, "textures/back.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_X, "textures/right.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_X, "textures/left.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_Y, "textures/top.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_Y, "textures/bottom.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_Z, "textures/front.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_Z, "textures/back.jpg")) return false;
 
     return true;
 }
@@ -100,33 +84,26 @@ bool SkyBox::createSkyBox()
 //------------------------------------------------------------------------------
 //! \brief Init your scene.
 //------------------------------------------------------------------------------
-bool SkyBox::onSetup()
+bool SkyBoxTextureCube::onSetup()
 {
-    enableCallbacks(window::Event::Keyboard);
-
     // Enable some OpenGL states
     glCheck(glEnable(GL_DEPTH_TEST));
     glCheck(glDepthFunc(GL_LESS));
     glCheck(glDisable(GL_BLEND));
     glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-    // Place a camera
-    m_lookat = Vector3f(0,0,0);
-    m_prog.matrix44f("model") = m_transformable.transform();
-    m_prog.matrix44f("view") =
-            matrix::lookAt(Vector3f(3,3,3), m_lookat, Vector3f(0,1,0));
-
     return createSkyBox();
 }
 
 // -----------------------------------------------------------------------------
-//! \brief Draw skybox. Should be draw as last.
+//! \brief Draw skybox. The skybox should be the last to be drawn for depth
+//! testing optimizations.
 // -----------------------------------------------------------------------------
-void SkyBox::drawSkyBox()
+void SkyBoxTextureCube::drawSkyBox()
 {
+    static Vector3f lookat = Vector3f(1,8,8);
     // Remove translation from the view matrix
-    Matrix44f view =
-            matrix::lookAt(Vector3f(3,3,3), m_lookat, Vector3f(0,1,0));
+    Matrix44f view = matrix::lookAt(Vector3f(10,10,10), lookat, Vector3f(0,1,0));
     m_prog.matrix44f("view") = Matrix44f(Matrix33f(view));
 
     // Change depth function so depth test passes when values are equal
@@ -136,9 +113,7 @@ void SkyBox::drawSkyBox()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Paint our scene.
-//------------------------------------------------------------------------------
-bool SkyBox::onPaint()
+bool SkyBoxTextureCube::onPaint()
 {
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
@@ -149,13 +124,13 @@ bool SkyBox::onPaint()
 }
 
 //------------------------------------------------------------------------------
-void SkyBox::onSetupFailed(std::string const& reason)
+void SkyBoxTextureCube::onSetupFailed(std::string const& reason)
 {
     std::cerr << "Failure during the onSetup. Reason: " << reason << std::endl;
 }
 
 //------------------------------------------------------------------------------
-void SkyBox::onPaintFailed(std::string const& reason)
+void SkyBoxTextureCube::onPaintFailed(std::string const& reason)
 {
     std::cerr << "Failure during rendering. Reason: " << reason << std::endl;
 }

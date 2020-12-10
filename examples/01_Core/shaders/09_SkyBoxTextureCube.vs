@@ -6,8 +6,6 @@
 
 // Vertex position
 in vec3 position;
-// Vertex texture coordinates
-in vec2 UV;
 // View-Projection matrices (no Model matrix needed here)
 uniform mat4 projection;
 uniform mat4 view;
@@ -18,7 +16,7 @@ uniform mat4 view;
 out struct v2f_s
 {
    // Interpolated fragment texture coordinates
-   vec2 UV;
+   vec3 UV;
 } v2f;
 
 // ----------------------------------------------------------------------------
@@ -27,9 +25,9 @@ out struct v2f_s
 void main()
 {
     // To fragment program
-    v2f.UV = UV;
+    v2f.UV = position;
 
     // Final position
-    vec4 pos = projection * view * vec4(aPos, 1.0);
+    vec4 pos = projection * view * vec4(position, 1.0);
     gl_Position = pos.xyww;
 }

@@ -22,6 +22,7 @@
 #  define EXAMPLE_09_SKYBOX_TEXTURECUBE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------
@@ -31,12 +32,12 @@
 //! \note This example takes its inspiration from:
 //! https://learnopengl.com/Advanced-OpenGL/Cubemaps
 //------------------------------------------------------------------------------
-class SkyBox: public GLWindow
+class SkyBoxTextureCube: public GLWindow
 {
 public:
 
-    SkyBox();
-    ~SkyBox();
+    SkyBoxTextureCube(uint32_t const width, uint32_t const height, const char *title);
+    ~SkyBoxTextureCube();
 
     static std::string info()
     {
@@ -59,8 +60,6 @@ private:
     GLFragmentShader   fs1;
     GLVAO              m_skybox;
     GLProgram          m_prog;
-    Transformable<float, 3U> m_transformable;
-    Vector3f           m_lookat;
 };
 
 #endif // EXAMPLE_09_SKYBOX_TEXTURECUBE_HPP
