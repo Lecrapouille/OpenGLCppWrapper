@@ -19,7 +19,7 @@ uniform mat4 projection;
 out struct v2f_s
 {
    // Interpolated fragment texture coordinates
-   vec2 UV;
+   vec3 UV;
 } v2f;
 
 // ----------------------------------------------------------------------------

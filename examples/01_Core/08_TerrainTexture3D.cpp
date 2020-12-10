@@ -58,7 +58,7 @@ bool TerrainTexture3D::onSetup()
 
     m_vertex_shader.read("01_Core/shaders/08_TerrainTexture3D.vs");
     m_fragment_shader.read("01_Core/shaders/08_TerrainTexture3D.fs");
-    if (!m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
+    if (!m_prog.compile(m_vertex_shader, m_fragment_shader))
     {
         std::cerr << "failed compiling OpenGL program. Reason was '"
                   << m_prog.strerror() << "'" << std::endl;
@@ -96,7 +96,7 @@ bool TerrainTexture3D::createTerrain()
     m_prog.bind(m_vao);
 
     // Load all 2D textures into a single big 3D texture
-    m_vao.texture3D("tex3d").wrap(TextureWrap::CLAMP_TO_BORDER);
+    m_vao.texture3D("tex3d").wrap(GLTexture::Wrap::CLAMP_TO_BORDER);
     if (!m_vao.texture3D("tex3d").load(
         {
             "textures/deep_water.png",

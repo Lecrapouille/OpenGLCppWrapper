@@ -30,10 +30,10 @@ public:
 
     virtual bool setPixelFormat(GLTexture::PixelFormat const cpuformat) = 0;
 
-    virtual bool load(const char *const filename, GLTexture::Buffer& buffer,
+    virtual bool load(std::string const& filename, GLTexture::Buffer& buffer,
                       size_t& width, size_t& height) = 0;
 
-    virtual bool save(const char *const filename, GLTexture::Buffer const& buffer,
+    virtual bool save(std::string const& filename, GLTexture::Buffer const& buffer,
                       size_t const width, size_t const height) = 0;
 
     virtual GLenum getPixelType() const = 0;

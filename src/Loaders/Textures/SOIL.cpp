@@ -62,17 +62,19 @@ bool SOIL::setPixelFormat(GLTexture::PixelFormat const cpuformat)
 }
 
 //------------------------------------------------------------------------------
-bool SOIL::load(const char *const filename, GLTexture::Buffer& buffer,
+bool SOIL::load(std::string const& filename, GLTexture::Buffer& buffer,
                 size_t& width, size_t& height)
 {
-    if (unlikely(nullptr == filename))
-        return false;
     if (unlikely(!m_isValid))
+    {
+        std::cerr << "Cannot load texture: setPixelFormat() method did called or returned false"
+                  << std::endl;
         return false;
+    }
 
     // Load the image as a C array.
     int w, h;
-    unsigned char* image = SOIL_load_image(filename, &w, &h, 0,
+    unsigned char* image = SOIL_load_image(filename.c_str(), &w, &h, 0,
                                            static_cast<int>(m_soilFormat));
     if (likely(nullptr != image))
     {
@@ -99,9 +101,16 @@ bool SOIL::load(const char *const filename, GLTexture::Buffer& buffer,
 }
 
 //------------------------------------------------------------------------------
-bool SOIL::save(const char *const filename, GLTexture::Buffer const& texture_buffer,
+bool SOIL::save(std::string const& filename, GLTexture::Buffer const& texture_buffer,
                 size_t const width, size_t const height)
 {
+    if (unlikely(!m_isValid))
+    {
+        std::cerr << "Cannot load texture: setPixelFormat() method did called or returned false"
+                  << std::endl;
+        return false;
+    }
+
     const unsigned char* buffer = texture_buffer.to_array();
     if (unlikely(nullptr == buffer))
     {
@@ -124,7 +133,7 @@ bool SOIL::save(const char *const filename, GLTexture::Buffer const& texture_buf
         return false;
     }
 
-    bool res = !!SOIL_save_image(filename,
+    bool res = !!SOIL_save_image(filename.c_str(),
                                  m_soilFormat,
                                  static_cast<int>(width),
                                  static_cast<int>(height),

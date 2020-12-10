@@ -33,8 +33,8 @@
 #include "01_Core/06_IndexedSphere.hpp"
 #include "01_Core/07_MultipleObjects.hpp"
 
-/*#include "01_Core/08_TerrainTexture3D.hpp"
-#include "01_Core/09_SkyBoxTextureCube.hpp"
+#include "01_Core/08_TerrainTexture3D.hpp"
+/*#include "01_Core/09_SkyBoxTextureCube.hpp"
 #include "01_Core/10_PostProdFrameBuffer.hpp"
 #include "01_Core/11_ComplexShader.hpp"
 #include "01_Core/12_BasicLighting.hpp"*/
@@ -69,8 +69,8 @@ static void usage(char *argv[])
     std::cout << "  8: " << RotatingQuad::info() << std::endl;
     std::cout << "  9: " << IndexedSphere::info() << std::endl;
     std::cout << " 10: " << MultipleObjects::info() << std::endl;
-    /*std::cout << " 11: " << TerrainTexture3D::info() << std::endl;
-    std::cout << " 12: " << SkyBoxTextureCube::info() << std::endl;
+    std::cout << " 11: " << TerrainTexture3D::info() << std::endl;
+    /*std::cout << " 12: " << SkyBoxTextureCube::info() << std::endl;
     std::cout << " 13: " << PostProdFrameBuffer::info() << std::endl;
     std::cout << " 14: " << ComplexShader::info() << std::endl;
     std::cout << " 15: " << BasicLighting::info() << std::endl;*/
@@ -140,10 +140,10 @@ int main(int argc, char *argv[])
         case 11:
             app.create<ShapeDepthMaterial>(WIDTH, HEIGHT, "Depth Material");
             break;
-  /*      case 12:
+        case 12:
             app.create<TerrainTexture3D>(WIDTH, HEIGHT, "Terrain 3D Texture");
             break;
-        case 13:
+            /*       case 13:
             app.create<SkyBoxTextureCube>(WIDTH, HEIGHT, "SkyBox Cube Texture");
             break;
         case 14:

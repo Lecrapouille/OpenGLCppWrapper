@@ -77,8 +77,7 @@ public:
             return false;
 
         m_buffer.clear();
-        size_t i = filenames.size();
-        while (i--)
+        for (size_t i = 0u; i < filenames.size(); ++i)
         {
             // Load a Texture2D and pack it subsequently into a large 2D texture
             m_width = m_height = 0;
@@ -86,12 +85,12 @@ public:
                 return false;
 
             // Check consistency of Texture2D dimension
-            if ((i != 0) && ((prevWidth != m_width) || (prevHeight != m_height)))
+            if ((i != 0u) && ((prevWidth != m_width) || (prevHeight != m_height)))
             {
-                std::cerr << "Failed picture file '" << filenames[i]
-                          << "' has not correct dimension "
-                          << prevWidth << "x" << prevHeight
-                          << std::endl;
+                std::cerr << "Failed picture file " << i << ": '" << filenames[i]
+                          << "' has not correct dimension ("
+                          << prevWidth << " x " << prevHeight
+                          << ")" << std::endl;
                 return false;
             }
 

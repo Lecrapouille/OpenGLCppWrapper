@@ -61,14 +61,14 @@ public:
     //! \param[out] height return the texture height (in pixel)
     //! \return true if the loading ends with success, else return false.
     //--------------------------------------------------------------------------
-    virtual bool load(const char *const filename, GLTexture::Buffer& buffer,
+    virtual bool load(std::string const&, GLTexture::Buffer& buffer,
                       size_t& width, size_t& height) override;
 
 
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    virtual bool save(const char *const filename, GLTexture::Buffer const& texture_buffer,
+    virtual bool save(std::string const&, GLTexture::Buffer const& texture_buffer,
                       size_t const width, size_t const height) override;
 
 private:

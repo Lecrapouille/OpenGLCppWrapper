@@ -22,6 +22,7 @@
 #  define EXAMPLE_08_TERRAIN_TEXTURE3D_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------
@@ -36,7 +37,7 @@ class TerrainTexture3D: public GLWindow
 {
 public:
 
-    TerrainTexture3D();
+    TerrainTexture3D(uint32_t const width, uint32_t const height, const char *title);
     ~TerrainTexture3D();
 
     static std::string info()
