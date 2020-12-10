@@ -18,53 +18,59 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "09_SkyBoxTextureCube.hpp"
+#include "10_SkyBoxShape.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
-SkyBoxTextureCube::SkyBoxTextureCube(uint32_t const width, uint32_t const height, const char *title)
+SkyBoxShape::SkyBoxShape(uint32_t const width, uint32_t const height, const char *title)
     : GLWindow(width, height, title),
-      m_skybox("SkyBoxTextureCube"),
-      m_prog("progSkyBox")
+      m_shape("Shape"),
+      m_skybox("SkyBox"),
+      m_progShape("progShape"),
+      m_progSkyBox("progSkyBox")
 {
-    std::cout << "Hello SkyBoxTextureCube: " << info() << std::endl;
+    std::cout << "Hello SkyBoxShape: " << info() << std::endl;
 }
 
 //------------------------------------------------------------------------------
-SkyBoxTextureCube::~SkyBoxTextureCube()
+SkyBoxShape::~SkyBoxShape()
 {
-    std::cout << "Hello SkyBoxTextureCube" << std::endl;
+    std::cout << "Bye SkyBoxShape" << std::endl;
 }
 
 //------------------------------------------------------------------------------
-void SkyBoxTextureCube::onWindowResized()
+void SkyBoxShape::onWindowResized()
 {
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
-    m_prog.matrix44f("projection") =
+    Matrix44f const& proj =
             matrix::perspective(maths::toRadian(60.0f),
                                 width<float>() / height<float>(),
                                 0.1f,
                                 100.0f);
+    m_progShape.matrix44f("projection") = proj;
+    m_progSkyBox.matrix44f("projection") = proj;
 }
 
 //------------------------------------------------------------------------------
 //! \brief Create a skybox.
 //------------------------------------------------------------------------------
-bool SkyBoxTextureCube::createSkyBox()
+bool SkyBoxShape::createSkyBox()
 {
     vs1.read("01_Core/shaders/09_SkyBoxTextureCube.vs");
     fs1.read("01_Core/shaders/09_SkyBoxTextureCube.fs");
 
-    if (!m_prog.compile(vs1, fs1))
+    if (!m_progSkyBox.compile(vs1, fs1))
     {
         std::cerr << "Failed compiling OpenGL program. Reason was '"
-                  << m_prog.strerror() << "'" << std::endl;
+                  << m_progSkyBox.strerror() << "'" << std::endl;
         return false;
     }
 
-    m_prog.bind(m_skybox);
+    m_progSkyBox.bind(m_skybox);
 
+    // Now we have to fill VBOs with data: here vertices. Because in
+    // vertex shader a_position is vect3 we have to cast to Vector3f.
     m_skybox.vector3f("position") =
     {
         #include "geometry/cube_position.txt"
@@ -82,9 +88,48 @@ bool SkyBoxTextureCube::createSkyBox()
 }
 
 //------------------------------------------------------------------------------
+//! \brief Create a 3D shape (Cone, Pyramid, Cylinder, Tube). See
+//! these class like factories for instanciating VAO.
+//------------------------------------------------------------------------------
+bool SkyBoxShape::createShape()
+{
+    vs2.read("01_Core/shaders/07_MultipleObjects.vs");
+    fs2.read("01_Core/shaders/07_MultipleObjects.fs");
+
+    // Compile shader as OpenGL program. This one will instanciate all OpenGL objects for you.
+    if (!m_progShape.compile(vs2, fs2))
+    {
+        std::cerr << "Failed compiling OpenGL program. Reason was '"
+                  << m_progShape.strerror() << "'" << std::endl;
+        return false;
+    }
+
+    m_progShape.scalarf("scale") = 1.0f;
+    m_progShape.vector4f("color") = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+    m_progShape.bind(m_shape);
+
+    m_shape.vector3f("position") =
+    {
+        #include "geometry/cube_position.txt"
+    };
+    m_shape.vector3f("position") *= 0.5f;
+
+    m_shape.vector2f("UV") =
+    {
+        #include "geometry/cube_texture.txt"
+    };
+
+    GLTexture2D& texture = m_shape.texture2D("texID");
+    texture.interpolation(GLTexture::Minification::LINEAR,
+                          GLTexture::Magnification::LINEAR);
+    texture.wrap(GLTexture::Wrap::MIRRORED_REPEAT);
+    return texture.load("textures/wooden-crate.jpg");
+}
+
+//------------------------------------------------------------------------------
 //! \brief Init your scene.
 //------------------------------------------------------------------------------
-bool SkyBoxTextureCube::onSetup()
+bool SkyBoxShape::onSetup()
 {
     // Enable some OpenGL states
     glCheck(glEnable(GL_DEPTH_TEST));
@@ -92,45 +137,73 @@ bool SkyBoxTextureCube::onSetup()
     glCheck(glDisable(GL_BLEND));
     glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-    return createSkyBox();
+    return createShape() && createSkyBox();
 }
 
-// -----------------------------------------------------------------------------
-//! \brief Draw skybox. The skybox should be the last to be drawn for depth
-//! testing optimizations.
-// -----------------------------------------------------------------------------
-void SkyBoxTextureCube::drawSkyBox()
+static Vector3f lookat = Vector3f(2,2,2);
+static Matrix44f view = matrix::lookAt(Vector3f(5,5,5), lookat, Vector3f(0,1,0));
+
+// --------------------------------------------------------------
+//! \brief Draw the shape.
+// --------------------------------------------------------------
+void SkyBoxShape::drawShape()
 {
-    static Vector3f lookat = Vector3f(1,8,8);
+    static float time = 0.0f;
+    time += dt();
+
+    // Apply a rotation to the box around the Y-axis
+    Transformable<float, 3U> transform;
+    transform.reset(); // restore to identity matrix
+    transform.rotateY(4.0f * cosf(time));
+    transform.translate(Vector3f(2.0f, 2.0f, 2.0f));
+    m_progShape.scalarf("scale") = cosf(time) + 0.5f;
+    m_progShape.matrix44f("model") = transform.matrix();
+    m_progShape.matrix44f("view") = view;
+
+    // Set depth function back to default
+    glCheck(glDepthFunc(GL_LESS));
+    m_progShape.draw(m_shape, Mode::TRIANGLES, 0, 36);
+}
+
+// --------------------------------------------------------------
+//! \brief Draw skybox. Should be draw as last.
+// --------------------------------------------------------------
+void SkyBoxShape::drawSkyBox()
+{
     // Remove translation from the view matrix
-    Matrix44f view = matrix::lookAt(Vector3f(10,10,10), lookat, Vector3f(0,1,0));
-    m_prog.matrix44f("view") = Matrix44f(Matrix33f(view));
+    m_progSkyBox.matrix44f("view") = Matrix44f(Matrix33f(view));
 
     // Change depth function so depth test passes when values are equal
     // to depth buffer's content
     glCheck(glDepthFunc(GL_LEQUAL));
-    m_prog.draw(m_skybox, Mode::TRIANGLES, 0, 36);
+    m_progSkyBox.draw(m_skybox, Mode::TRIANGLES, 0, 36);
 }
 
 //------------------------------------------------------------------------------
-bool SkyBoxTextureCube::onPaint()
+//! \brief Paint our scene.
+//------------------------------------------------------------------------------
+bool SkyBoxShape::onPaint()
 {
+    // Clear OpenGL color and depth buffers.
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
+    // Draw scene as normal.
+    drawShape();
+    // Draw skybox as last. Set depth function back to default
     drawSkyBox();
 
     return true;
 }
 
 //------------------------------------------------------------------------------
-void SkyBoxTextureCube::onSetupFailed(std::string const& reason)
+void SkyBoxShape::onSetupFailed(std::string const& reason)
 {
     std::cerr << "Failure during the onSetup. Reason: " << reason << std::endl;
 }
 
 //------------------------------------------------------------------------------
-void SkyBoxTextureCube::onPaintFailed(std::string const& reason)
+void SkyBoxShape::onPaintFailed(std::string const& reason)
 {
     std::cerr << "Failure during rendering. Reason: " << reason << std::endl;
 }
