@@ -27,7 +27,7 @@ RotatingQuad::RotatingQuad(uint32_t const width, uint32_t const height,
     : GLWindow(width, height, title),
       m_prog("Prog")
 {
-    std::cout << "Hello RotatingQuad " << info() << std::endl;
+    std::cout << "Hello RotatingQuad: " << info() << std::endl;
 }
 
 //------------------------------------------------------------------------------

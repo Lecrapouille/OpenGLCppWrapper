@@ -53,6 +53,7 @@ OBJS_CORE = \
   08_TerrainTexture3D.o \
   09_SkyBoxTextureCube.o \
   10_SkyBoxShape.o \
+  11_ComplexShader.o \
 
 #  11_SimpleFrameBuffer.o \
 #  12_PostProdFrameBuffer.o \

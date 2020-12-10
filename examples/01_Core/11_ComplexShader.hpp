@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_13_COMPLEX_SHADER_HPP
-#define EXAMPLE_13_COMPLEX_SHADER_HPP
+#ifndef EXAMPLE_11_COMPLEX_SHADER_HPP
+#define EXAMPLE_11_COMPLEX_SHADER_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include "../debug.hpp"
@@ -32,7 +32,7 @@ class ComplexShader: public GLWindow
 {
 public:
 
-    ComplexShader();
+    ComplexShader(uint32_t const width, uint32_t const height, const char *title);
     ~ComplexShader();
 
     static std::string info()
@@ -53,7 +53,7 @@ private:
 
     GLVertexShader     m_vertex_shader;
     GLFragmentShader   m_fragment_shader;
-    GLVAO              m_quad;
+    GLVAO32            m_quad;
     GLProgram          m_prog;
 };
 

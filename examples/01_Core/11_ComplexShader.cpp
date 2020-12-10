@@ -18,67 +18,74 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "13_ComplexShader.hpp"
+#include "11_ComplexShader.hpp"
 #include <iostream>
 
-ComplexShader::ComplexShader()
-  : m_quad("VAO_quad"),
-    m_prog("Prog")
-{}
-
-ComplexShader::~ComplexShader()
-{}
-
-void ComplexShader::onWindowSizeChanged()
+//------------------------------------------------------------------------------
+ComplexShader::ComplexShader(uint32_t const width, uint32_t const height, const char *title)
+    : GLWindow(width, height, title),
+      m_quad("VAO_quad"),
+      m_prog("Prog")
 {
-  // Make sure the viewport matches the new window dimensions.
-  glCheck(glViewport(0, 0, width<int>(), height<int>()));
+    std::cout << "Hello ComplexShader:" << info() << std::endl;
+}
+
+//------------------------------------------------------------------------------
+ComplexShader::~ComplexShader()
+{
+    std::cout << "Bye ComplexShader" << std::endl;
+}
+
+//------------------------------------------------------------------------------
+void ComplexShader::onWindowResized()
+{
+    glCheck(glViewport(0, 0, width<int>(), height<int>()));
 }
 
 //------------------------------------------------------------------------------
 //! \brief Initialize shader and create a quad.
 //------------------------------------------------------------------------------
-bool ComplexShader::setup()
+bool ComplexShader::onSetup()
 {
-  // Load vertex and fragment shaders with GLSL code.
-  m_vertex_shader.fromFile("01_Core/shaders/13_ComplexShader.vs");
-  m_fragment_shader.fromFile("01_Core/shaders/13_ComplexShader.fs");
+    // Load vertex and fragment shaders with GLSL code.
+    m_vertex_shader.read("01_Core/shaders/11_ComplexShader.vs");
+    m_fragment_shader.read("01_Core/shaders/11_ComplexShader.fs");
 
-  // Compile the shader program
-  if (!m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
+    // Compile the shader program
+    if (!m_prog.compile(m_vertex_shader, m_fragment_shader))
     {
-      std::cerr << "Failed compiling OpenGL program. Reason was '"
-                << m_prog.getError() << "'" << std::endl;
-      return false;
+        std::cerr << "Failed compiling OpenGL program. Reason was '"
+                  << m_prog.strerror() << "'" << std::endl;
+        return false;
     }
 
-  // Create a quad.
-  m_prog.bind(m_quad);
+    // Create a quad.
+    m_prog.bind(m_quad);
 
-  // Fill VBOs of the VAO: init quad vertex positions.
-  m_quad.vector3f("position") =
+    // Fill VBOs of the VAO: init quad vertex positions.
+    m_quad.vector3f("position") =
     {
-      Vector2f(1.0f, 1.0f), Vector2f(1.0f, -1.0f),
-      Vector2f(-1.0f, -1.0f), Vector2f(-1.0f, 1.0f)
+        Vector3f(1.0f, 1.0f), Vector3f(1.0f, -1.0f),
+        Vector3f(-1.0f, -1.0f), Vector3f(-1.0f, 1.0f)
     };
 
-  // Fill VBOs of the VAO: init texture positions.
-  m_quad.vector2f("uv") =
+    // Fill VBOs of the VAO: init texture positions.
+    m_quad.vector2f("uv") =
     {
-      Vector2f(1.0f, 1.0f), Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 0.0f), Vector2f(0.0f, 1.0f)
+        Vector2f(1.0f, 1.0f), Vector2f(1.0f, 0.0f),
+        Vector2f(0.0f, 0.0f), Vector2f(0.0f, 1.0f)
     };
 
-  // Vertices index of the quad
-  m_quad.index32() =
+    // Vertices index of the quad
+    m_quad.index() =
     {
-      0, 1, 3, // first triangle
-      1, 2, 3  // second triangle
+        0u, 1u, 3u, // first triangle
+        1u, 2u, 3u  // second triangle
     };
 
-  settings();
+    settings();
 
-  return true;
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -86,26 +93,38 @@ bool ComplexShader::setup()
 //------------------------------------------------------------------------------
 void ComplexShader::settings()
 {
-  m_prog.vector3f("color") = Vector3f(1.0f, 1.0f, 1.0f);
-  m_prog.scalarf("speed") = 0.0001f;
-  m_prog.scalarf("brightness") = 0.0018f;
-  m_prog.scalarf("distfading") = 0.7f;
-  m_prog.scalarf("twinkleSpeed") = 200.0f;
+    m_prog.vector3f("color") = Vector3f(1.0f, 1.0f, 1.0f);
+    m_prog.scalarf("speed") = 0.0001f;
+    m_prog.scalarf("brightness") = 0.0018f;
+    m_prog.scalarf("distfading") = 0.7f;
+    m_prog.scalarf("twinkleSpeed") = 200.0f;
 }
 
 //------------------------------------------------------------------------------
 //! \brief Paint our scene. Here we are using the delta time to
 //------------------------------------------------------------------------------
-bool ComplexShader::draw()
+bool ComplexShader::onPaint()
 {
-  static float time = 0.0f;
-  time += dt();
+    static float time = 0.0f;
+    time += dt();
 
-  glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
-  glCheck(glClear(GL_COLOR_BUFFER_BIT));
+    glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
+    glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-  m_prog.scalarf("time") = time;
-  m_prog.draw(m_quad, Mode::TRIANGLES, m_quad.index32());
+    m_prog.scalarf("time") = time;
+    m_prog.draw(m_quad, Mode::TRIANGLES);
 
-  return true;
+    return true;
+}
+
+//------------------------------------------------------------------------------
+void ComplexShader::onSetupFailed(std::string const& reason)
+{
+    std::cerr << "Failure during the onSetup. Reason: " << reason << std::endl;
+}
+
+//------------------------------------------------------------------------------
+void ComplexShader::onPaintFailed(std::string const& reason)
+{
+    std::cerr << "Failure during rendering. Reason: " << reason << std::endl;
 }
