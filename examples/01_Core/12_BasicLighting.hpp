@@ -22,6 +22,8 @@
 #  define EXAMPLE_12_BASIC_LIGHTING_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "Math/Transformable.hpp"
+#  include "../debug.hpp"
 
 // *****************************************************************************
 //! \brief This example shows how to create a basic light.
@@ -52,30 +54,12 @@ private:
 
 private:
 
-    // Quick and dirty camera
-    class Camera
-    {
-    public:
-
-        Camera()
-        {
-            model = Identity44f;
-            view = ;
-            projection = ;
-        }
-
-        Matrix44f model;
-        Matrix44f view;
-        Matrix44f projection;
-    };
-
     GLVertexShader     m_vs1, m_vs2;
     GLFragmentShader   m_fs1, m_fs2;
     GLVAO              m_cube;
     GLVAO              m_lamp;
     GLProgram          m_prog_cube;
     GLProgram          m_prog_lamp;
-    Camera             m_camera;
 };
 
 #endif // EXAMPLE_12_BASIC_LIGHTING_HPP

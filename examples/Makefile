@@ -54,11 +54,8 @@ OBJS_CORE = \
   09_SkyBoxTextureCube.o \
   10_SkyBoxShape.o \
   11_ComplexShader.o \
-
-#  11_SimpleFrameBuffer.o \
-#  12_PostProdFrameBuffer.o \
-#  13_ComplexShader.o \
-#  14_BasicLighting.o
+  12_BasicLighting.o \
+  13_PostProdFrameBuffer.o
 
 OBJS_SCENE = \
   00_DepthMaterial.o \

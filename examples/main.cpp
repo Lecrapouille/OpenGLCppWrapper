@@ -36,9 +36,8 @@
 #include "01_Core/09_SkyBoxTextureCube.hpp"
 #include "01_Core/10_SkyBoxShape.hpp"
 #include "01_Core/11_ComplexShader.hpp"
-
-/*#include "01_Core/10_PostProdFrameBuffer.hpp"
-#include "01_Core/12_BasicLighting.hpp"*/
+#include "01_Core/12_BasicLighting.hpp"
+#include "01_Core/13_PostProdFrameBuffer.hpp"
 
 #include "02_Scene/00_DepthMaterial.hpp"
 
@@ -74,10 +73,10 @@ static void usage(char *argv[])
     std::cout << " 12: " << SkyBoxTextureCube::info() << std::endl;
     std::cout << " 13: " << SkyBoxShape::info() << std::endl;
     std::cout << " 14: " << ComplexShader::info() << std::endl;
-    /*std::cout << " 13: " << PostProdFrameBuffer::info() << std::endl;
-    std::cout << " 15: " << BasicLighting::info() << std::endl;*/
+    std::cout << " 15: " << BasicLighting::info() << std::endl;
+    std::cout << " 16: " << PostProdFrameBuffer::info() << std::endl;
     std::cout << "SceneGraph API:" << std::endl;
-    std::cout << " 16: " << ShapeDepthMaterial::info() << std::endl;
+    std::cout << " 17: " << ShapeDepthMaterial::info() << std::endl;
     exit(EXIT_FAILURE);
 }
 
@@ -151,11 +150,13 @@ int main(int argc, char *argv[])
         case 14:
             app.create<ComplexShader>(WIDTH, HEIGHT, "Complex Shader");
             break;
-        /*case 14:
+        case 15:
+            app.create<BasicLighting>(WIDTH, HEIGHT, "Basic Lighting");
+            break;
+        case 16:
             app.create<PostProdFrameBuffer>(WIDTH, HEIGHT, "PostProd FrameBuffer");
             break;
- */
-        case 16:
+        case 17:
             app.create<ShapeDepthMaterial>(WIDTH, HEIGHT, "Depth Material");
             break;
         default:

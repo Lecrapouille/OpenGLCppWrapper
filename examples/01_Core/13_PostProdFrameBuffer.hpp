@@ -22,6 +22,7 @@
 #  define EXAMPLE_10_POSTPROD_FRAMEBUFFER_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------
@@ -31,7 +32,7 @@ class PostProdFrameBuffer: public GLWindow
 {
 public:
 
-    PostProdFrameBuffer();
+    PostProdFrameBuffer(uint32_t const width, uint32_t const height, const char *title);
     ~PostProdFrameBuffer();
 
     static std::string info()
@@ -52,6 +53,8 @@ private:
 
 private:
 
+    GLFrameBuffer       m_fbo;
+
     // First program (scene)
 
     GLVertexShader      m_vs_scene;
@@ -66,8 +69,6 @@ private:
     GLFragmentShader    m_fs_screen;
     GLProgram           m_prog_screen;
     GLVAO               m_screen;
-
-    GLFrameBuffer       m_fbo;
 };
 
-#endif // EXAMPLE_12_POSTPROD_FRAMEBUFFER_HPP
+#endif // EXAMPLE_13_POSTPROD_FRAMEBUFFER_HPP

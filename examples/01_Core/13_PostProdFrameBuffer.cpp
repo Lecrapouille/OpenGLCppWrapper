@@ -18,19 +18,19 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "12_PostProdFrameBuffer.hpp"
+#include "13_PostProdFrameBuffer.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
 PostProdFrameBuffer::PostProdFrameBuffer(uint32_t const width, uint32_t const height,
                                          const char *title)
     : GLWindow(width, height, title),
+      m_fbo("FBO"),
       m_prog_scene("prog_cube"),
       m_cube("VAO_cube"),
       m_floor("VAO_floor"),
       m_prog_screen("prog_screen"),
-      m_screen("VAO_screen"),
-      m_fbo("FBO")
+      m_screen("VAO_screen")
 {
     std::cout << "Hello PostProdFrameBuffer " << info() << std::endl;
 }
@@ -42,7 +42,7 @@ PostProdFrameBuffer::~PostProdFrameBuffer()
 }
 
 //------------------------------------------------------------------------------
-void PostProdFrameBuffer::onWindowSizeChanged()
+void PostProdFrameBuffer::onWindowResized()
 {
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
@@ -53,14 +53,14 @@ void PostProdFrameBuffer::onWindowSizeChanged()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Shader for drawing the scene
+//! \brief Shader for rendering the scene
 //------------------------------------------------------------------------------
 bool PostProdFrameBuffer::firstProgram()
 {
     // Compile the shader for the scene
-    m_vs_scene.fromFile("01_Core/shaders/12_PostProdFrameBuffer_cube.vs");
-    m_fs_scene.fromFile("01_Core/shaders/12_PostProdFrameBuffer_cube.fs");
-    if (!m_prog_scene.attachShaders(m_vs_scene, m_fs_scene).compile())
+    m_vs_scene.read("01_Core/shaders/13_PostProdFrameBuffer_cube.vs");
+    m_fs_scene.read("01_Core/shaders/13_PostProdFrameBuffer_cube.fs");
+    if (!m_prog_scene.compile(m_vs_scene, m_fs_scene))
     {
         std::cerr << "Failed compiling OpenGL program. Reason was '"
                   << m_prog_scene.strerror() << "'" << std::endl;
@@ -69,68 +69,25 @@ bool PostProdFrameBuffer::firstProgram()
 
     // Create the cube
     m_prog_scene.bind(m_cube);
-
     m_cube.vector3f("position") =
     {
-        Vector3f(-0.5f,  0.5f,  0.5f),  // Front Top Left            - Red   - 0
-        Vector3f( 0.5f,  0.5f,  0.5f),  // Front Top Right           - Green - 1
-        Vector3f( 0.5f, -0.5f,  0.5f),  // Front Bottom Right        - Blue  - 2
-        Vector3f(-0.5f, -0.5f,  0.5f),  // Front Bottom Left         - Cyan  - 3
-        Vector3f(-0.5f,  0.5f, -0.5f),  // Back Top Left             - Pink  - 4
-        Vector3f( 0.5f,  0.5f, -0.5f),  // Back Top Right            - Yellow- 5
-        Vector3f( 0.5f, -0.5f, -0.5f),  // Back Bottom Right         - White - 6
-        Vector3f(-0.5f, -0.5f, -0.5f),  // Back Bottom Left          - Gray  - 7
+        #include "geometry/cube_position.txt"
     };
-
-    m_cube.vector3f("uv") =
+    m_cube.vector2f("UV") =
     {
-        Vector3f(1.0f, 0.0f, 0.0f),  // Front Top Left               - Red   - 0
-        Vector3f(0.0f, 1.0f, 0.0f),  // Front Top Right              - Green - 1
-        Vector3f(0.0f, 0.0f, 1.0f),  // Front Bottom Right           - Blue  - 2
-        Vector3f(0.0f, 1.0f, 1.0f),  // Front Bottom Left            - Cyan  - 3
-        Vector3f(1.0f, 0.0f, 1.0f),  // Back Top Left                - Pink  - 4
-        Vector3f(1.0f, 1.0f, 0.0f),  // Back Top Right               - Yellow- 5
-        Vector3f(0.1f, 0.1f, 0.1f),  // Back Bottom Right            - White - 6
-        Vector3f(1.0f, 1.0f, 1.0f),  // Back Bottom Left             - Gray  - 7
+        #include "geometry/cube_texture.txt"
     };
-
-    m_cube.index() =
-    {
-        0u,3u,2u,  // Front
-        2u,1u,0u,
-        1u,5u,6u,  // Right
-        6u,2u,1u,
-        5u,4u,7u,  // Left
-        7u,6u,5u,
-        4u,7u,3u,  // Back
-        3u,0u,4u,
-        4u,5u,1u,  // Top
-        1u,0u,4u,
-        3u,2u,6u,  // Bottom
-        6u,7u,3u,
-    };
-
-
-    m_cube.vector3f("aPos") =
-            {
-#include "geometry/cube_position.txt"
-            };
-
-    m_cube.vector2f("aTexCoords") =
-            {
-#include "geometry/cube_texture.txt"
-            };
 
     // Create the floor
     m_prog_scene.bind(m_floor);
-    m_floor.vector3f("aPos") =
-            {
-#include "geometry/floor_position.txt"
-            };
-    m_floor.vector2f("aTexCoords") =
-            {
-#include "geometry/floor_texture.txt"
-            };
+    m_floor.vector3f("position") =
+    {
+        #include "geometry/floor_position.txt"
+    };
+    m_floor.vector2f("UV") =
+    {
+       #include "geometry/floor_texture.txt"
+    };
 
     // Apply textures
     if (!m_cube.texture2D("texture1").load("textures/wooden-crate.jpg"))
@@ -150,14 +107,14 @@ bool PostProdFrameBuffer::firstProgram()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Shader for drawing the screen
+//! \brief Shader for post producing the screen
 //------------------------------------------------------------------------------
 bool PostProdFrameBuffer::secondProgram()
 {
     // Compile the shader for the screen
-    m_vs_screen.fromFile("01_Core/shaders/12_PostProdFrameBuffer_screen.vs");
-    m_fs_screen.fromFile("01_Core/shaders/12_PostProdFrameBuffer_screen.fs");
-    if (!m_prog_screen.attachShaders(m_vs_screen, m_fs_screen).compile())
+    m_vs_screen.read("01_Core/shaders/13_PostProdFrameBuffer_screen.vs");
+    m_fs_screen.read("01_Core/shaders/13_PostProdFrameBuffer_screen.fs");
+    if (!m_prog_screen.compile(m_vs_screen, m_fs_screen))
     {
         std::cerr << "failed compiling OpenGL program. Reason was '"
                   << m_prog_screen.strerror() << "'" << std::endl;
@@ -181,8 +138,6 @@ bool PostProdFrameBuffer::secondProgram()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Init your scene.
-//------------------------------------------------------------------------------
 bool PostProdFrameBuffer::onSetup()
 {
     glCheck(glEnable(GL_DEPTH_TEST));
@@ -203,9 +158,7 @@ bool PostProdFrameBuffer::onSetup()
 }
 
 //------------------------------------------------------------------------------
-//! \brief Paint our scene.
-//------------------------------------------------------------------------------
-bool PostProdFrameBuffer::draw()
+bool PostProdFrameBuffer::onPaint()
 {
     static float time = 0.0f;
     time += dt();
@@ -228,4 +181,16 @@ bool PostProdFrameBuffer::draw()
     m_prog_screen.draw(m_screen, Mode::TRIANGLES, 0, 6);
 
     return true;
+}
+
+//------------------------------------------------------------------------------
+void PostProdFrameBuffer::onSetupFailed(std::string const& reason)
+{
+    std::cerr << "Failure during the onSetup. Reason: " << reason << std::endl;
+}
+
+//------------------------------------------------------------------------------
+void PostProdFrameBuffer::onPaintFailed(std::string const& reason)
+{
+    std::cerr << "Failure during rendering. Reason: " << reason << std::endl;
 }

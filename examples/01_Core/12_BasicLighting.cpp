@@ -20,10 +20,7 @@
 
 #include "12_BasicLighting.hpp"
 #include <iostream>
-
-// -----------------------------------------------------------------------------
-// lighting position
-static Vector3f lightPos(1.2f, 1.0f, 2.0f);
+#include <cstdlib>
 
 // -----------------------------------------------------------------------------
 BasicLighting::BasicLighting(uint32_t const width, uint32_t const height,
@@ -44,24 +41,29 @@ BasicLighting::~BasicLighting()
 }
 
 // -----------------------------------------------------------------------------
-void BasicLighting::onWindowSizeChanged()
+void BasicLighting::onWindowResized()
 {
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
-    m_camera.projection = matrix::perspective(maths::toRadian(60.0f),
-                                              width<float>() / height<float>(),
-                                              0.1f, 10.0f);
-    m_prog_cube.matrix44f("projection") = m_camera.projection;
-    m_prog_lamp.matrix44f("projection") = m_camera.projection;
+    Matrix44f const& proj =
+            matrix::perspective(maths::toRadian(60.0f),
+                                width<float>() / height<float>(),
+                                0.1f, 100.0f);
+    m_prog_cube.matrix44f("projection") = proj;
+    m_prog_lamp.matrix44f("projection") = proj;
 }
+
+static Vector3f lightPos = Vector3f(1.2f, 1.0f, 2.0f);
+static Vector3f lookat = Vector3f(1,1,1);
+static Matrix44f view = matrix::lookAt(Vector3f(5,5,5), lookat, Vector3f(0,1,0));
 
 //------------------------------------------------------------------------------
 //! \brief Create a cube for the lamp.
 //------------------------------------------------------------------------------
 bool BasicLighting::createLamp()
 {
-    m_vs1.fromFile("01_Core/shaders/14_BasicLighting_lamp.vs");
-    m_fs1.fromFile("01_Core/shaders/14_BasicLighting_lamp.fs");
+    m_vs1.read("01_Core/shaders/12_BasicLighting_lamp.vs");
+    m_fs1.read("01_Core/shaders/12_BasicLighting_lamp.fs");
 
     if (!m_prog_lamp.compile(m_vs1, m_fs1))
     {
@@ -70,15 +72,19 @@ bool BasicLighting::createLamp()
         return false;
     }
 
-    // Create a cube.
+    // Draw a cube on the light position
     m_prog_lamp.bind(m_lamp);
-    m_lamp.vector3f("position") = ;
+    m_lamp.vector3f("position") =
+    {
+       #include "geometry/cube_position.txt"
+    };
 
-    Transformable<float, 3U> transformable;
-    transformable.position(lightPos);
-    transformable.scale(Vector3f(0.05f)); // a smaller cube
-    m_prog_lamp.matrix44f("model") = transformable.transform();
-    m_prog_lamp.matrix44f("view") = m_camera.view;
+    Transformable<float, 3U> transform;
+    transform.reset();
+    transform.position(lightPos);
+    transform.scale(Vector3f(0.05f)); // a smaller cube
+    m_prog_lamp.matrix44f("model") = transform.matrix();
+    m_prog_lamp.matrix44f("view") = view;
 
     return true;
 }
@@ -89,8 +95,8 @@ bool BasicLighting::createLamp()
 bool BasicLighting::createCube()
 {
     // Load vertex and fragment shaders with GLSL code.
-    m_vs2.fromFile("01_Core/shaders/14_BasicLighting_material.vs");
-    m_fs2.fromFile("01_Core/shaders/14_BasicLighting_material.fs");
+    m_vs2.read("01_Core/shaders/12_BasicLighting_material.vs");
+    m_fs2.read("01_Core/shaders/12_BasicLighting_material.fs");
 
     // Compile the shader program
     if (!m_prog_cube.compile(m_vs2, m_fs2))
@@ -102,13 +108,20 @@ bool BasicLighting::createCube()
 
     // Create a cube.
     m_prog_cube.bind(m_cube);
-    m_cube.vector3f("position") = ;
-    m_cube.vector3f("normal") = ;
+    m_cube.vector3f("position") =
+    {
+       #include "geometry/cube_position.txt"
+    };
+    m_cube.vector3f("normal") =
+    {
+       #include "geometry/cube_normals.txt"
+    };
 
-    Transformable<float, 3U> transformable;
-    m_prog_cube.matrix44f("model") = transformable.transform();
-    m_prog_cube.matrix44f("view") = m_camera.view;
-    m_prog_cube.vector3f("viewPos") = m_camera.model;
+    Transformable<float, 3U> transform;
+    transform.reset();
+    m_prog_cube.matrix44f("model") = transform.matrix();
+    m_prog_cube.matrix44f("view") = view;
+    m_prog_cube.vector3f("viewPos") = lightPos;
 
     // Material properties
     // Note: specular lighting doesn't have full effect on this object's material
@@ -151,7 +164,7 @@ bool BasicLighting::onSetup()
     if (!createCube())
         return false;
 
-    changeLightProperties(randf());
+    changeLightProperties(float(std::rand() % 10));
 
     return true;
 }
@@ -164,12 +177,8 @@ bool BasicLighting::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    m_prog_lamp.matrix44f("view") = m_camera.view;
-    m_prog_cube.matrix44f("view") = m_camera.view;
-    m_prog_cube.vector3f("model") = m_camera.model;
-
-    m_prog_cube.draw(m_cube, Mode::TRIANGLES);
-    m_prog_lamp.draw(m_lamp, Mode::TRIANGLES);
+    m_prog_cube.draw(m_cube, Mode::TRIANGLES, 0u, 36u);
+    m_prog_lamp.draw(m_lamp, Mode::TRIANGLES, 0u, 36u);
 
     return true;
 }

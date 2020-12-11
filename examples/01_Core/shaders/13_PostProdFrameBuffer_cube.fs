@@ -4,28 +4,28 @@
 // Data from C++ program
 // ----------------------------------------------------------------------------
 
-// Vertex position
-in vec3 position;
-// Vertex texture coordinates
-in vec2 UV;
+// Texture sampler
+uniform sampler2D texID;
 
 // ----------------------------------------------------------------------------
-// Data to fragment program
+// Data from vertex program
 // ----------------------------------------------------------------------------
-out struct v2f_s
+in struct v2f_s
 {
    // Interpolated fragment texture coordinates
    vec2 UV;
 } v2f;
 
 // ----------------------------------------------------------------------------
-// Vertex program
+// Fragment program output
+// ----------------------------------------------------------------------------
+out vec4 fragColor;
+
+// ----------------------------------------------------------------------------
+// Fragment program
 // ----------------------------------------------------------------------------
 void main()
 {
-    // To fragment program
-    v2f.UV = UV;
-
-    // Final position
-    gl_Position = vec4(position.x, position.y, 0.0, 1.0);
+    // Final color
+    fragColor = texture(texID, v2f.UV);
 }
