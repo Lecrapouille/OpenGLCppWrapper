@@ -43,109 +43,109 @@
 //! \brief Macro for building constructors
 // *****************************************************************************
 #define VECTOR_DIM(N)                                                   \
-  /*! \brief Empty constructor */                                       \
-  Vector()                                                              \
-  {                                                                     \
-    static_assert(N >= 2_z, "Minimun dimension for a vector is 2");     \
-  }                                                                     \
+    /*! \brief Empty constructor */                                     \
+    Vector()                                                            \
+    {                                                                   \
+        static_assert(N >= 2_z, "Minimun dimension for a vector is 2"); \
+    }                                                                   \
                                                                         \
-  /*! \brief Constructor with initialization list */                    \
-  Vector(std::initializer_list<T> initList)                             \
-  {                                                                     \
-    const size_t m = std::min(static_cast<size_t>(N), initList.size());  /* FIXME cast */ \
-    auto iter = initList.begin();                                       \
-    for (size_t i = 0_z; i < m; ++i)                                    \
-      {                                                                 \
-        m_data[i] = *iter;                                              \
-        ++iter;                                                         \
-      }                                                                 \
+    /*! \brief Constructor with initialization list */                  \
+    Vector(std::initializer_list<T> initList)                           \
+    {                                                                   \
+        const size_t m = std::min(static_cast<size_t>(N), initList.size());  /* FIXME cast */ \
+        auto iter = initList.begin();                                   \
+        for (size_t i = 0_z; i < m; ++i)                                \
+        {                                                               \
+            m_data[i] = *iter;                                          \
+            ++iter;                                                     \
+        }                                                               \
                                                                         \
-    /* Zero-fill any remaining elements */                              \
-    for (size_t i = m; i < N; ++i)                                      \
-      {                                                                 \
-        m_data[i] = maths::zero<T>();                                   \
-      }                                                                 \
-  }                                                                     \
+        /* Zero-fill any remaining elements */                          \
+        for (size_t i = m; i < N; ++i)                                  \
+        {                                                               \
+            m_data[i] = maths::zero<T>();                               \
+        }                                                               \
+    }                                                                   \
                                                                         \
-  /*! \brief Constructor with uniform value */                          \
-  explicit Vector(T const scalar)                                       \
-  {                                                                     \
-    size_t i = N;                                                       \
-    while (i--)                                                         \
-      {                                                                 \
-        m_data[i] = scalar;                                             \
-      }                                                                 \
-  }                                                                     \
+    /*! \brief Constructor with uniform value */                        \
+    explicit Vector(T const scalar)                                     \
+    {                                                                   \
+        size_t i = N;                                                   \
+        while (i--)                                                     \
+        {                                                               \
+            m_data[i] = scalar;                                         \
+        }                                                               \
+    }                                                                   \
                                                                         \
-  /*! \brief Constructor by copy */                                     \
-  template <typename U, size_t nOther>                                  \
-  explicit Vector(Vector<U, nOther> const& other)                       \
-  {                                                                     \
-    const size_t m = std::min(static_cast<size_t>(N), nOther);  /* FIXME cast */ \
-    size_t i = m;                                                       \
-    while (i--)                                                         \
-      {                                                                 \
-        m_data[i] = T(other[i]);                                        \
-      }                                                                 \
+    /*! \brief Constructor by copy */                                   \
+    template <typename U, size_t nOther>                                \
+    explicit Vector(Vector<U, nOther> const& other)                     \
+    {                                                                   \
+        const size_t m = std::min(static_cast<size_t>(N), nOther);  /* FIXME cast */ \
+        size_t i = m;                                                   \
+        while (i--)                                                     \
+        {                                                               \
+            m_data[i] = T(other[i]);                                    \
+        }                                                               \
                                                                         \
-    /* Zero-fill any remaining elements */                              \
-    for (i = m; i < N; ++i)                                             \
-      {                                                                 \
-        m_data[i] = maths::zero<T>();                                   \
-      }                                                                 \
-  }                                                                     \
+        /* Zero-fill any remaining elements */                          \
+        for (i = m; i < N; ++i)                                         \
+        {                                                               \
+            m_data[i] = maths::zero<T>();                               \
+        }                                                               \
+    }                                                                   \
                                                                         \
                                                                         \
-  /*! \brief Flips all the components of the vector */                  \
-  void invert()                                                         \
-  {                                                                     \
-    size_t i = N;                                                       \
-    while (i--)                                                         \
-      {                                                                 \
-        m_data[i] = -m_data[i];                                         \
-      }                                                                 \
-  }                                                                     \
+    /*! \brief Flips all the components of the vector */                \
+    void invert()                                                       \
+    {                                                                   \
+        size_t i = N;                                                   \
+        while (i--)                                                     \
+        {                                                               \
+            m_data[i] = -m_data[i];                                     \
+        }                                                               \
+    }                                                                   \
                                                                         \
-  /*! \brief Add the given vector to this, scaled by the given amount */ \
-  void addScaled(Vector<T,N> const& other, T const scale)               \
-  {                                                                     \
-    size_t i = N;                                                       \
-    while (i--)                                                         \
-      {                                                                 \
-        m_data[i] += (scale * other.m_data[i]);                         \
-      }                                                                 \
-  }                                                                     \
+    /*! \brief Add the given vector to this, scaled by the given amount */ \
+    void addScaled(Vector<T,N> const& other, T const scale)             \
+    {                                                                   \
+        size_t i = N;                                                   \
+        while (i--)                                                     \
+        {                                                               \
+            m_data[i] += (scale * other.m_data[i]);                     \
+        }                                                               \
+    }                                                                   \
                                                                         \
-  /*! \brief Vector product (aka cross product). */                     \
-  Vector<T,N>& operator%=(Vector<T,N> const& b)                         \
-  {                                                                     \
-    *this = cross(*this, b);                                            \
-    return *this;                                                       \
-  }                                                                     \
+    /*! \brief Vector product (aka cross product). */                   \
+    Vector<T,N>& operator%=(Vector<T,N> const& b)                       \
+    {                                                                   \
+        *this = cross(*this, b);                                        \
+        return *this;                                                   \
+    }                                                                   \
                                                                         \
-  /*! \brief Return the dimension */                                    \
-  inline size_t size() const { return N; }                              \
+    /*! \brief Return the dimension */                                  \
+    inline size_t size() const { return N; }                            \
                                                                         \
-  /*! \brief Return the dimension */                                    \
-  inline size_t length() const { return N; }                            \
+    /*! \brief Return the dimension */                                  \
+    inline size_t length() const { return N; }                          \
                                                                         \
-  /* Accessors */                                                       \
-  T& operator[](size_t const i)          { return m_data[i]; }          \
-  const T& operator[](size_t const i) const { return m_data[i]; }       \
-  T& operator[](int const i)             { return m_data[i]; }          \
-  const T& operator[](int const i) const { return m_data[i]; }          \
+    /* Accessors */                                                     \
+    T& operator[](size_t const i)          { return m_data[i]; }        \
+    const T& operator[](size_t const i) const { return m_data[i]; }     \
+    T& operator[](int const i)             { return m_data[i]; }        \
+    const T& operator[](int const i) const { return m_data[i]; }        \
                                                                         \
-  /* C array conversions */                                             \
-  typedef T(&array_t)[N];                                               \
-  typedef const T(&const_array_t)[N];                                   \
-  operator array_t ()                   { return m_data; }              \
-  operator const_array_t () const       { return m_data; }              \
+    /* C array conversions */                                           \
+    typedef T(&array_t)[N];                                             \
+    typedef const T(&const_array_t)[N];                                 \
+    operator array_t ()                   { return m_data; }            \
+    operator const_array_t () const       { return m_data; }            \
                                                                         \
 private:                                                                \
                                                                         \
- /* Disallow bool conversions (without this, they'd happen implicitly*/ \
- /* via the array conversions) */                                       \
- operator bool()
+/* Disallow bool conversions (without this, they'd happen implicitly*/  \
+/* via the array conversions) */                                        \
+operator bool()
 
 // *****************************************************************************
 //! \brief Generic mathematic vector for a given dimension.
@@ -160,44 +160,44 @@ class Vector
 {
 public:
 
-  VECTOR_DIM(n);
+    VECTOR_DIM(n);
 
-  //! \brief Return the norm of this instance.
-  T norm() const
-  {
-    T l = maths::zero<T>();
-    size_t i = n;
+    //! \brief Return the norm of this instance.
+    T norm() const
+    {
+        T l = maths::zero<T>();
+        size_t i = n;
 
-    while (i--)
-      l += (m_data[i] * m_data[i]);
-    return maths::sqrt(l);
-  }
+        while (i--)
+            l += (m_data[i] * m_data[i]);
+        return maths::sqrt(l);
+    }
 
-  //! \brief Make this instance be a unit vector.
-  //! \note undefined behavior is the norm of the vector is 0.
-  void normalize()
-  {
-    T const l = maths::one<T>() / norm();
-    size_t i = n;
+    //! \brief Make this instance be a unit vector.
+    //! \note undefined behavior is the norm of the vector is 0.
+    void normalize()
+    {
+        T const l = maths::one<T>() / norm();
+        size_t i = n;
 
-    while (i--)
-      m_data[i] *= l;
-  }
+        while (i--)
+            m_data[i] *= l;
+    }
 
-  void lerpSelf(Vector<T,n> const& uv, T const alpha)
-  {
-    size_t i = n;
+    void lerpSelf(Vector<T,n> const& uv, T const alpha)
+    {
+        size_t i = n;
 
-    while (i--)
-      m_data[i] += (uv.m_data[i] - m_data[i]) * alpha;
-  }
+        while (i--)
+            m_data[i] += (uv.m_data[i] - m_data[i]) * alpha;
+    }
 
 protected:
 
-  //! \brief static array holdind values.
-  //! \note be careful to not produce a stack overflow with a huge size.
-  //! \todo std::array to avoid segfaut in huge dimension ?
-  T m_data[n];
+    //! \brief static array holdind values.
+    //! \note be careful to not produce a stack overflow with a huge size.
+    //! \todo std::array to avoid segfaut in huge dimension ?
+    T m_data[n];
 };
 
 // *****************************************************************************
@@ -208,61 +208,61 @@ class Vector<T, 2_z>
 {
 public:
 
-  //! \brief Constructor.
-  Vector(const T scalar_x, const T scalar_y)
-  {
-    x = scalar_x;
-    y = scalar_y;
-  }
+    //! \brief Constructor.
+    Vector(const T scalar_x, const T scalar_y)
+    {
+        x = scalar_x;
+        y = scalar_y;
+    }
 
-  VECTOR_DIM(2_z);
+    VECTOR_DIM(2_z);
 
-  //! \brief Return the norm of this instance.
-  inline T norm() const
-  {
-    return maths::sqrt(x * x + y * y);
-  }
+    //! \brief Return the norm of this instance.
+    inline T norm() const
+    {
+        return maths::sqrt(x * x + y * y);
+    }
 
-  //! \brief Make this instance be a unit vector.
-  //! \note undefined behavior is the norm of the vector is 0.
-  void normalize()
-  {
-    T const l = maths::one<T>() / norm();
-    x *= l;
-    y *= l;
-  }
+    //! \brief Make this instance be a unit vector.
+    //! \note undefined behavior is the norm of the vector is 0.
+    void normalize()
+    {
+        T const l = maths::one<T>() / norm();
+        x *= l;
+        y *= l;
+    }
 
 public:
 
-  //! \brief static array holdind values.
-  union
-  {
     //! \brief static array holdind values.
-    T m_data[2_z];
+    union
+    {
+        //! \brief static array holdind values.
+        T m_data[2_z];
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-    struct { T x; T y; };
-    struct { T u; T v; };
+        struct { T x; T y; };
+        struct { T u; T v; };
 #pragma GCC diagnostic pop
-  };
+    };
 
-  //! \brief Create a vector filled with NaN (for float and double only).
-  const static Vector<T, 2_z> DUMMY;
-  //! \brief Create a vector filled with zero<T>().
-  const static Vector<T, 2_z> ZERO;
-  //! \brief Create the vector filled with one<T>().
-  const static Vector<T, 2_z> UNIT_SCALE;
-  //! \brief Create the vector filled with negative one<T>().
-  const static Vector<T, 2_z> NEGATIVE_UNIT_SCALE;
-  //! \brief Create the vector [one<T>() zero<T>()].
-  const static Vector<T, 2_z> UNIT_X;
-  //! \brief Create the vector [zero<T>() one<T>()].
-  const static Vector<T, 2_z> UNIT_Y;
-  //! \brief Create the vector [-one<T>() zero<T>()].
-  const static Vector<T, 2_z> NEGATIVE_UNIT_X;
-  //! \brief Create the vector [zero<T>() -one<T>()].
-  const static Vector<T, 2_z> NEGATIVE_UNIT_Y;
+    //! \brief Create a vector filled with NaN (for float and double only).
+    const static Vector<T, 2_z> DUMMY;
+    //! \brief Create a vector filled with zero<T>().
+    const static Vector<T, 2_z> ZERO;
+    //! \brief Create the vector filled with one<T>().
+    const static Vector<T, 2_z> UNIT_SCALE;
+    //! \brief Create the vector filled with negative one<T>().
+    const static Vector<T, 2_z> NEGATIVE_UNIT_SCALE;
+    //! \brief Create the vector [one<T>() zero<T>()].
+    const static Vector<T, 2_z> UNIT_X;
+    //! \brief Create the vector [zero<T>() one<T>()].
+    const static Vector<T, 2_z> UNIT_Y;
+    //! \brief Create the vector [-one<T>() zero<T>()].
+    const static Vector<T, 2_z> NEGATIVE_UNIT_X;
+    //! \brief Create the vector [zero<T>() -one<T>()].
+    const static Vector<T, 2_z> NEGATIVE_UNIT_Y;
 };
 
 // Predifined vectors
@@ -283,78 +283,100 @@ class Vector<T, 3_z>
 {
 public:
 
-  //! \brief Constructor.
-  Vector(Vector<T, 2_z> const& v, const T scalar_z = maths::zero<T>())
-  {
-    x = v.x;
-    y = v.y;
-    z = scalar_z;
-  }
+    //! \brief Constructor.
+    Vector(Vector<T, 2_z> const& v, const T scalar_z = maths::zero<T>())
+    {
+        x = v.x;
+        y = v.y;
+        z = scalar_z;
+    }
 
-  //! \brief Constructor.
-  Vector(const T scalar_x, const T scalar_y, const T scalar_z = maths::zero<T>())
-  {
-    x = scalar_x;
-    y = scalar_y;
-    z = scalar_z;
-  }
+    //! \brief Constructor.
+    Vector(const T scalar_x, const T scalar_y, const T scalar_z = maths::zero<T>())
+    {
+        x = scalar_x;
+        y = scalar_y;
+        z = scalar_z;
+    }
 
-  VECTOR_DIM(3_z);
+    VECTOR_DIM(3_z);
 
-   //! \brief Return the norm of this instance.
-  inline T norm() const
-  {
-    return maths::sqrt(x * x + y * y + z * z);
-  }
+    //! \brief Return the norm of this instance.
+    inline T norm() const
+    {
+        return maths::sqrt(x * x + y * y + z * z);
+    }
 
-  //! \brief Make this instance be a unit vector.
-  //! \note undefined behavior is the norm of the vector is 0.
-  void normalize()
-  {
-    T const l = maths::one<T>() / norm();
-    x *= l;
-    y *= l;
-    z *= l;
-  }
+    //! \brief Make this instance be a unit vector.
+    //! \note undefined behavior is the norm of the vector is 0.
+    void normalize()
+    {
+        T const l = maths::one<T>() / norm();
+        x *= l;
+        y *= l;
+        z *= l;
+    }
 
 public:
 
-  //! \brief static array holdind values.
-  union
-  {
-    T m_data[3_z];
+    //! \brief static array holdind values.
+    union
+    {
+        T m_data[3_z];
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-    struct { T x; T y; T z; };
-    struct { T r; T g; T b; };
+        struct { T x; T y; T z; };
+        struct { T r; T g; T b; };
 #pragma GCC diagnostic pop
-  };
+    };
 
-  //! \brief Create a vector filled with NaN (for float and double only).
-  const static Vector<T, 3_z> DUMMY;
-  //! \brief Create a vector filled with zero<T>().
-  const static Vector<T, 3_z> ZERO;
-  //! \brief Create the vector filled with one<T>().
-  const static Vector<T, 3_z> UNIT_SCALE;
-  //! \brief Create the vector filled with negative one<T>().
-  const static Vector<T, 3_z> NEGATIVE_UNIT_SCALE;
-  //! \brief Create the vector [one<T>() zero<T>() zero<T>()].
-  const static Vector<T, 3_z> UNIT_X;
-  //! \brief Create the vector [zero<T>() one<T>() zero<T>()].
-  const static Vector<T, 3_z> UNIT_Y;
-  //! \brief Create the vector [zero<T>() zero<T>() one<T>()].
-  const static Vector<T, 3_z> UNIT_Z;
-  //! \brief Create the vector [-one<T>() zero<T>() zero<T>()].
-  const static Vector<T, 3_z> NEGATIVE_UNIT_X;
-  //! \brief Create the vector [zero<T>() -one<T>() zero<T>()].
-  const static Vector<T, 3_z> NEGATIVE_UNIT_Y;
-  //! \brief Create the vector [zero<T>() zero<T>() -one<T>()].
-  const static Vector<T, 3_z> NEGATIVE_UNIT_Z;
+    //! \brief Create a vector filled with NaN (for float and double only).
+    const static Vector<T, 3_z> DUMMY;
+    //! \brief Create a vector filled with zero<T>().
+    const static Vector<T, 3_z> ZERO;
+    //! \brief Create the vector filled with one<T>().
+    const static Vector<T, 3_z> ONE;
+    //! \brief Create the vector filled with inf<T>().
+    const static Vector<T, 3_z> POSITIVE_INFINITY;
+    //! \brief Create the vector filled with -inf<T>().
+    const static Vector<T, 3_z> NEGATIVE_INFINITY;
+    //! \brief Create the vector filled with one<T>().
+    const static Vector<T, 3_z> UNIT_SCALE;
+    //! \brief Create the vector filled with negative one<T>().
+    const static Vector<T, 3_z> NEGATIVE_UNIT_SCALE;
+    //! \brief Create the vector [one<T>() zero<T>() zero<T>()].
+    const static Vector<T, 3_z> UNIT_X;
+    //! \brief Create the vector [zero<T>() one<T>() zero<T>()].
+    const static Vector<T, 3_z> UNIT_Y;
+    //! \brief Create the vector [zero<T>() zero<T>() one<T>()].
+    const static Vector<T, 3_z> UNIT_Z;
+    //! \brief Create the vector [-one<T>() zero<T>() zero<T>()].
+    const static Vector<T, 3_z> NEGATIVE_UNIT_X;
+    //! \brief Create the vector [zero<T>() -one<T>() zero<T>()].
+    const static Vector<T, 3_z> NEGATIVE_UNIT_Y;
+    //! \brief Create the vector [zero<T>() zero<T>() -one<T>()].
+    const static Vector<T, 3_z> NEGATIVE_UNIT_Z;
+    //! \brief Alias for NEGATIVE_UNIT_X
+    const static Vector<T, 3_z> LEFT;
+    //! \brief Alias for UNIT_X
+    const static Vector<T, 3_z> RIGHT;
+    //! \brief Alias for NEGATIVE_UNIT_Y
+    const static Vector<T, 3_z> BACK;
+    //! \brief Alias for UNIT_Y
+    const static Vector<T, 3_z> FORWARD;
+    //! \brief Alias for NEGATIVE_UNIT_Z
+    const static Vector<T, 3_z> DOWN;
+    //! \brief Alias for UNIT_Z
+    const static Vector<T, 3_z> UP;
 };
 
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::DUMMY(T(NAN));
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::DUMMY(maths::nan<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ZERO(maths::zero<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ONE(maths::one<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::POSITIVE_INFINITY(maths::inf<T>(), maths::inf<T>(), maths::inf<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_INFINITY(-maths::inf<T>(), -maths::inf<T>(), maths::inf<T>());
+
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_SCALE(maths::one<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_SCALE(-maths::one<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_X(maths::one<T>(), maths::zero<T>(), maths::zero<T>());
@@ -364,6 +386,13 @@ template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_X(-math
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_Z(maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
 
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::LEFT(-maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::RIGHT(maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::BACK(maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::FORWARD(maths::zero<T>(), maths::zero<T>(), maths::one<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::DOWN(maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UP(maths::zero<T>(), maths::one<T>(), maths::zero<T>());
+
 // *****************************************************************************
 //! \brief Specialization for vector of dimension 4
 // *****************************************************************************
@@ -372,81 +401,81 @@ class Vector<T, 4_z>
 {
 public:
 
-  //! \brief Constructor.
-  Vector(Vector<T, 3_z> const& v, const T scalar_w = maths::zero<T>())
-  {
-    x = v.x;
-    y = v.y;
-    z = v.z;
-    w = scalar_w;
-  }
+    //! \brief Constructor.
+    Vector(Vector<T, 3_z> const& v, const T scalar_w = maths::zero<T>())
+    {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+        w = scalar_w;
+    }
 
-  //! \brief Constructor.
-  Vector(const T scalar_x, const T scalar_y, const T scalar_z, const T scalar_w)
-  {
-    x = scalar_x;
-    y = scalar_y;
-    z = scalar_z;
-    w = scalar_w;
-  }
+    //! \brief Constructor.
+    Vector(const T scalar_x, const T scalar_y, const T scalar_z, const T scalar_w)
+    {
+        x = scalar_x;
+        y = scalar_y;
+        z = scalar_z;
+        w = scalar_w;
+    }
 
-  VECTOR_DIM(4_z);
+    VECTOR_DIM(4_z);
 
-  //! \brief Return the norm of this instance.
-  inline T norm() const
-  {
-    return maths::sqrt(x * x + y * y + z * z + w * w);
-  }
+    //! \brief Return the norm of this instance.
+    inline T norm() const
+    {
+        return maths::sqrt(x * x + y * y + z * z + w * w);
+    }
 
-  //! \brief Make this instance be a unit vector.
-  //! \note undefined behavior is the norm of the vector is 0.
-  void normalize()
-  {
-    T const l = maths::one<T>() / norm();
-    x *= l;
-    y *= l;
-    z *= l;
-    w *= l;
-  }
+    //! \brief Make this instance be a unit vector.
+    //! \note undefined behavior is the norm of the vector is 0.
+    void normalize()
+    {
+        T const l = maths::one<T>() / norm();
+        x *= l;
+        y *= l;
+        z *= l;
+        w *= l;
+    }
 
 public:
 
-  //! \brief static array holdind values.
-  union
-  {
-    T m_data[4_z];
+    //! \brief static array holdind values.
+    union
+    {
+        T m_data[4_z];
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-    struct { T x; T y; T z; T w; };
-    struct { T r; T g; T b; T a; };
+        struct { T x; T y; T z; T w; };
+        struct { T r; T g; T b; T a; };
 #pragma GCC diagnostic pop
-  };
+    };
 
-  //! \brief Create a vector filled with NaN (for float and double only).
-  const static Vector<T, 4_z> DUMMY;
-  //! \brief Create a vector filled with zero<T>().
-  const static Vector<T, 4_z> ZERO;
-  //! \brief Create the vector filled with one<T>().
-  const static Vector<T, 4_z> UNIT_SCALE;
-  //! \brief Create the vector filled with negative one<T>().
-  const static Vector<T, 4_z> NEGATIVE_UNIT_SCALE;
-  //! \brief Create the vector [one<T>() zero<T>() zero<T>() zero<T>()].
-  const static Vector<T, 4_z> UNIT_X;
-  //! \brief Create the vector [zero<T>() one<T>() zero<T>() zero<T>()].
-  const static Vector<T, 4_z> UNIT_Y;
-  //! \brief Create the vector [zero<T>() zero<T>() one<T>() zero<T>()].
-  const static Vector<T, 4_z> UNIT_Z;
-  //! \brief Create the vector [zero<T>() zero<T>() zero<T>() one<T>()].
-  const static Vector<T, 4_z> UNIT_W;
-  //! \brief Create the vector [-one<T>() zero<T>() zero<T>() zero<T>()].
-  const static Vector<T, 4_z> NEGATIVE_UNIT_X;
-  //! \brief Create the vector [zero<T>() -one<T>() zero<T>() zero<T>()].
-  const static Vector<T, 4_z> NEGATIVE_UNIT_Y;
-  //! \brief Create the vector [zero<T>() zero<T>() -one<T>() zero<T>()].
-  const static Vector<T, 4_z> NEGATIVE_UNIT_Z;
-  //! \brief Create the vector [zero<T>() zero<T>() zero<T>() -one<T>()].
-  const static Vector<T, 4_z> NEGATIVE_UNIT_W;
+    //! \brief Create a vector filled with NaN (for float and double only).
+    const static Vector<T, 4_z> DUMMY;
+    //! \brief Create a vector filled with zero<T>().
+    const static Vector<T, 4_z> ZERO;
+    //! \brief Create the vector filled with one<T>().
+    const static Vector<T, 4_z> UNIT_SCALE;
+    //! \brief Create the vector filled with negative one<T>().
+    const static Vector<T, 4_z> NEGATIVE_UNIT_SCALE;
+    //! \brief Create the vector [one<T>() zero<T>() zero<T>() zero<T>()].
+    const static Vector<T, 4_z> UNIT_X;
+    //! \brief Create the vector [zero<T>() one<T>() zero<T>() zero<T>()].
+    const static Vector<T, 4_z> UNIT_Y;
+    //! \brief Create the vector [zero<T>() zero<T>() one<T>() zero<T>()].
+    const static Vector<T, 4_z> UNIT_Z;
+    //! \brief Create the vector [zero<T>() zero<T>() zero<T>() one<T>()].
+    const static Vector<T, 4_z> UNIT_W;
+    //! \brief Create the vector [-one<T>() zero<T>() zero<T>() zero<T>()].
+    const static Vector<T, 4_z> NEGATIVE_UNIT_X;
+    //! \brief Create the vector [zero<T>() -one<T>() zero<T>() zero<T>()].
+    const static Vector<T, 4_z> NEGATIVE_UNIT_Y;
+    //! \brief Create the vector [zero<T>() zero<T>() -one<T>() zero<T>()].
+    const static Vector<T, 4_z> NEGATIVE_UNIT_Z;
+    //! \brief Create the vector [zero<T>() zero<T>() zero<T>() -one<T>()].
+    const static Vector<T, 4_z> NEGATIVE_UNIT_W;
 };
 
 template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::DUMMY(T(NAN));
@@ -467,137 +496,137 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths
 // *****************************************************************************
 
 #define DEFINE_UNARY_OPERATOR(op)                       \
-  template <typename T, size_t n>                       \
-  Vector<T, n> operator op (Vector<T, n> const& a)      \
-  {                                                     \
-    Vector<T, n> result;                                \
-    size_t i = n;                                       \
-    while (i--)                                         \
-      result[i] = op a[i];                              \
-    return result;                                      \
-  }
+    template <typename T, size_t n>                     \
+    Vector<T, n> operator op (Vector<T, n> const& a)    \
+    {                                                   \
+        Vector<T, n> result;                            \
+        size_t i = n;                                   \
+        while (i--)                                     \
+            result[i] = op a[i];                        \
+        return result;                                  \
+    }
 
 #define DEFINE_BINARY_OPERATORS(op)                                     \
-  /* Vector-Vector op */                                                \
-  template <typename T, size_t n>                                       \
-  Vector<T, n> operator op (Vector<T, n> const& a, Vector<T, n> const& b) \
-  {                                                                     \
-    Vector<T, n> result;                                                \
-    size_t i = n;                                                       \
-    while (i--)                                                         \
-      result[i] = a[i] op b[i];                                         \
-    return result;                                                      \
-  }                                                                     \
-  /* Scalar-Vector op */                                                \
-  template <typename T, size_t n>                                       \
-  Vector<T, n> operator op (T const a, Vector<T, n> const& b)           \
-  {                                                                     \
-    Vector<T, n> result;                                                \
-    size_t i = n;                                                       \
-    while (i--)                                                         \
-      result[i] = a op b[i];                                            \
-    return result;                                                      \
-  }                                                                     \
-  /* Vector-scalar op */                                                \
-  template <typename T, size_t n>                                       \
-  Vector<T, n> operator op (Vector<T, n> const& a, T const b)           \
-  {                                                                     \
-    Vector<T, n> result;                                                \
-    size_t i = n;                                                       \
-    while (i--)                                                         \
-      result[i] = a[i] op b;                                            \
-    return result;                                                      \
-  }
+    /* Vector-Vector op */                                              \
+    template <typename T, size_t n>                                     \
+    Vector<T, n> operator op (Vector<T, n> const& a, Vector<T, n> const& b) \
+    {                                                                   \
+        Vector<T, n> result;                                            \
+        size_t i = n;                                                   \
+        while (i--)                                                     \
+            result[i] = a[i] op b[i];                                   \
+        return result;                                                  \
+    }                                                                   \
+    /* Scalar-Vector op */                                              \
+    template <typename T, size_t n>                                     \
+    Vector<T, n> operator op (T const a, Vector<T, n> const& b)         \
+    {                                                                   \
+        Vector<T, n> result;                                            \
+        size_t i = n;                                                   \
+        while (i--)                                                     \
+            result[i] = a op b[i];                                      \
+        return result;                                                  \
+    }                                                                   \
+    /* Vector-scalar op */                                              \
+    template <typename T, size_t n>                                     \
+    Vector<T, n> operator op (Vector<T, n> const& a, T const b)         \
+    {                                                                   \
+        Vector<T, n> result;                                            \
+        size_t i = n;                                                   \
+        while (i--)                                                     \
+            result[i] = a[i] op b;                                      \
+        return result;                                                  \
+    }
 
 #define DEFINE_INPLACE_OPERATORS(op)                                    \
-  /* Vector-Vector op */                                                \
-  template <typename T, size_t n>                                       \
-  Vector<T, n>& operator op (Vector<T, n> &a, Vector<T, n> const& b)    \
-  {                                                                     \
-    size_t i = n;                                                       \
-    while (i--)                                                         \
-      a[i] op b[i];                                                     \
-    return a;                                                           \
-  }                                                                     \
-  /* Vector-scalar op */                                                \
-  template <typename T, size_t n>                                       \
-  Vector<T, n>& operator op (Vector<T, n> &a, T const b)                \
-  {                                                                     \
-    size_t i = n;                                                       \
-    while (i--)                                                         \
-      a[i] op b;                                                        \
-    return a;                                                           \
-  }
+    /* Vector-Vector op */                                              \
+    template <typename T, size_t n>                                     \
+    Vector<T, n>& operator op (Vector<T, n> &a, Vector<T, n> const& b)  \
+    {                                                                   \
+        size_t i = n;                                                   \
+        while (i--)                                                     \
+            a[i] op b[i];                                               \
+        return a;                                                       \
+    }                                                                   \
+    /* Vector-scalar op */                                              \
+    template <typename T, size_t n>                                     \
+    Vector<T, n>& operator op (Vector<T, n> &a, T const b)              \
+    {                                                                   \
+        size_t i = n;                                                   \
+        while (i--)                                                     \
+            a[i] op b;                                                  \
+        return a;                                                       \
+    }
 
 #define DEFINE_RELATIONAL_OPERATORS(op)                                 \
-  /* Vector-Vector op */                                                \
-  template <typename T, typename U, size_t n>                           \
-  Vector<bool, n> operator op (Vector<T, n> const& a, Vector<U, n> const& b) \
-  {                                                                     \
-    Vector<bool, n> result;                                             \
-    size_t i = n;                                                       \
-    while (i--)                                                         \
-      result[i] = a[i] op b[i];                                         \
-    return result;                                                      \
-  }                                                                     \
-  /* Scalar-Vector op */                                                \
-  template <typename T, typename U, size_t n>                           \
-  Vector<bool, n> operator op (T const& a, Vector<U, n> const& b)       \
-  {                                                                     \
-    Vector<bool, n> result;                                             \
-    size_t i = n;                                                       \
-    while (i--)                                                         \
-      result[i] = a op b[i];                                            \
-    return result;                                                      \
-  }                                                                     \
-  /* Vector-scalar op */                                                \
-  template <typename T, typename U, size_t n>                           \
-  Vector<bool, n> operator op (Vector<T, n> const& a, U const& b)       \
-  {                                                                     \
-    Vector<bool, n> result;                                             \
-    size_t i = n;                                                       \
-    while (i--)                                                         \
-      result[i] = a[i] op b;                                            \
-    return result;                                                      \
-  }
+    /* Vector-Vector op */                                              \
+    template <typename T, typename U, size_t n>                         \
+    Vector<bool, n> operator op (Vector<T, n> const& a, Vector<U, n> const& b) \
+    {                                                                   \
+        Vector<bool, n> result;                                         \
+        size_t i = n;                                                   \
+        while (i--)                                                     \
+            result[i] = a[i] op b[i];                                   \
+        return result;                                                  \
+    }                                                                   \
+    /* Scalar-Vector op */                                              \
+    template <typename T, typename U, size_t n>                         \
+    Vector<bool, n> operator op (T const& a, Vector<U, n> const& b)     \
+    {                                                                   \
+        Vector<bool, n> result;                                         \
+        size_t i = n;                                                   \
+        while (i--)                                                     \
+            result[i] = a op b[i];                                      \
+        return result;                                                  \
+    }                                                                   \
+    /* Vector-scalar op */                                              \
+    template <typename T, typename U, size_t n>                         \
+    Vector<bool, n> operator op (Vector<T, n> const& a, U const& b)     \
+    {                                                                   \
+        Vector<bool, n> result;                                         \
+        size_t i = n;                                                   \
+        while (i--)                                                     \
+            result[i] = a[i] op b;                                      \
+        return result;                                                  \
+    }
 
 #define DEFINE_FUN1_OPERATOR(name, op)          \
-  template <typename T, size_t n>               \
-  Vector<T, n> name(Vector<T, n> const& a)      \
-  {                                             \
-    Vector<T, n> result;                        \
-    size_t i = n;                               \
+    template <typename T, size_t n>             \
+    Vector<T, n> name(Vector<T, n> const& a)    \
+    {                                           \
+        Vector<T, n> result;                    \
+        size_t i = n;                           \
                                                 \
-    while (i--)                                 \
-      result[i] = op(a[i]);                     \
-    return result;                              \
-  }
+        while (i--)                             \
+            result[i] = op(a[i]);               \
+        return result;                          \
+    }
 
 #define DEFINE_FUN2_OPERATOR(name, op)                                  \
-  template <typename T, size_t n>                                       \
-  Vector<T, n> name(Vector<T, n> const& a, Vector<T, n> const& b)       \
-  {                                                                     \
-    Vector<T, n> result;                                                \
-    size_t i = n;                                                       \
+    template <typename T, size_t n>                                     \
+    Vector<T, n> name(Vector<T, n> const& a, Vector<T, n> const& b)     \
+    {                                                                   \
+        Vector<T, n> result;                                            \
+        size_t i = n;                                                   \
                                                                         \
-    while (i--)                                                         \
-      result[i] = op(a[i], b[i]);                                       \
-    return result;                                                      \
-  }
+        while (i--)                                                     \
+            result[i] = op(a[i], b[i]);                                 \
+        return result;                                                  \
+    }
 
 #define DEFINE_BOOL_OPERATOR(name, op)                          \
-  template <typename T, size_t n>                               \
-  bool name(Vector<T, n> const& a, Vector<T, n> const& b)       \
-  {                                                             \
-    size_t i = n;                                               \
+    template <typename T, size_t n>                             \
+    bool name(Vector<T, n> const& a, Vector<T, n> const& b)     \
+    {                                                           \
+        size_t i = n;                                           \
                                                                 \
-    while (i--)                                                 \
-      {                                                         \
-        if (!(a[i] op b[i]))                                    \
-          return false;                                         \
-      }                                                         \
-    return true;                                                \
-  }
+        while (i--)                                             \
+        {                                                       \
+            if (!(a[i] op b[i]))                                \
+                return false;                                   \
+        }                                                       \
+        return true;                                            \
+    }
 
 DEFINE_BINARY_OPERATORS(+)
 DEFINE_BINARY_OPERATORS(-)
@@ -626,327 +655,327 @@ DEFINE_RELATIONAL_OPERATORS(>=)
 template <typename T, size_t n>
 Vector<T, n> operator*(T const a, Vector<T, n> const& b)
 {
-  Vector<T, n> result;
-  size_t i = n;
-  while (i--)
-    result[i] = a * b[i];
-  return result;
+    Vector<T, n> result;
+    size_t i = n;
+    while (i--)
+        result[i] = a * b[i];
+    return result;
 }
 
 //! \brief Vector-scalar op
 template <typename T, size_t n>
 Vector<T, n> operator*(Vector<T, n> const& a, T const b)
 {
-  Vector<T, n> result;
-  size_t i = n;
-  while (i--)
-    result[i] = a[i] * b;
-  return result;
+    Vector<T, n> result;
+    size_t i = n;
+    while (i--)
+        result[i] = a[i] * b;
+    return result;
 }
 
 namespace vector
 {
-  //! \brief Calculates and returns a component-wise product of this vector with
-  //! the given vector.
-  template <typename T, size_t n>
-  Vector<T, n> componentProduct(Vector<T, n> const& a, Vector<T, n> const& b)
-  {
+//! \brief Calculates and returns a component-wise product of this vector with
+//! the given vector.
+template <typename T, size_t n>
+Vector<T, n> componentProduct(Vector<T, n> const& a, Vector<T, n> const& b)
+{
     Vector<T, n> result;
     size_t i = n;
     while (i--)
-    result[i] = a[i] * b[i];
+        result[i] = a[i] * b[i];
     return result;
-  }
+}
 
-  //! \brief Performs a component-wise product with the given vector and sets this
-  //! vector to its result.
-  template <typename T, size_t n>
-  Vector<T, n> componentProductUpdate(Vector<T, n> const& a)
-  {
+//! \brief Performs a component-wise product with the given vector and sets this
+//! vector to its result.
+template <typename T, size_t n>
+Vector<T, n> componentProductUpdate(Vector<T, n> const& a)
+{
     Vector<T, n> result;
     size_t i = n;
     while (i--)
-      result[i] *= a[i];
+        result[i] *= a[i];
     return result;
-  }
+}
 
-  DEFINE_FUN2_OPERATOR(min, std::min)
-  DEFINE_FUN2_OPERATOR(max, std::max)
-  DEFINE_FUN1_OPERATOR(abs, maths::abs)
-  DEFINE_BOOL_OPERATOR(ge, >=)
-  DEFINE_BOOL_OPERATOR(gt, >)
-  DEFINE_BOOL_OPERATOR(le, <=)
-  DEFINE_BOOL_OPERATOR(lt, <)
+DEFINE_FUN2_OPERATOR(min, std::min)
+DEFINE_FUN2_OPERATOR(max, std::max)
+DEFINE_FUN1_OPERATOR(abs, maths::abs)
+DEFINE_BOOL_OPERATOR(ge, >=)
+DEFINE_BOOL_OPERATOR(gt, >)
+DEFINE_BOOL_OPERATOR(le, <=)
+DEFINE_BOOL_OPERATOR(lt, <)
 
-  //! \brief Compare the integer values for each elements of vectors.
-  //! \note Do not confuse this function with operator==() or the
-  //! function equivalent() which do not have the same behavior.
-  //! \return true if all elements have the same value.
-  template <typename T, size_t n>
-  typename std::enable_if<std::numeric_limits<T>::is_integer, bool>::type
-  eq(Vector<T, n> const& a, Vector<T, n> const& b)
-  {
+//! \brief Compare the integer values for each elements of vectors.
+//! \note Do not confuse this function with operator==() or the
+//! function equivalent() which do not have the same behavior.
+//! \return true if all elements have the same value.
+template <typename T, size_t n>
+typename std::enable_if<std::numeric_limits<T>::is_integer, bool>::type
+eq(Vector<T, n> const& a, Vector<T, n> const& b)
+{
     if (&a != &b)
-      {
+    {
         size_t i = n;
         while (i--)
-          {
+        {
             if (a[i] != b[i])
-              return false;
-          }
-      }
+                return false;
+        }
+    }
     return true;
-  }
+}
 
-  //! \brief Compare the float values for each elements of vectors.
-  //! \note Do not confuse this function with operator==() or the
-  //! function equivalent() which do not have the same behavior.
-  //! \return true if all elements have the same value.
-  template <typename T, size_t n>
-  typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-  eq(Vector<T, n> const& a, Vector<T, n> const& b)
-  {
+//! \brief Compare the float values for each elements of vectors.
+//! \note Do not confuse this function with operator==() or the
+//! function equivalent() which do not have the same behavior.
+//! \return true if all elements have the same value.
+template <typename T, size_t n>
+typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+eq(Vector<T, n> const& a, Vector<T, n> const& b)
+{
     if (&a != &b)
-      {
+    {
         size_t i = n;
         while (i--)
-          {
+        {
             if (!maths::almostEqual(a[i], b[i]))
-              return false;
-          }
-      }
+                return false;
+        }
+    }
     return true;
-  }
+}
 
-  template <typename T, size_t n>
-  bool ne(Vector<T, n> const& a, Vector<T, n> const& b)
-  {
+template <typename T, size_t n>
+bool ne(Vector<T, n> const& a, Vector<T, n> const& b)
+{
     return !vector::eq(a, b);
-  }
+}
 
-  template <typename T, size_t n>
-  void swap(Vector<T, n> &a, Vector<T, n> &b)
-  {
+template <typename T, size_t n>
+void swap(Vector<T, n> &a, Vector<T, n> &b)
+{
     if (&a != &b)
-      {
+    {
         size_t i = n;
         while (i--)
-          {
+        {
             std::swap(a[i], b[i]);
-          }
-      }
-  }
+        }
+    }
+}
 
-  //! \brief Get the coeficient of collinearity (k) of two vectors (u and v).
-  //!
-  //! Two non-null vectors are collinear if and only it exists a
-  //! scalar k != 0, where: u = k v (note: if u is a null vector, any
-  //! vector v is collinear to u because k = 0).
-  //!
-  //! \return k if vectors are collinear, else return NaN if vectors are not
-  //! collinear, else return 0 if zero vector.
-  //!
-  //! \note Use this function for T a familly of float and not for integers.
-  template <typename T, size_t n>
-  T collinearity(Vector<T, n> const& u, Vector<T, n> const& v)
-  {
+//! \brief Get the coeficient of collinearity (k) of two vectors (u and v).
+//!
+//! Two non-null vectors are collinear if and only it exists a
+//! scalar k != 0, where: u = k v (note: if u is a null vector, any
+//! vector v is collinear to u because k = 0).
+//!
+//! \return k if vectors are collinear, else return NaN if vectors are not
+//! collinear, else return 0 if zero vector.
+//!
+//! \note Use this function for T a familly of float and not for integers.
+template <typename T, size_t n>
+T collinearity(Vector<T, n> const& u, Vector<T, n> const& v)
+{
     // Null vector ?
     if (maths::almostZero(u[0]) || maths::almostZero(v[0]))
-      return maths::zero<T>();
+        return maths::zero<T>();
 
     const T k = u[0] / v[0];
     for (size_t i = 1_z; i < n; ++i)
-      {
+    {
         if (!maths::almostEqual(k * v[i], u[i]))
-          return T(NAN);
-      }
+            return T(NAN);
+    }
     return k;
-  }
+}
 
-  //! \brief Check if two vectors are parallels.
-  //! \note Use this function for T a familly of float and not for integers.
-  // http://www.educastream.com/vecteurs-colineaires-seconde
-  template <typename T, size_t n>
-  bool areCollinear(Vector<T, n> const& u, Vector<T, n> const& v)
-  {
+//! \brief Check if two vectors are parallels.
+//! \note Use this function for T a familly of float and not for integers.
+// http://www.educastream.com/vecteurs-colineaires-seconde
+template <typename T, size_t n>
+bool areCollinear(Vector<T, n> const& u, Vector<T, n> const& v)
+{
     T k = collinearity(u, v);
     return !std::isnan(k);
-  }
+}
 
-  //! \brief Check if two vectors are mathematicaly equivalent: same
-  //! norm (magnitude), same direction (parallel) and same sign.
-  //! \note Use this function for T a familly of float and not for integers.
-  template <typename T, size_t n>
-  bool areEquivalent(Vector<T, n> const& u, Vector<T, n> const& v)
-  {
+//! \brief Check if two vectors are mathematicaly equivalent: same
+//! norm (magnitude), same direction (parallel) and same sign.
+//! \note Use this function for T a familly of float and not for integers.
+template <typename T, size_t n>
+bool areEquivalent(Vector<T, n> const& u, Vector<T, n> const& v)
+{
     T k = collinearity(u, v);
     return maths::almostEqual(k, maths::one<T>());
-  }
+}
 
-  //! \brief Check if three points A, B, C are aligned.
-  //! \note Use this function for T a familly of float and not for integers.
-  template <typename T, size_t n>
-  bool arePointsAligned(Vector<T, n> const& a, Vector<T, n> const& b, Vector<T, n> const& c)
-  {
+//! \brief Check if three points A, B, C are aligned.
+//! \note Use this function for T a familly of float and not for integers.
+template <typename T, size_t n>
+bool arePointsAligned(Vector<T, n> const& a, Vector<T, n> const& b, Vector<T, n> const& c)
+{
     return areCollinear(b - a, c - a);
-  }
+}
 
-  //! \brief Constrain each element of the vector to lower and upper bounds.
-  template <typename T, size_t n>
-  Vector<T, n> clamp(Vector<T, n> const& a, T const lower, T const upper)
-  {
+//! \brief Constrain each element of the vector to lower and upper bounds.
+template <typename T, size_t n>
+Vector<T, n> clamp(Vector<T, n> const& a, T const lower, T const upper)
+{
     Vector<T, n> result;
     size_t i = n;
 
     while (i--)
-      result[i] = maths::clamp(a[i], lower, upper);
+        result[i] = maths::clamp(a[i], lower, upper);
     return result;
-  }
+}
 
-  //! \brief Vector product, aka for cross product (specialization for 2D vectors).
-  template <typename T>
-  T cross(Vector<T, 2_z> const& a, Vector<T, 2_z> const& b)
-  {
+//! \brief Vector product, aka for cross product (specialization for 2D vectors).
+template <typename T>
+T cross(Vector<T, 2_z> const& a, Vector<T, 2_z> const& b)
+{
     return a.x * b.y - a.y * b.x;
-  }
+}
 
-  //! \brief Vector product, aka for cross product (specialization for 3D vectors).
-  template <typename T>
-  Vector<T, 3_z> cross(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
-  {
+//! \brief Vector product, aka for cross product (specialization for 3D vectors).
+template <typename T>
+Vector<T, 3_z> cross(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
+{
     return
-      {
-       a.y * b.z - a.z * b.y,
-       a.z * b.x - a.x * b.z,
-       a.x * b.y - a.y * b.x,
-      };
-  }
+            {
+                a.y * b.z - a.z * b.y,
+                a.z * b.x - a.x * b.z,
+                a.x * b.y - a.y * b.x,
+            };
+}
 
-  //! \brief Dot product, aka scalar product (general algorithm).
-  template <typename T, size_t n>
-  T dot(Vector<T, n> const& a, Vector<T, n> const& b)
-  {
+//! \brief Dot product, aka scalar product (general algorithm).
+template <typename T, size_t n>
+T dot(Vector<T, n> const& a, Vector<T, n> const& b)
+{
     T result = maths::zero<T>();
     size_t i = n;
 
     while (i--)
-      result += a[i] * b[i];
+        result += a[i] * b[i];
     return result;
-  }
+}
 
-  //! \brief Dot product, aka scalar product (specialization for 3D vectors).
-  template <typename T, size_t n>
-  T dot(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
-  {
+//! \brief Dot product, aka scalar product (specialization for 3D vectors).
+template <typename T, size_t n>
+T dot(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
+{
     return a.x * b.x + a.y * b.y + a.z * b.z;
-  }
+}
 
-  //! \brief Gets the squared magnitude of this vector.
-  //! \note Alias for squaredNorm()
-  template <typename T, size_t n>
-  T squaredMagnitude(Vector<T, n> const& a)
-  {
+//! \brief Gets the squared magnitude of this vector.
+//! \note Alias for squaredNorm()
+template <typename T, size_t n>
+T squaredMagnitude(Vector<T, n> const& a)
+{
     return dot(a, a);
-  }
+}
 
-  //! \brief Gets the squared magnitude of this vector.
-  //! \note Alias for squaredMagnitude()
-  template <typename T, size_t n>
-  T squaredNorm(Vector<T, n> const& a)
-  {
+//! \brief Gets the squared magnitude of this vector.
+//! \note Alias for squaredMagnitude()
+template <typename T, size_t n>
+T squaredNorm(Vector<T, n> const& a)
+{
     return dot(a, a);
-  }
+}
 
-  //! \brief Gets the magnitude of this vector.
-  //! \note Alias for squaredNorm()
-  template <typename T, size_t n>
-  T magnitude(Vector<T, n> const& a)
-  {
+//! \brief Gets the magnitude of this vector.
+//! \note Alias for squaredNorm()
+template <typename T, size_t n>
+T magnitude(Vector<T, n> const& a)
+{
     return T(maths::sqrt(dot(a, a)));
-  }
+}
 
-  //! \brief Gets the magnitude of this vector.
-  //! \note Alias for squaredMagnitude()
-  template <typename T, size_t n>
-  T norm(Vector<T, n> const& a)
-  {
+//! \brief Gets the magnitude of this vector.
+//! \note Alias for squaredMagnitude()
+template <typename T, size_t n>
+T norm(Vector<T, n> const& a)
+{
     return T(maths::sqrt(dot(a, a)));
-  }
+}
 
-  //! \brief Gets the squared magnitude of a - b.
-  template <typename T, size_t n>
-  T squaredDistance(Vector<T, n> const& a, Vector<T, n> const& b)
-  {
+//! \brief Gets the squared magnitude of a - b.
+template <typename T, size_t n>
+T squaredDistance(Vector<T, n> const& a, Vector<T, n> const& b)
+{
     return squaredNorm(a - b);
-  }
+}
 
-  //! \brief Gets the magnitude of a - b.
-  template <typename T, size_t n>
-  T distance(Vector<T, n> const& a, Vector<T, n> const& b)
-  {
+//! \brief Gets the magnitude of a - b.
+template <typename T, size_t n>
+T distance(Vector<T, n> const& a, Vector<T, n> const& b)
+{
     return maths::sqrt(squaredDistance(a, b));
-  }
+}
 
-  // FIXME: throw exception
-  //! \brief Turns a non-zero vector into a vector of unit length.
-  template <typename T, size_t n>
-  Vector<T, n> normalize(Vector<T, n> const& a)
-  {
+// FIXME: throw exception
+//! \brief Turns a non-zero vector into a vector of unit length.
+template <typename T, size_t n>
+Vector<T, n> normalize(Vector<T, n> const& a)
+{
     return a / norm(a);
-  }
+}
 
-  //! \brief Turns a non-zero vector into a vector of unit length.
-  template <typename T, size_t n>
-  Vector<T, n> normalise(Vector<T, n> const& a)
-  {
+//! \brief Turns a non-zero vector into a vector of unit length.
+template <typename T, size_t n>
+Vector<T, n> normalise(Vector<T, n> const& a)
+{
     return a / norm(a);
-  }
+}
 
-  //! \brief Returns a vector at a point half way between the two
-  //! given positions.
-  template <typename T, size_t n>
-  Vector<T, n> middle(Vector<T, n> const& a, Vector<T, n> const& b)
-  {
+//! \brief Returns a vector at a point half way between the two
+//! given positions.
+template <typename T, size_t n>
+Vector<T, n> middle(Vector<T, n> const& a, Vector<T, n> const& b)
+{
     Vector<T, n> result;
     size_t i = n;
 
     while (i--)
-      result[i] = (a[i] + b[i]) / T(2);
+        result[i] = (a[i] + b[i]) / T(2);
     return result;
-  }
+}
 
-  //! \brief Return the perpendicular vector (specialization for 2D vectors).
-  template <typename T>
-  Vector<T, 2_z> orthogonal(Vector<T, 2_z> const& a)
-  {
+//! \brief Return the perpendicular vector (specialization for 2D vectors).
+template <typename T>
+Vector<T, 2_z> orthogonal(Vector<T, 2_z> const& a)
+{
     return { -a.y, a.x };
-  }
+}
 
-  //! \brief Return the perpendicular vector (specialization for 3D vectors).
-  template <typename T>
-  Vector<T, 3_z> orthogonal(Vector<T, 3_z> const& a)
-  {
+//! \brief Return the perpendicular vector (specialization for 3D vectors).
+template <typename T>
+Vector<T, 3_z> orthogonal(Vector<T, 3_z> const& a)
+{
     // Implementation due to Sam Hocevar - see blog post:
     // http://lolengine.net/blog/2013/09/21/picking-orthogonal-Vector-combing-coconuts
     if (maths::abs(a.x) > maths::abs(a.z))
-      return { -a.y, a.x, maths::zero<T>() };
+        return { -a.y, a.x, maths::zero<T>() };
     else
-      return { maths::zero<T>(), -a.z, a.y };
-  }
+        return { maths::zero<T>(), -a.z, a.y };
+}
 
-  //! \brief Check if the given two vectors are perpendicular between them.
-  template <typename T, size_t n>
-  typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-  areOrthogonal(Vector<T, n> const& a, Vector<T, n> const& b)
-  {
+//! \brief Check if the given two vectors are perpendicular between them.
+template <typename T, size_t n>
+typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+areOrthogonal(Vector<T, n> const& a, Vector<T, n> const& b)
+{
     return maths::almostZero(dot(a, b));
-  }
+}
 
-  //! \brief Gets the angle (in degrees) between 2 vectors.
-  //! Compute: acos(dot(a,b) / (norm(a) * norm(b)))
-  template <typename T, size_t n>
-  T angleBetween(Vector<T, n> const& org, Vector<T, n> const& dest)
-  {
+//! \brief Gets the angle (in degrees) between 2 vectors.
+//! Compute: acos(dot(a,b) / (norm(a) * norm(b)))
+template <typename T, size_t n>
+T angleBetween(Vector<T, n> const& org, Vector<T, n> const& dest)
+{
     T lenProduct = norm(org) * norm(dest);
 
     // Divide by zero check
@@ -956,70 +985,70 @@ namespace vector
     T f = dot(org, dest) / lenProduct;
     f = std::min(std::max(f, -maths::one<T>()), maths::one<T>());
     return T(maths::toDegree(std::acos(f)));
-  }
+}
 
-  //! \brief Calculates a reflection vector to the plane with the given normal.
-  template <typename T, size_t n>
-  Vector<T, n> reflect(Vector<T, n> const& v, Vector<T, n> const& normal)
-  {
+//! \brief Calculates a reflection vector to the plane with the given normal.
+template <typename T, size_t n>
+Vector<T, n> reflect(Vector<T, n> const& v, Vector<T, n> const& normal)
+{
     return v - (T(2) * dot(v, normal) * normal);
-  }
+}
 
-  //! \brief Summation
-  template <typename T, size_t n>
-  T sum(Vector<T, n> const& v)
-  {
+//! \brief Summation
+template <typename T, size_t n>
+T sum(Vector<T, n> const& v)
+{
     T res = maths::zero<T>();
     size_t i = n;
     while (i--)
-      {
+    {
         res += v[i];
-      }
+    }
 
     return res;
-  }
+}
 
-  //! \brief Mean (general algorithm)
-  template <typename T, size_t n>
-  T mean(Vector<T, n> const& v)
-  {
+//! \brief Mean (general algorithm)
+template <typename T, size_t n>
+T mean(Vector<T, n> const& v)
+{
     return sum(v) / T(n);
-  }
+}
 
-  //! \brief Mean (specialization for 2D vectors).
-  template <typename T>
-  T mean(Vector<T, 2_z> const& v)
-  {
+//! \brief Mean (specialization for 2D vectors).
+template <typename T>
+T mean(Vector<T, 2_z> const& v)
+{
     return (v[0] + v[1]) / T(2);
-  }
+}
 
-  //! \brief Mean (specialization for 3D vectors).
-  template <typename T>
-  T mean(Vector<T, 3_z> const& v)
-  {
+//! \brief Mean (specialization for 3D vectors).
+template <typename T>
+T mean(Vector<T, 3_z> const& v)
+{
     return (v[0] + v[1] + v[2]) / T(3);
-  }
+}
 
-  //! \brief Mean (specialization for 4D vectors).
-  template <typename T>
-  T mean(Vector<T, 4_z> const& v)
-  {
+//! \brief Mean (specialization for 4D vectors).
+template <typename T>
+T mean(Vector<T, 4_z> const& v)
+{
     return (v[0] + v[1] + v[2] + v[3]) / T(4);
-  }
+}
 
-  //! \brief Root Mean Square
-  template <typename T, size_t n>
-  T rms(Vector<T, n> const& v)
-  {
+//! \brief Root Mean Square
+template <typename T, size_t n>
+T rms(Vector<T, n> const& v)
+{
     return norm(v) / maths::sqrt(v.size());
-  }
+}
 
-  //! \brief Standard deviation
-  template <typename T, size_t n>
-  T std(Vector<T, n> const& v)
-  {
+//! \brief Standard deviation
+template <typename T, size_t n>
+T std(Vector<T, n> const& v)
+{
     return norm(v - vector::mean(v)) / maths::sqrt(v.size());
-  }
+}
 
 } // namespace vector
 
@@ -1027,47 +1056,47 @@ namespace vector
 template <typename T, size_t n>
 T operator*(Vector<T, n> const& a, Vector<T, n> const& b)
 {
-  return vector::dot(a, b);
+    return vector::dot(a, b);
 }
 
 //! \brief Vector product (aka cross product).
 template <typename T, size_t n>
 Vector<T, n> operator%(Vector<T, n> const& a, Vector<T, n> const& b)
 {
-  return vector::cross(a, b);
+    return vector::cross(a, b);
 }
 
 //! \brief Display a vector (global algorithm).
 template <typename T, size_t n>
 std::ostream& operator<<(std::ostream& os, Vector<T, n> const& v)
 {
-  os << "Vector(" << v[0];
-  for (size_t i = 1; i < n; ++i)
+    os << "Vector(" << v[0];
+    for (size_t i = 1; i < n; ++i)
     {
-      os << ", " << v[i];
+        os << ", " << v[i];
     }
-  return os << ')';
+    return os << ')';
 }
 
 //! \brief Display a vector (specialization for 2D vectors).
 template <typename T>
 std::ostream& operator<<(std::ostream& os, Vector<T, 2_z> const& v)
 {
-  return os << "Vector(" << v[0] << ", " << v[1] << ')';
+    return os << "Vector(" << v[0] << ", " << v[1] << ')';
 }
 
 //! \brief Display a vector (specialization for 3D vectors).
 template <typename T>
 std::ostream& operator<<(std::ostream& os, Vector<T, 3_z> const& v)
 {
-  return os << "Vector(" << v[0] << ", " << v[1] << ", " << v[2] << ')';
+    return os << "Vector(" << v[0] << ", " << v[1] << ", " << v[2] << ')';
 }
 
 //! \brief Display a vector (specialization for 4D vectors).
 template <typename T>
 std::ostream& operator<<(std::ostream& os, Vector<T, 4_z> const& v)
 {
-  return os << "Vector(" << v[0] << ", " << v[1] << ", " << v[2]  << ", " << v[3] << ')';
+    return os << "Vector(" << v[0] << ", " << v[1] << ", " << v[2]  << ", " << v[3] << ')';
 }
 
 // *****************************************************************************

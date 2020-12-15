@@ -287,7 +287,7 @@ public:
         {
             if (unlikely(!matrix::inverse(matrix(), m_inverse_transform)))
             {
-                throw GL::Exception("Failed to inverse the matrix");
+                //FIXME throw GL::Exception("Failed to inverse the matrix");
                 matrix::identity(m_inverse_transform);
             }
             m_inverse_trans_needs_update = false;
