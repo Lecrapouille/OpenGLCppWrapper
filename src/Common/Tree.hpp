@@ -36,79 +36,134 @@ public:
     struct Node
     {
         template<typename X = T>
-        Node(X&& ele, Node* root = nullptr)
-            : parent(root),
-              data{std::forward<X>(ele)}
+        Node(X&& d, Node* p = nullptr)
+            : parent(p),
+              data{std::forward<X>(d)}
         {}
 
-        template<typename X = T>
-        void attach(X&& x, Node* root = nullptr)
+        Node& operator[](size_t const i)
         {
-            children.push_back(std::make_unique<Node>(std::forward<X>(x), root));
+            return children[i];
         }
 
-        std::vector<std::unique_ptr<Node>> children;
+        Node& root()
+        {
+            Node* n = this;
+            while (n->parent != nullptr)
+                n = n->parent;
+            return *n;
+        }
+
+        //! \brief Getter
+        inline operator const T&() const
+        {
+            return data;
+        }
+
+        //! \brief Setter
+        inline operator T&()
+        {
+            return data;
+        }
+
         Node* parent = nullptr;
+        std::vector<std::unique_ptr<Node>> children;
         T data;
     };
-
-private:
-
-    std::unique_ptr<Node> root = nullptr;
-    std::size_t sz = 0u;
 
 public:
 
     Tree() = default;
 
+    template<typename X = T>
+    Tree(X&& data)
+    {
+        m_root = std::make_unique<Node>(std::forward<X>(data), nullptr);
+        m_size = 1u;
+    }
+
+    template<typename X = T>
+    Tree(std::initializer_list<X> list)
+    {
+        for (auto& it: list)
+            insert(it);
+    }
+
     Tree(const Tree& other)
-        : root{clone(other.root)}
+        : m_root{clone(other.m_root)}
     {}
+
+    ~Tree()
+    {
+        clear();
+    }
 
     Tree& operator=(const Tree& other)
     {
         // copy and swap idiom
         Tree tmp(other);
-        std::swap(root, tmp.root);
-        std::swap(sz, tmp.sz);
+        std::swap(m_root, tmp.m_root);
+        std::swap(m_size, tmp.m_size);
         return *this;
     }
 
     Tree(Tree&& other) noexcept
         : Tree()
     {
-        std::swap(root, other.root);
-        std::swap(sz, other.sz);
+        std::swap(m_root, other.m_root);
+        std::swap(m_size, other.m_size);
     }
 
     Tree& operator=(Tree&& other) noexcept
     {
-        std::swap(root, other.root);
-        std::swap(sz, other.sz);
+        std::swap(m_root, other.m_root);
+        std::swap(m_size, other.m_size);
         return *this;
     }
 
-    inline void clear() noexcept
+    void clear()
     {
-        root.reset(nullptr);
+        if (m_root != nullptr)
+            clear(*m_root);
+        m_root = nullptr;
+    }
+
+    void clear(Node& node)
+    {
+        Node* current = &node;
+
+        while ((current != &node) || (!node.children.empty()))
+        {
+            if (!current->children.empty())
+            {
+                current = current->children.back().get();
+            }
+            else
+            {
+                current = current->parent;
+                current->children.pop_back();
+                --m_size;
+            }
+        }
+        --m_size;
     }
 
     inline bool empty() const noexcept
     {
-        return sz == 0;
+        return m_size == 0u;
     }
 
     inline const std::size_t& size() const noexcept
     {
-        return sz;
+        return m_size;
     }
 
     void print() const// noexcept
     {
-        if (root == nullptr)
+        if (m_root == nullptr)
             return ;
 
-        const_traverse(root, [](auto& node)
+        traverse(*m_root, [](Node const& node)
         {
             std::cout << "Node: " << node.data;
             std::cout << " has " << node.children.size()
@@ -122,59 +177,99 @@ public:
     template<typename Functor>
     void traverse(Functor functor)
     {
-        traverse(root, functor);
+        if (m_root == nullptr)
+            return ;
+
+        traverse(*m_root, functor);
     }
 
     template<typename Functor>
-    void const_traverse(Functor functor) const// noexcept
+    void traverse(Functor functor) const// noexcept
     {
-        traverse(root, functor);
+        if (m_root == nullptr)
+            return ;
+
+        traverse(*m_root, functor);
+    }
+
+    template<typename Functor>
+    void traverse(Node& node, Functor functor)
+    {
+        functor(node);
+
+        for (auto& child: node.children)
+        {
+            traverse(*child, functor);
+        }
+    }
+
+    template<typename Functor>
+    void traverse(Node const& node, Functor functor) const
+    {
+        functor(node);
+
+        for (auto& child: node.children)
+        {
+            traverse(*child, functor);
+        }
     }
 
     bool search(const T& x) const noexcept
     {
-        return search(x, root);
+        if (m_root == nullptr)
+            return false;
+
+        return search(x, m_root);
+    }
+
+    Node& root()
+    {
+        return *m_root;
     }
 
     template<typename X = T>
-    Node& attach(X&& x)
+    Node& root(X&& x)
     {
-        ++sz;
-        if (root == nullptr)
+        m_size = 1u;
+        m_root = std::make_unique<Node>(std::forward<X>(x), nullptr);
+        return *m_root;
+    }
+
+    template<typename X = T>
+    Node& insert(X&& x)
+    {
+        if (m_root == nullptr)
         {
-            root = std::make_unique<Node>(std::forward<X>(x), nullptr);
-            return *root;
+            ++m_size;
+            m_root = std::make_unique<Node>(std::forward<X>(x), nullptr);
+            return *m_root;
         }
         else
         {
-            root->attach(std::forward<X>(x), root.get());
-            return *(root->children.back());
+            return insert(*m_root, std::forward<X>(x));
         }
+    }
+
+    template<typename X = T>
+    Node& insert(Node& parent, X&& x)
+    {
+        ++m_size;
+        parent.children.push_back(std::make_unique<Node>(std::forward<X>(x), &parent));
+        return *(m_root->children.back());
+    }
+
+    template<typename X = T>
+    void insert(Node& parent, std::initializer_list<X> list)
+    {
+        m_size += list.size();
+        for (auto& it: list)
+            parent.children.push_back(std::make_unique<Node>(it, &parent));
     }
 
 private:
 
-    template<typename Functor>
-    void traverse(std::unique_ptr<Node>& t, Functor functor)
-    {
-        functor(*t);
-
-        for (auto& child: t->children)
-        {
-            traverse(child, functor);
-        }
-    }
-
-    template<typename Functor>
-    void const_traverse(std::unique_ptr<Node> const& t, Functor functor) const
-    {
-        functor(*t);
-
-        for (auto& child: t->children)
-        {
-            const_traverse(child, functor);
-        }
-    }
+    std::unique_ptr<Node> m_root = nullptr;
+    std::size_t m_size = 0u;
 };
 
 #endif

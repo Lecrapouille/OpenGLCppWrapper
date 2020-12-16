@@ -19,71 +19,67 @@
 ##=====================================================================
 
 ###################################################
+# Project definition
+#
+PROJECT = OpenGLCppWrapper
+TARGET = $(PROJECT)-UnitTest
+DESCRIPTION = Unit tests for $(PROJECT)
+BUILD_TYPE = debug
+USE_COVERAGE = 1
+STANDARD = --std=c++14
+
+###################################################
 # Location of the project directory and Makefiles
 #
 P := ..
 M := $(P)/.makefile
+include $(M)/Makefile.header
 
 ###################################################
-# Project definition
+# List of files to compile.
 #
-TARGET = $(PROJECT)-UnitTest
-DESCRIPTION = Unit tests for $(PROJECT)
-BUILD_TYPE = debug
-
-include $(P)/Makefile.common
+OBJS = tests-tree.o main.o
 
 ###################################################
-# Make the list of compiled files
+# Project defines
 #
-OBJS  = VectorTests.o MatrixTests.o
-OBJS += GLObjectTests.o GLVAOTests.o GLVBOTests.o
-OBJS += GLShadersTests.o GLProgramTests.o
-OBJS += PendingDataTests.o PendingContainerTests.o
-OBJS += UnitTests.o
+DEFINES += -Wno-unused-function -Wno-undef -Wno-keyword-macro -Wno-float-equal \
+  -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_ROOT)/core\"
 
 ###################################################
-# Link against the crpcut unit test lib.
-# Note: that crpcut does not provide pkg-config file.
+# Compilation options.
 #
-NOT_PKG_LIBS += -lcrpcut -ldl
+PKG_LIBS += gtest gmock
 
 ###################################################
 # Code coverage. Comment these lines if coveraging
-# is not desired. All -fno-*inline* forces lcov to
-# count non used template methods.
+# is not desired.
 #
-COMPIL_FLAGS += --coverage -O0 -fno-inline -fno-inline-small-functions -fno-default-inline -fno-elide-constructors
-LINKER_FLAGS += --coverage
+LINKER_FLAGS += -lreadline -ldl
 
 ###################################################
-# Set Libraries compiled in the external/ directory.
-# For knowing which libraries is needed please read
-# the doc/Install.md file.
-#FIXME: the static lib name shall be extracted from root makefile
+# Inform Makefile where to find header files
 #
-THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.$(shell cat $(P)/VERSION))
+INCLUDES += \
+  -I$(P)/include -I$(P)/src
 
 ###################################################
-# Compile OpenGLCppWrapper unit tests.
-all: $(THIRDPART_LIBS) $(TARGET)
+# Inform Makefile where to find *.cpp and *.o files
+#
+VPATH +=
 
 ###################################################
-# Be sure the main project have been compiled
-#
-$(OBJS): | $(THIRDPART_LIBS)
-$(THIRDPART_LIBS):
-	@$(call print-to,"Compiling","$(THIRDPART_LIBS)","$@","$(VERSION)")
-	@cd $(P) && $(MAKE)
+# Compile SimTaDyn unit tests
+all: $(TARGET)
 
 ###################################################
 # Run unit tests.
 .PHONY: unit-tests
-unit-tests: $(TARGET)
+.PHONY: check
+unit-tests check: $(TARGET)
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
-	@$(SANITIZER) ./$(BUILD)/$(TARGET) || (cat $(TARGET).log; return 1)
+	$(SANITIZER) ./$(BUILD)/$(TARGET) $(TU_OPTIONS) || (cat $(TARGET).log; return 1)
 
 ###################################################
 # Sharable informations between all Makefiles
 include $(M)/Makefile.footer
-#$(error "QQ $(CXXFLAGS)")
