@@ -69,5 +69,5 @@ VPATH += $(P)/src/OpenGL $(P)/src/OpenGL/Buffers
 VPATH += $(P)/src/OpenGL/Context $(P)/src/OpenGL/Shaders
 VPATH += $(P)/src/OpenGL/Textures $(P)/src/OpenGL/Variables
 VPATH += $(P)/src/UI $(P)/src/Loaders/Textures $(P)/src/Loaders/3D
-VPATH += $(P)/src/SceneGraph/Material $(P)/src/SceneGraph/Geometry
+VPATH += $(P)/src/SceneGraph/Material $(P)/src/SceneGraph/Geometry $(P)/src/SceneGraph
 VPATH += $(THIRDPART) $(THIRDPART)/imgui $(THIRDPART)/SOIL/obj

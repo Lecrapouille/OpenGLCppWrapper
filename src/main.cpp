@@ -5,18 +5,18 @@ int main()
 {
     GameObject::Ptr g0 = GameObject::create("AA");
     std::cout << g0->size() << std::endl;
-    assert(g0->parent() == nullptr);
-    assert(g0->children().size() == 0u);
+    assert(g0->parent == nullptr);
+    assert(g0->children.size() == 0u);
 
     GameObject& g1 = g0->insert("BB");std::cout << g0->size() << std::endl;
-    assert(g0->parent() == nullptr);
-    assert(g0->children().size() == 1u);
-    assert(g1.parent() == g0.get());
-    assert(g1.children().size() == 0u);
+    assert(g0->parent == nullptr);
+    assert(g0->children.size() == 1u);
+    assert(g1.parent == g0.get());
+    assert(g1.children.size() == 0u);
 
     g1.insert("CC");
-    std::cout << g0->child(0).name() << std::endl;
-    std::cout << g0->child(0).child(0).name() << std::endl;
+    std::cout << g0->children[0]->name() << std::endl;
+    std::cout << g0->children[0]->children[0]->name() << std::endl;
 
 
     GameObject::Ptr g2 = GameObject::create("EE");

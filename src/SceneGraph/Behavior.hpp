@@ -22,6 +22,19 @@
 #  define BEHAVIOR_HPP
 
 //------------------------------------------------------------------------------
+//! \brief Drawable Object
+//------------------------------------------------------------------------------
+class Renderable
+{
+public:
+
+    virtual ~Renderable() = default;
+
+    virtual void draw(Matrix44f const& /*modelMatrix*/)
+    {}
+};
+
+//------------------------------------------------------------------------------
 //! \brief Comes from Unity's MonoBehavior class
 //------------------------------------------------------------------------------
 class Behavior
@@ -30,6 +43,32 @@ public:
 
     virtual ~Behavior() = default;
 
+    //--------------------------------------------------------------------------
+    //! \brief Calback triggered when the object becomes enabled and active.
+    //--------------------------------------------------------------------------
+    virtual void onEnable()
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Calback triggered when the object becomes disabled.
+    //! This is also called when the object is destroyed and can be used for any
+    //! cleanup code.
+    //--------------------------------------------------------------------------
+    virtual void onDisable()
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Calback triggered just after the creation of an object and only
+    //! once during the lifetime of the script instance.
+    //--------------------------------------------------------------------------
+    virtual bool onCreate()
+    {
+       return true;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Calback triggered just when the scene is loaded.
+    //--------------------------------------------------------------------------
     virtual void onSetup()
     {}
 

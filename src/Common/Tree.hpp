@@ -49,10 +49,12 @@ public:
     //! \brief Create a new T as smart pointer. Use insert() to add it in the
     //! tree.
     //--------------------------------------------------------------------------
-    template <typename ...ArgsT>
+    template<typename ...ArgsT>
     static Ptr create(ArgsT&&... args)
     {
-        return std::make_unique<T>(std::forward<ArgsT>(args)...);
+        Ptr obj = std::make_unique<T>(std::forward<ArgsT>(args)...);
+        obj->onCreate();
+        return std::move(obj);
     }
 
 public:
@@ -76,7 +78,7 @@ public:
     //! \param[in] args parameters to the tree node constructor.
     //! \return the reference to the newly created tree node.
     //--------------------------------------------------------------------------
-    template <typename ...ArgsT>
+    template<typename ...ArgsT>
     T& insert(ArgsT&&... args)
     {
         children.push_back(create(std::forward<ArgsT>(args)...));

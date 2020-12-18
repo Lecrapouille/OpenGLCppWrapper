@@ -23,13 +23,14 @@
 
 #  include "SceneGraph/Geometry/Geometry.hpp"
 #  include "SceneGraph/Material/Material.hpp"
+#  include "SceneGraph/SceneGraph.hpp"
 
 // *****************************************************************************
 //! \brief Base class for predefined 3D shape (cube, cylinder ...). A Shape is
 //! a geometry (purely shape construction) associated to a material (albedo ...)
 // *****************************************************************************
 template<class Geometry, class Material>
-class Shape
+class Shape: public SceneGraph::Node
 {
 public:
 
@@ -37,15 +38,24 @@ public:
     //! \brief Give a name to the shape.
     //--------------------------------------------------------------------------
     Shape(std::string const& name)
-        : m_name(name), m_vao(name)
+        : SceneGraph::Node(name), m_vao(name)
     {}
+
+    using Ptr = std::unique_ptr<Shape<Geometry,Material>>;
+    static Ptr create(std::string const& name)
+    {
+        Ptr obj = std::make_unique<Shape<Geometry,Material>>(name);
+        if (obj->onCreate())
+            throw GL::Exception("Failed creating the shape");
+        return std::move(obj);
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Compile the material shaders and populate the geomatry.
     //! \note some geometry have to be configurate before their generation ie
     //! see their configure() method.
     //--------------------------------------------------------------------------
-    bool create()
+    virtual bool onCreate() override
     {
         // FIXME since prog has MVP matrix and vertice position should noy be
         // external ?
@@ -72,23 +82,24 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Return the projection matrix of the Model-View-Projection
     //--------------------------------------------------------------------------
-    void draw()
+    virtual void draw(Matrix44f const& modelMatrix = Identity44f) override
     {
+        material.program.matrix44f("modelMatrix") = modelMatrix;
         material.program.draw(m_vao, Mode::TRIANGLES);
     }
 
     //--------------------------------------------------------------------------
     //! \brief Return the model matrix of the Model-View-Projection
     //--------------------------------------------------------------------------
-    Matrix44f& model()
+    Matrix44f& modelMatrix()
     {
         return material.program.matrix44f("modelMatrix");
     }
 
-   //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     //! \brief Return the view matrix of the Model-View-Projection
     //--------------------------------------------------------------------------
-     Matrix44f& view()
+    Matrix44f& viewMatrix()
     {
         return material.program.matrix44f("viewMatrix");
     }
@@ -96,17 +107,9 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Return the projection matrix of the Model-View-Projection
     //--------------------------------------------------------------------------
-    Matrix44f& projection()
+    Matrix44f& projectionMatrix()
     {
         return material.program.matrix44f("projectionMatrix");
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Return the shape name.
-    //--------------------------------------------------------------------------
-    inline std::string const& name() const
-    {
-        return m_name;
     }
 
 public:
@@ -115,8 +118,6 @@ public:
     Geometry geometry;
 
 protected:
-
-    std::string m_name;
 
     //! \brief VAO with index
     GLVAO32 m_vao;

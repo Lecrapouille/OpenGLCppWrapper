@@ -1,69 +1,95 @@
+//=====================================================================
+// OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
+// Copyright 2018-2020 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of OpenGLCppWrapper.
+//
+// OpenGLCppWrapper is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef SCENEGRAPH_HPP
 #  define SCENEGRAPH_HPP
 
-#  include "Common/Tree.hpp"
 #  include "Math/Transformable.hpp"
-#  include "SceneGraph/Object.hpp"
-#  include "SceneGraph/Behavior.hpp"
+#  include "Common/Tree.hpp"
+#  include "SceneGraph/GameObject.hpp"
 
 //------------------------------------------------------------------------------
 //! \brief
 //------------------------------------------------------------------------------
-class GameObject : public Tree<GameObject>, public Object, public Behavior
+class SceneGraph
 {
 public:
 
-    GameObject(std::string const& name)
-        : Object(name)
-    {}
-
-    virtual ~GameObject() = default;
-
-    Matrix44f const& worldTransform() const
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    class Node : public GameObject, public Tree<Node>
     {
-        return m_world_transform;
-    }
+        friend class SceneGraph;
 
-    void update(float const dt)
-    {
-        traverse([dt](GameObject& node)
+    public:
+
+        //----------------------------------------------------------------------
+        //! \brief Create a Node with a name
+        //----------------------------------------------------------------------
+        Node(std::string const& name)
+            : GameObject(name)
+        {}
+
+        //----------------------------------------------------------------------
+        //! \brief
+        //----------------------------------------------------------------------
+        inline Matrix44f const& worldTransform() const
         {
-            // Derived class may override this function for animating nodes.
-            node.onUpdate(dt);
+            return m_world_transform;
+        }
 
-            // Update the matrix transform from the parent matrix.
-            node.m_world_transform = node.transform.matrix();
-            if (node.parent != nullptr)
-                node.m_world_transform *= node.parent->m_world_transform;
-        });
-    }
+    public:
 
-    void debug()
-    {
-        traverse([](GameObject& node)
-        {
-            std::cout << "Node: " << node.name();
-            std::cout << " has " << node.children.size()
-                      << " children:";
-            for (auto const& it: node.children)
-                std::cout << " " <<  it->name();
-            std::cout << std::endl;
-        });
-    }
+        //----------------------------------------------------------------------
+        //! \brief
+        //----------------------------------------------------------------------
+        Transformable3D transform;
+
+    private:
+
+        //----------------------------------------------------------------------
+        //! \brief
+        //----------------------------------------------------------------------
+        Matrix44f m_world_transform = Identity44f;
+    };
+
+    ~SceneGraph();
+    void debug();
+    void setup();
+    void update(float const dt);
+    void draw();
+    void release();
 
 public:
 
-    Transformable3D transform;
-
-private:
-
-    Matrix44f m_world_transform = Identity44f;
+    Node::Ptr root = nullptr;
 };
 
-std::ostream& operator<<(std::ostream& os, GameObject const& o)
+//------------------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------------------
+inline std::ostream& operator<<(std::ostream& os, SceneGraph::Node const& o)
 {
     //Matrix44f const& mat = o.transform.matrix();
-    return os << "GameObject "
+    return os << "Node "
               << o.name() << " " << o.id();
             //<< o.transform.matrix();
 }

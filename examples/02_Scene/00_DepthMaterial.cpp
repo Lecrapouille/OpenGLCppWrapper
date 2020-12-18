@@ -24,8 +24,7 @@
 //------------------------------------------------------------------------------
 ShapeDepthMaterial::ShapeDepthMaterial(uint32_t const width, uint32_t const height,
                              const char *title)
-    : GLWindow(width, height, title),
-      m_shape("Plane")
+    : GLWindow(width, height, title)
 {
     std::cout << "Hello DepthMaterial: " << info() << std::endl;
 }
@@ -42,7 +41,10 @@ void ShapeDepthMaterial::onWindowResized()
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
     // Change the projction matrix of the shape
-    m_shape.projection() =
+    Shape<Exported, DepthMaterial>& root = // FIXME
+            *(static_cast<Shape<Exported, DepthMaterial>*>(m_scene.root.get()));
+
+    root.projectionMatrix() =  // FIXME: TODO scene.updateMatrix + visitor
             matrix::perspective(maths::toRadian(60.0f),
                                 width<float>() / height<float>(),
                                 0.1f, 100.0f);
@@ -51,25 +53,18 @@ void ShapeDepthMaterial::onWindowResized()
 //------------------------------------------------------------------------------
 bool ShapeDepthMaterial::onSetup()
 {
+    Shape<Exported, DepthMaterial>::Ptr root = // FIXME
+            Shape<Exported, DepthMaterial>::create("Object");
+
     // Configure the shape: geometry and material
-    m_shape.geometry.configure(1.0f, 1.0f, 5.0f, 10u);
-    //m_shape.material.configure(); // Pour basic material
+    root->geometry.select("/home/qq/MyGitHub/OpenGLCppWrapper/examples/textures/qq.obj");
+    root->material.near() = 1.0f;
+    root->material.far() = 10.0f;
+    root->material.opacity() = 1.0f;
+    std::cout << root->geometry.vertices() << std::endl;
 
-    // Compile shaders, generate the geometry
-    m_shape.create();
-
-    // If wanted: modify geometry and material values
-    //m_shape.geometry.vertices() *= 2.0f;
-    m_shape.material.near() = 1.0f;
-    m_shape.material.far() = 10.0f;
-    m_shape.material.opacity() = 1.0f;
-
-    // You can debug the shape
-    std::cout << m_shape.material.near()
-              << " " << m_shape.material.far()
-              << " " << m_shape.material.opacity()
-              << std::endl;
-    std::cout << m_shape.geometry.vertices() << std::endl;
+    m_scene.root = std::move(root);
+    m_scene.debug();
 
     return true;
 }
@@ -82,11 +77,15 @@ bool ShapeDepthMaterial::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-    m_shape.model() = Identity44f;
-    m_shape.view() = matrix::lookAt(Vector3f(5,5,5),
+    Shape<Exported, DepthMaterial>& root =
+            *(static_cast<Shape<Exported, DepthMaterial>*>(m_scene.root.get()));
+
+    root.modelMatrix() = Identity44f;
+    root.viewMatrix() = matrix::lookAt(Vector3f(5,5,5),
                                     Vector3f(2,2,2),
                                     Vector3f(0,1,0));
-    m_shape.draw();
+    m_scene.update(dt());
+    m_scene.draw();
 
     return true;
 }

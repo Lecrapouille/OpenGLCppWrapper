@@ -22,7 +22,8 @@
 #  define EXAMPLE_02_DEPTH_MATERIAL_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Math/Transformable.hpp"
+#  include "SceneGraph/SceneGraph.hpp"
+#  include "SceneGraph/Shape.hpp"
 #  include "../debug.hpp"
 
 //#  include "Material/Shape.hpp"
@@ -52,8 +53,7 @@ private:
     virtual bool onPaint() override;
     virtual void onPaintFailed(std::string const& reason) override;
 
-    //! \brief A tube with the depth as material
-    Shape<Tube, DepthMaterial> m_shape;
+    SceneGraph m_scene;
 };
 
 #endif // EXAMPLE_02_DEPTH_MATERIAL_HPP

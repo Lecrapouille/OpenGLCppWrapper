@@ -45,7 +45,7 @@ bool Tube::doGenerate(GLVertexBuffer<Vector3f>& vertices,
     const bool top_caps = m_top_radius > 0.0f;
 
     std::vector<float> angle;
-    maths::linspace(0.0f, float(maths::TWO_PI), m_slices + 1u, angle, true);
+    maths::linspace(0.0f, maths::TWO_PI<float>, m_slices + 1u, angle, true);
 
     std::vector<float> texture;
     maths::linspace(0.0f, 1.0f, m_slices + 1u, texture, true);
