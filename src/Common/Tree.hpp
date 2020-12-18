@@ -68,7 +68,7 @@ public:
     {
         std::cout << "Bye " << static_cast<T*>(this)->name() << std::endl;
         // Avoid using implicit recursive deletion due to usage of smart pointer
-        //clear();
+        //clear(); // FIXME ?
     }
 
     //--------------------------------------------------------------------------
@@ -79,9 +79,9 @@ public:
     template <typename ...ArgsT>
     T& insert(ArgsT&&... args)
     {
-        m_children.push_back(create(std::forward<ArgsT>(args)...));
-        m_children.back()->m_parent = static_cast<T*>(this);
-        return *static_cast<T*>(m_children.back().get());
+        children.push_back(create(std::forward<ArgsT>(args)...));
+        children.back()->parent = static_cast<T*>(this);
+        return *static_cast<T*>(children.back().get());
     }
 
     //--------------------------------------------------------------------------
@@ -90,18 +90,9 @@ public:
     //--------------------------------------------------------------------------
     size_t insert(Ptr node)
     {
-        node->m_parent = static_cast<T*>(this);
-        m_children.push_back(std::move(node));
-        return m_children.size() - 1u;
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Getter to the nth child. Throw an exception if the index is odd.
-    //! \return the reference to the nth child.
-    //--------------------------------------------------------------------------
-    T& child(size_t const i)
-    {
-        return *static_cast<T*>(m_children.at(i).get());
+        node->parent = static_cast<T*>(this);
+        children.push_back(std::move(node));
+        return children.size() - 1u;
     }
 
     //--------------------------------------------------------------------------
@@ -111,24 +102,12 @@ public:
     //--------------------------------------------------------------------------
     T& operator[](size_t const i)
     {
-        return *static_cast<T*>(m_children[i].get());
+        return *children[i];
     }
 
-    //--------------------------------------------------------------------------
-    //! \brief Return the parent node.
-    //! \return the address of the parent or nullptr for the root tree.
-    //--------------------------------------------------------------------------
-    T* parent()
+    T const& operator[](size_t const i) const
     {
-        return static_cast<T*>(m_parent);
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Return the list of children.
-    //--------------------------------------------------------------------------
-    std::vector<std::unique_ptr<T>>& children()
-    {
-        return m_children;
+        return *children[i];
     }
 
     //--------------------------------------------------------------------------
@@ -139,8 +118,8 @@ public:
     T& root()
     {
         T* n = static_cast<T*>(this);
-        while (n->m_parent != nullptr)
-            n = n->m_parent;
+        while (n->parent != nullptr)
+            n = n->parent;
         return *n;
     }
 
@@ -153,20 +132,21 @@ public:
         size_t removed = 0u;
         Tree* current = this;
 
-        while ((current != this) || (!this->m_children.empty()))
+        while ((current != this) || (!this->children.empty()))
         {
-            if (!current->m_children.empty())
+            if (!current->children.empty())
             {
-                current = current->m_children.back().get();
+                current = current->children.back().get();
             }
             else
             {
-                current = current->m_parent;
-                current->m_children.pop_back();
+                current = current->parent;
+                current->children.pop_back();
                 ++removed;
             }
         }
         ++removed;
+        std::cout << "end clear: " << std::endl;
         return removed;
     }
 
@@ -181,7 +161,7 @@ public:
     {
         functor(*static_cast<T*>(this), std::forward<ArgsT>(args)...);
 
-        for (auto& child: m_children)
+        for (auto& child: children)
         {
             child->traverse(functor, std::forward<ArgsT>(args)...);
         }
@@ -198,7 +178,7 @@ public:
     {
         functor(*static_cast<const T*>(this), std::forward<ArgsT>(args)...);
 
-        for (auto& child: m_children)
+        for (auto& child: children)
         {
             child->traverse(functor, std::forward<ArgsT>(args)...);
         }
@@ -213,7 +193,7 @@ public:
         size_t count = 0u;
         Tree<T>::traverse([](T const& node, size_t& c)
                           {
-                              c += node.m_children.size();
+                              c += node.children.size();
                           }, count);
         return count + 1u;
     }
@@ -226,13 +206,13 @@ public:
         return size() == 0u;
     }
 
-protected:
+public:
 
     //! \brief Access to the parent node. Needed for scene graph to get parent
     //! transform matrix.
-    T* m_parent = nullptr;
+    T* parent = nullptr;
     //! \brief Child nodes.
-    std::vector<std::unique_ptr<T>> m_children;
+    std::vector<std::unique_ptr<T>> children;
 };
 
 #endif

@@ -33,8 +33,8 @@ public:
 
             // Update the matrix transform from the parent matrix.
             node.m_world_transform = node.transform.matrix();
-            if (node.parent() != nullptr)
-                node.m_world_transform *= node.parent()->m_world_transform;
+            if (node.parent != nullptr)
+                node.m_world_transform *= node.parent->m_world_transform;
         });
     }
 
@@ -43,9 +43,9 @@ public:
         traverse([](GameObject& node)
         {
             std::cout << "Node: " << node.name();
-            std::cout << " has " << node.children().size()
+            std::cout << " has " << node.children.size()
                       << " children:";
-            for (auto const& it: node.children())
+            for (auto const& it: node.children)
                 std::cout << " " <<  it->name();
             std::cout << std::endl;
         });
