@@ -28,6 +28,8 @@ class Behavior
 {
 public:
 
+    virtual ~Behavior() = default;
+
     virtual void onSetup()
     {}
 

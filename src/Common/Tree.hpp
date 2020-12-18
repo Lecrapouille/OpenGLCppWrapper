@@ -26,250 +26,213 @@
 #  include <iostream>
 
 //------------------------------------------------------------------------------
-//! \brief
+//! \brief General Tree class. This class is made to allow derived class to
+//! access to parent and child nodes. This is easier to create scene graph and
+//! contrary to std container data has to be mixed with internal states.
+//! If this is not desired you can see other implementations:
+//! - https://github.com/reconndev/General-Tree/blob/master/GeneralTree/GeneralTree.hpp
+//! - https://gist.github.com/phoemur/6dd18d608438373185f6a2457662c1c2
+//! - https://github.com/taskflow/taskflow/blob/master/taskflow/core/graph.hpp
+//! \tparam T derived class deriving from Tree.
 //------------------------------------------------------------------------------
 template<class T>
 class Tree
 {
 public:
 
-    struct Node
+    //--------------------------------------------------------------------------
+    //! \brief Use as T::Ptr
+    //--------------------------------------------------------------------------
+    using Ptr = std::unique_ptr<T>;
+
+    //--------------------------------------------------------------------------
+    //! \brief Create a new T as smart pointer. Use insert() to add it in the
+    //! tree.
+    //--------------------------------------------------------------------------
+    template <typename ...ArgsT>
+    static Ptr create(ArgsT&&... args)
     {
-        template<typename X = T>
-        Node(X&& d, Node* p = nullptr)
-            : parent(p),
-              data{std::forward<X>(d)}
-        {}
-
-        Node& operator[](size_t const i)
-        {
-            return children[i];
-        }
-
-        Node& root()
-        {
-            Node* n = this;
-            while (n->parent != nullptr)
-                n = n->parent;
-            return *n;
-        }
-
-        //! \brief Getter
-        inline operator const T&() const
-        {
-            return data;
-        }
-
-        //! \brief Setter
-        inline operator T&()
-        {
-            return data;
-        }
-
-        Node* parent = nullptr;
-        std::vector<std::unique_ptr<Node>> children;
-        T data;
-    };
+        return std::make_unique<T>(std::forward<ArgsT>(args)...);
+    }
 
 public:
 
-    Tree() = default;
+    Tree<T>() = default;
+    Tree<T>(const Tree<T>&) = delete;
+    Tree<T>& operator=(const Tree<T>&) = delete;
 
-    template<typename X = T>
-    Tree(X&& data)
+    //--------------------------------------------------------------------------
+    //! \brief Release this node and its child nodes.
+    //--------------------------------------------------------------------------
+    virtual ~Tree<T>()
     {
-        m_root = std::make_unique<Node>(std::forward<X>(data), nullptr);
-        m_size = 1u;
+        std::cout << "Bye " << static_cast<T*>(this)->name() << std::endl;
+        // Avoid using implicit recursive deletion due to usage of smart pointer
+        //clear();
     }
 
-    template<typename X = T>
-    Tree(std::initializer_list<X> list)
+    //--------------------------------------------------------------------------
+    //! \brief Create and store a new tree node.
+    //! \param[in] args parameters to the tree node constructor.
+    //! \return the reference to the newly created tree node.
+    //--------------------------------------------------------------------------
+    template <typename ...ArgsT>
+    T& insert(ArgsT&&... args)
     {
-        for (auto& it: list)
-            insert(it);
+        m_children.push_back(create(std::forward<ArgsT>(args)...));
+        m_children.back()->m_parent = static_cast<T*>(this);
+        return *static_cast<T*>(m_children.back().get());
     }
 
-    Tree(const Tree& other)
-        : m_root{clone(other.m_root)}
-    {}
-
-    ~Tree()
+    //--------------------------------------------------------------------------
+    //! \brief Insert a new node. The element is moved so no longer be used.
+    //! \return the index of the object.
+    //--------------------------------------------------------------------------
+    size_t insert(Ptr node)
     {
-        clear();
+        node->m_parent = static_cast<T*>(this);
+        m_children.push_back(std::move(node));
+        return m_children.size() - 1u;
     }
 
-    Tree& operator=(const Tree& other)
+    //--------------------------------------------------------------------------
+    //! \brief Getter to the nth child. Throw an exception if the index is odd.
+    //! \return the reference to the nth child.
+    //--------------------------------------------------------------------------
+    T& child(size_t const i)
     {
-        // copy and swap idiom
-        Tree tmp(other);
-        std::swap(m_root, tmp.m_root);
-        std::swap(m_size, tmp.m_size);
-        return *this;
+        return *static_cast<T*>(m_children.at(i).get());
     }
 
-    Tree(Tree&& other) noexcept
-        : Tree()
+    //--------------------------------------------------------------------------
+    //! \brief Getter to the nth child. Do not throw an exception if the index
+    //! is odd. For throw method, use instead child(i).
+    //! \return the reference to the nth child.
+    //--------------------------------------------------------------------------
+    T& operator[](size_t const i)
     {
-        std::swap(m_root, other.m_root);
-        std::swap(m_size, other.m_size);
+        return *static_cast<T*>(m_children[i].get());
     }
 
-    Tree& operator=(Tree&& other) noexcept
+    //--------------------------------------------------------------------------
+    //! \brief Return the parent node.
+    //! \return the address of the parent or nullptr for the root tree.
+    //--------------------------------------------------------------------------
+    T* parent()
     {
-        std::swap(m_root, other.m_root);
-        std::swap(m_size, other.m_size);
-        return *this;
+        return static_cast<T*>(m_parent);
     }
 
-    void clear()
+    //--------------------------------------------------------------------------
+    //! \brief Return the list of children.
+    //--------------------------------------------------------------------------
+    std::vector<std::unique_ptr<T>>& children()
     {
-        if (m_root != nullptr)
-            clear(*m_root);
-        m_root = nullptr;
+        return m_children;
     }
 
-    void clear(Node& node)
+    //--------------------------------------------------------------------------
+    //! \brief Return the root of the tree.
+    //! \note this algorithm is O(n) where n is the depth of the node.
+    //! \return the reference of the tree root.
+    //--------------------------------------------------------------------------
+    T& root()
     {
-        Node* current = &node;
+        T* n = static_cast<T*>(this);
+        while (n->m_parent != nullptr)
+            n = n->m_parent;
+        return *n;
+    }
 
-        while ((current != &node) || (!node.children.empty()))
+    //--------------------------------------------------------------------------
+    //! \brief Clear the tree in a not recursive way to avoid stack overflow.
+    //! \return the number of deleted nodes.
+    //--------------------------------------------------------------------------
+    size_t clear()
+    {
+        size_t removed = 0u;
+        Tree* current = this;
+
+        while ((current != this) || (!this->m_children.empty()))
         {
-            if (!current->children.empty())
+            if (!current->m_children.empty())
             {
-                current = current->children.back().get();
+                current = current->m_children.back().get();
             }
             else
             {
-                current = current->parent;
-                current->children.pop_back();
-                --m_size;
+                current = current->m_parent;
+                current->m_children.pop_back();
+                ++removed;
             }
         }
-        --m_size;
+        ++removed;
+        return removed;
     }
 
-    inline bool empty() const noexcept
+    //--------------------------------------------------------------------------
+    //! \brief Traverse the tree and call a function on each node
+    //! \note Recursive method.
+    //! \param[in] functor lambda function to call on each node.
+    //! \param[in] args extra parameters of the lambda function.
+    //--------------------------------------------------------------------------
+    template<typename Functor, typename ...ArgsT>
+    void traverse(Functor functor, ArgsT&&... args)
     {
-        return m_size == 0u;
-    }
+        functor(*static_cast<T*>(this), std::forward<ArgsT>(args)...);
 
-    inline const std::size_t& size() const noexcept
-    {
-        return m_size;
-    }
-
-    void print() const// noexcept
-    {
-        if (m_root == nullptr)
-            return ;
-
-        traverse(*m_root, [](Node const& node)
+        for (auto& child: m_children)
         {
-            std::cout << "Node: " << node.data;
-            std::cout << " has " << node.children.size()
-                      << " children:";
-            for (auto const& it: node.children)
-                std::cout << " " <<  it->data;
-            std::cout << std::endl;
-        });
-    }
-
-    template<typename Functor>
-    void traverse(Functor functor)
-    {
-        if (m_root == nullptr)
-            return ;
-
-        traverse(*m_root, functor);
-    }
-
-    template<typename Functor>
-    void traverse(Functor functor) const// noexcept
-    {
-        if (m_root == nullptr)
-            return ;
-
-        traverse(*m_root, functor);
-    }
-
-    template<typename Functor>
-    void traverse(Node& node, Functor functor)
-    {
-        functor(node);
-
-        for (auto& child: node.children)
-        {
-            traverse(*child, functor);
+            child->traverse(functor, std::forward<ArgsT>(args)...);
         }
     }
 
-    template<typename Functor>
-    void traverse(Node const& node, Functor functor) const
+    //--------------------------------------------------------------------------
+    //! \brief Const Traverse the tree and call a function on each node
+    //! \note Recursive method.
+    //! \param[in] functor lambda function to call on each node.
+    //! \param[in] args extra parameters of the lambda function.
+    //--------------------------------------------------------------------------
+    template<typename Functor, typename ...ArgsT>
+    void traverse(Functor functor, ArgsT&&... args) const
     {
-        functor(node);
+        functor(*static_cast<const T*>(this), std::forward<ArgsT>(args)...);
 
-        for (auto& child: node.children)
+        for (auto& child: m_children)
         {
-            traverse(*child, functor);
+            child->traverse(functor, std::forward<ArgsT>(args)...);
         }
     }
 
-    bool search(const T& x) const noexcept
+    //--------------------------------------------------------------------------
+    //! \brief Return the number of elements sotred in the tree.
+    //! \note time is O(n) where n is the number of elements.
+    //--------------------------------------------------------------------------
+    inline std::size_t size() const
     {
-        if (m_root == nullptr)
-            return false;
-
-        return search(x, m_root);
+        size_t count = 0u;
+        Tree<T>::traverse([](T const& node, size_t& c)
+                          {
+                              c += node.m_children.size();
+                          }, count);
+        return count + 1u;
     }
 
-    Node& root()
+    //--------------------------------------------------------------------------
+    //! \brief Return true if the tree is empty.
+    //--------------------------------------------------------------------------
+    inline bool empty() const
     {
-        return *m_root;
+        return size() == 0u;
     }
 
-    template<typename X = T>
-    Node& root(X&& x)
-    {
-        m_size = 1u;
-        m_root = std::make_unique<Node>(std::forward<X>(x), nullptr);
-        return *m_root;
-    }
+protected:
 
-    template<typename X = T>
-    Node& insert(X&& x)
-    {
-        if (m_root == nullptr)
-        {
-            ++m_size;
-            m_root = std::make_unique<Node>(std::forward<X>(x), nullptr);
-            return *m_root;
-        }
-        else
-        {
-            return insert(*m_root, std::forward<X>(x));
-        }
-    }
-
-    template<typename X = T>
-    Node& insert(Node& parent, X&& x)
-    {
-        ++m_size;
-        parent.children.push_back(std::make_unique<Node>(std::forward<X>(x), &parent));
-        return *(m_root->children.back());
-    }
-
-    template<typename X = T>
-    void insert(Node& parent, std::initializer_list<X> list)
-    {
-        m_size += list.size();
-        for (auto& it: list)
-            parent.children.push_back(std::make_unique<Node>(it, &parent));
-    }
-
-private:
-
-    std::unique_ptr<Node> m_root = nullptr;
-    std::size_t m_size = 0u;
+    //! \brief Access to the parent node. Needed for scene graph to get parent
+    //! transform matrix.
+    T* m_parent = nullptr;
+    //! \brief Child nodes.
+    std::vector<std::unique_ptr<T>> m_children;
 };
 
 #endif
