@@ -21,22 +21,10 @@
 #ifndef BEHAVIOR_HPP
 #  define BEHAVIOR_HPP
 
-//------------------------------------------------------------------------------
-//! \brief Drawable Object
-//------------------------------------------------------------------------------
-class Renderable
-{
-public:
-
-    virtual ~Renderable() = default;
-
-    virtual void draw(Matrix44f const& /*modelMatrix*/)
-    {}
-};
-
-//------------------------------------------------------------------------------
-//! \brief Comes from Unity's MonoBehavior class
-//------------------------------------------------------------------------------
+// *****************************************************************************
+//! \brief Give some behavior for a game objects.
+//! Inspired by Unity's MonoBehavior class.
+// *****************************************************************************
 class Behavior
 {
 public:
@@ -59,18 +47,23 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Calback triggered just after the creation of an object and only
-    //! once during the lifetime of the script instance.
+    //! once during the lifetime of the instance. Used it for allocating memory
+    //! \return true when the creation succeeded, false on failure.
     //--------------------------------------------------------------------------
     virtual bool onCreate()
     {
-       return true;
+        return true;
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Calback triggered just when the scene is loaded.
+    //! \brief Calback triggered just when the scene is loaded. Used it for
+    //! configuring or restoring internal states of the object (setting, config).
+    //! \return true when the setup succeeded, false on failure.
     //--------------------------------------------------------------------------
-    virtual void onSetup()
-    {}
+    virtual bool onSetup()
+    {
+        return true;
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Callback triggered when visiting the scene for updating
@@ -88,9 +81,16 @@ public:
     //! is an error prone pratice. I think doUpdate() does the same thing in a more
     //! simpler way for the developper.
     //!
-    //! \param dt: delta time from the previous update.
+    //! \param[in] dt: delta time from the previous update.
     //--------------------------------------------------------------------------
     virtual void onUpdate(float const /*dt*/)
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Callback triggered when drawing the scene.
+    //! \param[in] modelMatrix: Model matrix.
+    //--------------------------------------------------------------------------
+    virtual void onDraw(Matrix44f const& /*modelMatrix*/)
     {}
 };
 

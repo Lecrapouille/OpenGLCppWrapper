@@ -265,7 +265,7 @@ public:
     //! Note:
     //!   Be careful of operation order: we apply scale first, then
     //!   the rotation then the translation.
-    Matrix<T, n + 1_z, n + 1_z> const& matrix()
+    Matrix<T, n + 1_z, n + 1_z> const& matrix() // FIXME should be const
     {
         if (unlikely(m_transform_needs_update))
         {

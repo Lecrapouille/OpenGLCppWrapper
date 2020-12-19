@@ -39,7 +39,8 @@
 #include "01_Core/12_BasicLighting.hpp"
 #include "01_Core/13_PostProdFrameBuffer.hpp"
 
-#include "02_Scene/00_DepthMaterial.hpp"
+#include "02_SceneGraph/00_SG_Base.hpp"
+#include "02_SceneGraph/01_SG_MaterialsAndShapes.hpp"
 
 #include <iostream>
 #include <stdlib.h>
@@ -76,7 +77,8 @@ static void usage(char *argv[])
     std::cout << " 15: " << BasicLighting::info() << std::endl;
     std::cout << " 16: " << PostProdFrameBuffer::info() << std::endl;
     std::cout << "SceneGraph API:" << std::endl;
-    std::cout << " 17: " << ShapeDepthMaterial::info() << std::endl;
+    std::cout << " 17: " << SGBase::info() << std::endl;
+    std::cout << " 18: " << SGMatAndShape::info() << std::endl;
     exit(EXIT_FAILURE);
 }
 
@@ -157,7 +159,10 @@ int main(int argc, char *argv[])
             app.create<PostProdFrameBuffer>(WIDTH, HEIGHT, "PostProd FrameBuffer");
             break;
         case 17:
-            app.create<ShapeDepthMaterial>(WIDTH, HEIGHT, "Depth Material");
+            app.create<SGBase>(WIDTH, HEIGHT, "Base of Scene Graph");
+            break;
+        case 18:
+            app.create<SGMatAndShape>(WIDTH, HEIGHT, "Scene Graph of Shapes and Meterials");
             break;
         default:
             std::cerr << "Incorrect example id !" << std::endl;

@@ -35,7 +35,11 @@ bool Exported::doGenerate(GLVertexBuffer<Vector3f>& vertices,
                           GLIndex32& index)
 {
     if (m_filename.size() == 0u)
+    {
+        std::cerr << "ERROR: Exported::doGenerate: no input file given"
+                  << std::endl;
         return false;
+    }
 
     OBJFileLoader loader;
     return loader.load(m_filename, vertices, normals, uv, index);

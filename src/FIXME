@@ -1,1 +1,3 @@
 Shape<Geometry, Material> => cree un material (programme + shader) mais ca devrait etre creer une seule fois => static
+
+Window => FixedTime update

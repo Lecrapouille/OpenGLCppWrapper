@@ -30,37 +30,45 @@
 //! a geometry (purely shape construction) associated to a material (albedo ...)
 // *****************************************************************************
 template<class Geometry, class Material>
-class Shape: public SceneGraph::Node
+class Shape: public SceneObject
 {
 public:
+
+    using Ptr = std::unique_ptr<Shape>;
 
     //--------------------------------------------------------------------------
     //! \brief Give a name to the shape.
     //--------------------------------------------------------------------------
     Shape(std::string const& name)
-        : SceneGraph::Node(name), m_vao(name)
+        : SceneObject(name), m_vao(name)
     {}
 
-    using Ptr = std::unique_ptr<Shape<Geometry,Material>>;
+    // FIXME SceneObject::create should suffice
+    /*using Ptr = std::unique_ptr<Shape<Geometry,Material>>;
     static Ptr create(std::string const& name)
     {
         Ptr obj = std::make_unique<Shape<Geometry,Material>>(name);
         if (obj->onCreate())
             throw GL::Exception("Failed creating the shape");
         return std::move(obj);
-    }
+        }*/
+    // FIXME
 
     //--------------------------------------------------------------------------
     //! \brief Compile the material shaders and populate the geomatry.
     //! \note some geometry have to be configurate before their generation ie
     //! see their configure() method.
     //--------------------------------------------------------------------------
-    virtual bool onCreate() override
+    bool onCreate()
     {
-        // FIXME since prog has MVP matrix and vertice position should noy be
-        // external ?
+        std::cout << "Shape::onCreate()" << std::endl;
+        // FIXME since prog has MVP matrix and vertice position should not the
+        // GLProgram be external ?
         if (!material.create())
+        {
+            std::cerr << "Failed creating material" << std::endl;
             return false;
+        }
 
         // FIXME: Not all these attributes are needed: ie depth material only use
         // position so normals ans uv are useless
@@ -71,8 +79,10 @@ public:
                                m_vao.vector2f("uv"),
                                m_vao.index()))
         {
+            std::cerr << "Failed creating geometry" << std::endl;
             return false;
         }
+        std::cout << "Vertices: " << geometry.vertices() << std::endl;
 
         // Populate VBOs in the VAO (note: should be before geometry.generate()
         material.program.bind(m_vao);
@@ -80,9 +90,9 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Return the projection matrix of the Model-View-Projection
+    //! \brief Draw the shape.
     //--------------------------------------------------------------------------
-    virtual void draw(Matrix44f const& modelMatrix = Identity44f) override
+    virtual void onDraw(Matrix44f const& modelMatrix = Identity44f) override
     {
         material.program.matrix44f("modelMatrix") = modelMatrix;
         material.program.draw(m_vao, Mode::TRIANGLES);

@@ -49,10 +49,10 @@ public:
     //! \brief Create a new T as smart pointer. Use insert() to add it in the
     //! tree.
     //--------------------------------------------------------------------------
-    template<typename ...ArgsT>
-    static Ptr create(ArgsT&&... args)
+    template<class X, typename ...ArgsT>
+    static std::unique_ptr<X> create(ArgsT&&... args)
     {
-        Ptr obj = std::make_unique<T>(std::forward<ArgsT>(args)...);
+        std::unique_ptr<X> obj = std::make_unique<X>(std::forward<ArgsT>(args)...);
         obj->onCreate();
         return std::move(obj);
     }

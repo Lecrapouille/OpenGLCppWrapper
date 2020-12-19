@@ -18,48 +18,75 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OBJECT_HPP
-#  define OBJECT_HPP
+#ifndef GAME_OBJECT_HPP
+#  define GAME_OBJECT_HPP
 
 #  include "Common/ClassCounter.hpp"
 #  include "Common/Components.hpp"
 #  include "SceneGraph/Behavior.hpp"
 
 //------------------------------------------------------------------------------
-//! \brief
+//! \brief Base and abstract GameObject class specialized for game.
 //------------------------------------------------------------------------------
 class GameObject : private UniqueID<GameObject>,
                    private InstanceCounter<GameObject>,
-                   public Behavior, public Renderable
+                   public Behavior
 {
 public:
 
+    //--------------------------------------------------------------------------
+    //! \brief Set the name of the GameObject and generate an unique identifier.
+    //--------------------------------------------------------------------------
     GameObject(std::string const& name /* TODO: components*/)
         : m_id(UniqueID<GameObject>::getID()),
           m_name(name)
     {}
 
+    //--------------------------------------------------------------------------
+    //! \brief Generate an unique identifier and set the default name
+    //--------------------------------------------------------------------------
+   GameObject()
+        : m_id(UniqueID<GameObject>::getID()),
+          m_name("GameObject" + std::to_string(m_id))
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the object name. Should be unique.
+    //--------------------------------------------------------------------------
     std::string const& name() const
     {
         return m_name;
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Return the unique identifier.
+    //--------------------------------------------------------------------------
     Key id() const
     {
         return m_id;
     }
 
-    Key count() const
+    //--------------------------------------------------------------------------
+    //! \brief Return the number of created Objects.
+    //--------------------------------------------------------------------------
+    static Key count()
     {
         return InstanceCounter<GameObject>::count();
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Enable (true) or disable (false) a node.
+    //! If disabled, the node is no longer drawn, updated ...
+    //--------------------------------------------------------------------------
     void enable(bool const v = true)
     {
         m_enabled = v;
         v ? onEnable() : onDisable();
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Return if the node is enabled (true) or disabled (false).
+    //--------------------------------------------------------------------------
     bool enabled() const
     {
         return m_enabled;
@@ -67,14 +94,21 @@ public:
 
 public:
 
+    //! \brief Extend the class by adding new behaviors.
     Components components;
-    std::unique_ptr<Renderable> renderable = nullptr;
+    //! \brief A tag is a reference word which you can assign to one or more
+    //! Objects.
     std::string tag;
 
 private:
 
+    //! \brief Unique identifier. Used for searching a node from the root node
+    //! of the scene.
     Key m_id;
+    //! \brief Name of the object. Used for searching a node from the root node
+    //! of the scene.
     std::string m_name;
+    //! \brief If disabled, the node is no longer drawn, updated ...
     bool m_enabled = true;
 };
 

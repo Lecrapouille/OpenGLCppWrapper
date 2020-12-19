@@ -94,39 +94,44 @@ bool OBJFileLoader::load(std::string const& fileName,
 
     // Reorganize group of vertices, normals, uv in order
     // of faces.
-    size_t gli[3];
-    GLIndex32::Type indexCount = 0u;
-    size_t pointAt;
-    std::string str;
-
-    for (auto& i : faces)
+    GLIndex32::Type count = 0u;
+    for (auto& f : faces)
     {
-        std::istringstream ss(i);
+        std::istringstream ss(f);
+        std::string str;
+        size_t type = 0u;
 
-        pointAt = 0u;
         while (getline(ss, str, '/'))
         {
-            gli[pointAt++] = std::stoul(str) - 1u;
+            ++type;
+
+            if (str.size() == 0u)
+                continue;
+
+            try
+            {
+                uint32_t index = uint32_t(std::stoul(str)) - 1u;
+                if (type == 1u) {
+                    vertices.append(tmp_vertices.at(index));
+                    std::cout << " " << index + 1u;
+                }
+                else if (type == 2u)
+                    uv.append(tmp_uv.at(index));
+                else if (type == 3u)
+                    normals.append(tmp_normals.at(index));
+            }
+            catch (std::exception const&)
+            {
+                std::cerr << "Erroneous face index" << std::endl;
+                return false;
+            }
         }
 
-        try
-        {
-            vertices.append(tmp_vertices.at(gli[0]));
-            uv.append(tmp_uv.at(gli[1]));
-            normals.append(tmp_normals.at(gli[2]));
-        }
-        catch (std::exception const&)
-        {
-            std::cerr << "Erroneous face index" << std::endl;
-            return false;
-        }
-
-        for (int v = 0; v < 3; v++)
-        {
-            indices.append(indexCount);
-            ++indexCount;
-        }
+        indices.append(count++);
     }
+std::cout << std::endl;
+    std::cout << "V: " << vertices << std::endl;
+    std::cout << "I: " << indices << std::endl;
 
     return true;
 }

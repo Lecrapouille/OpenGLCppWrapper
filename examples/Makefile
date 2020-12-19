@@ -58,7 +58,9 @@ OBJS_CORE = \
   13_PostProdFrameBuffer.o
 
 OBJS_SCENE = \
-  00_DepthMaterial.o \
+  00_SG_Base.o \
+  01_SG_MaterialsAndShapes.o \
+
 #  01_BasicMaterial.o \
 #  02_NormalsMaterial.o \
 #  03_SceneNodes.o \
@@ -75,7 +77,7 @@ OBJS += \
   $(OBJS_WINDOW) $(OBJS_CORE) $(OBJS_SCENE) $(OBJS_THREE) debug.o main.o
 
 VPATH += \
-  00_Window 01_Core 02_Scene 03_ThreeJs
+  00_Window 01_Core 02_SceneGraph 03_ThreeJs
 
 INCLUDES += \
   -I00_Window -I01_Core -I02_Scene -I03_ThreeJs

@@ -18,36 +18,30 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_02_DEPTH_MATERIAL_HPP
-#  define EXAMPLE_02_DEPTH_MATERIAL_HPP
+#ifndef EXAMPLE_00_SG_BASE_HPP
+#  define EXAMPLE_00_SG_BASE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include "SceneGraph/SceneGraph.hpp"
-#  include "SceneGraph/Shape.hpp"
 #  include "../debug.hpp"
-
-//#  include "Material/Shape.hpp"
-//#  include "Material/Tube.hpp"
-//#  include "Material/DepthMaterial.hpp"
 
 // *****************************************************************************
 //! \brief This example shows how to apply the depth material to a 3D shape.
 // *****************************************************************************
-class ShapeDepthMaterial: public GLWindow
+class SGBase: public GLWindow
 {
 public:
 
-    ShapeDepthMaterial(uint32_t const width, uint32_t const height, const char *title);
-    ~ShapeDepthMaterial();
+    SGBase(uint32_t const width, uint32_t const height, const char *title);
+    ~SGBase();
 
     static std::string info()
     {
-        return "Apply a depth material to a 3D shape";
+        return "Show the basics of scene graphs";
     }
 
 private:
 
-    virtual void onWindowResized() override;
     virtual bool onSetup() override;
     virtual void onSetupFailed(std::string const& reason) override;
     virtual bool onPaint() override;
@@ -56,4 +50,4 @@ private:
     SceneGraph m_scene;
 };
 
-#endif // EXAMPLE_02_DEPTH_MATERIAL_HPP
+#endif // EXAMPLE_00_SG_BASE_HPP

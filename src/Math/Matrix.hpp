@@ -847,12 +847,15 @@ namespace matrix
 template <typename T, size_t rows, size_t cols>
 std::ostream& operator<<(std::ostream& os, Matrix<T, rows, cols> const& m)
 {
+  os << '[';
   for (size_t i = 0_z; i < rows; ++i)
     {
       for (size_t j = 0_z; j < cols; ++j)
         os << m(i, j) << " ";
-      os << '\n';
+      if (i < rows - 1u)
+        os << "\b; ";
     }
+  os << "\b]";
   return os;
 }
 

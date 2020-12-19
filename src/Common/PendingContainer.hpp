@@ -28,6 +28,8 @@
 #  include <cmath>
 #  include <fstream>
 
+// TODO https://en.cppreference.com/w/cpp/algorithm/transform
+
 // *****************************************************************************
 //! \brief PendingContainer is a class over std::vector for memorizing elements
 //! and knowing which elements have been modified (pending data).

@@ -13,3 +13,10 @@ Teach you how to create an OpenGL window and enable events such as resizing, mou
 ========
 
 Teach you how to use the OpenGLCppWrapper lower level layer. You will learn how to tell OpenGLCppWrapper to create for you VAO, VBO, textures from OpenGL GLSL shaders.
+
+02_SceneGraph:
+==============
+
+Work in progress.
+
+Show how to create and manipulate a scene graph in the way of Unity and Three.js

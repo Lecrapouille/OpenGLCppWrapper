@@ -224,7 +224,7 @@ bool GLProgram::onUpdate()
         it.second->begin();
     }
 
-    if ((m_vao != nullptr) && (m_vao->needUpdate()))
+    if (m_vao != nullptr)// && (m_vao->needUpdate()))
     {
         m_vao->begin();
 
@@ -240,7 +240,7 @@ bool GLProgram::onUpdate()
             m_vao->m_listTextures[it.first]->begin();
         }
 
-        //m_vao->end();
+        m_vao->end();
 
         throw_if_odd_vao();
     }

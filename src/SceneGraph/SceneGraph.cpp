@@ -20,37 +20,102 @@
 
 #include "SceneGraph.hpp"
 #include <iostream>
+#include <sstream>
 
+//------------------------------------------------------------------------------
 SceneGraph::~SceneGraph()
 {
     release();
 }
 
+//------------------------------------------------------------------------------
+SceneObject* SceneGraph::get(std::string const& path)
+{
+    SceneObject* found = nullptr;
+
+    if (root == nullptr)
+        return nullptr;
+
+    if (path[0] == '/')
+    {
+        std::stringstream sspath(path);
+        std::string name;
+        found = root.get();
+
+        while (std::getline(sspath, name, '/'))
+        {
+            if (name == "")
+                continue;
+
+            found = findChild(found, name);
+            if (found == nullptr)
+                return nullptr;
+        }
+
+        return found;
+    }
+    else
+    {
+        root->traverse([](SceneObject& node, std::string const& name, SceneObject* found)
+        {
+            if (found == nullptr)
+            {
+                if (node.name() == name)
+                {
+                    found = &node;
+                }
+            }
+        }, path, found);
+    }
+
+    return found;
+}
+
+//------------------------------------------------------------------------------
+SceneObject* SceneGraph::findChild(SceneObject* node, std::string const& name)
+{
+    for (auto& it: node->children)
+    {
+        if (it->name() == name)
+            return it.get();
+    }
+    return nullptr;
+}
+
+//------------------------------------------------------------------------------
+void SceneGraph::getByTag(std::string const& tag, std::vector<Node*> found)
+{
+    if (root == nullptr)
+        return ;
+
+    root->traverse([](SceneObject& node, std::string const& tag, std::vector<Node*> found)
+    {
+        if (node.tag == tag)
+        {
+            found.push_back(&node);
+        }
+    }, tag, found);
+}
+
+//------------------------------------------------------------------------------
 void SceneGraph::debug()
 {
     if (root == nullptr)
         return ;
 
-    root->traverse([](SceneGraph::Node& node)
+    root->traverse([](SceneObject& node)
     {
-        std::cout << "Node: " << node.name()
-                  << std::endl
-                  << " enabled: " << node.enabled()
-                  << std::endl
-                  << " has " << node.children.size()
-                  << " children:" << std::endl;
-        for (auto const& it: node.children)
-            std::cout << " " <<  it->name();
-        std::cout << std::endl;
+        std::cout << node << std::endl;
     });
 }
 
+//------------------------------------------------------------------------------
 void SceneGraph::setup()
 {
     if (root == nullptr)
         return ;
 
-    root->traverse([](SceneGraph::Node& node)
+    root->traverse([](SceneObject& node)
     {
         if (!node.enabled())
             return ;
@@ -59,17 +124,17 @@ void SceneGraph::setup()
     });
 }
 
+//------------------------------------------------------------------------------
 void SceneGraph::update(float const dt)
 {
     if (root == nullptr)
         return ;
-std::cout << "Update ici" << std::endl;
-    root->traverse([dt](SceneGraph::Node& node)
-    {std::cout << "Update la" << std::endl;
-        if (!node.enabled()) {std::cout << "merde" << std::endl;
+
+    root->traverse([dt](SceneObject& node)
+    {
+        if (!node.enabled())
             return ;
-        }
-        std::cout << "Update '" << node.name() << "'" << std::endl;
+
         // Derived class may override this function for animating nodes.
         node.onUpdate(dt);
 
@@ -80,31 +145,33 @@ std::cout << "Update ici" << std::endl;
     });
 }
 
+//------------------------------------------------------------------------------
 void SceneGraph::draw()
 {
     if (root == nullptr)
         return ;
 
-    root->traverse([](SceneGraph::Node& node)
+    root->traverse([](SceneObject& node)
     {
-        if ((!node.enabled()) || (node.renderable == nullptr))
+        if (!node.enabled())
             return ;
-        std::cout << "Draw " << node.name() << std::endl;
+
         // TODO: this could be better to create an node like OpenInventor
         // separator instead of this computation made everytime (even if
         // scaling a node it will also scale descendants)? Sometimes you
         // just want to scale the node not its descendants.
-        node.renderable->draw(matrix::scale(node.m_world_transform,
-                                            node.transform.localScale()));
+        node.onDraw(matrix::scale(node.m_world_transform,
+                                  node.transform.localScale()));
     });
 }
 
+//------------------------------------------------------------------------------
 void SceneGraph::release()
 {
     if (root == nullptr)
         return ;
 
-    root->traverse([](SceneGraph::Node& node)
+    root->traverse([](SceneObject& node)
     {
         if (!node.enabled())
             return ;

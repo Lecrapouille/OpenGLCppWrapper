@@ -18,11 +18,11 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "00_DepthMaterial.hpp"
+#include "01_SG_MaterialsAndShapes.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
-ShapeDepthMaterial::ShapeDepthMaterial(uint32_t const width, uint32_t const height,
+SGMatAndShape::SGMatAndShape(uint32_t const width, uint32_t const height,
                              const char *title)
     : GLWindow(width, height, title)
 {
@@ -30,13 +30,13 @@ ShapeDepthMaterial::ShapeDepthMaterial(uint32_t const width, uint32_t const heig
 }
 
 //------------------------------------------------------------------------------
-ShapeDepthMaterial::~ShapeDepthMaterial()
+SGMatAndShape::~SGMatAndShape()
 {
     std::cout << "Bye DepthMaterial" << std::endl;
 }
 
 //------------------------------------------------------------------------------
-void ShapeDepthMaterial::onWindowResized()
+void SGMatAndShape::onWindowResized()
 {
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
@@ -51,17 +51,16 @@ void ShapeDepthMaterial::onWindowResized()
 }
 
 //------------------------------------------------------------------------------
-bool ShapeDepthMaterial::onSetup()
+bool SGMatAndShape::onSetup()
 {
-    Shape<Exported, DepthMaterial>::Ptr root = // FIXME
-            Shape<Exported, DepthMaterial>::create("Object");
+    std::cout << "SGMatAndShape::onSetup()" << std::endl;
+    MyObject::Ptr root = MyObject::create<MyObject>("Object");
 
     // Configure the shape: geometry and material
     root->geometry.select("/home/qq/MyGitHub/OpenGLCppWrapper/examples/textures/qq.obj");
     root->material.near() = 1.0f;
     root->material.far() = 10.0f;
     root->material.opacity() = 1.0f;
-    std::cout << root->geometry.vertices() << std::endl;
 
     m_scene.root = std::move(root);
     m_scene.debug();
@@ -72,7 +71,7 @@ bool ShapeDepthMaterial::onSetup()
 //------------------------------------------------------------------------------
 //! \brief Renderer our shape
 //------------------------------------------------------------------------------
-bool ShapeDepthMaterial::onPaint()
+bool SGMatAndShape::onPaint()
 {
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
@@ -90,12 +89,12 @@ bool ShapeDepthMaterial::onPaint()
     return true;
 }
 
-void ShapeDepthMaterial::onSetupFailed(std::string const& reason)
+void SGMatAndShape::onSetupFailed(std::string const& reason)
 {
     std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
 }
 
-void ShapeDepthMaterial::onPaintFailed(std::string const& reason)
+void SGMatAndShape::onPaintFailed(std::string const& reason)
 {
     std::cerr << "Failure during rendering. Reason: " << reason << std::endl;
 }
