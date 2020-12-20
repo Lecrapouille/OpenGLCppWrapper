@@ -132,7 +132,7 @@ bool IndexedSphere::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    m_prog.draw(m_sphere, Mode::POINTS);
+    m_sphere.draw(Mode::POINTS);
 
     return true;
 }

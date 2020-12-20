@@ -177,8 +177,8 @@ bool BasicLighting::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    m_prog_cube.draw(m_cube, Mode::TRIANGLES, 0u, 36u);
-    m_prog_lamp.draw(m_lamp, Mode::TRIANGLES, 0u, 36u);
+    m_cube.draw(Mode::TRIANGLES, 0u, 36u);
+    m_lamp.draw(Mode::TRIANGLES, 0u, 36u);
 
     return true;
 }

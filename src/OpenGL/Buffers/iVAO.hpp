@@ -54,6 +54,27 @@ public:
         return m_index;
     }
 
+    bool draw(Mode const mode = Mode::TRIANGLES)
+    {
+        if (likely(m_program != nullptr))
+        {
+            // assert(m_program->ompiled());
+            m_program->begin();  // Optim: glUse()
+            begin(); // Optim: glBindVertexArray(m_vao->handle());
+            index().begin();
+            glCheck(glDrawElements(static_cast<GLenum>(mode),
+                                   static_cast<GLsizei>(index().size()),
+                                   index().gltype(), 0));
+            return true; // FIXME not always the case
+        }
+        else
+        {
+            std::cerr << "Failed OpenGL VAO has not been bound to a GLProgram"
+                      << std::endl;
+            return false;
+        }
+    }
+
 private:
 
     GLElementBuffer<T> m_index;

@@ -25,6 +25,7 @@
 //=====================================================================
 
 #include "OpenGL/Shaders/Program.hpp"
+#include "OpenGL/Buffers/iVAO.hpp"
 
 //--------------------------------------------------------------------------
 GLProgram::GLProgram(std::string const& name)
@@ -542,74 +543,4 @@ size_t GLProgram::getSamplerNames(std::vector<std::string>& list, bool const cle
     for (auto const& it: m_samplers)
         list.push_back(it.first);
     return list.size();
-}
-
-//--------------------------------------------------------------------------
-void GLProgram::doDraw(Mode const mode, size_t const first, size_t const count)
-{
-    begin();
-    m_vao->begin(); // Optim: glBindVertexArray(m_vao->handle());
-    glCheck(glDrawArrays(static_cast<GLenum>(mode),
-                         static_cast<GLint>(first),
-                         static_cast<GLsizei>(count)));
-    //glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    //end();
-}
-
-//--------------------------------------------------------------------------
-void GLProgram::draw(Mode const mode, size_t const first, size_t const count)
-{
-    throw_if_not_compiled();
-    throw_if_vao_not_bound();
-    doDraw(mode, first, count);
-}
-
-//--------------------------------------------------------------------------
-void GLProgram::draw(GLVAO& vao, Mode const mode, size_t const first, size_t const count)
-{
-    throw_if_vao_cannot_be_bound(vao);
-    doDraw(mode, first, count);
-}
-
-//--------------------------------------------------------------------------
-void GLProgram::draw(GLVAO& vao, Mode const mode)
-{
-    throw_if_not_compiled();
-    throw_if_vao_cannot_be_bound(vao);
-    doDraw(mode, 0u, m_vao->count());
-}
-
-//--------------------------------------------------------------------------
-void GLProgram::draw(Mode const mode)
-{
-    throw_if_not_compiled();
-    throw_if_vao_not_bound();
-    doDraw(mode, 0u, m_vao->count());
-}
-
-//----------------------------------------------------------------------------
-void GLProgram::throw_if_not_compiled()
-{
-    if (unlikely(!compiled()))
-    {
-        throw GL::Exception("Failed OpenGL program has not been compiled");
-    }
-}
-
-//----------------------------------------------------------------------------
-void GLProgram::throw_if_vao_cannot_be_bound(GLVAO& vao)
-{
-    if (unlikely(!bind(vao)))
-    {
-        throw GL::Exception("Failed binding VAO to OpenGL program");
-    }
-}
-
-//----------------------------------------------------------------------------
-void GLProgram::throw_if_vao_not_bound()
-{
-    if (unlikely(m_vao == nullptr))
-    {
-        throw GL::Exception("Failed OpenGL program has not been bound to a VAO");
-    }
 }

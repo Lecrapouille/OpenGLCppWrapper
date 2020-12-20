@@ -26,7 +26,8 @@ IndexedQuad::IndexedQuad(uint32_t const width, uint32_t const height,
                          const char *title)
     : GLWindow(width, height, title),
       m_prog("Prog"),
-      m_box("Box")
+      m_box("Box"),
+      m_box2("Box2")
 {
     std::cout << "Hello IndexedQuad " << info() << std::endl;
 }
@@ -81,6 +82,7 @@ bool IndexedQuad::onSetup()
     }
 
     m_prog.bind(m_box);
+    m_prog.bind(m_box2);
 
     m_box.vector3f("position") =
     {
@@ -122,6 +124,47 @@ bool IndexedQuad::onSetup()
         6u,7u,3u,
     };
 
+
+    m_box2.vector3f("position") =
+    {
+        Vector3f(-0.5f,  0.5f,  0.5f),  // Front Top Left            - Red   - 0
+        Vector3f( 0.5f,  0.5f,  0.5f),  // Front Top Right           - Green - 1
+        Vector3f( 0.5f, -0.5f,  0.5f),  // Front Bottom Right        - Blue  - 2
+        Vector3f(-0.5f, -0.5f,  0.5f),  // Front Bottom Left         - Cyan  - 3
+        Vector3f(-0.5f,  0.5f, -0.5f),  // Back Top Left             - Pink  - 4
+        Vector3f( 0.5f,  0.5f, -0.5f),  // Back Top Right            - Yellow- 5
+        Vector3f( 0.5f, -0.5f, -0.5f),  // Back Bottom Right         - White - 6
+        Vector3f(-0.5f, -0.5f, -0.5f),  // Back Bottom Left          - Gray  - 7
+    };
+
+    m_box2.vector3f("color") =
+    {
+        Vector3f(1.0f, 0.0f, 0.0f),  // Front Top Left               - Red   - 0
+        Vector3f(0.0f, 1.0f, 0.0f),  // Front Top Right              - Green - 1
+        Vector3f(0.0f, 0.0f, 1.0f),  // Front Bottom Right           - Blue  - 2
+        Vector3f(0.0f, 1.0f, 1.0f),  // Front Bottom Left            - Cyan  - 3
+        Vector3f(1.0f, 0.0f, 1.0f),  // Back Top Left                - Pink  - 4
+        Vector3f(1.0f, 1.0f, 0.0f),  // Back Top Right               - Yellow- 5
+        Vector3f(0.1f, 0.1f, 0.1f),  // Back Bottom Right            - White - 6
+        Vector3f(1.0f, 1.0f, 1.0f),  // Back Bottom Left             - Gray  - 7
+    };
+
+    m_box2.index() =
+    {
+        0u,3u,2u,  // Front
+        2u,1u,0u,
+        1u,5u,6u,  // Right
+        6u,2u,1u,
+        5u,4u,7u,  // Left
+        7u,6u,5u,
+        4u,7u,3u,  // Back
+        3u,0u,4u,
+        4u,5u,1u,  // Top
+        1u,0u,4u,
+        3u,2u,6u,  // Bottom
+        6u,7u,3u,
+    };
+
     // Helper for debugging states of your program
     debug(m_vertex_shader, m_fragment_shader);
     debug(m_prog);
@@ -136,8 +179,12 @@ bool IndexedQuad::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
+m_box2.vector3f("position")[0] += Vector3f(0.0001f);
+m_box.vector3f("position")[0] += Vector3f(0.0001f);
+
     // Draw the box using the EBO
-    m_prog.draw(m_box, Mode::TRIANGLES);
+    m_box.draw(Mode::TRIANGLES);
+    m_box2.draw(Mode::POINTS);
 
     return true;
 }

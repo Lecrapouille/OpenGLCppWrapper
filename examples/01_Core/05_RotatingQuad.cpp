@@ -164,8 +164,8 @@ bool RotatingQuad::onPaint()
     m_box.transform.rotateY(4.0f * cosf(time));
     m_prog.matrix44f("model") = m_box.transform.matrix();
 
-    // Draw the box using the EBO
-    m_prog.draw(m_box.vao, Mode::TRIANGLES);
+    // Draw the box using the EBO. Do not pass vertices count or indice !!
+    m_box.vao.draw(Mode::TRIANGLES);
 
     return true;
 }

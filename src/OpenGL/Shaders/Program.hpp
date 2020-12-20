@@ -31,25 +31,9 @@
 #  include "OpenGL/Variables/Attribute.hpp"
 #  include "OpenGL/Variables/Uniform.hpp"
 #  include "OpenGL/Variables/Samplers.hpp"
-#  include "OpenGL/Buffers/iVAO.hpp"
 #  include "Common/Any.hpp"
 
-//! \brief Mode for drawing primitives (points, lines, triangles ...)
-enum class Mode : GLenum
-{
-    /* 0x0000 */ POINTS = GL_POINTS,
-    /* 0x0001 */ LINES = GL_LINES,
-    /* 0x0002 */ LINE_LOOP = GL_LINE_LOOP,
-    /* 0x0003 */ LINE_STRIP = GL_LINE_STRIP,
-    /* 0x0004 */ TRIANGLES = GL_TRIANGLES,
-    /* 0x0005 */ TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
-    /* 0x0006 */ TRIANGLE_FAN = GL_TRIANGLE_FAN,
-    /* 0x000A */ LINES_ADJACENCY = GL_LINES_ADJACENCY,
-    /* 0x000B */ LINE_STRIP_ADJACENCY = GL_LINE_STRIP_ADJACENCY,
-    /* 0x000C */ TRIANGLES_ADJACENCY = GL_TRIANGLES_ADJACENCY,
-    /* 0x000D */ TRIANGLE_STRIP_ADJACENCY = GL_TRIANGLE_STRIP_ADJACENCY,
-    /* 0x000E */ PATCHES = GL_PATCHES,
-};
+class GLVAO;
 
 // *****************************************************************************
 //
@@ -155,22 +139,6 @@ public:
     inline bool isBound() const
     {
         return nullptr != m_vao;
-    }
-
-    void draw(Mode const mode, size_t const first, size_t const count);
-    void draw(GLVAO& vao, Mode const mode, size_t const first, size_t const count);
-    void draw(GLVAO& vao, Mode const mode);
-    void draw(Mode const mode);
-
-    template<class T>
-    void draw(GLVAOi<T>& vao, Mode const mode)
-    {
-        begin();
-        vao.begin();
-        vao.index().begin();
-        glCheck(glDrawElements(static_cast<GLenum>(mode),
-                               static_cast<GLsizei>(vao.index().size()),
-                               vao.index().gltype(), 0));
     }
 
     //--------------------------------------------------------------------------
@@ -543,11 +511,6 @@ private:
     //! \brief Create Attribute instances
     //--------------------------------------------------------------------------
     void createAttribute(GLenum type, const char *name, const GLuint prog);
-
-    //--------------------------------------------------------------------------
-    //! \brief Do the draw call. This method is only made for factorizing code.
-    //--------------------------------------------------------------------------
-    void doDraw(Mode const mode, size_t const first, size_t const count);
 
 private:
 

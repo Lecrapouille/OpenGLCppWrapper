@@ -25,7 +25,6 @@
 //=====================================================================
 
 #include "OpenGL/Buffers/VAO.hpp"
-#include "OpenGL/Shaders/Program.hpp"
 
 //uint32_t count() { return static_cast<uint32_t>(m_VBOs.begin()->second->size())); }
 
@@ -175,4 +174,30 @@ void GLVAO::init(GLProgram& program)
 
     // Make VAO and GLProgram be coupled.
     m_program = &program;
+}
+
+//--------------------------------------------------------------------------
+bool GLVAO::draw(Mode const mode, size_t const first, size_t const count)
+{
+  if (likely(m_program != nullptr))
+    {
+      m_program->begin(); // Optim: glUse()
+      begin(); // Optim: glBindVertexArray(m_vao->handle());
+      glCheck(glDrawArrays(static_cast<GLenum>(mode),
+			   static_cast<GLint>(first),
+			   static_cast<GLsizei>(count)));
+      return true; // FIXME not always the case
+    }
+  else
+    {
+      std::cerr << "Failed OpenGL VAO has not been bound to a GLProgram"
+		<< std::endl;
+      return false;
+    }
+}
+
+//--------------------------------------------------------------------------
+bool GLVAO::draw(Mode const mode, size_t const first)
+{
+  return GLVAO::draw(mode, first, m_count);
 }

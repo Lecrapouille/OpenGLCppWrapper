@@ -162,7 +162,7 @@ void SkyBoxShape::drawShape()
 
     // Set depth function back to default
     glCheck(glDepthFunc(GL_LESS));
-    m_progShape.draw(m_shape, Mode::TRIANGLES, 0, 36);
+    m_shape.draw(Mode::TRIANGLES, 0u, 36u);
 }
 
 // --------------------------------------------------------------
@@ -176,7 +176,7 @@ void SkyBoxShape::drawSkyBox()
     // Change depth function so depth test passes when values are equal
     // to depth buffer's content
     glCheck(glDepthFunc(GL_LEQUAL));
-    m_progSkyBox.draw(m_skybox, Mode::TRIANGLES, 0, 36);
+    m_skybox.draw(Mode::TRIANGLES, 0u, 36u);
 }
 
 //------------------------------------------------------------------------------

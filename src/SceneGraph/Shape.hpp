@@ -21,6 +21,7 @@
 #ifndef SHAPE_HPP
 #  define SHAPE_HPP
 
+#  include "OpenGL/Buffers/iVAO.hpp"
 #  include "SceneGraph/Geometry/Geometry.hpp"
 #  include "SceneGraph/Material/Material.hpp"
 #  include "SceneGraph/SceneGraph.hpp"
@@ -94,7 +95,7 @@ public:
     virtual void onDraw(Matrix44f const& modelMatrix = Identity44f) override
     {
         material.program.matrix44f("modelMatrix") = modelMatrix;
-        material.program.draw(m_vao, Mode::TRIANGLES);
+        m_vao.draw(Mode::TRIANGLES);
     }
 
     //--------------------------------------------------------------------------

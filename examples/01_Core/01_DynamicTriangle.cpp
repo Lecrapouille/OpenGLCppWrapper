@@ -119,7 +119,7 @@ bool DynamicTriangle::onPaint()
     m_prog.vector3f("color") = Vector3f(st, ct, 0.0f);
 
     // Draw the VAO bound to the shader program.
-    m_prog.draw(m_triangle, Mode::TRIANGLES, 0, 3);
+    m_triangle.draw(Mode::TRIANGLES);
 
     return true;
 }

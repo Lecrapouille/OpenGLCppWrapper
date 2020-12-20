@@ -109,7 +109,7 @@ void SkyBoxTextureCube::drawSkyBox()
     // Change depth function so depth test passes when values are equal
     // to depth buffer's content
     glCheck(glDepthFunc(GL_LEQUAL));
-    m_prog.draw(m_skybox, Mode::TRIANGLES, 0, 36);
+    m_skybox.draw(Mode::TRIANGLES, 0u, 36u);
 }
 
 //------------------------------------------------------------------------------

@@ -112,7 +112,7 @@ bool ComplexShader::onPaint()
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
     m_prog.scalarf("time") = time;
-    m_prog.draw(m_quad, Mode::TRIANGLES);
+    m_quad.draw(Mode::TRIANGLES);
 
     return true;
 }

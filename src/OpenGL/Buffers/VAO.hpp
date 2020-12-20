@@ -30,10 +30,26 @@
 #  include "OpenGL/Variables/Uniform.hpp"
 #  include "OpenGL/Buffers/VBO.hpp"
 #  include "OpenGL/Textures/Textures.hpp"
+#  include "OpenGL/Shaders/Program.hpp"
 #  include "Math/Vector.hpp"
 #  include "Common/Any.hpp"
 
-class GLProgram;
+//! \brief Mode for drawing primitives (points, lines, triangles ...)
+enum class Mode : GLenum
+{
+    /* 0x0000 */ POINTS = GL_POINTS,
+    /* 0x0001 */ LINES = GL_LINES,
+    /* 0x0002 */ LINE_LOOP = GL_LINE_LOOP,
+    /* 0x0003 */ LINE_STRIP = GL_LINE_STRIP,
+    /* 0x0004 */ TRIANGLES = GL_TRIANGLES,
+    /* 0x0005 */ TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
+    /* 0x0006 */ TRIANGLE_FAN = GL_TRIANGLE_FAN,
+    /* 0x000A */ LINES_ADJACENCY = GL_LINES_ADJACENCY,
+    /* 0x000B */ LINE_STRIP_ADJACENCY = GL_LINE_STRIP_ADJACENCY,
+    /* 0x000C */ TRIANGLES_ADJACENCY = GL_TRIANGLES_ADJACENCY,
+    /* 0x000D */ TRIANGLE_STRIP_ADJACENCY = GL_TRIANGLE_STRIP_ADJACENCY,
+    /* 0x000E */ PATCHES = GL_PATCHES,
+};//! \brief Mode for drawing primitives (points, lines, triangles ...)
 
 class GLVAO: public GLObject<GLenum>
 {
@@ -103,6 +119,16 @@ public:
     //! \brief
     //--------------------------------------------------------------------------
     bool bound() const;
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    bool draw(Mode const mode, size_t const first, size_t const count);
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    bool draw(Mode const mode = Mode::TRIANGLES, size_t const first = 0u);
 
     //--------------------------------------------------------------------------
     //! \brief Check if this instance has VBOs.
@@ -318,20 +344,6 @@ public:
         return getTexture<GLTextureCube>(name);
     }
 
-    /*
-      void draw(Mode const mode, size_t const first, size_t const count)
-      {
-      throw_if_vao_not_bound();
-      m_program->draw(*this, mode, first, count);
-      }
-
-      void draw(Mode const mode)
-      {
-      throw_if_vao_not_bound();
-      m_program->draw(*this, mode);
-      }
-    */
-
 private:
 
     //--------------------------------------------------------------------------
@@ -361,6 +373,7 @@ private:
     //--------------------------------------------------------------------------
     virtual bool onCreate() override
     {
+std::cout << "VAO::onCreate()" << std::endl;
         glCheck(glGenVertexArrays(1, &m_handle));
         return false;
     }
@@ -370,6 +383,7 @@ private:
     //--------------------------------------------------------------------------
     virtual void onActivate() override
     {
+std::cout << "VAO::onActivate()" << std::endl;
         glCheck(glBindVertexArray(m_handle));
     }
 
@@ -394,6 +408,7 @@ private:
     //--------------------------------------------------------------------------
     virtual void onDeactivate() override
     {
+std::cout << "VAO::onDeactivate()" << std::endl;
         glCheck(glBindVertexArray(0U));
     }
 
@@ -467,7 +482,7 @@ private:
         }
     }
 
-private:
+protected:
 
     using VBOs = Any;
     using Textures = Any;
