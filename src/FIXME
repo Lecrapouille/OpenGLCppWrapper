@@ -1,3 +1,9 @@
-Shape<Geometry, Material> => cree un material (programme + shader) mais ca devrait etre creer une seule fois => static
+1/ Shape<Geometry, Material> => cree un material (programme + shader) mais ca devrait etre creer une seule fois => static
 
-Window => FixedTime update
+2/ OBJ loader broken + Shape doit faire cout << vertices sinon pas affichees
+
+3/ VAO::VBO::size() pas possible a cause du template =>
+PendingContainer pour eviter les template devrait etre du type <Byte> et pouvoir retourner des view<float>
+https://github.com/dpilger26/NumCpp or Xtensor ?
+
+4/ Window => FixedTime update

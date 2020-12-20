@@ -41,6 +41,46 @@ bool GLVAO::bound() const
     return (m_program != nullptr) && (m_program->handle() != 0u);
 }
 
+//--------------------------------------------------------------------------
+bool GLVAO::checkVBOSizes()
+{
+    if (likely(!m_need_update))
+    {
+        return true;
+    }
+
+    if (unlikely(!bound() || m_listBuffers.empty()))
+    {
+        std::cerr << "VAO " << name() << " is not yet bound to a GLProgram";
+        return false;
+    }
+
+    bool consistent_vbo_sizes = true;
+    m_count = m_listBuffers.begin()->second->size();
+    for (auto& it: m_listBuffers)
+    {
+        std::cerr << "VBO " << it.first
+                  << " size is " << it.second->size()
+                  << std::endl;
+
+        if (unlikely(m_count != it.second->size()))
+        {
+            std::cerr << "VAO " << name()
+                      << " does not have all of its VBOs with the same size:"
+                      << std::endl;
+            for (auto& itt: m_listBuffers)
+            {
+                std::cerr << "VBO " << itt.first
+                          << " size is " << itt.second->size()
+                          << std::endl;
+            }
+            consistent_vbo_sizes = false;
+        }
+    }
+
+    return consistent_vbo_sizes;
+}
+
 //----------------------------------------------------------------------------
 //! \brief Populate the VAO with a list of VBOs and textures. The
 //! number depends on the number of shader attributes and uniform

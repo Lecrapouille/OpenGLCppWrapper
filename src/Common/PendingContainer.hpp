@@ -81,6 +81,30 @@ class PendingContainer: public Pending
             return m_ref.set(m_index) = other;
         }
 
+        //! \brief Setter method.
+        inline T& operator+=(T const& other)
+        {
+            return m_ref.set(m_index) += other;
+        }
+
+        //! \brief Setter method.
+        inline T& operator-=(T const& other)
+        {
+            return m_ref.set(m_index) -= other;
+        }
+
+        //! \brief Setter method.
+        inline T& operator*=(T const& other)
+        {
+            return m_ref.set(m_index) *= other;
+        }
+
+        //! \brief Setter method.
+        inline T& operator/=(T const& other)
+        {
+            return m_ref.set(m_index) /= other;
+        }
+
         //! \brief This method allow to write std::cout << PendingContainer[0]
         inline friend std::ostream& operator<<(std::ostream& os, const Deref& d)
         {

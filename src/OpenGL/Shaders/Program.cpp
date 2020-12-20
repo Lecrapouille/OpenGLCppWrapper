@@ -74,19 +74,36 @@ bool GLProgram::bind(GLVAO& vao)
         }
     }
 
+    // Bind to a newly and never bound VAO ?
     if (unlikely(!vao.bound()))
     {
-        std::cout << "bind VAO " << vao.name() << " to GLProgram " << name() << std::endl;
+        m_vao = &vao;
+        std::cout << "bind VAO " << m_vao->name() << " to GLProgram " << name() << std::endl;
 
         // When binding the VAO to GLProgram for the first time:
         // populate VBOs and textures in the VAO.
+        //onActivate();
+        //vao.begin();
         vao.init(*this);
         m_need_update = true;
+        /*for (auto& it: m_attributes)
+        {
+            m_vao->m_listBuffers[it.first]->begin();
+            it.second->begin();
+        }
+        for (auto& it: m_samplers)
+        {
+            it.second->begin();
+            m_vao->m_listTextures[it.first]->begin();
+        }
+        vao.end();*/
+        return true;
     }
+
+    // Check if VAO has been previously bound to this GLProgram. If not, this
+    // probably an error of the developper trying to bind an incompatible VAO.
     else if (unlikely(!vao.bound(m_handle)))
     {
-        // Check if VAO has been previously bind by this GLProgram. If not
-        // This is probably an error of the developper.
         std::cerr << "Tried to bind VAO "
                   << vao.name()
                   << " already bound to another GLProgram than "
@@ -94,9 +111,12 @@ bool GLProgram::bind(GLVAO& vao)
         return false;
     }
 
-    // Bind the VAO to the GLProgram. This relationship is now unbreakable
-    m_vao = &vao;
-    return true;
+    // Bind a VAO that already has been bound to this instance of GLProgram.
+    else
+    {
+        m_vao = &vao;
+        return true;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -157,15 +177,16 @@ bool GLProgram::compile()
 //--------------------------------------------------------------------------
 bool GLProgram::onCreate()
 {
+    std::cout << "GLProgram::onCreate()" << std::endl;
     m_handle = glCheck(glCreateProgram());
-    // Hack: setup() has to be called before activate() contrary to VBO, VAO
-    m_need_setup = onSetup();
     return false;
 }
+
 
 //--------------------------------------------------------------------------
 bool GLProgram::onSetup()
 {
+    std::cout << "GLProgram::onSetup()" << std::endl;
     bool success = true;
 
     // Compile shaders if they have not yet been compiled
@@ -213,36 +234,46 @@ bool GLProgram::onSetup()
 //--------------------------------------------------------------------------
 bool GLProgram::needUpdate() const
 {
-    return true;//(m_vao != nullptr) && (m_vao->needUpdate());
+    return (m_vao != nullptr) && (m_vao->needUpdate());
 }
 
 //--------------------------------------------------------------------------
 bool GLProgram::onUpdate()
 {
-    for (auto const& it: m_uniformLocations)
+    std::cout << "GLProgram::onUpdate() uniforms" << std::endl;
+
+    if (!m_vao->checkVBOSizes())
     {
+        return false;
+    }
+
+#if 0
+    if (!m_vao->checkLoadTextures())
+    {
+        throw GL::Exception("Failed OpenGL textures have not all been loaded");
+    }
+#endif
+
+    std::cout << "GLProgram::onUpdate() VAO" << std::endl;
+    m_vao->begin();
+
+    for (auto& it: m_attributes)
+    {
+        m_vao->m_listBuffers[it.first]->begin();
         it.second->begin();
     }
 
-    if (m_vao != nullptr)// && (m_vao->needUpdate()))
+    for (auto& it: m_samplers)
     {
-        m_vao->begin();
+        it.second->begin();
+        m_vao->m_listTextures[it.first]->begin();
+    }
 
-        for (auto& it: m_attributes)
-        {
-            m_vao->m_listBuffers[it.first]->begin();
-            it.second->begin();
-        }
+    m_vao->end();
 
-        for (auto& it: m_samplers)
-        {
-            it.second->begin();
-            m_vao->m_listTextures[it.first]->begin();
-        }
-
-        m_vao->end();
-
-        throw_if_odd_vao();
+    for (auto const& it: m_uniformLocations)
+    {
+        it.second->begin();
     }
 
     return false;
@@ -251,6 +282,17 @@ bool GLProgram::onUpdate()
 //--------------------------------------------------------------------------
 void GLProgram::onActivate()
 {
+    std::cout << "GLProgram::onActivate()" << std::endl;
+
+    if (!compiled()) {
+        std::cout << "GLProgram::onActivate() not COMPILED" << std::endl;
+        return ;
+    }
+    if (m_vao == nullptr) {
+        std::cout << "GLProgram::onActivate() not bound" << std::endl;
+        return ;
+    }
+
     glCheck(glUseProgram(m_handle));
 }
 
@@ -543,21 +585,6 @@ void GLProgram::draw(Mode const mode)
     throw_if_not_compiled();
     throw_if_vao_not_bound();
     doDraw(mode, 0u, m_vao->count());
-}
-
-//----------------------------------------------------------------------------
-void GLProgram::throw_if_odd_vao()
-{
-#if 0
-    if (!m_vao->checkVBOSizes())
-    {
-        throw GL::Exception("Failed OpenGL attributes have not the same size");
-    }
-    if (!m_vao->checkLoadTextures())
-    {
-        throw GL::Exception("Failed OpenGL textures have not all been loaded");
-    }
-#endif
 }
 
 //----------------------------------------------------------------------------

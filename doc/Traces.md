@@ -13,6 +13,8 @@ Where `path/to/your/binary` has to be changed by the path of your application us
 For OpenGLCppWrapper:
 ```sh
 cd OpenGLCppWrapper/examples
-apitrace trace --api gl build/OpenGLCppWrapper
-qapitrace OpenGLCppWrapper.trace &
+apitrace trace --api gl build/OpenGLExamples 10
+qapitrace OpenGLExamples.trace
 ```
+
+You probably have to remove the previous trace `OpenGLExamples.trace` else a `OpenGLExamples.1.trace` will be created.

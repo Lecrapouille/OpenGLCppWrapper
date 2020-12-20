@@ -92,6 +92,7 @@ bool OBJFileLoader::load(std::string const& fileName,
     if (tmp_vertices.size() == 0u)
         return false;
 
+#warning "TO BE FIXED" // FIXME: index broken + FIXME: need cout << vertices() else not displayed
     // Reorganize group of vertices, normals, uv in order
     // of faces.
     GLIndex32::Type count = 0u;
@@ -113,7 +114,6 @@ bool OBJFileLoader::load(std::string const& fileName,
                 uint32_t index = uint32_t(std::stoul(str)) - 1u;
                 if (type == 1u) {
                     vertices.append(tmp_vertices.at(index));
-                    std::cout << " " << index + 1u;
                 }
                 else if (type == 2u)
                     uv.append(tmp_uv.at(index));
@@ -129,9 +129,6 @@ bool OBJFileLoader::load(std::string const& fileName,
 
         indices.append(count++);
     }
-std::cout << std::endl;
-    std::cout << "V: " << vertices << std::endl;
-    std::cout << "I: " << indices << std::endl;
 
     return true;
 }

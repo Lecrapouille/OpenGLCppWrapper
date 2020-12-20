@@ -463,7 +463,7 @@ private:
     //! \note this function does not check if VAO is bind. Call
     //! throw_if_vao_not_bound() before this method.
     //--------------------------------------------------------------------------
-    void throw_if_odd_vao();
+    //void throw_if_odd_vao();
 
     //--------------------------------------------------------------------------
     //! \brief Concat the last error to the list of errors
@@ -471,10 +471,12 @@ private:
     void concatError(std::string const& msg);
 
     //--------------------------------------------------------------------------
-    //! \brief Create a new OpenGL program.
+    //! \brief Create a new OpenGL program. Compile and link shaders bound to
+    //! this GLProgram instance.
     //!
-    //! \note Contrary to VBO, GLProgram has to perform its setup() before
-    //! calling activate()
+    //! \return false is compilation succeeded (indicating setup has not to be
+    //! redone). Return true if an error occurred (errors in the code source of
+    //! shaders).
     //--------------------------------------------------------------------------
     virtual bool onCreate() override;
 
@@ -485,14 +487,7 @@ private:
     virtual void onActivate() override;
 
     //--------------------------------------------------------------------------
-    //! \brief Compile and link shaders isBound to this GLProgram.
-    //!
-    //! \return false is compilation succeeded (indicating setup has not to be
-    //! redone). Return true if an error occurred (errors in the code source of
-    //! shaders).
-    //!
-    //! \note Contrary to other GLObject, GLProgram has to perform its
-    //! setup() before calling activate().
+    //! \brief
     //--------------------------------------------------------------------------
     virtual bool onSetup() override;
 

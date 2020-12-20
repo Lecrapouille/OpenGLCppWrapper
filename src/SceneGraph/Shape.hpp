@@ -82,7 +82,6 @@ public:
             std::cerr << "Failed creating geometry" << std::endl;
             return false;
         }
-        std::cout << "Vertices: " << geometry.vertices() << std::endl;
 
         // Populate VBOs in the VAO (note: should be before geometry.generate()
         material.program.bind(m_vao);

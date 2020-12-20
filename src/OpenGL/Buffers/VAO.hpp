@@ -408,6 +408,11 @@ private:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
+    bool checkVBOSizes();
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
     template<class T>
     GLVertexBuffer<T>& getVBO(const char *name)  // TODO const:  foo = getVBO(()
     {
@@ -466,7 +471,7 @@ private:
 
     using VBOs = Any;
     using Textures = Any;
-    using ListBuffers = std::map<std::string, std::shared_ptr<GLObject<GLenum>>>;
+    using ListBuffers = std::map<std::string, std::shared_ptr<IGLBuffer>>;
     using ListTextures = std::map<std::string, std::shared_ptr<GLTexture>>;
 
     VBOs         m_VBOs;

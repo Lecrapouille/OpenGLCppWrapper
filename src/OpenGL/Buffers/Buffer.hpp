@@ -39,6 +39,19 @@ enum class BufferUsage : GLenum
     /* 0x88E8 */ DYNAMIC_DRAW = GL_DYNAMIC_DRAW,
 };
 
+// FIXME Workaround to have VAO::VBOs[0].size()
+class IGLBuffer
+  : public GLObject<GLenum>
+{
+public:
+
+  explicit IGLBuffer(std::string const& name, GLenum const target)
+      : GLObject(name, target)
+  {}
+
+  virtual size_t size() const = 0;
+};
+
 // *****************************************************************************
 //! \brief GLBuffer is a class of contigous elements (array) CPU side that is
 //! aware of area of dirty elements that needs to be updated to the GPU. GLBuffer
@@ -47,7 +60,7 @@ enum class BufferUsage : GLenum
 //! in a VBO are indexed by a Element Buffer Object (EBO) which is also a GLBuffer.
 // *****************************************************************************
 template<typename T>
-class GLBuffer: public GLObject<GLenum>, public PendingContainer<T>
+class GLBuffer: public IGLBuffer, public PendingContainer<T>
 {
 public:
 
@@ -64,9 +77,8 @@ public:
     //--------------------------------------------------------------------------
     explicit GLBuffer(std::string const& name, GLenum const target,
                       BufferUsage const usage)
-        : GLObject(name)
+        : IGLBuffer(name, target)
     {
-        GLObject::m_target = target;
         m_usage = static_cast<GLenum>(usage);
     }
 
@@ -75,9 +87,8 @@ public:
     //--------------------------------------------------------------------------
     explicit GLBuffer(std::string const& name, GLenum const target,
                       size_t const size, BufferUsage const usage)
-        : GLObject(name), PendingContainer<T>(size)
+        : IGLBuffer(name, target), PendingContainer<T>(size)
     {
-        GLObject::m_target = target;
         m_usage = static_cast<GLenum>(usage);
     }
 
@@ -87,6 +98,12 @@ public:
     virtual ~GLBuffer() override
     {
         release();
+    }
+
+    // FIXME: workaround
+    virtual size_t size() const override
+    {
+        return PendingContainer<T>::size();
     }
 
     //--------------------------------------------------------------------------
