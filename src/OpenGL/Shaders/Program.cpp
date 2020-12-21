@@ -61,7 +61,7 @@ void GLProgram::concatError(std::string const& msg)
 //----------------------------------------------------------------------------
 bool GLProgram::bind(GLVAO& vao)
 {
-    // Try compile the GLProgram if not previously compiled
+    // Compile the GLProgram if this has not been done yet
     if (unlikely(!compiled()))
     {
         if (!compile())
@@ -75,48 +75,35 @@ bool GLProgram::bind(GLVAO& vao)
         }
     }
 
-    // Bind to a newly and never bound VAO ?
-    if (unlikely(!vao.bound()))
+    // Bind this instance of GLProgram to a never bound VAO
+    if (unlikely(!vao.isBound()))
     {
         m_vao = &vao;
         std::cout << "bind VAO " << m_vao->name() << " to GLProgram " << name() << std::endl;
 
         // When binding the VAO to GLProgram for the first time:
         // populate VBOs and textures in the VAO.
-        //onActivate();
-        //vao.begin();
-        vao.init(*this);
-        m_need_update = true;
-        /*for (auto& it: m_attributes)
-        {
-            m_vao->m_listBuffers[it.first]->begin();
-            it.second->begin();
-        }
-        for (auto& it: m_samplers)
-        {
-            it.second->begin();
-            m_vao->m_listTextures[it.first]->begin();
-        }
-        vao.end();*/
+	vao.m_program = this;
+	vao.createVBOsFromAttribs(m_attributes);
+        vao.createTexturesFromSamplers(m_samplers);
+	vao.m_need_update = true;
         return true;
     }
 
     // Check if VAO has been previously bound to this GLProgram. If not, this
     // probably an error of the developper trying to bind an incompatible VAO.
-    else if (unlikely(!vao.bound(m_handle)))
+    else if (likely(vao.isBoundTo(m_handle)))
+    {
+        m_vao = &vao;
+        return true;
+    }
+    else
     {
         std::cerr << "Tried to bind VAO "
                   << vao.name()
                   << " already bound to another GLProgram than "
                   << name() << std::endl;
         return false;
-    }
-
-    // Bind a VAO that already has been bound to this instance of GLProgram.
-    else
-    {
-        m_vao = &vao;
-        return true;
     }
 }
 
@@ -229,55 +216,22 @@ bool GLProgram::onSetup()
 
     // Release shaders stored in GPU.
     detachAllShaders();
+    m_need_update = true;
     return !success;
-}
-
-//--------------------------------------------------------------------------
-bool GLProgram::needUpdate() const
-{
-    return (m_vao != nullptr) && (m_vao->needUpdate());
 }
 
 //--------------------------------------------------------------------------
 bool GLProgram::onUpdate()
 {
-    std::cout << "GLProgram::onUpdate() uniforms" << std::endl;
-
-    if (!m_vao->checkVBOSizes())
-    {
-        return false;
-    }
-
-#if 0
-    if (!m_vao->checkLoadTextures())
-    {
-        throw GL::Exception("Failed OpenGL textures have not all been loaded");
-    }
-#endif
-
-    std::cout << "GLProgram::onUpdate() VAO" << std::endl;
-    m_vao->begin();
-
-    for (auto& it: m_attributes)
-    {
-        m_vao->m_listBuffers[it.first]->begin();
-        it.second->begin();
-    }
-
-    for (auto& it: m_samplers)
-    {
-        it.second->begin();
-        m_vao->m_listTextures[it.first]->begin();
-    }
-
-    m_vao->end();
+    std::cout << "GLProgram::onUpdate() uniforms"
+	      << std::endl;
 
     for (auto const& it: m_uniformLocations)
     {
         it.second->begin();
     }
 
-    return false;
+    return true;
 }
 
 //--------------------------------------------------------------------------

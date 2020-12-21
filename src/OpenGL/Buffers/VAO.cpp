@@ -26,21 +26,9 @@
 
 #include "OpenGL/Buffers/VAO.hpp"
 
-//uint32_t count() { return static_cast<uint32_t>(m_VBOs.begin()->second->size())); }
-
 //--------------------------------------------------------------------------
-bool GLVAO::bound(GLenum const prog_id) const
-{
-    return (m_program != nullptr) && (m_program->handle() == prog_id);
-}
-
-//--------------------------------------------------------------------------
-bool GLVAO::bound() const
-{
-    return (m_program != nullptr) && (m_program->handle() != 0u);
-}
-
-//--------------------------------------------------------------------------
+// Using .size() is not a good idea since Vector3f = 3 float.
+// So compare bytes instead
 bool GLVAO::checkVBOSizes()
 {
     if (likely(!m_need_update))
@@ -48,7 +36,7 @@ bool GLVAO::checkVBOSizes()
         return true;
     }
 
-    if (unlikely(!bound() || m_listBuffers.empty()))
+    if (unlikely(!isBound() || m_listBuffers.empty()))
     {
         std::cerr << "VAO " << name() << " is not yet bound to a GLProgram";
         return false;
@@ -58,10 +46,6 @@ bool GLVAO::checkVBOSizes()
     m_count = m_listBuffers.begin()->second->size();
     for (auto& it: m_listBuffers)
     {
-        std::cerr << "VBO " << it.first
-                  << " size is " << it.second->size()
-                  << std::endl;
-
         if (unlikely(m_count != it.second->size()))
         {
             std::cerr << "VAO " << name()
@@ -81,14 +65,10 @@ bool GLVAO::checkVBOSizes()
 }
 
 //----------------------------------------------------------------------------
-//! \brief Populate the VAO with a list of VBOs and textures. The
-//! number depends on the number of shader attributes and uniform
-//! texture samplers.
-//----------------------------------------------------------------------------
-void GLVAO::init(GLProgram& program)
+void GLVAO::createVBOsFromAttribs(GLProgram::Attributes const& attributes)
 {
-    // Create a list of VBOs. TODO: manage integers
-    for (auto& it: program.attributes())
+    // TODO: manage integers
+    for (auto const& it: attributes)
     {
         const char *name = it.first.c_str();
         switch (it.second->size())
@@ -129,10 +109,12 @@ void GLVAO::init(GLProgram& program)
             throw GL::Exception("Attribute with dimension > 4 is not managed");
         }
     }
+}
 
-    // Create a list of textures.
-    //m_listTextures.reserve(program.samplers().size());
-    for (auto& it: program.samplers())
+//--------------------------------------------------------------------------
+void GLVAO::createTexturesFromSamplers(GLProgram::Samplers const& samplers)
+{
+    for (auto const& it: samplers)
     {
         const char *name = it.first.c_str();
         const GLenum gltype = it.second->target();
@@ -171,33 +153,96 @@ void GLVAO::init(GLProgram& program)
                                 + std::to_string(gltype));
         }
     }
-
-    // Make VAO and GLProgram be coupled.
-    m_program = &program;
 }
 
 //--------------------------------------------------------------------------
 bool GLVAO::draw(Mode const mode, size_t const first, size_t const count)
 {
-  if (likely(m_program != nullptr))
+    if (likely(m_program != nullptr))
     {
-      m_program->begin(); // Optim: glUse()
-      begin(); // Optim: glBindVertexArray(m_vao->handle());
-      glCheck(glDrawArrays(static_cast<GLenum>(mode),
-			   static_cast<GLint>(first),
-			   static_cast<GLsizei>(count)));
-      return true; // FIXME not always the case
+      m_program->begin();   //glCheck(glUseProgram(m_program->handle()));
+	begin(); // Optim: glBindVertexArray(m_vao->handle());
+	glCheck(glDrawArrays(static_cast<GLenum>(mode),
+			     static_cast<GLint>(first),
+			     static_cast<GLsizei>(count)));
+	return true; // FIXME not always the case
     }
-  else
+    else
     {
-      std::cerr << "Failed OpenGL VAO has not been bound to a GLProgram"
-		<< std::endl;
-      return false;
+        std::cerr << "Failed OpenGL VAO has not been bound to a GLProgram"
+		  << std::endl;
+	return false;
     }
 }
 
 //--------------------------------------------------------------------------
-bool GLVAO::draw(Mode const mode, size_t const first)
+bool GLVAO::onUpdate()
 {
-  return GLVAO::draw(mode, first, m_count);
+    if (!checkVBOSizes())
+        return true;
+
+    //    if (!m_vao->checkLoadTextures())
+    //    return true;
+
+    std::cout << "GLVAO::onUpdate()" << std::endl;
+    //m_vao->begin();
+
+    // if
+
+    for (auto& it: m_program->m_attributes)
+    {
+        m_listBuffers[it.first]->begin();
+        it.second->begin();
+    }
+
+    // if
+
+    for (auto& it: m_program->m_samplers)
+    {
+        it.second->begin();
+        m_listTextures[it.first]->begin();
+    }
+
+    //m_vao->end();
+
+    return false;
+}
+
+//--------------------------------------------------------------------------
+size_t GLVAO::getVBONames(std::vector<std::string> &list, bool const clear) const
+{
+  if (clear) { list.clear(); }
+  list.reserve(m_listBuffers.size());
+  for (auto& it: m_listBuffers)
+    {
+      list.push_back(it.second->name());
+    }
+  return list.size();
+}
+
+//--------------------------------------------------------------------------
+size_t GLVAO::getTexturesNames(std::vector<std::string>& list, bool const clear) const
+{
+  if (clear) { list.clear(); }
+  list.reserve(m_listTextures.size());
+  for (auto& it: m_listTextures)
+    {
+      list.push_back(it.second->name()); // FIXME filename
+    }
+  return list.size();
+}
+
+//--------------------------------------------------------------------------
+size_t GLVAO::getUnloadedTextures(std::vector<std::string>& list, bool const clear) const
+{
+  if (clear) { list.clear(); }
+  list.reserve(m_listTextures.size());
+  for (auto& it: m_listTextures)
+    {
+      if (!it.second->loaded())
+	{
+	  list.push_back(it.second->name()); // TODO filename()
+	}
+    }
+  return list.size();
 }

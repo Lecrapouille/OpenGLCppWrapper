@@ -37,7 +37,7 @@ public:
 
     static std::string info()
     {
-        return "Render an rotating box";
+        return "Post Production with Framebuffer";
     }
 
 private:

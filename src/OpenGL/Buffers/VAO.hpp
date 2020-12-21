@@ -34,7 +34,9 @@
 #  include "Math/Vector.hpp"
 #  include "Common/Any.hpp"
 
+//--------------------------------------------------------------------------
 //! \brief Mode for drawing primitives (points, lines, triangles ...)
+//--------------------------------------------------------------------------
 enum class Mode : GLenum
 {
     /* 0x0000 */ POINTS = GL_POINTS,
@@ -49,8 +51,11 @@ enum class Mode : GLenum
     /* 0x000C */ TRIANGLES_ADJACENCY = GL_TRIANGLES_ADJACENCY,
     /* 0x000D */ TRIANGLE_STRIP_ADJACENCY = GL_TRIANGLE_STRIP_ADJACENCY,
     /* 0x000E */ PATCHES = GL_PATCHES,
-};//! \brief Mode for drawing primitives (points, lines, triangles ...)
+};
 
+//******************************************************************************
+//! \brief Class Wrapping OpenGL VAO
+//******************************************************************************
 class GLVAO: public GLObject<GLenum>
 {
     //! \brief GLProgram directly modifies GLVAO states.
@@ -97,38 +102,31 @@ public:
     //!   - BufferUsage::DYNAMIC_DRAW: The data store contents will be modified repeatedly
     //!     and used many times.
     //--------------------------------------------------------------------------
-    void usage(BufferUsage const usage_)
+    void usage(BufferUsage const usage)
     {
-       m_usage = usage_;
+       m_usage = usage;
     }
 
     //--------------------------------------------------------------------------
     //! \brief Set the number of elements to reserve when creating VBOs.
     //--------------------------------------------------------------------------
-    void reserve(size_t const reserve_)
+    void reserve(size_t const reserve)
     {
-       m_reserve = reserve_;
+       m_reserve = reserve;
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    bool bound(GLenum const prog_id) const;
-
-    //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    bool bound() const;
-
-    //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Wrap the glDrawArrays() function
     //--------------------------------------------------------------------------
     bool draw(Mode const mode, size_t const first, size_t const count);
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Wrap the glDrawArrays() function
     //--------------------------------------------------------------------------
-    bool draw(Mode const mode = Mode::TRIANGLES, size_t const first = 0u);
+    inline bool draw(Mode const mode = Mode::TRIANGLES, size_t const first = 0u)
+    {
+        return GLVAO::draw(mode, first, m_count);
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Check if this instance has VBOs.
@@ -158,14 +156,6 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Alias for hasTextures()
-    //--------------------------------------------------------------------------
-    inline bool hasSamplers() const
-    {
-        return 0_z != m_textures.size();
-    }
-
-    //--------------------------------------------------------------------------
     //! \brief Return the list of VBO names. VBO names come from names of
     //! attributes variables used inside GLSL shaders. This method is mainly
     //! used for debug purpose.
@@ -178,16 +168,7 @@ public:
     //!
     //! \return the number of inserted elements.
     //--------------------------------------------------------------------------
-    size_t getVBONames(std::vector<std::string> &list, bool const clear = true) const
-    {
-        if (clear) { list.clear(); }
-        list.reserve(m_listBuffers.size());
-        for (auto& it: m_listBuffers)
-        {
-            list.push_back(it.second->name());
-        }
-        return list.size();
-    }
+    size_t getVBONames(std::vector<std::string> &list, bool const clear = true) const;
 
     //--------------------------------------------------------------------------
     //! \brief Return the list of sampler names. Samplers come from names of
@@ -208,30 +189,8 @@ public:
     //! \todo: get the tuple sampler name and texture name ?
     //! \return the number of inserted elements.
     //--------------------------------------------------------------------------
-    size_t getTexturesNames(std::vector<std::string>& list, bool const clear = true) const
-    {
-        if (clear) { list.clear(); }
-        list.reserve(m_listTextures.size());
-        for (auto& it: m_listTextures)
-        {
-            list.push_back(it.second->name()); // FIXME filename
-        }
-        return list.size();
-    }
-
-    size_t getUnloadedTextures(std::vector<std::string>& list, bool const clear = true) const
-    {
-        if (clear) { list.clear(); }
-        list.reserve(m_listTextures.size());
-        for (auto& it: m_listTextures)
-        {
-            if (!it.second->loaded())
-            {
-                list.push_back(it.second->name()); // TODO filename()
-            }
-        }
-        return list.size();
-    }
+    size_t getTexturesNames(std::vector<std::string>& list, bool const clear = true) const;
+    size_t getUnloadedTextures(std::vector<std::string>& list, bool const clear = true) const;
 
     //--------------------------------------------------------------------------
     //! \brief Return the reference of the named VBO holding a 4D vector of type
@@ -347,6 +306,22 @@ public:
 private:
 
     //--------------------------------------------------------------------------
+    //! \brief Return true if this instance of VAO is bound to the given GLProgram
+    //--------------------------------------------------------------------------
+    inline bool isBoundTo(GLenum const prog_id) const
+    {
+        return (m_program != nullptr) && (m_program->handle() == prog_id);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return true if this instance of VAO is bound to a GLProgram
+    //--------------------------------------------------------------------------
+    inline bool isBound() const
+    {
+       return (m_program != nullptr) && (m_program->handle() != 0u);
+    }
+
+    //--------------------------------------------------------------------------
     //! \brief Return the number of elements in buffers.
     //--------------------------------------------------------------------------
     inline size_t count() const
@@ -355,18 +330,10 @@ private:
     }
 
     //--------------------------------------------------------------------------
-    void throw_if_vao_not_bound()
-    {
-        if (unlikely(m_program == nullptr))
-        {
-            throw GL::Exception("Failed OpenGL VAO has not been bound to a GLProgram");
-        }
-    }
-
+    //! \brief Populate VBOs
     //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    void init(GLProgram& prog);
+    void createTexturesFromSamplers(GLProgram::Samplers const& samplers);
+    void createVBOsFromAttribs(GLProgram::Attributes const& attributes);
 
     //--------------------------------------------------------------------------
     //! \brief Create a new OpenGL VAO.
@@ -396,12 +363,9 @@ std::cout << "VAO::onActivate()" << std::endl;
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Dummy method. Nothing is made.
+    //! \brief
     //--------------------------------------------------------------------------
-    virtual bool onUpdate() override
-    {
-        return false;
-    }
+    virtual bool onUpdate() override;
 
     //--------------------------------------------------------------------------
     //! \brief Unbind the VAO from OpenGL.
@@ -421,12 +385,13 @@ std::cout << "VAO::onDeactivate()" << std::endl;
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief All VBOs shall have the same number of elements
     //--------------------------------------------------------------------------
     bool checkVBOSizes();
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Find and return a VBO. Create and store a VBO if and only if the
+    //! VAO is not yet bound to a GLProgram.
     //--------------------------------------------------------------------------
     template<class T>
     GLVertexBuffer<T>& getVBO(const char *name)  // TODO const:  foo = getVBO(()
@@ -437,15 +402,16 @@ std::cout << "VAO::onDeactivate()" << std::endl;
         try
         {
             GLVertexBuffer<T>& vbo = *(m_VBOs.get<std::shared_ptr<GLVertexBuffer<T>>>(name));
-            m_need_update = true;// TODO const:  foo = getVBO(()
+            m_need_update = true;// TODO const:  foo = getVBO()
+	    std::cout << "getVBO need update = true" << std::endl;
 
             return vbo;
         }
         catch (std::exception&)
         {
-            if (likely(!bound()))
+            if (likely(!isBound()))
             {
-                auto vbo = std::make_shared<GLVertexBuffer<T>>(name, 3_z, m_usage);
+                auto vbo = std::make_shared<GLVertexBuffer<T>>(name, m_reserve, m_usage);
                 m_VBOs.add(name, vbo);
                 m_listBuffers[name] = vbo;
 
@@ -465,7 +431,7 @@ std::cout << "VAO::onDeactivate()" << std::endl;
         if (unlikely(nullptr == name))
             throw GL::Exception("nullptr passed to uniform");
 
-        if (likely(!bound()))
+        if (likely(!isBound()))
         {
             m_textures.add(name, std::make_shared<T>(name));
         }
@@ -473,6 +439,7 @@ std::cout << "VAO::onDeactivate()" << std::endl;
         try
         {
             m_need_update = true; // TODO gerer foo = getTexture()
+	    std::cout << "getTexture need update = true" << std::endl;
             return *(m_textures.get<std::shared_ptr<T>>(name));
         }
         catch (std::exception&)

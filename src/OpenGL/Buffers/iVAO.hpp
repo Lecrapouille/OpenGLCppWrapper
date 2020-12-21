@@ -56,15 +56,15 @@ public:
 
     bool draw(Mode const mode = Mode::TRIANGLES)
     {
+        std::cout << "VAOii DRAW" << std::endl;
         if (likely(m_program != nullptr))
         {
-            // assert(m_program->ompiled());
-            m_program->begin();  // Optim: glUse()
+	    m_program->begin(); // m_program->begin();
             begin(); // Optim: glBindVertexArray(m_vao->handle());
-            index().begin();
+            m_index.begin();
             glCheck(glDrawElements(static_cast<GLenum>(mode),
-                                   static_cast<GLsizei>(index().size()),
-                                   index().gltype(), 0));
+                                   static_cast<GLsizei>(m_index.size()),
+                                   m_index.gltype(), 0));
             return true; // FIXME not always the case
         }
         else
