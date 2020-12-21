@@ -18,25 +18,25 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SceneGraph/Geometry/Exported.hpp"
+#include "SceneGraph/Geometry/Model.hpp"
 #include "Loaders/3D/OBJ.hpp"
 
 //--------------------------------------------------------------------------
-    Exported& Exported::select(std::string const& filename)
+Model& Model::select(std::string const& filename)
 {
     m_filename = filename;
     return *this;
 }
 
 //--------------------------------------------------------------------------
-bool Exported::doGenerate(GLVertexBuffer<Vector3f>& vertices,
-                          GLVertexBuffer<Vector3f>& normals,
-                          GLVertexBuffer<Vector2f>& uv,
-                          GLIndex32& index)
+bool Model::doGenerate(GLVertexBuffer<Vector3f>& vertices,
+                       GLVertexBuffer<Vector3f>& normals,
+                       GLVertexBuffer<Vector2f>& uv,
+                       GLIndex32& index)
 {
     if (m_filename.size() == 0u)
     {
-        std::cerr << "ERROR: Exported::doGenerate: no input file given"
+        std::cerr << "ERROR: Model::doGenerate: no input file given"
                   << std::endl;
         return false;
     }

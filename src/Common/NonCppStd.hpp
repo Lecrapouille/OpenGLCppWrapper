@@ -74,7 +74,7 @@ protected:
 //! - ClassSP: shared_pointer<Class>
 //! - classUP: unique_pointer<Class>
 // *****************************************************************************
-#define DECLARE_CLASS(TypeName)                      \
+#  define DECLARE_CLASS(TypeName)                    \
     class TypeName;                                  \
     using TypeName##_SP = std::shared_ptr<TypeName>; \
     using TypeName##_UP = std::unique_ptr<TypeName>; \
@@ -84,10 +84,7 @@ protected:
 // *****************************************************************************
 // Enable make_unique for C++11 and Visual Studio
 // *****************************************************************************
-#if !((defined(_MSC_VER) && (_MSC_VER >= 1800)) ||                                    \
-      (defined(__clang__) && defined(__APPLE__) && (COMPILER_VERSION >= 60000)) ||    \
-      (defined(__clang__) && (!defined(__APPLE__)) && (COMPILER_VERSION >= 30400)) && (__cplusplus > 201103L) || \
-      (defined(__GNUC__) && (COMPILER_VERSION >= 40900) && (__cplusplus > 201103L)))
+#  if __cplusplus == 201103L
 
 // These compilers do not support make_unique so redefine it
 namespace std
@@ -127,7 +124,8 @@ namespace std
   typename _Unique_if<T>::_Known_bound
   make_unique(Args&&...) = delete;
 }
-#  endif
+
+#  endif // __cplusplus == 201103L
 
 // *****************************************************************************
 // Hack for allowing std::make_unique to create instances of class having a

@@ -48,21 +48,21 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    class MyObject: public Shape<Exported, DepthMaterial>
+    class MyObject: public Shape<Model, DepthMaterial>
     {
     public:
 
         using Ptr = std::unique_ptr<MyObject>;
 
         MyObject(std::string const& name)
-            : Shape<Exported, DepthMaterial>(name + std::to_string(id()))
+            : Shape<Model, DepthMaterial>(name + std::to_string(id()))
         {}
 
         virtual bool onCreate() override
         {
             std::cout << "MyObject::onCreate()" << std::endl;
             geometry.select("/home/qq/MyGitHub/OpenGLCppWrapper/examples/textures/qq.obj");
-            Shape<Exported, DepthMaterial>::onCreate();
+            Shape<Model, DepthMaterial>::onCreate();
             return true;
         }
 

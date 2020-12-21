@@ -16,6 +16,7 @@
 #  define OPENGLCPPWRAPPER_EXCEPTION_HPP
 
 #  include <typeinfo>
+#  include <string>
 #  include "NonCppStd.hpp"
 
 class BaseException: public std::exception

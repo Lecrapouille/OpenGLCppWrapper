@@ -18,22 +18,22 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXPORTED_GEO_HPP
-#  define EXPORTED_GEO_HPP
+#ifndef GEOMETRY_MODEL_HPP
+#  define GEOMETRY_MODEL_HPP
 
 #  include "SceneGraph/Geometry/Geometry.hpp"
 
 // *****************************************************************************
-//! \brief Generate the geomatry of a plane.
+//! \brief Generate the geometry from a file
 // *****************************************************************************
-class Exported: public Geometry
+class Model: public Geometry
 {
 public:
 
     //--------------------------------------------------------------------------
     //! \brief Select the loader
     //--------------------------------------------------------------------------
-    Exported& select(std::string const& filename);
+    Model& select(std::string const& filename);
 
 private:
 
@@ -50,4 +50,4 @@ private:
     std::string m_filename;
 };
 
-#endif
+#endif // GEOMETRY_MODEL_HPP

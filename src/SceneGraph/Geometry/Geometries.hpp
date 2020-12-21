@@ -23,6 +23,6 @@
 
 #  include "SceneGraph/Geometry/Plane.hpp"
 #  include "SceneGraph/Geometry/Tube.hpp"
-#  include "SceneGraph/Geometry/Exported.hpp"
+#  include "SceneGraph/Geometry/Model.hpp"
 
 #endif // OPENGLCPPWRAPPER_GEOMETRIES_HPP

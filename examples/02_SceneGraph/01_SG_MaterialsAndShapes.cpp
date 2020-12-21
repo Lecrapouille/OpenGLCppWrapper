@@ -41,8 +41,7 @@ void SGMatAndShape::onWindowResized()
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
     // Change the projction matrix of the shape
-    Shape<Exported, DepthMaterial>& root = // FIXME
-            *(static_cast<Shape<Exported, DepthMaterial>*>(m_scene.root.get()));
+    MyObject& root = *(static_cast<MyObject*>(m_scene.root.get())); // FIXME proper solution ?
 
     root.projectionMatrix() =  // FIXME: TODO scene.updateMatrix + visitor
             matrix::perspective(maths::toRadian(60.0f),
@@ -76,8 +75,7 @@ bool SGMatAndShape::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-    Shape<Exported, DepthMaterial>& root =
-            *(static_cast<Shape<Exported, DepthMaterial>*>(m_scene.root.get()));
+    MyObject& root = *(static_cast<MyObject*>(m_scene.root.get())); // FIXME proper solution ?
 
     root.modelMatrix() = Identity44f;
     root.viewMatrix() = matrix::lookAt(Vector3f(5,5,5),

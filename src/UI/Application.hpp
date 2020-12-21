@@ -106,9 +106,14 @@ public:
         std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
         std::cout << std::endl;
 
+#  pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wold-style-cast"
+
         // Make sure OpenGL version 3.3 API is available
         if (!GLEW_VERSION_3_3)
             throw GL::Exception("OpenGL 3.3 API is not available!");
+
+#   pragma GCC diagnostic pop
     }
 
 private:

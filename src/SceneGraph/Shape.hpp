@@ -60,7 +60,7 @@ public:
     //! \note some geometry have to be configurate before their generation ie
     //! see their configure() method.
     //--------------------------------------------------------------------------
-    bool onCreate()
+    virtual bool onCreate() override
     {
         std::cout << "Shape::onCreate()" << std::endl;
         // FIXME since prog has MVP matrix and vertice position should not the
