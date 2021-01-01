@@ -22,7 +22,6 @@
 #  define EXAMPLE_10_SKYBOX_SHAPE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------

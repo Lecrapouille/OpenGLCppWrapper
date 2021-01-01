@@ -22,7 +22,6 @@
 #  define EXAMPLE_07_INDEXED_SPHERE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------

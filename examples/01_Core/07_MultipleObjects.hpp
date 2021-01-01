@@ -22,7 +22,6 @@
 #  define EXAMPLE_07_MULTIPLE_MOVING_OBJECTS_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------

@@ -22,7 +22,6 @@
 #  define EXAMPLE_09_SKYBOX_TEXTURECUBE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------

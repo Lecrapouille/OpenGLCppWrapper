@@ -22,7 +22,6 @@
 #  define EXAMPLE_00_SG_BASE_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "SceneGraph/SceneGraph.hpp"
 #  include "../debug.hpp"
 
 // *****************************************************************************
@@ -47,7 +46,7 @@ private:
     virtual bool onPaint() override;
     virtual void onPaintFailed(std::string const& reason) override;
 
-    SceneGraph m_scene;
+    SceneTree m_scene;
 };
 
 #endif // EXAMPLE_00_SG_BASE_HPP

@@ -22,7 +22,6 @@
 #  define EXAMPLE_05_ROTATING_BOX_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
 // *****************************************************************************

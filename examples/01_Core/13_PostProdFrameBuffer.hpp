@@ -22,7 +22,6 @@
 #  define EXAMPLE_10_POSTPROD_FRAMEBUFFER_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------

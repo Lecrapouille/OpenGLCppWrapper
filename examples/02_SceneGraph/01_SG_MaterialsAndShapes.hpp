@@ -22,8 +22,6 @@
 #  define EXAMPLE_01_SG_MATERIALS_AND_SHAPES_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "SceneGraph/SceneGraph.hpp"
-#  include "SceneGraph/Shape.hpp"
 #  include "../debug.hpp"
 
 //#  include "Material/Shape.hpp"
@@ -84,7 +82,7 @@ private:
     virtual bool onPaint() override;
     virtual void onPaintFailed(std::string const& reason) override;
 
-    SceneGraph m_scene;
+    SceneTree m_scene;
 };
 
 #endif // EXAMPLE_01_SG_MATERIALS_AND_SHAPES_HPP

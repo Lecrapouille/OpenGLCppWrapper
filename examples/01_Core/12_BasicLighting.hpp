@@ -22,7 +22,6 @@
 #  define EXAMPLE_12_BASIC_LIGHTING_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
 // *****************************************************************************

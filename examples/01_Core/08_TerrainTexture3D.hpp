@@ -22,7 +22,6 @@
 #  define EXAMPLE_08_TERRAIN_TEXTURE3D_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
-#  include "Math/Transformable.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------
