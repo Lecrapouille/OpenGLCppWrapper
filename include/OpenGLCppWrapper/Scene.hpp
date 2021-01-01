@@ -21,8 +21,9 @@
 #ifndef OPENGLCPPWRAPPER_INCLUDE_SCENE_GRAPH_HPP
 #  define OPENGLCPPWRAPPER_INCLUDE_SCENE_GRAPH_HPP
 
-#  include "SceneGraph/Shape.hpp"
-#  include "SceneGraph/Material/Materials.hpp"
-#  include "SceneGraph/Geometry/Geometries.hpp"
+#  include "Scene/Material/Materials.hpp"
+#  include "Scene/Geometry/Geometries.hpp"
+#  include "Scene/ShapeNode.hpp"
+#  include "Scene/BlinkerNode.hpp"
 
 #endif // OPENGLCPPWRAPPER_INCLUDE_SCENE_GRAPH_HPP

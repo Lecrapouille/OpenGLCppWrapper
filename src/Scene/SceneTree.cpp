@@ -18,18 +18,18 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SceneGraph.hpp"
+#include "Scene/SceneTree.hpp"
 #include <iostream>
 #include <sstream>
 
 //------------------------------------------------------------------------------
-SceneGraph::~SceneGraph()
+SceneTree::~SceneTree()
 {
     release();
 }
 
 //------------------------------------------------------------------------------
-SceneObject* SceneGraph::get(std::string const& path)
+SceneObject* SceneTree::get(std::string const& path)
 {
     SceneObject* found = nullptr;
 
@@ -72,7 +72,7 @@ SceneObject* SceneGraph::get(std::string const& path)
 }
 
 //------------------------------------------------------------------------------
-SceneObject* SceneGraph::findChild(SceneObject* node, std::string const& name)
+SceneObject* SceneTree::findChild(SceneObject* node, std::string const& name)
 {
     for (auto& it: node->children)
     {
@@ -83,7 +83,7 @@ SceneObject* SceneGraph::findChild(SceneObject* node, std::string const& name)
 }
 
 //------------------------------------------------------------------------------
-void SceneGraph::getByTag(std::string const& tag, std::vector<Node*> found)
+void SceneTree::getByTag(std::string const& tag, std::vector<Node*> found)
 {
     if (root == nullptr)
         return ;
@@ -98,7 +98,7 @@ void SceneGraph::getByTag(std::string const& tag, std::vector<Node*> found)
 }
 
 //------------------------------------------------------------------------------
-void SceneGraph::debug()
+void SceneTree::debug()
 {
     if (root == nullptr)
         return ;
@@ -110,7 +110,7 @@ void SceneGraph::debug()
 }
 
 //------------------------------------------------------------------------------
-void SceneGraph::setup()
+void SceneTree::setup()
 {
     if (root == nullptr)
         return ;
@@ -125,7 +125,7 @@ void SceneGraph::setup()
 }
 
 //------------------------------------------------------------------------------
-void SceneGraph::update(float const dt)
+void SceneTree::update(float const dt)
 {
     if (root == nullptr)
         return ;
@@ -146,7 +146,7 @@ void SceneGraph::update(float const dt)
 }
 
 //------------------------------------------------------------------------------
-void SceneGraph::draw()
+void SceneTree::draw()
 {
     if (root == nullptr)
         return ;
@@ -166,7 +166,7 @@ void SceneGraph::draw()
 }
 
 //------------------------------------------------------------------------------
-void SceneGraph::release()
+void SceneTree::release()
 {
     if (root == nullptr)
         return ;

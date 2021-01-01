@@ -79,10 +79,11 @@ public:
     //! \return the reference to the newly created tree node.
     //--------------------------------------------------------------------------
     template<typename ...ArgsT>
-    T& insert(ArgsT&&... args)
+    T& attach(ArgsT&&... args)
     {
         children.push_back(create(std::forward<ArgsT>(args)...));
         children.back()->parent = static_cast<T*>(this);
+        onNodeAdded();
         return *static_cast<T*>(children.back().get());
     }
 
@@ -90,11 +91,33 @@ public:
     //! \brief Insert a new node. The element is moved so no longer be used.
     //! \return the index of the object.
     //--------------------------------------------------------------------------
-    size_t insert(Ptr node)
+    size_t attach(Ptr node)
     {
         node->parent = static_cast<T*>(this);
         children.push_back(std::move(node));
+        onNodeAdded();
         return children.size() - 1u;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Insert a new node. The element is moved so no longer be used.
+    //! \return the index of the object.
+    //--------------------------------------------------------------------------
+    size_t detach(Ptr node)
+    {
+        auto it = std::find_if(children.begin(), children.end(),
+                               [node](Ptr i)
+                               {
+                                   return i.get() == node.get();
+                               });
+
+        if (it != children.end())
+        {
+            children.erase(it);
+            onNodeRemoved();
+        }
+
+        return *this;
     }
 
     //--------------------------------------------------------------------------
@@ -207,6 +230,24 @@ public:
     {
         return size() == 0u;
     }
+
+private:
+
+    //--------------------------------------------------------------------------
+    //! \brief Callback when a node has been added. By default do nothing but
+    //! derived class can override this method.
+    //!
+    //! \param node newly inserted node.
+    //--------------------------------------------------------------------------
+    virtual void onNodeAdded()
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Callback when a node has been removed. By default do nothing but
+    //! derived class can override this method.
+    //--------------------------------------------------------------------------
+    virtual void onNodeRemoved()
+    {}
 
 public:
 

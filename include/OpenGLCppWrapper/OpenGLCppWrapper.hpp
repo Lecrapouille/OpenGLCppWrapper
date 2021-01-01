@@ -23,6 +23,6 @@
 
 #  include "OpenGLCppWrapper/OpenGL.hpp"
 #  include "OpenGLCppWrapper/UI.hpp"
-#  include "OpenGLCppWrapper/SceneGraph.hpp"
+#  include "OpenGLCppWrapper/Scene.hpp"
 
 #endif // OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP

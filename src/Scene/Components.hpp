@@ -1,10 +1,10 @@
 // Original code source https://stackoverflow.com/questions/44105058/how-does-unitys-getcomponent-work
 // Quote: "I'm wondering how the GetComponent() method that Unity implements works."
 
-#ifndef OPENGLCPPWRAPPER_COMPONENTS_HPP
-#  define OPENGLCPPWRAPPER_COMPONENTS_HPP
+#ifndef OPENGLCPPWRAPPER_SCENEGRAPH_COMPONENTS_HPP
+#  define OPENGLCPPWRAPPER_SCENEGRAPH_COMPONENTS_HPP
 
-#  include "NonCppStd.hpp"
+#  include "Common/NonCppStd.hpp"
 #  include <algorithm> // find_if
 #  include <vector>
 
@@ -143,4 +143,4 @@ private:
     std::vector<std::unique_ptr<Component>> m_components;
 };
 
-#endif // OPENGLCPPWRAPPER_COMPONENTS_HPP
+#endif // OPENGLCPPWRAPPER_SCENEGRAPH_COMPONENTS_HPP

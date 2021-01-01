@@ -21,7 +21,7 @@
 #ifndef PLANE_HPP
 #  define PLANE_HPP
 
-#  include "SceneGraph/Geometry/Geometry.hpp"
+#  include "Scene/Geometry/Geometry.hpp"
 
 // *****************************************************************************
 //! \brief Generate the geomatry of a plane.

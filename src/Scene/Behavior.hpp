@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef BEHAVIOR_HPP
-#  define BEHAVIOR_HPP
+#ifndef OPENGLCPPWRAPPER_SCENEGRAPH_BEHAVIOR_HPP
+#  define OPENGLCPPWRAPPER_SCENEGRAPH_BEHAVIOR_HPP
 
 // *****************************************************************************
 //! \brief Give some behavior for a game objects.
@@ -94,4 +94,4 @@ public:
     {}
 };
 
-#endif
+#endif // OPENGLCPPWRAPPER_SCENEGRAPH_BEHAVIOR_HPP

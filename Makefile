@@ -51,7 +51,7 @@ OBJ_GUI = Window.o Application.o DearImGui.o
 OBJ_MATERIALS = Material.o DepthMaterial.o
 OBJ_GEOMETRIES = Geometry.o Model.o Plane.o Tube.o
 OBJ_LOADERS = OBJ.o SOIL.o
-OBJ_SCENE_GRAPH = SceneGraph.o
+OBJ_SCENE_GRAPH = SceneTree.o
 
 OBJS += $(THIRDPART_OBJS) $(OBJ_COMMON)
 OBJS += $(OBJ_OPENGL_CONTEXT) $(OBJ_OPENGL_VARIABLES)

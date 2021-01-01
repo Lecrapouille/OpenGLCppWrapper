@@ -18,12 +18,12 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SCENEGRAPH_HPP
-#  define SCENEGRAPH_HPP
+#ifndef OPENGLCPPWRAPPER_SCENEGRAPH_SCENE_TREE_HPP
+#  define OPENGLCPPWRAPPER_SCENEGRAPH_SCENE_TREE_HPP
 
 #  include "Math/Transformable.hpp"
-#  include "Common/Tree.hpp"
-#  include "SceneGraph/GameObject.hpp"
+#  include "Scene/Tree.hpp"
+#  include "Scene/GameObject.hpp"
 
 // *****************************************************************************
 //! \brief Class container fo holding a scene.
@@ -43,7 +43,7 @@
 //! For more information you can read this document "Scene Graphs" at
 //!   https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/
 // *****************************************************************************
-class SceneGraph
+class SceneTree
 {
 public:
 
@@ -53,9 +53,23 @@ public:
     //--------------------------------------------------------------------------
     class Node : public GameObject, public Tree<Node>
     {
-        friend class SceneGraph;
+        friend class SceneTree;
 
     public:
+
+        //----------------------------------------------------------------------
+        //! \brief Print on the console internal states of a node.
+        //----------------------------------------------------------------------
+        inline friend std::ostream& operator<<(std::ostream& os, Node& node)
+        {
+            return os << "Node: " << node.name() << std::endl
+                      << " transform: " << node.transform.matrix() << std::endl
+                      << " enabled: " << node.enabled() << std::endl
+                      << " has " << node.children.size()
+                      << " children:" << std::endl << "  ";
+            for (auto const& it: node.children)
+                std::cout << " " <<  it->name();
+        }
 
         //----------------------------------------------------------------------
         //! \brief Create a Node with a name
@@ -97,7 +111,7 @@ public:
     //! \brief Release all node attached to this scene. Each node before its
     //! \brief destruction has its method onDisable() called.
     //--------------------------------------------------------------------------
-    ~SceneGraph();
+    ~SceneTree();
 
     //--------------------------------------------------------------------------
     //! \brief Traverse the scene and print information on each node to the
@@ -145,20 +159,6 @@ public:
 //------------------------------------------------------------------------------
 //! \brief Alias name
 //------------------------------------------------------------------------------
-using SceneObject = SceneGraph::Node;
+using SceneObject = SceneTree::Node;
 
-//------------------------------------------------------------------------------
-//! \brief Print on the console internal states of a node.
-//------------------------------------------------------------------------------
-inline std::ostream& operator<<(std::ostream& os, SceneObject& node)
-{
-    return os << "Node: " << node.name() << std::endl
-              << " transform: " << node.transform.matrix() << std::endl
-              << " enabled: " << node.enabled() << std::endl
-              << " has " << node.children.size()
-              << " children:" << std::endl << "  ";
-    for (auto const& it: node.children)
-        std::cout << " " <<  it->name();
-}
-
-#endif
+#endif // OPENGLCPPWRAPPER_SCENEGRAPH_SCENE_TREE_HPP

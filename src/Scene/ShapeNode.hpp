@@ -18,13 +18,13 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SHAPE_HPP
-#  define SHAPE_HPP
+#ifndef OPENGLCPPWRAPPER_SCENEGRAPH_SHAPE_NODE_HPP
+#  define OPENGLCPPWRAPPER_SCENEGRAPH_SHAPE_NODE_HPP
 
 #  include "OpenGL/Buffers/iVAO.hpp"
-#  include "SceneGraph/Geometry/Geometry.hpp"
-#  include "SceneGraph/Material/Material.hpp"
-#  include "SceneGraph/SceneGraph.hpp"
+#  include "Scene/Geometry/Geometry.hpp"
+#  include "Scene/Material/Material.hpp"
+#  include "Scene/SceneTree.hpp"
 
 // *****************************************************************************
 //! \brief Base class for predefined 3D shape (cube, cylinder ...). A Shape is
@@ -133,4 +133,4 @@ protected:
     GLVAO32 m_vao;
 };
 
-#endif
+#endif // OPENGLCPPWRAPPER_SCENEGRAPH_SHAPE_NODE_HPP

@@ -20,7 +20,7 @@
 
 #include "UI/Window.hpp"
 #include "UI/Application.hpp"
-#include "Common/GPUMemory.hpp"
+#include "OpenGL/Buffers/GPUMemory.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>

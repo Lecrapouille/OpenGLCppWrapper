@@ -21,8 +21,8 @@
 #ifndef OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP
 #  define OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP
 
-#  include "Common/GPUMemory.hpp"
 #  include "Common/Pending.hpp"
+#  include "OpenGL/Buffers/GPUMemory.hpp"
 #  include <vector>
 #  include <algorithm>
 #  include <cmath>

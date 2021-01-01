@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2020 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -18,19 +18,11 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SceneGraph/Material/DepthMaterial.hpp"
-#include "SceneGraph/Material/ShaderLib.hpp"
+#ifndef OPENGLCPPWRAPPER_GEOMETRIES_HPP
+#  define OPENGLCPPWRAPPER_GEOMETRIES_HPP
 
-void DepthMaterial::createShaders(GLVertexShader& vertexShader,
-                                  GLFragmentShader& fragmentShader)
-{
-    shaders::materials::depth::code(vertexShader);
-    shaders::materials::depth::code(fragmentShader);
-}
+#  include "Scene/Geometry/Plane.hpp"
+#  include "Scene/Geometry/Tube.hpp"
+#  include "Scene/Geometry/Model.hpp"
 
-void DepthMaterial::init()
-{
-    near() = 1.0f;
-    far() = 100.0f;
-    opacity() = 1.0f;
-}
+#endif // OPENGLCPPWRAPPER_GEOMETRIES_HPP

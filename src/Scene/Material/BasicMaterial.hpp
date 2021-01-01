@@ -21,7 +21,7 @@
 #ifndef BASIC_MATERIAL_HPP
 #  define BASIC_MATERIAL_HPP
 
-#  include "SceneGraph/Material/Material.hpp"
+#  include "Scene/Material/Material.hpp"
 
 class BasicMaterial: public Material
 {

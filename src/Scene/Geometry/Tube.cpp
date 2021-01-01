@@ -18,7 +18,7 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SceneGraph/Geometry/Tube.hpp"
+#include "Scene/Geometry/Tube.hpp"
 
 //------------------------------------------------------------------------------
 Tube& Tube::configure(float const top_radius,

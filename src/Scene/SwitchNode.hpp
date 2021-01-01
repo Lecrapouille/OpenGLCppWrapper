@@ -18,44 +18,31 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_SCENE_SWITCH_HPP
-#  define OPENGLCPPWRAPPER_SCENE_SWITCH_HPP
+#ifndef OPENGLCPPWRAPPER_SCENEGRAPH_SWITCH_HPP
+#  define OPENGLCPPWRAPPER_SCENEGRAPH_SWITCH_HPP
 
-#  include "Scene/Node.hpp"
+#  include "Scene/SceneTree.hpp"
 
-namespace glwrap
+// *****************************************************************************
+//! \brief A special node scene allowing to select a single child allowed to be
+//! traversed: other children are ignored. A SwitchNode3D is not renderable.
+//! \note this node has been inspired by OpenInventor soSwitch
+//! https://grey.colorado.edu/coin3d/classSoSwitch.html
+// *****************************************************************************
+class SwitchNode : public SceneObject
 {
-  DECLARE_CLASS(SwitchNode3D);
-
-  // ***************************************************************************
-  //! \brief A special node scene allowing to select a single child allowed to
-  //! be traversed: other children are ignored. A SwitchNode3D is not renderable.
-  //! \note this node has been inspired by OpenInventor soSwitch
-  //! https://grey.colorado.edu/coin3d/classSoSwitch.html
-  // ***************************************************************************
-  class SwitchNode3D
-    : public Node3D
-  {
-  public:
+public:
 
     //--------------------------------------------------------------------------
     //! \brief Create a switch node with a given name.
     //!
     //! \param name the name of the node. It is used mainly for the debug.
     //--------------------------------------------------------------------------
-    SwitchNode3D(std::string const& name)
-      : Node3D(name, false)
+    SwitchNode(std::string const& name)
+        : SceneObject(name)
     {}
 
-  public:
-
-    //--------------------------------------------------------------------------
-    //! \brief Static method allowing to create a switch node.
-    //--------------------------------------------------------------------------
-    static SwitchNode3D_SP create(std::string const& name)
-    {
-      return std::make_shared<SwitchNode3D>(name);
-    }
+public:
 
     //--------------------------------------------------------------------------
     //! \brief Select the desired child.
@@ -69,12 +56,12 @@ namespace glwrap
     //--------------------------------------------------------------------------
     void select(size_t const nth)
     {
-      if (m_designated == nth)
-        return ;
+        if (m_designated == nth)
+            return ;
 
-      m_designated = nth;
-      designated2effective();
-      updateTraversable();
+        m_designated = nth;
+        designated2effective();
+        updateEnabledChild();
     }
 
     //--------------------------------------------------------------------------
@@ -82,7 +69,7 @@ namespace glwrap
     //--------------------------------------------------------------------------
     size_t selected() const
     {
-      return m_selected;
+        return m_selected;
     }
 
     //--------------------------------------------------------------------------
@@ -90,9 +77,9 @@ namespace glwrap
     //--------------------------------------------------------------------------
     void next()
     {
-      m_designated = (m_designated + 1_z) % m_children.size();
-      m_selected = m_designated;
-      updateTraversable();
+        m_designated = (m_designated + 1_z) % children.size();
+        m_selected = m_designated;
+        updateEnabledChild();
     }
 
     //--------------------------------------------------------------------------
@@ -100,47 +87,44 @@ namespace glwrap
     //--------------------------------------------------------------------------
     void previous()
     {
-      if (unlikely(m_designated == 0_z))
-        m_designated = m_children.size();
-      --m_designated;
-      m_selected = m_designated;
-      updateTraversable();
+        if (unlikely(m_designated == 0_z))
+            m_designated = children.size();
+        --m_designated;
+        m_selected = m_designated;
+        updateEnabledChild();
     }
 
     //--------------------------------------------------------------------------
     //! \brief Call Node3D::debug() and show additional information.
     //--------------------------------------------------------------------------
-    virtual void debug() const override
+    inline friend std::ostream& operator<<(std::ostream& os, SwitchNode& node)
     {
-      Node3D::debug();
-      std::cout << "Switched to child " << m_selected
-                << ": " << m_children[m_selected]->name()
-                << std::endl;
+        return os << *static_cast<Node*>(&node)
+                  << "Switched to child " << node.m_selected
+                  << ": " << node.children[node.m_selected]->name()
+                  << std::endl;
     }
 
-  protected:
+private:
 
     //--------------------------------------------------------------------------
     //! \brief Make the desired child traversable and the others not traversable.
     //--------------------------------------------------------------------------
-    void updateTraversable()
+    void updateEnabledChild()
     {
-      if (unlikely(m_children.size() == 0_z))
-        return ;
+        for (auto& it: children)
+            it->enable(false);
 
-      for (auto& it: m_children)
-        it->setTraversable(false);
-
-      m_children[m_selected]->setTraversable(true);
+        children[m_selected]->enable(true);
     }
 
     //--------------------------------------------------------------------------
     //! \brief Callback when a child has been added. Update the traversable
     //! status for all children.
     //--------------------------------------------------------------------------
-    virtual void onNodeAdded(Node3D_SP& /*node*/) override
+    virtual void onNodeAdded() override
     {
-      updateTraversable();
+        updateEnabledChild();
     }
 
     //--------------------------------------------------------------------------
@@ -149,11 +133,9 @@ namespace glwrap
     //--------------------------------------------------------------------------
     virtual void onNodeRemoved() override
     {
-      designated2effective();
-      updateTraversable();
+        designated2effective();
+        updateEnabledChild();
     }
-
-  private:
 
     //--------------------------------------------------------------------------
     //! \brief Conver the designated child by the user to the real effective
@@ -163,18 +145,16 @@ namespace glwrap
     //--------------------------------------------------------------------------
     inline void designated2effective()
     {
-      // m_selected = std::min(m_designated, m_children.size() - 1_z);
-      m_selected = m_designated % m_children.size();
+        // m_selected = std::min(m_designated, children.size() - 1_z);
+        m_selected = m_designated % children.size();
     }
 
-  protected:
+protected:
 
     //! \brief Child chosen by the user (index of the std::vector).
     size_t m_designated = 0u;
     //! \brief Chosen child converted to a valid std::vector index.
     size_t m_selected = 0u;
-  };
+};
 
-} // namespace glwrap
-
-#endif // OPENGLCPPWRAPPER_SCENE_SWITCH_HPP
+#endif // OPENGLCPPWRAPPER_SCENEGRAPH_SWITCH_HPP

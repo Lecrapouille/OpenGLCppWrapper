@@ -18,17 +18,40 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SceneGraph/Geometry/Geometry.hpp"
+#ifndef DEPTH_MATERIAL_HPP
+#  define DEPTH_MATERIAL_HPP
 
-//--------------------------------------------------------------------------
-bool Geometry::generate(GLVertexBuffer<Vector3f>& vertices,
-                        GLVertexBuffer<Vector3f>& normals,
-                        GLVertexBuffer<Vector2f>& uv,
-                        GLIndex32&                index)
+#  include "Scene/Material/Material.hpp"
+
+class DepthMaterial : public Material
 {
-    m_vertices = &vertices;
-    m_normals = &normals;
-    m_uv = &uv;
-    m_index = &index;
-    return doGenerate(vertices, normals, uv, index);
-}
+public:
+
+    DepthMaterial()
+        : Material("DepthMaterial")
+    {}
+
+    float& near()
+    {
+        return program.scalarf("near");
+    }
+
+    float& far()
+    {
+        return program.scalarf("far");
+    }
+
+    float& opacity()
+    {
+        return program.scalarf("opacity");
+    }
+
+private:
+
+    virtual void createShaders(GLVertexShader& vertexShader,
+                               GLFragmentShader& fragmentShader) override;
+
+    virtual void init() override;
+};
+
+#endif

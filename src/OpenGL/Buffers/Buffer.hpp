@@ -28,7 +28,7 @@
 #  define OPENGLCPPWRAPPER_GLBUFFER_HPP
 
 #  include "OpenGL/GLObject.hpp"
-#  include "Common/PendingContainer.hpp"
+#  include "OpenGL/Buffers/PendingContainer.hpp"
 
 //! \brief Specifies the expected usage pattern of the data store for
 //! glBufferData.

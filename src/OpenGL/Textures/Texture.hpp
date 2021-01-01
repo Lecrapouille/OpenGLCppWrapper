@@ -37,7 +37,7 @@
 // *****************************************************************************
 
 #  include "OpenGL/GLObject.hpp"
-#  include "Common/PendingContainer.hpp"
+#  include "OpenGL/Buffers/PendingContainer.hpp"
 
 // *****************************************************************************
 //! \brief Helper converter CPU to GPU pixel format.

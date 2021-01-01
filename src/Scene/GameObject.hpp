@@ -18,12 +18,12 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef GAME_OBJECT_HPP
-#  define GAME_OBJECT_HPP
+#ifndef OPENGLCPPWRAPPER_SCENEGRAPH_GAME_OBJECT_HPP
+#  define OPENGLCPPWRAPPER_SCENEGRAPH_GAME_OBJECT_HPP
 
 #  include "Common/ClassCounter.hpp"
-#  include "Common/Components.hpp"
-#  include "SceneGraph/Behavior.hpp"
+#  include "Scene/Components.hpp"
+#  include "Scene/Behavior.hpp"
 
 //------------------------------------------------------------------------------
 //! \brief Base and abstract GameObject class specialized for game.
@@ -112,4 +112,4 @@ private:
     bool m_enabled = true;
 };
 
-#endif
+#endif // OPENGLCPPWRAPPER_SCENEGRAPH_GAME_OBJECT_HPP

@@ -18,7 +18,7 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SceneGraph/Geometry/Plane.hpp"
+#include "Scene/Geometry/Plane.hpp"
 
 //------------------------------------------------------------------------------
 Plane& Plane::configure(float width,

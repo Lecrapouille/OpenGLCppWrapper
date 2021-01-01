@@ -18,7 +18,7 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SceneGraph/Material/Material.hpp"
+#include "Scene/Material/Material.hpp"
 
 bool Material::create()
 {

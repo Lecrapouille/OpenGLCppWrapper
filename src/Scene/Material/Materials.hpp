@@ -18,29 +18,10 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SceneGraph/Geometry/Model.hpp"
-#include "Loaders/3D/OBJ.hpp"
+#ifndef OPENGLCPPWRAPPER_MATERIALS_HPP
+#  define OPENGLCPPWRAPPER_MATERIALS_HPP
 
-//--------------------------------------------------------------------------
-Model& Model::select(std::string const& filename)
-{
-    m_filename = filename;
-    return *this;
-}
+#  include "Scene/Material/DepthMaterial.hpp"
+//#  include "SceneGraph/Material/BasicMaterial.hpp"
 
-//--------------------------------------------------------------------------
-bool Model::doGenerate(GLVertexBuffer<Vector3f>& vertices,
-                       GLVertexBuffer<Vector3f>& normals,
-                       GLVertexBuffer<Vector2f>& uv,
-                       GLIndex32& index)
-{
-    if (m_filename.size() == 0u)
-    {
-        std::cerr << "ERROR: Model::doGenerate: no input file given"
-                  << std::endl;
-        return false;
-    }
-
-    OBJFileLoader loader;
-    return loader.load(m_filename, vertices, normals, uv, index);
-}
+#endif // OPENGLCPPWRAPPER_MATERIALS_HPP
