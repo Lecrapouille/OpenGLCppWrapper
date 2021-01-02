@@ -68,7 +68,7 @@ public:
     //--------------------------------------------------------------------------
     virtual ~Tree<T>()
     {
-        std::cout << "Bye " << static_cast<T*>(this)->name() << std::endl;
+        //std::cout << "Bye " << static_cast<T*>(this)->name() << std::endl;
         // Avoid using implicit recursive deletion due to usage of smart pointer
         //clear(); // FIXME ?
     }
@@ -78,13 +78,13 @@ public:
     //! \param[in] args parameters to the tree node constructor.
     //! \return the reference to the newly created tree node.
     //--------------------------------------------------------------------------
-    template<typename ...ArgsT>
-    T& attach(ArgsT&&... args)
+    template<class X, typename ...ArgsT>
+    X& attach(ArgsT&&... args)
     {
-        children.push_back(create(std::forward<ArgsT>(args)...));
+        children.push_back(create<X>(std::forward<ArgsT>(args)...));
         children.back()->parent = static_cast<T*>(this);
         onNodeAdded();
-        return *static_cast<T*>(children.back().get());
+        return *static_cast<X*>(children.back().get());
     }
 
     //--------------------------------------------------------------------------

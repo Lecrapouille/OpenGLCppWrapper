@@ -24,10 +24,6 @@
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include "../debug.hpp"
 
-//#  include "Material/Shape.hpp"
-//#  include "Material/Tube.hpp"
-//#  include "Material/DepthMaterial.hpp"
-
 // *****************************************************************************
 //! \brief This example shows how to apply the depth material to a 3D shape.
 // *****************************************************************************
@@ -46,27 +42,27 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    class MyObject: public Shape<Model, DepthMaterial>
+    class MyModel: public Shape<Model, DepthMaterial>
     {
     public:
 
-        using Ptr = std::unique_ptr<MyObject>;
-
-        MyObject(std::string const& name)
-            : Shape<Model, DepthMaterial>(name + std::to_string(id()))
+        MyModel(std::string const& name)
+            : Shape<Model, DepthMaterial>(name)
         {}
+
+        //FIXME private:
 
         virtual bool onCreate() override
         {
-            std::cout << "MyObject::onCreate()" << std::endl;
-            geometry.select("/home/qq/MyGitHub/OpenGLCppWrapper/examples/textures/qq.obj");
+            std::cout << "MyModel::onCreate()" << std::endl;
+            geometry.select("textures/tree.obj");
             Shape<Model, DepthMaterial>::onCreate();
             return true;
         }
 
         virtual bool onSetup() override
         {
-            std::cout << "MyObject::onSetup()" << std::endl;
+            std::cout << "MyModel::onSetup()" << std::endl;
             material.near() = 1.0f;
             material.far() = 10.0f;
             material.opacity() = 1.0f;

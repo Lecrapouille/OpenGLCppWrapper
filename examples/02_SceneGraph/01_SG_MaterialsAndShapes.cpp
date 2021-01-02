@@ -41,9 +41,9 @@ void SGMatAndShape::onWindowResized()
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
     // Change the projction matrix of the shape
-    MyObject& root = *(static_cast<MyObject*>(m_scene.root.get())); // FIXME proper solution ?
+    MyModel* root = static_cast<MyModel*>(m_scene.root.get());
 
-    root.projectionMatrix() =  // FIXME: TODO scene.updateMatrix + visitor
+    root->projectionMatrix() =  // FIXME: TODO scene.updateMatrix + visitor
             matrix::perspective(maths::toRadian(60.0f),
                                 width<float>() / height<float>(),
                                 0.1f, 100.0f);
@@ -52,16 +52,11 @@ void SGMatAndShape::onWindowResized()
 //------------------------------------------------------------------------------
 bool SGMatAndShape::onSetup()
 {
-    std::cout << "SGMatAndShape::onSetup()" << std::endl;
-    MyObject::Ptr root = MyObject::create<MyObject>("Object");
-
-    // Configure the shape: geometry and material
-    root->geometry.select("/home/qq/MyGitHub/OpenGLCppWrapper/examples/textures/qq.obj");
-    root->material.near() = 1.0f;
-    root->material.far() = 10.0f;
-    root->material.opacity() = 1.0f;
-
-    m_scene.root = std::move(root);
+    m_scene.root = SceneObject::create<MyModel>("Tree0");
+    MyModel& t1 = m_scene.root->attach<MyModel>("Tree1");
+    MyModel& t2 = m_scene.root->attach<MyModel>("Tree2");
+    t1.attach<MyModel>("Tree1.0");
+    t2.attach<MyModel>("Tree2.0");
     m_scene.debug();
 
     return true;
@@ -75,23 +70,25 @@ bool SGMatAndShape::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-    MyObject& root = *(static_cast<MyObject*>(m_scene.root.get())); // FIXME proper solution ?
+    MyModel& root = *(static_cast<MyModel*>(m_scene.root.get())); // FIXME proper solution ?
 
     root.modelMatrix() = Identity44f;
     root.viewMatrix() = matrix::lookAt(Vector3f(5,5,5),
-                                    Vector3f(2,2,2),
-                                    Vector3f(0,1,0));
+                                       Vector3f(2,2,2),
+                                       Vector3f(0,1,0));
     m_scene.update(dt());
     m_scene.draw();
 
     return true;
 }
 
+//------------------------------------------------------------------------------
 void SGMatAndShape::onSetupFailed(std::string const& reason)
 {
     std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
 }
 
+//------------------------------------------------------------------------------
 void SGMatAndShape::onPaintFailed(std::string const& reason)
 {
     std::cerr << "Failure during rendering. Reason: " << reason << std::endl;

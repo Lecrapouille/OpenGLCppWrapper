@@ -62,13 +62,16 @@ public:
         //----------------------------------------------------------------------
         inline friend std::ostream& operator<<(std::ostream& os, Node& node)
         {
-            return os << "Node: " << node.name() << std::endl
-                      << " transform: " << node.transform.matrix() << std::endl
-                      << " enabled: " << node.enabled() << std::endl
-                      << " has " << node.children.size()
-                      << " children:" << std::endl << "  ";
+            os << "Node id " << node.id() << ": " << node.name() << std::endl
+               << " transform: " << node.transform.matrix() << std::endl
+               << " enabled: " << node.enabled() << std::endl
+               << " has " << node.children.size()
+               << " children:" << std::endl << " ";
             for (auto const& it: node.children)
-                std::cout << " " <<  it->name();
+                os << "  " <<  it->name();
+            if (node.children.size() != 0u)
+                os << std::endl;
+            return os;
         }
 
         //----------------------------------------------------------------------
