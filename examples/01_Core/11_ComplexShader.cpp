@@ -60,7 +60,12 @@ bool ComplexShader::onSetup()
     }
 
     // Create a quad.
-    m_prog.bind(m_quad);
+    if (!m_prog.bind(m_quad))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog.strerror() << "'" << std::endl;
+        return false;
+    }
 
     // Fill VBOs of the VAO: init quad vertex positions.
     m_quad.vector3f("position") =
@@ -112,7 +117,11 @@ bool ComplexShader::onPaint()
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
     m_prog.scalarf("time") = time;
-    m_quad.draw(Mode::TRIANGLES);
+    if (!m_quad.draw(Mode::TRIANGLES))
+    {
+        std::cerr << "Quad not renderered" << std::endl;
+        return false;
+    }
 
     return true;
 }

@@ -46,7 +46,7 @@ public:
 private:
 
     bool createSkyBox();
-    void drawSkyBox();
+    bool drawSkyBox();
     virtual bool onSetup() override;
     virtual bool onPaint() override;
     virtual void onSetupFailed(std::string const& reason) override;

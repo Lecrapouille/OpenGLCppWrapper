@@ -61,48 +61,52 @@ void GLProgram::concatError(std::string const& msg)
 //----------------------------------------------------------------------------
 bool GLProgram::bind(GLVAO& vao)
 {
-    // Compile the GLProgram if this has not been done yet
+    std::cout << "bind GLProgram " << name() << " to VAO " << vao.name() << std::endl;
+
+    // First compile the GLProgram (compile shaders and load GLSL variables) if
+    // this has not been done yet. Indeed GLProgram will populate the bound VAO
+    // with VBOs.
     if (unlikely(!compiled()))
     {
         if (!compile())
         {
-            std::cerr << "Tried to bind VAO "
-                      << vao.name()
-                      << "' to a GLProgram "
-                      << name() << " that failed to compile"
-                      << std::endl;
+            std::string err("Tried to bind VAO "  + vao.name()
+                            + "' to a GLProgram " + name()
+                            + " that failed to compile");
+            concatError(err);
             return false;
         }
     }
 
-    // Bind this instance of GLProgram to a never bound VAO
+    // Bind this instance of GLProgram to a never bound VAO. When binding a VAO
+    // for the first time: populate it with VBOs and textures.
     if (unlikely(!vao.isBound()))
     {
-        m_vao = &vao;
-        std::cout << "bind VAO " << m_vao->name() << " to GLProgram " << name() << std::endl;
+        std::cout << "Populate VAO " << vao.name() << std::endl;
 
-        // When binding the VAO to GLProgram for the first time:
-        // populate VBOs and textures in the VAO.
-	vao.m_program = this;
-	vao.createVBOsFromAttribs(m_attributes);
+        vao.m_program = this;
+        vao.createVBOsFromAttribs(m_attributes);
         vao.createTexturesFromSamplers(m_samplers);
-	vao.m_need_update = true;
+        vao.m_need_update = true;
+        m_vao = &vao;
         return true;
     }
 
-    // Check if VAO has been previously bound to this GLProgram. If not, this
-    // probably an error of the developper trying to bind an incompatible VAO.
+    // Check if VAO has been previously bound to this instance of GLProgram. If
+    // not, this probably an error of the developper trying to bind a VAO to an
+    // incompatible GLProgram.
     else if (likely(vao.isBoundTo(m_handle)))
     {
+        std::cout << "BOUUND VAO " << m_vao->name() << " to GLProgram " << name() << std::endl;
+        vao.m_need_update = true; // TBD
         m_vao = &vao;
         return true;
     }
     else
     {
-        std::cerr << "Tried to bind VAO "
-                  << vao.name()
-                  << " already bound to another GLProgram than "
-                  << name() << std::endl;
+        std::string err("Tried to bind VAO " + vao.name()
+                        + " already bound to another GLProgram than " + name());
+        concatError(err);
         return false;
     }
 }
@@ -224,7 +228,7 @@ bool GLProgram::onSetup()
 bool GLProgram::onUpdate()
 {
     std::cout << "GLProgram::onUpdate() uniforms"
-	      << std::endl;
+              << std::endl;
 
     for (auto const& it: m_uniformLocations)
     {
@@ -254,6 +258,10 @@ void GLProgram::onActivate()
 //--------------------------------------------------------------------------
 void GLProgram::onDeactivate()
 {
+    for (auto const& it: m_uniformLocations)
+    {
+        it.second->end();
+    }
     glCheck(glUseProgram(0U));
 }
 

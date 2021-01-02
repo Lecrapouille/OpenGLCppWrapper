@@ -67,7 +67,12 @@ bool SkyBoxShape::createSkyBox()
         return false;
     }
 
-    m_progSkyBox.bind(m_skybox);
+    if (!m_progSkyBox.bind(m_skybox))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_progSkyBox.strerror() << "'" << std::endl;
+        return false;
+    }
 
     // Now we have to fill VBOs with data: here vertices. Because in
     // vertex shader a_position is vect3 we have to cast to Vector3f.
@@ -106,7 +111,12 @@ bool SkyBoxShape::createShape()
 
     m_progShape.scalarf("scale") = 1.0f;
     m_progShape.vector4f("color") = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-    m_progShape.bind(m_shape);
+    if (!m_progShape.bind(m_shape))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_progShape.strerror() << "'" << std::endl;
+        return false;
+    }
 
     m_shape.vector3f("position") =
     {
@@ -146,7 +156,7 @@ static Matrix44f view = matrix::lookAt(Vector3f(5,5,5), lookat, Vector3f(0,1,0))
 // --------------------------------------------------------------
 //! \brief Draw the shape.
 // --------------------------------------------------------------
-void SkyBoxShape::drawShape()
+bool SkyBoxShape::drawShape()
 {
     static float time = 0.0f;
     time += dt();
@@ -162,13 +172,19 @@ void SkyBoxShape::drawShape()
 
     // Set depth function back to default
     glCheck(glDepthFunc(GL_LESS));
-    m_shape.draw(Mode::TRIANGLES, 0u, 36u);
+    if (!m_shape.draw(Mode::TRIANGLES, 0u, 36u))
+    {
+        std::cerr << "Shape not renderered" << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 // --------------------------------------------------------------
 //! \brief Draw skybox. Should be draw as last.
 // --------------------------------------------------------------
-void SkyBoxShape::drawSkyBox()
+bool SkyBoxShape::drawSkyBox()
 {
     // Remove translation from the view matrix
     m_progSkyBox.matrix44f("view") = Matrix44f(Matrix33f(view));
@@ -176,7 +192,13 @@ void SkyBoxShape::drawSkyBox()
     // Change depth function so depth test passes when values are equal
     // to depth buffer's content
     glCheck(glDepthFunc(GL_LEQUAL));
-    m_skybox.draw(Mode::TRIANGLES, 0u, 36u);
+    if (!m_skybox.draw(Mode::TRIANGLES, 0u, 36u))
+    {
+        std::cerr << "SkyBox not renderered" << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -189,11 +211,11 @@ bool SkyBoxShape::onPaint()
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     // Draw scene as normal.
-    drawShape();
+    bool res1 = drawShape();
     // Draw skybox as last. Set depth function back to default
-    drawSkyBox();
+    bool res2 = drawSkyBox();
 
-    return true;
+    return res1 && res2;
 }
 
 //------------------------------------------------------------------------------

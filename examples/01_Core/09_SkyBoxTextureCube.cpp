@@ -63,7 +63,12 @@ bool SkyBoxTextureCube::createSkyBox()
         return false;
     }
 
-    m_prog.bind(m_skybox);
+    if (!m_prog.bind(m_skybox))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog.strerror() << "'" << std::endl;
+        return false;
+    }
 
     m_skybox.vector3f("position") =
     {
@@ -99,7 +104,7 @@ bool SkyBoxTextureCube::onSetup()
 //! \brief Draw skybox. The skybox should be the last to be drawn for depth
 //! testing optimizations.
 // -----------------------------------------------------------------------------
-void SkyBoxTextureCube::drawSkyBox()
+bool SkyBoxTextureCube::drawSkyBox()
 {
     static Vector3f lookat = Vector3f(1,8,8);
     // Remove translation from the view matrix
@@ -109,7 +114,13 @@ void SkyBoxTextureCube::drawSkyBox()
     // Change depth function so depth test passes when values are equal
     // to depth buffer's content
     glCheck(glDepthFunc(GL_LEQUAL));
-    m_skybox.draw(Mode::TRIANGLES, 0u, 36u);
+    if (!m_skybox.draw(Mode::TRIANGLES, 0u, 36u))
+    {
+        std::cerr << "Skybox not renderered" << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -118,9 +129,7 @@ bool SkyBoxTextureCube::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    drawSkyBox();
-
-    return true;
+    return drawSkyBox();
 }
 
 //------------------------------------------------------------------------------

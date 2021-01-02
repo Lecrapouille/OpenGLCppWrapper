@@ -49,7 +49,7 @@ void IndexedSphere::onWindowResized()
 //------------------------------------------------------------------------------
 //! \brief Create a VBO and a EBO (Element Buffer Object).
 //------------------------------------------------------------------------------
-void IndexedSphere::createSphere()
+bool IndexedSphere::createSphere()
 {
     constexpr float radius = 2.0f;
     constexpr uint32_t NbPointsLon = 100u;
@@ -63,7 +63,12 @@ void IndexedSphere::createSphere()
     // Bind the VAO to the program. This will populate VBOs.
     // Get the reference of the desired VBO because vector3f()
     // is not a faster method.
-    m_prog.bind(m_sphere);
+    if (!m_prog.bind(m_sphere))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog.strerror() << "'" << std::endl;
+        return false;
+    }
     auto& positions = m_sphere.vector3f("position");
 
     positions.reserve(NbPointsLon * NbPointsLat);
@@ -96,6 +101,8 @@ void IndexedSphere::createSphere()
     {
         indices.append(i);
     }
+
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -116,7 +123,8 @@ bool IndexedSphere::onSetup()
     m_prog.matrix44f("view") =
             matrix::lookAt(Vector3f(3,3,3), Vector3f(1,1,1), Vector3f(0,1,0));
 
-    createSphere();
+    if (!createSphere())
+        return false;
 
     // Helper for debugging states of your program
     debug(m_vertex_shader, m_fragment_shader);
@@ -132,7 +140,11 @@ bool IndexedSphere::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    m_sphere.draw(Mode::POINTS);
+    if (!m_sphere.draw(Mode::POINTS))
+    {
+        std::cerr << "Sphere not renderered" << std::endl;
+        return false;
+    }
 
     return true;
 }

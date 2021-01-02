@@ -22,17 +22,24 @@
 #include <iostream>
 
 //------------------------------------------------------------------------------
-// \brief GLObjects instance have a name. This name is usually used for logs and
-// debug purpose such as GLShader, GLProgram, GLVAO, GLTexture but some
-// GLObjects have name used as key for hash maps. In this case these instance
-// are internally (privately used) and their name managed automatically such
-// GLVBO, GLAttributes, GLSamplers.
+//! \brief m_prog, m_triangle: GLObject instances have a name. These names are
+//! used for two things:
+//!  - for log and debug purpose (GLShader, GLVAO, GLProgram ...) in this case
+//!    names are public.
+//!  - for key in hash maps (GLVBO, GLAttributes, GLSamplers) in this case names
+//!    are private and are internally managed automatically .
 //------------------------------------------------------------------------------
 ColorfulTriangle::ColorfulTriangle(uint32_t const width, uint32_t const height,
                                const char *title)
     : GLWindow(width, height, title),
       m_prog("Prog"),
       m_triangle("triangle")
+      // Possible alternative for VAO:
+      //   m_triangle(<name>, BufferUsage::<usage>, <reserve size for VBO>)
+      // Where:
+      //   - <usage> is STREAM_DRAW or STATIC_DRAW or DYNAMIC_DRAW (default). See
+      //     documentation of glBufferData() for more details.
+      //   - <reserve size for VBO> number of elements to allocate when creating VBO.
 {
     std::cout << "Hello ColorfulTriangle: " << info() << std::endl;
 }
@@ -44,26 +51,45 @@ ColorfulTriangle::~ColorfulTriangle()
 }
 
 //------------------------------------------------------------------------------
+//! \brief Callback called when the window has been resized. To get windows size
+//! you can call width<T>() and height<T>() where T is the desired type int,
+//! float ...
+//------------------------------------------------------------------------------
 void ColorfulTriangle::onWindowResized()
 {
+    // Note: you can wrap glCheck() around OpenGL functions to check potential
+    // errors.
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 }
 
 //------------------------------------------------------------------------------
-//! \brief Load a vertex shader and a fragment shader from string. Compile them.
-//! Bind a VAO object (our 3D shape, here a triangle) to the GLProgram in the
-//! aim to create VBOs (position, color). Fill these VBOs with data (vertex
-//! positions and vertex colors).
+//! \brief Callback called after OpenGL context has been created. Add in this
+//! method all your application setup.
+//!
+//! In this example, we load a vertex shader and a fragment shader from strings
+//! (GLVertexShader and GLFragmentShader). Compile them inside a GLProgram
+//! instance and bind this GLProgram instance to a GLVAO instance.
+//!
+//! Shaders allow projecting vertices on the screen and applying colors.
+//! Program allows to extract and memorize shaders variables (uniforms,
+//! attributes ...). GLVAO is your 3D shape and allows to store textures and
+//! GLVBOs and is the instance to draw. GLVBO holds information of your model
+//! (vertex positions, normals ...). They are created when binding a VAO to a
+//! Program.
+//!
+//! As developper, you just have to give shaders GLSL code and fill these VBOs
+//! with data (vertex positions and vertex colors) and texture to the path to
+//! the desired jpeg file.
 //------------------------------------------------------------------------------
 bool ColorfulTriangle::onSetup()
 {
-    // Load vertex and fragment shaders (GLSL code) from strings. There are two
-    // type of strings: -- classic string but you need to add explicitly chars
-    // such as '"' '\n' -- C++11 raw string litterals avoid to add '\n'
-    // chars. In this function, we will show the two ways. In next examples you
-    // will see how to load shaders from files.
+    // In next examples we will see how to load shaders GLSL code from files but
+    // for now we will see how to load vertex and fragment shaders from
+    // strings. There are two type of strings: -- classic string but you need to
+    // add explicitly chars such as '"' '\n' -- C++11 raw string litterals avoid
+    // to add '\n' chars. In this function, we will show the two ways.
 
-    // Shaders have operators to insert text.
+    // Shaders have operators such as << and >> to insert text.
     std::string v2f("struct v2f_s {                       \n"
                     "  vec3      color;                   \n"
                     "} v2f;                               \n");
@@ -78,7 +104,7 @@ bool ColorfulTriangle::onSetup()
             "  gl_Position = vec4(position, 0.0, 1.0);\n"
             "}";
 
-    // Example: Insert string from the begining
+    // Example of how to insert string from the begining
     "#version 330 core\n" >> m_vertex_shader;
 
     // Load fragment shader from C++11 raw string.
@@ -92,7 +118,7 @@ bool ColorfulTriangle::onSetup()
                        fragColor = vec4(v2f.color, 1);
                    })GLSL";
 
-    // Shaders can be displayed with:
+    // Optional. For debug, shaders can be displayed with:
     std::cout << "Shader program " << m_vertex_shader.name()
               << ":" << std::endl;
     std::cout << m_vertex_shader << std::endl << std::endl;
@@ -113,7 +139,8 @@ bool ColorfulTriangle::onSetup()
         return false;
     }
 
-    // Helper for debugging states of your program.
+    // Optional. Helper for debugging states of your GLProgram. See
+    // examples/debug.cpp
     debug(m_prog);
 
     // To initialize your 3D model, you have to use a VAO and bind it to the
@@ -121,10 +148,12 @@ bool ColorfulTriangle::onSetup()
     // attributes and samplers, will populate VBOs and textures inside the VAO
     // instance. Shader attributes and samplers give their name to VBOs and
     // textures. In our example, the VAO will have a single VBO named position.
-    m_prog.bind(m_triangle);
-
-    // Helper for debugging states of your program.
-    debug(m_triangle);
+    if (!m_prog.bind(m_triangle))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog.strerror() << "'" << std::endl;
+        return false;
+    }
 
     // Fill VBOs of the VAO: init triangle vertex positions. Note "position"
     // shall refer to the variable position inside the GLSL code. If you rename
@@ -132,7 +161,7 @@ bool ColorfulTriangle::onSetup()
     // sensitive.
     m_triangle.vector2f("position") =
     {
-        Vector2f(-1.0f, -1.0f),
+        Vector2f(-1.0f, -1.0f), // X, Y
         Vector2f(1.0f, -1.0f),
         Vector2f(0.0f, 1.0f)
     };
@@ -142,34 +171,49 @@ bool ColorfulTriangle::onSetup()
     // shader you will have to rename here too. Beware name are case sensitive.
     m_triangle.vector3f("color") =
     {
-        Vector3f(1.0f, 0.0f, 0.0f),
+        Vector3f(1.0f, 0.0f, 0.0f), // Red, Green, Blue
         Vector3f(0.0f, 1.0f, 0.0f),
         Vector3f(0.0f, 0.0f, 1.0f)
     };
+
+    // Optional. Helper for debugging states of your GLVAO. See
+    // examples/debug.cpp
+    debug(m_triangle);
 
     return true;
 }
 
 //------------------------------------------------------------------------------
+//! \brief Callback called each time for rendering the scene.
+//------------------------------------------------------------------------------
 bool ColorfulTriangle::onPaint()
 {
+    //
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-    // Render a triangle from 3 vertices and starting from the first indice.
-    // or simply m_triangle.draw() !!
+    // Render 3 vertices (starting from the first indice 0) as a triangle.
+    // You can simply call m_triangle.draw(Mode::TRIANGLES).
     if (!m_triangle.draw(Mode::TRIANGLES, 0u, 3u))
+    {
         std::cerr << "Triangle not renderered" << std::endl;
+        return false;
+    }
 
+    // Note: the double buffer is automatically managed
     return true;
 }
 
+//------------------------------------------------------------------------------
+//! \brief Callback called when ColorfulTriangle::onSetup() failed.
 //------------------------------------------------------------------------------
 void ColorfulTriangle::onSetupFailed(std::string const& reason)
 {
     std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
 }
 
+//------------------------------------------------------------------------------
+//! \brief Callback called when ColorfulTriangle::onPaint() failed.
 //------------------------------------------------------------------------------
 void ColorfulTriangle::onPaintFailed(std::string const& reason)
 {

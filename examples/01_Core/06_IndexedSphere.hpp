@@ -45,7 +45,7 @@ public:
 
 private:
 
-    void createSphere();
+    bool createSphere();
     virtual bool onSetup() override;
     virtual bool onPaint() override;
     virtual void onSetupFailed(std::string const& reason) override;

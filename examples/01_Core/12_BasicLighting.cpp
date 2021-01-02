@@ -73,7 +73,12 @@ bool BasicLighting::createLamp()
     }
 
     // Draw a cube on the light position
-    m_prog_lamp.bind(m_lamp);
+    if (!m_prog_lamp.bind(m_lamp))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog_lamp.strerror() << "'" << std::endl;
+        return false;
+    }
     m_lamp.vector3f("position") =
     {
        #include "geometry/cube_position.txt"
@@ -107,7 +112,12 @@ bool BasicLighting::createCube()
     }
 
     // Create a cube.
-    m_prog_cube.bind(m_cube);
+    if (!m_prog_cube.bind(m_cube))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog_cube.strerror() << "'" << std::endl;
+        return false;
+    }
     m_cube.vector3f("position") =
     {
        #include "geometry/cube_position.txt"
@@ -177,8 +187,16 @@ bool BasicLighting::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    m_cube.draw(Mode::TRIANGLES, 0u, 36u);
-    m_lamp.draw(Mode::TRIANGLES, 0u, 36u);
+    if (!m_cube.draw(Mode::TRIANGLES, 0u, 36u))
+    {
+        std::cerr << "Cube not renderered" << std::endl;
+        return false;
+    }
+    if (!m_lamp.draw(Mode::TRIANGLES, 0u, 36u))
+    {
+        std::cerr << "Lamp not renderered" << std::endl;
+        return false;
+    }
 
     return true;
 }

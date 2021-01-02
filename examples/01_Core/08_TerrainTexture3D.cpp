@@ -83,7 +83,11 @@ bool TerrainTexture3D::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    m_vao.draw(Mode::TRIANGLE_STRIP, 0, m_nbVertices);
+    if (!m_vao.draw(Mode::TRIANGLE_STRIP, 0, m_nbVertices))
+    {
+        std::cerr << "Terrain not renderered" << std::endl;
+        return false;
+    }
 
     return true;
 }
@@ -93,7 +97,12 @@ bool TerrainTexture3D::createTerrain()
 {
     const uint32_t dim = 40;
 
-    m_prog.bind(m_vao);
+    if (!m_prog.bind(m_vao))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog.strerror() << "'" << std::endl;
+        return false;
+    }
 
     // Load all 2D textures into a single big 3D texture
     m_vao.texture3D("tex3d").wrap(GLTexture::Wrap::CLAMP_TO_BORDER);

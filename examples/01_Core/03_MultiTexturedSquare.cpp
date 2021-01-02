@@ -76,7 +76,12 @@ bool MultiTexturedSquare::onSetup()
     }
 
     // Create VBOs of the VAO.
-    m_prog.bind(m_square);
+    if (!m_prog.bind(m_square))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog.strerror() << "'" << std::endl;
+        return false;
+    }
 
     // Fill VBOs of the VAO: init square vertex positions.
     m_square.vector3f("position") =
@@ -129,7 +134,11 @@ bool MultiTexturedSquare::onPaint()
 
     // Draw the square. Equivalent to
     // m_square.draw(Mode::TRIANGLES, 0, 6);
-    m_square.draw();
+    if (!m_square.draw())
+    {
+        std::cerr << "Square not renderered" << std::endl;
+        return false;
+    }
 
     return true;
 }

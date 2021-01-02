@@ -78,7 +78,12 @@ bool TexturedTriangle::onSetup()
     }
 
     // Create VBOs of the VAO.
-    m_prog.bind(m_triangle);
+    if (!m_prog.bind(m_triangle))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog.strerror() << "'" << std::endl;
+        return false;
+    }
 
     // Fill VBOs of the VAO: init triangle vertex positions.
     m_triangle.vector3f("position") =
@@ -120,7 +125,11 @@ bool TexturedTriangle::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-    m_triangle.draw(Mode::TRIANGLES, 0, 3);
+    if (!m_triangle.draw(Mode::TRIANGLES))
+    {
+        std::cerr << "Triangle not renderered" << std::endl;
+        return false;
+    }
 
     return true;
 }

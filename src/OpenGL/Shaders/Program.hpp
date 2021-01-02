@@ -36,7 +36,9 @@
 class GLVAO;
 
 // *****************************************************************************
-//
+//! \brief This class allows to track GLSL variables (uniforms and attributes)
+//! from given shaders (vertex, fragment, geometry). It allows to populate VBOs
+//! and textures to VAO instances bound to it.
 // *****************************************************************************
 class GLProgram: public GLObject<GLenum>
 {
@@ -51,43 +53,42 @@ class GLProgram: public GLObject<GLenum>
 public:
 
     //--------------------------------------------------------------------------
-    //! \brief Constructor. Give a name to the instance. Set the number of
-    //! elements to reserve when creating VBOs (0 by default). This constructor
-    //! makes no other actions.
+    //! \brief Constructor. Give a name to the instance. This constructor makes
+    //! no other actions.
     //!
     //! \param[in] name the name of this instance (used for debug and traces).
-    //! \param[in] nb_vertices number of elements to allocate when creating VBOs.
-    //!
-    //! \note VBO size can be resized as long as they have not been allocated
-    //! inside the GPU memory.
     //--------------------------------------------------------------------------
     GLProgram(std::string const& name);
 
     //--------------------------------------------------------------------------
-    //! \brief Destructor. Release elements from CPU and GPU.
+    //! \brief Destructor. Clear list of shaders, list of uniforms and list of
+    //! attributes. Unbound last VAO. Clear errors.
     //--------------------------------------------------------------------------
     virtual ~GLProgram() override;
 
     //--------------------------------------------------------------------------
-    //! \brief Compile a vertex shader and a fragment shader to this class.
+    //! \brief Compile a vertex shader and a fragment shader and populate list
+    //! of uniforms and attributes.
     //!
-    //! \note: this method is equivalent to the method begin() but with a more
-    //! explicit name and return the status of the compilation.
+    //! \note: this method is equivalent to the method GLObject::begin() but
+    //! with a more explicit name and return the status of the compilation.
     //!
     //! \return true if the program has been successfully compiled, else return
-    //! false. A internal error message is created in case of error.
+    //! false. A internal error message is created in case of error that can be
+    //! get with strerror().
     //--------------------------------------------------------------------------
     bool compile(GLVertexShader& vertex, GLFragmentShader& fragment);
 
     //--------------------------------------------------------------------------
-    //! \brief Compile a vertex shader, a fragment  and geometry shader to this
-    // class instance.
+    //! \brief Compile a vertex shader, a fragment and geometry shader and
+    //! populate list of uniforms and attributes.
     //!
-    //! \note: this method is equivalent to the method begin() but with a more
-    //! explicit name and return the status of the compilation.
+    //! \note: this method is equivalent to the method GLObject::begin() but
+    //! with a more explicit name and return the status of the compilation.
     //!
     //! \return true if the program has been successfully compiled, else return
-    //! false. A internal error message is created in case of error.
+    //! false. A internal error message is created in case of error that can be
+    //! get with strerror().
     //--------------------------------------------------------------------------
     bool compile(GLVertexShader& vertex, GLFragmentShader& fragment,
                  GLGeometryShader& geometry);
@@ -108,33 +109,38 @@ public:
     //! \brief Bind VAO with this GLProgram instance.
     //!
     //! Two cases:
-    //!   - If it's the first time that the VAO is bound to the GLProgram then the
-    //!     VAO has its internal list of VBOs and textures populated. They are
-    //!     refered by the variable name used in shaders (string). VBOs are
+    //!   - If it's the first time that the VAO is bound to the GLProgram then
+    //!     the VAO has its internal list of VBOs and textures populated. They
+    //!     are refered by the variable name used in the GLSL code. VBOs are
     //!     pre-allocated with the number of elements (either set from the by
-    //!     GLProgram constructor or by the method bind()) but no data are filled,
-    //!     this is the job of the developper to do it explicitly.
-    //!   - Else, if the VAO was bound previously, nothing is made (list are not
-    //!     created/updated).
+    //!     GLProgram constructor or by the method bind()) but no data are
+    //!     filled, this is the job of the developper to do it explicitly.
     //!
-    //! \note A VAO bound to a different GLProgram cannot be bind to a another
-    //! GLProgram. This is automatically detected and will produce an error. This
-    //! case is refused to avoid to the developer to have a silent error with an
-    //! unexpected behavior.
+    //!   - Else, if the VAO was bound previously with this instance of program,
+    //!     nothing is made (list are not created/updated).
+    //!
+    //!   - Else, if the VAO was bound previously with another instance of
+    //!     program, this is considered as an error and the method return false.
+    //!
+    //! \note A VAO bound to a GLProgram cannot be bound to a another
+    //! GLProgram. This case is refused to avoid to the developer to have a
+    //! silent error with an unexpected behavior.
     //!
     //! \param[in] vao the VAO to be bound with this instance of GLProgram.
     //!
     //! \return true if the GLVAO has been bound. If bounding cannot be made
     //! returns false (for one of the following reasons: the GLProgram cannot be
     //! compiled (syntax errors in shader code) or if the VOA has already been
-    //! bound by another GLProgram (incompatibility).
+    //! bound by another GLProgram (incompatibility). Call strerror() to get the
+    //! error message.
     //--------------------------------------------------------------------------
     bool bind(GLVAO& vao);
 
     //--------------------------------------------------------------------------
-    //! \brief Check if a VAO is bound with this GLProgram.
+    //! \brief Check if a VAO is bound to this GLProgram.
     //!
-    //! \return true if VAO and this GLProgram are already bound, else return false.
+    //! \return true if VAO and this GLProgram are already bound, else return
+    //! false.
     //--------------------------------------------------------------------------
     inline bool isBound() const
     {
@@ -405,33 +411,6 @@ private:
     //! \brief Do the shader compilation
     //--------------------------------------------------------------------------
     bool compile();
-
-    //--------------------------------------------------------------------------
-    //! \brief Throw GL::Exception if GLProgram cannot be compiled (due to
-    //! errors in shaders code source).
-    //--------------------------------------------------------------------------
-    void throw_if_not_compiled();
-
-    //--------------------------------------------------------------------------
-    //! \brief Throw GL::Exception if VAO cannot be bound to this GLProgram
-    //! (reasons are: errors in shaders code source or GLProgram already bind
-    //! to another VAO).
-    //--------------------------------------------------------------------------
-    void throw_if_vao_cannot_be_bound(GLVAO& vao);
-
-    //--------------------------------------------------------------------------
-    //! \brief Throw GL::Exception if VAO is not bind to this GLProgram
-    //! (reason: the developer forget to call \a bind.
-    //--------------------------------------------------------------------------
-    void throw_if_vao_not_bound();
-
-    //--------------------------------------------------------------------------
-    //! \brief Throw OpenGLException if the bound VAO has not all its VBO
-    //! with the same size.
-    //! \note this function does not check if VAO is bind. Call
-    //! throw_if_vao_not_bound() before this method.
-    //--------------------------------------------------------------------------
-    //void throw_if_odd_vao();
 
     //--------------------------------------------------------------------------
     //! \brief Concat the last error to the list of errors

@@ -91,7 +91,12 @@ bool RotatingQuad::onSetup()
         return false;
     }
 
-    m_prog.bind(m_box.vao);
+    if (!m_prog.bind(m_box.vao))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog.strerror() << "'" << std::endl;
+        return false;
+    }
 
     m_box.vao.vector3f("position") =
     {
@@ -165,7 +170,11 @@ bool RotatingQuad::onPaint()
     m_prog.matrix44f("model") = m_box.transform.matrix();
 
     // Draw the box using the EBO. Do not pass vertices count or indice !!
-    m_box.vao.draw(Mode::TRIANGLES);
+    if (!m_box.vao.draw(Mode::TRIANGLES))
+    {
+        std::cerr << "Box not renderered" << std::endl;
+        return false;
+    }
 
     return true;
 }

@@ -170,8 +170,8 @@ bool GLVAO::draw(Mode const mode, size_t const first, size_t const count)
     else
     {
         std::cerr << "Failed OpenGL VAO has not been bound to a GLProgram"
-		  << std::endl;
-	return false;
+                  << std::endl;
+        return false;
     }
 }
 
@@ -211,38 +211,38 @@ bool GLVAO::onUpdate()
 //--------------------------------------------------------------------------
 size_t GLVAO::getVBONames(std::vector<std::string> &list, bool const clear) const
 {
-  if (clear) { list.clear(); }
-  list.reserve(m_listBuffers.size());
-  for (auto& it: m_listBuffers)
+    if (clear) { list.clear(); }
+    list.reserve(m_listBuffers.size());
+    for (auto& it: m_listBuffers)
     {
-      list.push_back(it.second->name());
+        list.push_back(it.second->name());
     }
-  return list.size();
+    return list.size();
 }
 
 //--------------------------------------------------------------------------
 size_t GLVAO::getTexturesNames(std::vector<std::string>& list, bool const clear) const
 {
-  if (clear) { list.clear(); }
-  list.reserve(m_listTextures.size());
-  for (auto& it: m_listTextures)
+    if (clear) { list.clear(); }
+    list.reserve(m_listTextures.size());
+    for (auto& it: m_listTextures)
     {
-      list.push_back(it.second->name()); // FIXME filename
+        list.push_back(it.second->name()); // FIXME filename
     }
-  return list.size();
+    return list.size();
 }
 
 //--------------------------------------------------------------------------
 size_t GLVAO::getUnloadedTextures(std::vector<std::string>& list, bool const clear) const
 {
-  if (clear) { list.clear(); }
-  list.reserve(m_listTextures.size());
-  for (auto& it: m_listTextures)
+    if (clear) { list.clear(); }
+    list.reserve(m_listTextures.size());
+    for (auto& it: m_listTextures)
     {
-      if (!it.second->loaded())
-	{
-	  list.push_back(it.second->name()); // TODO filename()
-	}
+        if (!it.second->loaded())
+        {
+            list.push_back(it.second->name()); // TODO filename()
+        }
     }
-  return list.size();
+    return list.size();
 }

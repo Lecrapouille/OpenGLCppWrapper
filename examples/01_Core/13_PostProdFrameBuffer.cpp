@@ -68,7 +68,12 @@ bool PostProdFrameBuffer::firstProgram()
     }
 
     // Create the cube
-    m_prog_scene.bind(m_cube);
+    if (!m_prog_scene.bind(m_cube))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog_scene.strerror() << "'" << std::endl;
+        return false;
+    }
     m_cube.vector3f("position") =
     {
         #include "geometry/cube_position.txt"
@@ -79,7 +84,12 @@ bool PostProdFrameBuffer::firstProgram()
     };
 
     // Create the floor
-    m_prog_scene.bind(m_floor);
+    if (!m_prog_scene.bind(m_floor))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog_scene.strerror() << "'" << std::endl;
+        return false;
+    }
     m_floor.vector3f("position") =
     {
         #include "geometry/floor_position.txt"
@@ -122,7 +132,12 @@ bool PostProdFrameBuffer::secondProgram()
     }
 
     // Create a quad
-    m_prog_screen.bind(m_screen);
+    if (!m_prog_screen.bind(m_screen))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog_screen.strerror() << "'" << std::endl;
+        return false;
+    }
     m_screen.vector2f("position") =
     {
         Vector2f(-1.0f, 1.0f), Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f),
@@ -169,8 +184,16 @@ bool PostProdFrameBuffer::onPaint()
         glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
         glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         glEnable(GL_DEPTH_TEST);
-        m_floor.draw(Mode::TRIANGLES, 0, 6);
-        m_cube.draw(Mode::TRIANGLES, 0, 36);
+        if (!m_floor.draw(Mode::TRIANGLES, 0u, 6u))
+        {
+           std::cerr << "Floor not renderered" << std::endl;
+           return false;
+        }
+        if (!m_cube.draw(Mode::TRIANGLES, 0u, 36u))
+        {
+           std::cerr << "Cube not renderered" << std::endl;
+           return false;
+        }
     });
 
     // Second pass: draw to the screen
@@ -178,7 +201,11 @@ bool PostProdFrameBuffer::onPaint()
     glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
     m_prog_screen.scalarf("time") = time;
-    m_screen.draw(Mode::TRIANGLES, 0, 6);
+    if (!m_screen.draw(Mode::TRIANGLES, 0u, 6u))
+    {
+        std::cerr << "Screen not renderered" << std::endl;
+        return false;
+    }
 
     return true;
 }

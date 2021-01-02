@@ -76,7 +76,12 @@ bool DynamicTriangle::onSetup()
         return false;
     }
 
-    m_prog.bind(m_triangle);
+    if (!m_prog.bind(m_triangle))
+    {
+        std::cerr << "Failed binding. Reason was '"
+                  << m_prog.strerror() << "'" << std::endl;
+        return false;
+    }
 
     // Fill program uniform with a RGB color. Note "color" shall refer to the
     // variable color inside the GLSL code. If you rename it in the shader you
@@ -119,7 +124,10 @@ bool DynamicTriangle::onPaint()
     m_prog.vector3f("color") = Vector3f(st, ct, 0.0f);
 
     // Draw the VAO bound to the shader program.
-    m_triangle.draw(Mode::TRIANGLES);
+    if (!m_triangle.draw(Mode::TRIANGLES))
+    {
+        std::cerr << "Triangle not renderered" << std::endl;
+    }
 
     return true;
 }

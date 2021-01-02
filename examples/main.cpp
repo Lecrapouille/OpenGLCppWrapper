@@ -18,8 +18,6 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "debug.hpp"
-
 #include "00_Window/00_BasicWindow.hpp"
 #include "00_Window/01_BasicWindowIOEvents.hpp"
 #include "00_Window/02_BasicWindowImGui.hpp"
