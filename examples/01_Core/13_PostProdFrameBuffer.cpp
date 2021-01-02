@@ -50,6 +50,8 @@ void PostProdFrameBuffer::onWindowResized()
             matrix::perspective(maths::toRadian(50.0f),
                                 width<float>() / height<float>(),
                                 0.1f, 10.0f);
+    m_prog_screen.scalarf("screen_width") = width<float>();
+    m_prog_screen.scalarf("screen_height") = height<float>();
 }
 
 //------------------------------------------------------------------------------
@@ -100,9 +102,9 @@ bool PostProdFrameBuffer::firstProgram()
     };
 
     // Apply textures
-    if (!m_cube.texture2D("texture1").load("textures/wooden-crate.jpg"))
+    if (!m_cube.texture2D("texID").load("textures/wooden-crate.jpg"))
         return false;
-    if (!m_floor.texture2D("texture1").load("textures/path.png"))
+    if (!m_floor.texture2D("texID").load("textures/path.png"))
         return false;
 
     // Init Model-View-Project matrices (shader uniforms)
@@ -143,11 +145,14 @@ bool PostProdFrameBuffer::secondProgram()
         Vector2f(-1.0f, 1.0f), Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f),
         Vector2f(-1.0f, 1.0f), Vector2f( 1.0f, -1.0f), Vector2f(1.0f,  1.0f)
     };
-    m_screen.vector2f("uv") =
+    m_screen.vector2f("UV") =
     {
         Vector2f(0.0f, 1.0f), Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f),
         Vector2f(0.0f, 1.0f), Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f)
     };
+
+    m_prog_screen.scalarf("screen_width") = width<float>();
+    m_prog_screen.scalarf("screen_height") = height<float>();
 
     return true;
 }
@@ -166,7 +171,7 @@ bool PostProdFrameBuffer::onSetup()
 
     // Framebuffer
     m_fbo.resize(width<uint32_t>(), height<uint32_t>());
-    m_fbo.createColorTexture(m_screen.texture2D("screenTexture"));
+    m_fbo.createColorTexture(m_screen.texture2D("texID"));
     m_fbo.createDepthBuffer();
 
     return true;

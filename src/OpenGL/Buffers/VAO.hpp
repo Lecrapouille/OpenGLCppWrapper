@@ -441,7 +441,6 @@ private:
         }
         catch (std::exception&)
         {
-            assert(false);
             throw GL::Exception("GLTexture '" + std::string(name) + "' does not exist");
         }
     }

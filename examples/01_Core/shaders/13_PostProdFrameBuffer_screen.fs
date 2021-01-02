@@ -5,7 +5,10 @@
 // ----------------------------------------------------------------------------
 
 // Texture sampler
-uniform sampler2D screenTexture;
+uniform sampler2D texID;
+uniform float time;
+uniform float screen_width;
+uniform float screen_height;
 
 // ----------------------------------------------------------------------------
 // Data from vertex program
@@ -27,8 +30,8 @@ out vec4 fragColor;
 void main()
 {
     // Final color
-    fragColor = vec4(texture(screenTexture, v2f.UV +
-                             0.005 * vec2(sin(time+1024.0*TexCoords.x),
-                             cos(time+768.0*TexCoords.y))
+    fragColor = vec4(texture(texID, v2f.UV +
+                             0.005 * vec2(sin(time + screen_width * v2f.UV.x),
+                             cos(time + screen_height * v2f.UV.y))
                             ).xyz, 1.0);
 }
