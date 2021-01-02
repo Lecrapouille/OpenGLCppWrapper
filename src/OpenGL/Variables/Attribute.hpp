@@ -78,14 +78,6 @@ private:
     {
         m_handle = glCheck(glGetAttribLocation(m_program, cname()));
         m_index = static_cast<GLuint>(m_handle);
-
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wold-style-cast"
-        glCheck(glVertexAttribPointer(m_index, m_size, m_target, GL_FALSE,
-                                      static_cast<GLsizei>(m_stride),
-                                      (void*) m_offset));
-#  pragma GCC diagnostic pop
-
         return false;
     }
 
@@ -94,6 +86,12 @@ private:
     //--------------------------------------------------------------------------
     virtual void onActivate() override
     {
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wold-style-cast"
+        glCheck(glVertexAttribPointer(m_index, m_size, m_target, GL_FALSE,
+                                      static_cast<GLsizei>(m_stride),
+                                      (void*) m_offset)); // Do not place it onCreate
+#  pragma GCC diagnostic pop
         glCheck(glEnableVertexAttribArray(m_index));
     }
 
