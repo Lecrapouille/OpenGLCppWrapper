@@ -7,3 +7,10 @@ PendingContainer pour eviter les template devrait etre du type <Byte> et pouvoir
 https://github.com/dpilger26/NumCpp or Xtensor ?
 
 4/ Window => FixedTime update
+
+OpenGL calls:
+- VAO/Program: move list into Any => iterators
+- VAOi => index.begin() should be called once when bind into VAO
+- VAO getTexture / getVBO => m_need_update = true; not in all cases
+- draw() return true not always the case
+- Texture multiple objects => KO

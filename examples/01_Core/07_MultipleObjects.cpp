@@ -171,15 +171,15 @@ bool MultipleObjects::onPaint()
 
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-#if 0
+
     // Draw the first cube from the first VAO. Make it spining around its Y-axis.
     // Apply a "pinkished" coloration.
-    /* m_prog.vector4f("color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
+    m_prog.vector4f("color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
     m_cube1.transform.reset();
     m_cube1.transform.rotateY(4.0f * cosf(time));             // Apply a rotation around Y-axis
     m_cube1.transform.position(Vector3f(-1.0f, 0.0f, -1.0f)); // Apply a translation
     m_prog.matrix44f("model") = m_cube1.transform.matrix();   // Rotate and translate the cube
-    m_prog.draw(m_cube1.vao, Mode::TRIANGLES, 0, 36);         // Style 01: pass all parameters
+    m_cube1.vao.draw(Mode::TRIANGLES, 0, 36); // Style 01: pass all parameters
 
     // Draw the same cube (same model => same VAO) at different and fixed position.
     // Apply a "darkished" coloration.
@@ -187,24 +187,23 @@ bool MultipleObjects::onPaint()
     m_cube1.transform.reset();
     m_cube1.transform.position(Vector3f(-1.0f, 0.0f, 2.0f)); // Apply a translation
     m_prog.matrix44f("model") = m_cube1.transform.matrix();
-    m_prog.draw(m_cube1.vao, Mode::TRIANGLES, 0, 36); // Style 02: do not pass first and count vertices
-    */
+    m_cube1.vao.draw(); // Style 02: do not pass first and count vertices
+
     // Draw a third cube from the second VAO.
     // Apply a "darkished" coloration and let this cube static (no motion).
     m_prog.vector4f("color") = Vector4f(0.4f, 0.4f, 0.5f, 0.2f);
     m_cube2.transform.reset();
-    m_cube2.transform.position(Vector3f(-1.0f, 0.0f, 2.0f)); // Apply a translation
+    m_cube2.transform.position(Vector3f(2.0f, 0.0f, -2.0f)); // Apply a translation
     m_prog.matrix44f("model") = m_cube2.transform.matrix();
-    m_prog.draw(m_cube2.vao, Mode::TRIANGLES, 0, 36); // Style 02: do not pass first and count vertices
+    m_cube2.vao.draw(); // Style 02: do not pass first and count vertices
 
     // Draw the floor (second model => third VAO).
     m_prog.vector4f("color") = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-    m_prog.bind(m_floor.vao);
     m_floor.transform.reset();
     m_floor.transform.position(Vector3f(0.0f, 0.0f, 0.0f)); // Apply a translation
     m_prog.matrix44f("model") = m_floor.transform.matrix();
-    m_prog.draw(m_floor.vao, Mode::TRIANGLES, 0, 6); // Style 03: do not pass implict bound VAO and no vertices count
-#endif
+    m_floor.vao.draw(Mode::TRIANGLES, 0, 6); // Style 03: do not pass implict bound VAO and no vertices count
+
     return true;
 }
 

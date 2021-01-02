@@ -187,12 +187,12 @@ bool PostProdFrameBuffer::onPaint()
         if (!m_floor.draw(Mode::TRIANGLES, 0u, 6u))
         {
            std::cerr << "Floor not renderered" << std::endl;
-           return false;
+           return ;
         }
         if (!m_cube.draw(Mode::TRIANGLES, 0u, 36u))
         {
            std::cerr << "Cube not renderered" << std::endl;
-           return false;
+           return ;
         }
     });
 

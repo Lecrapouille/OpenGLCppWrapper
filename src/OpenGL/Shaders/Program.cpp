@@ -81,8 +81,6 @@ bool GLProgram::bind(GLVAO& vao)
     // for the first time: populate it with VBOs and textures.
     if (unlikely(!vao.isBound()))
     {
-        std::cout << "Populate VAO " << vao.name() << std::endl;
-
         vao.m_program = this;
         vao.createVBOsFromAttribs(m_attributes);
         vao.createTexturesFromSamplers(m_samplers);
@@ -95,7 +93,6 @@ bool GLProgram::bind(GLVAO& vao)
     // incompatible GLProgram.
     else if (likely(vao.isBoundTo(m_handle)))
     {
-        std::cout << "BOUUND VAO " << vao.name() << " to GLProgram " << name() << std::endl;
         vao.m_need_update = true; // TBD
         return true;
     }
@@ -166,7 +163,6 @@ bool GLProgram::compile()
 //--------------------------------------------------------------------------
 bool GLProgram::onCreate()
 {
-    std::cout << "GLProgram::onCreate()" << std::endl;
     m_handle = glCheck(glCreateProgram());
     return false;
 }
@@ -174,7 +170,6 @@ bool GLProgram::onCreate()
 //--------------------------------------------------------------------------
 bool GLProgram::onSetup()
 {
-    std::cout << "GLProgram::onSetup()" << std::endl;
     bool success = true;
 
     // Compile shaders if they have not yet been compiled
@@ -223,9 +218,6 @@ bool GLProgram::onSetup()
 //--------------------------------------------------------------------------
 bool GLProgram::onUpdate()
 {
-    std::cout << "GLProgram::onUpdate() " << m_uniformLocations.size()
-              << " uniforms" << std::endl;
-
     for (auto const& it: m_uniformLocations)
     {
         it.second->begin();
@@ -237,15 +229,9 @@ bool GLProgram::onUpdate()
 //--------------------------------------------------------------------------
 void GLProgram::onActivate()
 {
-    std::cout << "GLProgram::onActivate()" << std::endl;
-
-    if (!compiled()) {
-        std::cout << "GLProgram::onActivate() not COMPILED" << std::endl;
-        return ;
+    if (compiled()) {
+        glCheck(glUseProgram(m_handle));
     }
-
-    std::cout << "GL_USE" << std::endl;
-    glCheck(glUseProgram(m_handle));
 }
 
 //--------------------------------------------------------------------------

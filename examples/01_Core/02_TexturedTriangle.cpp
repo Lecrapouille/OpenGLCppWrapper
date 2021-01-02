@@ -125,7 +125,8 @@ bool TexturedTriangle::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-    if (!m_triangle.draw(Mode::TRIANGLES))
+    // implicit arguments: Mode::TRIANGLES, 0u, 3u
+    if (!m_triangle.draw())
     {
         std::cerr << "Triangle not renderered" << std::endl;
         return false;

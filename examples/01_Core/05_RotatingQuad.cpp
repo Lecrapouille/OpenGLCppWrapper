@@ -170,7 +170,7 @@ bool RotatingQuad::onPaint()
     m_prog.matrix44f("model") = m_box.transform.matrix();
 
     // Draw the box using the EBO. Do not pass vertices count or indice !!
-    if (!m_box.vao.draw(Mode::TRIANGLES))
+    if (!m_box.vao.draw())
     {
         std::cerr << "Box not renderered" << std::endl;
         return false;

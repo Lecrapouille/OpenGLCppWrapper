@@ -340,7 +340,6 @@ private:
     //--------------------------------------------------------------------------
     virtual bool onCreate() override
     {
-std::cout << "VAO::onCreate()" << std::endl;
         glCheck(glGenVertexArrays(1, &m_handle));
         return false;
     }
@@ -350,7 +349,6 @@ std::cout << "VAO::onCreate()" << std::endl;
     //--------------------------------------------------------------------------
     virtual void onActivate() override
     {
-std::cout << "VAO::onActivate()" << std::endl;
         glCheck(glBindVertexArray(m_handle));
     }
 
@@ -372,7 +370,6 @@ std::cout << "VAO::onActivate()" << std::endl;
     //--------------------------------------------------------------------------
     virtual void onDeactivate() override
     {
-std::cout << "VAO::onDeactivate()" << std::endl;
         glCheck(glBindVertexArray(0U));
     }
 
@@ -403,7 +400,7 @@ std::cout << "VAO::onDeactivate()" << std::endl;
         {
             GLVertexBuffer<T>& vbo = *(m_VBOs.get<std::shared_ptr<GLVertexBuffer<T>>>(name));
             m_need_update = true;// TODO const:  foo = getVBO()
-	    std::cout << "getVBO need update = true" << std::endl;
+            //std::cout << "getVBO need update = true" << std::endl;
 
             return vbo;
         }
@@ -439,7 +436,7 @@ std::cout << "VAO::onDeactivate()" << std::endl;
         try
         {
             m_need_update = true; // TODO gerer foo = getTexture()
-	    std::cout << "getTexture need update = true" << std::endl;
+            //std::cout << "getTexture need update = true" << std::endl;
             return *(m_textures.get<std::shared_ptr<T>>(name));
         }
         catch (std::exception&)

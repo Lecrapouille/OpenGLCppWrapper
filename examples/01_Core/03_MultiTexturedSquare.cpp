@@ -132,8 +132,7 @@ bool MultiTexturedSquare::onPaint()
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-    // Draw the square. Equivalent to
-    // m_square.draw(Mode::TRIANGLES, 0, 6);
+    // implicit arguments: Mode::TRIANGLES, 0u, 6u
     if (!m_square.draw())
     {
         std::cerr << "Square not renderered" << std::endl;

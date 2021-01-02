@@ -193,7 +193,8 @@ bool ColorfulTriangle::onPaint()
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
     // Render 3 vertices (starting from the first indice 0) as a triangle.
-    // You can simply call m_triangle.draw(Mode::TRIANGLES).
+    // You can simply call m_triangle.draw(Mode::TRIANGLES) or call
+    // m_triangle.draw().
     if (!m_triangle.draw(Mode::TRIANGLES, 0u, 3u))
     {
         std::cerr << "Triangle not renderered" << std::endl;

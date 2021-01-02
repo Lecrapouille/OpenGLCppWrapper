@@ -310,6 +310,7 @@ bool GLWindow::setup()
 
         // Force refreshing computation made when window changed
         onWindowResized();
+        glfwSwapBuffers(m_context);
     }
     catch (const GL::Exception& e)
     {

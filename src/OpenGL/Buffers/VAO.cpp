@@ -160,12 +160,12 @@ bool GLVAO::draw(Mode const mode, size_t const first, size_t const count)
 {
     if (likely(m_program != nullptr))
     {
-      m_program->begin();   //glCheck(glUseProgram(m_program->handle()));
-	begin(); // Optim: glBindVertexArray(m_vao->handle());
-	glCheck(glDrawArrays(static_cast<GLenum>(mode),
-			     static_cast<GLint>(first),
-			     static_cast<GLsizei>(count)));
-	return true; // FIXME not always the case
+        m_program->begin();   //glCheck(glUseProgram(m_program->handle()));
+        begin(); // Optim: glBindVertexArray(m_vao->handle());
+        glCheck(glDrawArrays(static_cast<GLenum>(mode),
+                             static_cast<GLint>(first),
+                             static_cast<GLsizei>(count)));
+        return true; // FIXME not always the case
     }
     else
     {
@@ -184,7 +184,7 @@ bool GLVAO::onUpdate()
     //    if (!m_vao->checkLoadTextures())
     //    return true;
 
-    std::cout << "GLVAO::onUpdate()" << std::endl;
+    //std::cout << "GLVAO::onUpdate()" << std::endl;
     //m_vao->begin();
 
     // if

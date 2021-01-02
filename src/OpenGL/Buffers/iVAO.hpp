@@ -56,12 +56,11 @@ public:
 
     bool draw(Mode const mode = Mode::TRIANGLES)
     {
-        std::cout << "VAOii DRAW" << std::endl;
         if (likely(m_program != nullptr))
         {
-	    m_program->begin(); // m_program->begin();
+            m_program->begin(); // m_program->begin();
             begin(); // Optim: glBindVertexArray(m_vao->handle());
-            m_index.begin();
+            m_index.begin(); // FIXME should be stored inside the VAO
             glCheck(glDrawElements(static_cast<GLenum>(mode),
                                    static_cast<GLsizei>(m_index.size()),
                                    m_index.gltype(), 0));

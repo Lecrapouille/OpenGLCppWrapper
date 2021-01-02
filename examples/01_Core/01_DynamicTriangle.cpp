@@ -124,7 +124,7 @@ bool DynamicTriangle::onPaint()
     m_prog.vector3f("color") = Vector3f(st, ct, 0.0f);
 
     // Draw the VAO bound to the shader program.
-    if (!m_triangle.draw(Mode::TRIANGLES))
+    if (!m_triangle.draw()) // implicit arguments: Mode::TRIANGLES, 0u, 3u
     {
         std::cerr << "Triangle not renderered" << std::endl;
     }

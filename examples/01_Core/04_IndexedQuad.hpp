@@ -57,7 +57,6 @@ private:
     //! You can use instead GLVAO16 where indices are uint16_t.
     //! You can use instead GLVAO8 where indices are uint8_t.
     GLVAO32            m_box;
-    GLVAO32            m_box2;
 };
 
 #endif // EXAMPLE_04_INDEXED_BOX_HPP
