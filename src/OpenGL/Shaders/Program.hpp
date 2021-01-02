@@ -137,17 +137,6 @@ public:
     bool bind(GLVAO& vao);
 
     //--------------------------------------------------------------------------
-    //! \brief Check if a VAO is bound to this GLProgram.
-    //!
-    //! \return true if VAO and this GLProgram are already bound, else return
-    //! false.
-    //--------------------------------------------------------------------------
-    inline bool isBound() const
-    {
-        return nullptr != m_vao;
-    }
-
-    //--------------------------------------------------------------------------
     //! \brief Return all error messages (concated by '\\n' char) produced either
     //! during the shader compilation or by an other event.
     //!
@@ -496,8 +485,6 @@ private:
     Samplers   m_samplers;
     Uniforms   m_uniforms;
     UniformLocations m_uniformLocations;
-    GLVAO     *m_vao = nullptr;
-
     std::vector<std::string> m_failedShaders;
     std::string m_error;
 };

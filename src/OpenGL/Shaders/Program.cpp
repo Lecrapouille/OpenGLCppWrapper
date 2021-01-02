@@ -46,7 +46,6 @@ void GLProgram::onRelease()
     m_uniformLocations.clear();
     m_samplers.clear();
     m_attributes.clear();
-    m_vao = nullptr;
     m_error.clear();
 }
 
@@ -88,7 +87,6 @@ bool GLProgram::bind(GLVAO& vao)
         vao.createVBOsFromAttribs(m_attributes);
         vao.createTexturesFromSamplers(m_samplers);
         vao.m_need_update = true;
-        m_vao = &vao;
         return true;
     }
 
@@ -97,9 +95,8 @@ bool GLProgram::bind(GLVAO& vao)
     // incompatible GLProgram.
     else if (likely(vao.isBoundTo(m_handle)))
     {
-        std::cout << "BOUUND VAO " << m_vao->name() << " to GLProgram " << name() << std::endl;
+        std::cout << "BOUUND VAO " << vao.name() << " to GLProgram " << name() << std::endl;
         vao.m_need_update = true; // TBD
-        m_vao = &vao;
         return true;
     }
     else
@@ -174,7 +171,6 @@ bool GLProgram::onCreate()
     return false;
 }
 
-
 //--------------------------------------------------------------------------
 bool GLProgram::onSetup()
 {
@@ -227,8 +223,8 @@ bool GLProgram::onSetup()
 //--------------------------------------------------------------------------
 bool GLProgram::onUpdate()
 {
-    std::cout << "GLProgram::onUpdate() uniforms"
-              << std::endl;
+    std::cout << "GLProgram::onUpdate() " << m_uniformLocations.size()
+              << " uniforms" << std::endl;
 
     for (auto const& it: m_uniformLocations)
     {
@@ -247,11 +243,8 @@ void GLProgram::onActivate()
         std::cout << "GLProgram::onActivate() not COMPILED" << std::endl;
         return ;
     }
-    if (m_vao == nullptr) {
-        std::cout << "GLProgram::onActivate() not bound" << std::endl;
-        return ;
-    }
 
+    std::cout << "GL_USE" << std::endl;
     glCheck(glUseProgram(m_handle));
 }
 
