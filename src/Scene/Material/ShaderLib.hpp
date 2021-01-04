@@ -27,6 +27,7 @@
 //! https://github.com/jdduke/three_cpp
 //----------------------------------------------------------------------------
 
+#  include "Scene/Material/BasicMaterial.hpp"
 #  include <string>
 
 #   pragma GCC diagnostic push
@@ -89,6 +90,317 @@ namespace shaders
         } // namespace fragment
     } // namespace common
 
+    //--------------------------------------------------------------------------
+    namespace color
+    {
+      namespace fragment
+      {
+        static const char* params(BasicMaterial::Config const& config)
+        {
+          if (config.useColor)
+            return
+              "// Color\n"
+              "in vec3 vColor;\n";
+          return "";
+        }
+
+        static const char* code(BasicMaterial::Config const& config)
+        {
+          if (config.useColor)
+            return
+              "  // Color\n"
+              "  FragColor = FragColor * vec4(vColor, opacity);\n";
+          return "";
+        }
+      } // namespace fragment
+
+      namespace vertex
+      {
+        static const char* params(BasicMaterial::Config const& config)
+        {
+          if (config.useColor)
+            return
+              "// Color\n"
+              "uniform vec3 color;\n"
+              "out vec3 vColor;\n";
+          return "";
+        }
+
+        static const char* code(BasicMaterial::Config const& config)
+        {
+          if (config.useColor) {
+            if (config.useGammaInput)
+              return
+                "  // Color + Gamma input\n"
+                "  vColor = color * color;\n";
+            return
+              "  // Color\n"
+              "  vColor = color;\n";
+          }
+          return "";
+        }
+      } // namespace vertex
+    } // namespace color
+
+    //--------------------------------------------------------------------------
+    namespace texture
+    {
+      namespace vertex
+      {
+        static const char* params(BasicMaterial::Config const& config)
+        {
+          if ((config.useMap) || (config.useBumpMap) || (config.useSpecularMap))
+            return
+              "// Texture\n"
+              "uniform vec4 offsetRepeat;\n"
+              "in vec2 UV;\n"
+              "out vec2 vUV;\n";
+          return "";
+        }
+
+      static const char* code(BasicMaterial::Config const& config)
+        {
+          if ((config.useMap) || (config.useBumpMap) || (config.useSpecularMap))
+            return
+              "  // Texture\n"
+              "  vUV = UV * offsetRepeat.zw + offsetRepeat.xy;\n";
+          return "";
+        }
+      } // namespace vertex
+
+      namespace fragment
+      {
+        static const char* params(BasicMaterial::Config const& config)
+        {
+          if ((config.useMap) || (config.useBumpMap) || (config.useSpecularMap))
+            return
+              "// Texture\n"
+              "in vec2 vUV;\n"
+              "uniform sampler2D texture;\n";
+          return "";
+        }
+
+        static const char* code(BasicMaterial::Config const& config)
+        {
+          if (config.useMap) {
+            if (config.useGammaInput)
+              return
+                "  // Texture + Gamma input\n"
+                "  vec4 texelColor = texture2D(texture, vUV);\n"
+                "  texelColor.xyz *= texelColor.xyz;\n"
+                "  FragColor = FragColor * texelColor;\n";
+            return
+              "  // Texture\n"
+              "  FragColor = FragColor * texture2D(texture, vUV);\n";
+          }
+          return "";
+        }
+      } // namespace fragment
+    } // namespace texture
+
+    //--------------------------------------------------------------------------
+    namespace light
+    {
+      namespace vertex
+      {
+        static const char* params(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+
+        static const char* code(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+      } // namespace vertex
+
+      namespace fragment
+      {
+        static const char* params(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+
+        static const char* code(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+      } // namespace fragment
+    } // namespace light
+
+    //--------------------------------------------------------------------------
+    namespace fog
+    {
+      namespace fragment
+      {
+        static const char* params(BasicMaterial::Config const& config)
+        {
+          if (config.useFog)
+            return
+              "// Fog\n"
+              "uniform vec3 fogColor;\n"
+              "uniform float fogNear;\n"
+              "uniform float fogFar;\n";
+
+          if (config.useExpFog)
+            return
+              "// Fog\n"
+              "uniform vec3 fogColor;\n"
+              "uniform float fogDensity;\n";
+
+          return "";
+        }
+
+        static const char* code(BasicMaterial::Config const& config)
+        {
+          if (config.useFog)
+            return
+              "  // Fog\n"
+              "  float depth = gl_FragCoord.z / gl_FragCoord.w;\n"
+              "  float fogFactor = smoothstep(fogNear, fogFar, depth);\n"
+              "  FragColor = mix(FragColor, vec4(fogColor, FragColor.w), fogFactor);\n";
+
+          if (config.useExpFog)
+            return
+              "  // Exponential Fog\n"
+              "  float depth = gl_FragCoord.z / gl_FragCoord.w;\n"
+              "  float fogFactor = exp2(-fogDensity * fogDensity * depth * depth * LOG2);\n"
+              "  fogFactor = 1.0 - clamp(fogFactor, 0.0, 1.0);\n"
+              "  FragColor = mix(FragColor, vec4(fogColor, FragColor.w), fogFactor);\n";
+
+          return "";
+        }
+      } // namespace fragment
+    } // namespace fog
+
+    //--------------------------------------------------------------------------
+    namespace shadow
+    {
+      namespace vertex
+      {
+        static const char* params(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+
+        static const char* code(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+      } // namespace vertex
+
+      namespace fragment
+      {
+        static const char* params(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+
+        static const char* code(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+      } // namespace fragment
+    } // namespace shadow
+
+    //--------------------------------------------------------------------------
+    namespace specular
+    {
+      namespace vertex
+      {
+        static const char* params(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+
+        static const char* code(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+      } // namespace vertex
+
+      namespace fragment
+      {
+        static const char* params(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+
+        static const char* code(BasicMaterial::Config const& /*config*/)
+        {
+          return // TODO
+            "";
+        }
+      } // namespace fragment
+    } // namespace specular
+
+    //--------------------------------------------------------------------------
+    namespace base
+    {
+      namespace vertex
+      {
+        static const char* code(BasicMaterial::Config const& /*config*/)
+        {
+          return
+            "  // Base vertex\n"
+            "  gl_Position = projectionMatrix * mvPosition;\n"
+            ;
+        }
+      } // namespace vertex
+    } // namespace base
+
+    //--------------------------------------------------------------------------
+    namespace alpha
+    {
+      namespace fragment
+      {
+        static const char* params(BasicMaterial::Config const& config)
+        {
+          if (config.useAlphaTest)
+            return
+              "// Alpha test\n"
+              "uniform float ALPHATEST;";
+          return "";
+        }
+
+        static const char* code(BasicMaterial::Config const& config)
+        {
+          if (config.useAlphaTest)
+            return
+              "  // Alpha test\n"
+              "  if (FragColor.a < ALPHATEST) discard;\n";
+          return "";
+        }
+      } // namespace fragment
+    } // namespace alpha
+
+    //--------------------------------------------------------------------------
+    namespace gamma
+    {
+      namespace fragment
+      {
+      static const char* code(BasicMaterial::Config const& config)
+        {
+          if (config.useGammaOutput)
+            return
+              "  // Gamma\n"
+              "  FragColor.xyz = sqrt(FragColor.xyz);\n";
+          return "";
+        }
+      } // namespace fragment
+    } // namespace gamma
+
     //==========================================================================
     namespace materials
     {
@@ -124,6 +436,84 @@ namespace shaders
                         << "}\n";
             }
         } // namespace depth
+
+        namespace normals
+        {
+            //------------------------------------------------------------------
+            static void code(GLVertexShader& vertexShader)
+            {
+                vertexShader
+                        << shaders::common::version()
+                        << shaders::common::vertex::params()
+                        << "uniform mat3 normalMatrix; // = mat3(transpose(inverse(modelMatrix * viewMatrix)));\n"
+                        << "out vec3 vNormal;\n"
+                        << "\nvoid main()\n{\n"
+                        << "  vec4 mvPosition = modelMatrix * viewMatrix * vec4(position, 1.0);\n"
+                        << "  vNormal = normalMatrix * normal;\n"
+                        << "  gl_Position = projectionMatrix * mvPosition;\n"
+                        << "}\n";
+            }
+
+            //------------------------------------------------------------------
+            static void code(GLFragmentShader& fragmentShader)
+            {
+                fragmentShader
+                        << shaders::common::version()
+                        << shaders::common::fragment::params()
+                        << "uniform float opacity;\n"
+                        << "in vec3 vNormal;\n"
+                        << "\nvoid main()\n{\n"
+                        << "  FragColor = vec4(0.5 * normalize(vNormal) + 0.5, opacity);\n"
+                        << "}\n";
+            }
+        } // namespace normals
+
+        namespace basic
+        {
+            //------------------------------------------------------------------
+            static void code(GLVertexShader& vertexShader, BasicMaterial::Config const& config)
+            {
+                vertexShader
+                        << shaders::common::version()
+                        << shaders::common::vertex::params()
+                        << shaders::texture::vertex::params(config)
+                        << shaders::light::vertex::params(config)
+                        << shaders::color::vertex::params(config)
+                        << "\nvoid main()\n{\n"
+                        << "  vec4 mvPosition = modelMatrix * viewMatrix * vec4(position, 1.0);\n"
+                        << shaders::texture::vertex::code(config)
+                        << shaders::light::vertex::code(config)
+                        << shaders::color::vertex::code(config)
+                        << shaders::base::vertex::code(config) << "}";
+            }
+
+            //------------------------------------------------------------------
+            static void code(GLFragmentShader& fragmentShader, BasicMaterial::Config const& config)
+            {
+                fragmentShader
+                        << shaders::common::version()
+                        << shaders::common::constants()
+                        << shaders::alpha::fragment::params(config)
+                        << shaders::common::fragment::params()
+                        << "uniform vec3 diffuse;\n"
+                        << "uniform float opacity;\n"
+                        << shaders::color::fragment::params(config)
+                        << shaders::texture::fragment::params(config)
+                        << shaders::light::fragment::params(config)
+                        << shaders::fog::fragment::params(config)
+                        << shaders::shadow::fragment::params(config)
+                        << shaders::specular::fragment::params(config)
+                        << "\nvoid main()\n{\n"
+                        << "  FragColor = vec4(diffuse, opacity);\n"
+                        << shaders::texture::fragment::code(config)
+                        << shaders::alpha::fragment::code(config)
+                        << shaders::light::fragment::code(config)
+                        << shaders::color::fragment::code(config)
+                        << shaders::shadow::fragment::code(config)
+                        << shaders::gamma::fragment::code(config)
+                        << shaders::fog::fragment::code(config) << "}";
+            }
+        } // namespace basic
     } // namespace materials
 } // namespace shaders
 

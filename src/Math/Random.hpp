@@ -52,6 +52,7 @@ real(T const low = zero<T>(), T const high = one<T>())
 //! interval [low, high].
 template<typename T>
 inline typename std::enable_if<std::is_integral<T>::value &&
+                               std::is_unsigned<T>::value &&
                                !std::is_floating_point<T>::value, T>::type
 integer(T const low = zero<T>(), T const high = one<T>())
 {

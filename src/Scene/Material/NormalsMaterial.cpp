@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2020 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -18,11 +18,18 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_MATERIALS_HPP
-#  define OPENGLCPPWRAPPER_MATERIALS_HPP
+#include "Scene/Material/NormalsMaterial.hpp"
+#include "Scene/Material/ShaderLib.hpp"
 
-#  include "Scene/Material/DepthMaterial.hpp"
-#  include "Scene/Material/NormalsMaterial.hpp"
-#  include "Scene/Material/BasicMaterial.hpp"
+void NormalsMaterial::createShaders(GLVertexShader& vertexShader,
+                                    GLFragmentShader& fragmentShader)
+{
+    shaders::materials::normals::code(vertexShader);
+    shaders::materials::normals::code(fragmentShader);
+}
 
-#endif // OPENGLCPPWRAPPER_MATERIALS_HPP
+void NormalsMaterial::init()
+{
+    opacity() = 1.0f;
+    normalMatrix() = Matrix33f(matrix::Identity);
+}

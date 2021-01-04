@@ -29,8 +29,10 @@ public:
 
     struct Config
     {
-        //! \brief If true then allow to drop fragment colors if lower than a
-        //! given threshold.
+        Config() {}
+
+        //! \brief If true then allow to drop fragment colors if lower than a given
+        //! threshold.
         bool useAlphaTest = false;
         //! \brief If true then taken into account gamma correction.
         bool useGammaInput = false;
@@ -40,59 +42,78 @@ public:
         bool useMap = false;
         //! \brief If true then apply a bump mapping texture to the object.
         bool useBumpMap = false;
-        //! \brief If true then simulate the bright spot of a light that appears
-        //! on shiny objects. Specular highlights are often more inclined to the
-        //! color of the light than the color of the object.
+        //! \brief If true then simulate the bright spot of a light that appears on
+        //! shiny objects. Specular highlights are often more inclined to the color
+        //! of the light than the color of the object.
         bool useSpecularMap = false;
         //! \brief If true then apply a color to the object.
         bool useColor = true;
+        //! \brief If true then apply a linear fog. Disabled if useExpFog is set to true.
+        bool useFog = false;
+        //! \brief If true then apply exponential fog and disable useFog.
+        bool useExpFog = false;
     };
 
-    BasicMaterial(GLProgram& prog,
-                  BasicMaterial::Config const& config = BasicMaterial::Config())
-        : Material("BasicMaterial", prog),
+    BasicMaterial(BasicMaterial::Config const& config = BasicMaterial::Config())
+        : Material("BasicMaterial"),
           m_config(config)
     {}
 
-    Vector3f& diffuse()
+    inline Vector3f& diffuse()
     {
-        return m_program.vector3f("diffuse");
+        return program.vector3f("diffuse");
     }
 
-    float& opacity()
+    inline float& opacity()
     {
-        return m_program.scalarf("opacity");
+        return program.scalarf("opacity");
     }
 
-    float& alphaTest()
+    inline Vector3f& color() // alias to diffuse() ???
     {
-        return m_program.scalarf("ALPHATEST");
+        return program.vector3f("color");
     }
 
-    Vector4f& offsetTexture()
+    inline float& alphaTest()
     {
-        return m_program.vector4f("offsetRepeat");
+        return program.scalarf("ALPHATEST");
     }
 
-    float& fogDensity()
+    inline Vector4f& offsetTexture()
     {
-        return m_program.scalarf("fogDensity");
+        return program.vector4f("offsetRepeat");
     }
 
-    float& fogNear()
+    inline float& fogDensity()
     {
-        return m_program.scalarf("fogNear");
+        return program.scalarf("fogDensity");
     }
 
-    float& fogFar()
+    inline float& fogNear()
     {
-        return m_program.scalarf("fogFar");
+        return program.scalarf("fogNear");
     }
 
-    Vector3f& fogColor()
+    inline float& fogFar()
     {
-        return m_program.vector3f("fogColor");
+        return program.scalarf("fogFar");
     }
+
+    inline Vector3f& fogColor()
+    {
+        return program.vector3f("fogColor");
+    }
+
+private:
+
+    virtual void createShaders(GLVertexShader& vertexShader,
+                               GLFragmentShader& fragmentShader) override;
+
+    virtual void init() override;
+
+private:
+
+    Config m_config;
 };
 
 #endif
