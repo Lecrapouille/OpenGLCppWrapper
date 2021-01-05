@@ -162,6 +162,12 @@ bool GLVAO::draw(Mode const mode, size_t const first, size_t const count)
     {
         m_program->begin();   //glCheck(glUseProgram(m_program->handle()));
         begin(); // Optim: glBindVertexArray(m_vao->handle());
+
+        for (auto& it: m_program->m_samplers)
+        {
+            it.second->begin();
+            m_listTextures[it.first]->begin();
+        }
         glCheck(glDrawArrays(static_cast<GLenum>(mode),
                              static_cast<GLint>(first),
                              static_cast<GLsizei>(count)));
@@ -193,14 +199,6 @@ bool GLVAO::onUpdate()
     {
         m_listBuffers[it.first]->begin();
         it.second->begin();
-    }
-
-    // if
-
-    for (auto& it: m_program->m_samplers)
-    {
-        it.second->begin();
-        m_listTextures[it.first]->begin();
     }
 
     //m_vao->end();
