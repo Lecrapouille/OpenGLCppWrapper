@@ -70,7 +70,7 @@ public:
     {
         //std::cout << "Bye " << static_cast<T*>(this)->name() << std::endl;
         // Avoid using implicit recursive deletion due to usage of smart pointer
-        //clear(); // FIXME ?
+        clear(); // FIXME ?
     }
 
     //--------------------------------------------------------------------------
@@ -171,7 +171,6 @@ public:
             }
         }
         ++removed;
-        std::cout << "end clear: " << std::endl;
         return removed;
     }
 
@@ -184,7 +183,7 @@ public:
     template<typename Functor, typename ...ArgsT>
     void traverse(Functor functor, ArgsT&&... args)
     {
-        functor(*static_cast<T*>(this), std::forward<ArgsT>(args)...);
+        functor(static_cast<T*>(this), std::forward<ArgsT>(args)...);
 
         for (auto& child: children)
         {
@@ -201,7 +200,7 @@ public:
     template<typename Functor, typename ...ArgsT>
     void traverse(Functor functor, ArgsT&&... args) const
     {
-        functor(*static_cast<const T*>(this), std::forward<ArgsT>(args)...);
+        functor(static_cast<const T*>(this), std::forward<ArgsT>(args)...);
 
         for (auto& child: children)
         {
@@ -216,9 +215,9 @@ public:
     inline std::size_t size() const
     {
         size_t count = 0u;
-        Tree<T>::traverse([](T const& node, size_t& c)
+        Tree<T>::traverse([](T const* node, size_t& c)
                           {
-                              c += node.children.size();
+                              c += node->children.size();
                           }, count);
         return count + 1u;
     }

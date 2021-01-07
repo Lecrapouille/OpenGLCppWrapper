@@ -48,6 +48,12 @@ class SceneTree
 public:
 
     //--------------------------------------------------------------------------
+    //! \brief Release all node attached to this scene. Each node before its
+    //! \brief destruction has its method onDisable() called.
+    //--------------------------------------------------------------------------
+    ~SceneTree();
+
+    //--------------------------------------------------------------------------
     //! \brief Extend the Tree node class by adding data (transform matrices ...)
     //! while keep knowing the parent node and child nodes.
     //--------------------------------------------------------------------------
@@ -104,17 +110,16 @@ public:
     };
 
     //--------------------------------------------------------------------------
-    //! \brief Find an element by its name. If the name uses '/'
+    //! \brief Find an element by its name. If the name uses and starts with '/'
+    //! then search the path and return the node.
+    //! \return the Node address if found or nullptr if not found.
     //--------------------------------------------------------------------------
     Node* get(std::string const& name);
 
+    //--------------------------------------------------------------------------
+    //! \brief Find an element by its tag.
+    //--------------------------------------------------------------------------
     void getByTag(std::string const& name, std::vector<Node*> found);
-
-    //--------------------------------------------------------------------------
-    //! \brief Release all node attached to this scene. Each node before its
-    //! \brief destruction has its method onDisable() called.
-    //--------------------------------------------------------------------------
-    ~SceneTree();
 
     //--------------------------------------------------------------------------
     //! \brief Traverse the scene and print information on each node to the

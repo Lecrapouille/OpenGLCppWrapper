@@ -92,16 +92,16 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Draw the shape.
     //--------------------------------------------------------------------------
-    virtual void onDraw(Matrix44f const& modelMatrix = Identity44f) override
+    virtual void onDraw(Matrix44f const& model_matrix = Identity44f) override
     {
-        material.program.matrix44f("modelMatrix") = modelMatrix;
+        modelMatrix() = model_matrix;
         m_vao.draw(Mode::TRIANGLES);
     }
 
     //--------------------------------------------------------------------------
     //! \brief Return the model matrix of the Model-View-Projection
     //--------------------------------------------------------------------------
-    Matrix44f& modelMatrix()
+    inline Matrix44f& modelMatrix()
     {
         return material.program.matrix44f("modelMatrix");
     }
@@ -109,7 +109,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Return the view matrix of the Model-View-Projection
     //--------------------------------------------------------------------------
-    Matrix44f& viewMatrix()
+    inline Matrix44f& viewMatrix()
     {
         return material.program.matrix44f("viewMatrix");
     }
@@ -117,7 +117,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Return the projection matrix of the Model-View-Projection
     //--------------------------------------------------------------------------
-    Matrix44f& projectionMatrix()
+    inline Matrix44f& projectionMatrix()
     {
         return material.program.matrix44f("projectionMatrix");
     }

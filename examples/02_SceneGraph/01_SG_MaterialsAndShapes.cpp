@@ -40,23 +40,41 @@ void SGMatAndShape::onWindowResized()
 {
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
-    // Change the projction matrix of the shape
-    MyModel* root = static_cast<MyModel*>(m_scene.root.get());
+    Matrix44f mat = matrix::perspective(maths::toRadian(60.0f),
+                                        width<float>() / height<float>(),
+                                        0.1f, 100.0f);
 
-    root->projectionMatrix() =  // FIXME: TODO scene.updateMatrix + visitor
-            matrix::perspective(maths::toRadian(60.0f),
-                                width<float>() / height<float>(),
-                                0.1f, 100.0f);
+    m_scene.root->traverse([](SceneObject* node, Matrix44f const& mat)
+    {
+        MyModel* n = dynamic_cast<MyModel*>(node);
+        if (n != nullptr)
+        {
+            n->projectionMatrix() = mat;
+        }
+    }, mat);
 }
 
 //------------------------------------------------------------------------------
 bool SGMatAndShape::onSetup()
 {
+    glCheck(glEnable(GL_DEPTH_TEST));
+    glCheck(glDepthFunc(GL_LESS));
+
     m_scene.root = SceneObject::create<MyModel>("Tree0");
     MyModel& t1 = m_scene.root->attach<MyModel>("Tree1");
     MyModel& t2 = m_scene.root->attach<MyModel>("Tree2");
-    t1.attach<MyModel>("Tree1.0");
-    t2.attach<MyModel>("Tree2.0");
+    MyModel& t3 = t1.attach<MyModel>("Tree1.0");
+    MyModel& t4 = t2.attach<MyModel>("Tree1.1");
+
+    //             Tree0
+    //    Tree2             Tree1
+    //              Tree1.0       Tree1.1
+    //
+    t1.transform.translate(Vector3f(1.0f, 1.0f, 0.0f));
+    t2.transform.translate(Vector3f(-1.0f, -1.0f, 0.0f));
+    t3.transform.translate(Vector3f(1.0f, 1.0f, 0.0f));
+    t4.transform.translate(Vector3f(-1.0f, -1.0f, 0.0f));
+
     m_scene.debug();
 
     return true;
@@ -68,15 +86,24 @@ bool SGMatAndShape::onSetup()
 bool SGMatAndShape::onPaint()
 {
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
-    glCheck(glClear(GL_COLOR_BUFFER_BIT));
+    glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    MyModel& root = *(static_cast<MyModel*>(m_scene.root.get())); // FIXME proper solution ?
-
-    root.modelMatrix() = Identity44f;
-    root.viewMatrix() = matrix::lookAt(Vector3f(5,5,5),
-                                       Vector3f(2,2,2),
-                                       Vector3f(0,1,0));
     m_scene.update(dt());
+
+    // Simulate camera
+    m_scene.root->traverse([](SceneObject* node)
+    {
+        MyModel* n = dynamic_cast<MyModel*>(node);
+        if (n != nullptr)
+        {
+            std::cout << n->name() << ": " << n->transform.position() << std::endl;
+
+            n->viewMatrix() = matrix::lookAt(Vector3f(0,0,5),
+                                             Vector3f(0,0,0),
+                                             Vector3f(0,1,0));
+        }
+    });
+
     m_scene.draw();
 
     return true;

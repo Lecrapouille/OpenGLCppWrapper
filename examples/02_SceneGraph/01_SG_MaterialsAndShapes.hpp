@@ -42,12 +42,12 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    class MyModel: public Shape<Model, DepthMaterial>
+    class MyModel: public Shape<Model, BasicMaterial>
     {
     public:
 
         MyModel(std::string const& name)
-            : Shape<Model, DepthMaterial>(name)
+            : Shape<Model, BasicMaterial>(name)
         {}
 
         //FIXME private:
@@ -56,16 +56,16 @@ public:
         {
             std::cout << "MyModel::onCreate()" << std::endl;
             geometry.select("textures/tree.obj");
-            Shape<Model, DepthMaterial>::onCreate();
+            Shape<Model, BasicMaterial>::onCreate();
             return true;
         }
 
         virtual bool onSetup() override
         {
             std::cout << "MyModel::onSetup()" << std::endl;
-            material.near() = 1.0f;
-            material.far() = 10.0f;
-            material.opacity() = 1.0f;
+            //material.near() = 1.0f;
+            //material.far() = 10.0f;
+            //material.opacity() = 1.0f;
             return true;
         }
     };

@@ -56,13 +56,13 @@ SceneObject* SceneTree::get(std::string const& path)
     }
     else
     {
-        root->traverse([](SceneObject& node, std::string const& name, SceneObject* found)
+        root->traverse([](SceneObject* node, std::string const& name, SceneObject* found)
         {
             if (found == nullptr)
             {
-                if (node.name() == name)
+                if (node->name() == name)
                 {
-                    found = &node;
+                    found = node;
                 }
             }
         }, path, found);
@@ -88,11 +88,11 @@ void SceneTree::getByTag(std::string const& tag, std::vector<Node*> found)
     if (root == nullptr)
         return ;
 
-    root->traverse([](SceneObject& node, std::string const& tag, std::vector<Node*> found)
+    root->traverse([](SceneObject* node, std::string const& tag, std::vector<Node*> found)
     {
-        if (node.tag == tag)
+        if (node->tag == tag)
         {
-            found.push_back(&node);
+            found.push_back(node);
         }
     }, tag, found);
 }
@@ -103,9 +103,9 @@ void SceneTree::debug()
     if (root == nullptr)
         return ;
 
-    root->traverse([](SceneObject& node)
+    root->traverse([](SceneObject* node)
     {
-        std::cout << node << std::endl;
+        std::cout << *node << std::endl;
     });
 }
 
@@ -115,12 +115,12 @@ void SceneTree::setup()
     if (root == nullptr)
         return ;
 
-    root->traverse([](SceneObject& node)
+    root->traverse([](SceneObject* node)
     {
-        if (!node.enabled())
+        if (!node->enabled())
             return ;
 
-        node.onSetup();
+        node->onSetup();
     });
 }
 
@@ -130,18 +130,18 @@ void SceneTree::update(float const dt)
     if (root == nullptr)
         return ;
 
-    root->traverse([dt](SceneObject& node)
+    root->traverse([dt](SceneObject* node)
     {
-        if (!node.enabled())
+        if (!node->enabled())
             return ;
 
         // Derived class may override this function for animating nodes.
-        node.onUpdate(dt);
+        node->onUpdate(dt);
 
         // Update the matrix transform from the parent matrix.
-        node.m_world_transform = node.transform.matrix();
-        if (node.parent != nullptr)
-            node.m_world_transform *= node.parent->m_world_transform;
+        node->m_world_transform = node->transform.matrix();
+        if (node->parent != nullptr)
+            node->m_world_transform *= node->parent->m_world_transform;
     });
 }
 
@@ -151,17 +151,17 @@ void SceneTree::draw()
     if (root == nullptr)
         return ;
 
-    root->traverse([](SceneObject& node)
+    root->traverse([](SceneObject* node)
     {
-        if (!node.enabled())
+        if (!node->enabled())
             return ;
 
         // TODO: this could be better to create an node like OpenInventor
         // separator instead of this computation made everytime (even if
         // scaling a node it will also scale descendants)? Sometimes you
         // just want to scale the node not its descendants.
-        node.onDraw(matrix::scale(node.m_world_transform,
-                                  node.transform.localScale()));
+        node->onDraw(matrix::scale(node->m_world_transform,
+                                   node->transform.localScale()));
     });
 }
 
@@ -171,12 +171,12 @@ void SceneTree::release()
     if (root == nullptr)
         return ;
 
-    root->traverse([](SceneObject& node)
+    root->traverse([](SceneObject* node)
     {
-        if (!node.enabled())
+        if (!node->enabled())
             return ;
 
-        node.onDisable();
+        node->onDisable();
     });
 
     root->clear();
