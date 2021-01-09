@@ -42,10 +42,11 @@ public:
     //! \brief
     // -------------------------------------------------------------------------
     template<class ComponentType, typename... Args>
-    void addComponent(Args&&... params)
+    ComponentType& addComponent(Args&&... params)
     {
         m_components.emplace_back(
             std::make_unique<ComponentType>(std::forward<Args>(params)...));
+        return *m_components.back();
     }
 
     // -------------------------------------------------------------------------
