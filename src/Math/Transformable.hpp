@@ -22,53 +22,89 @@
 #  define OPENGLCPPWRAPPER_TRANSFORMABLE_HPP
 
 #  include "Math/Transformation.hpp"
+#  include "Math/Quaternion.hpp"
 
 // *****************************************************************************
-//! \brief a Transformable defines a 4x4 transformation matrix from a
-//! translation, a rotation and a scale.  This class allow an object to move in
-//! a 2D-world (if n == 2U) or 3D-world (if n == 3U).  Not a thread safe class.
+//! \brief a Transformable defines a 4x4 transformation matrix from a given
+//! translation, a given rotation and a given scale factor. This class allows an
+//! object to move inside a 2D-world (if n == 2U) or 3D-world (if n == 3U).
+//! The returned matrix will be given to OpenGL shader for rendering the object
+//! inside the world.
 // *****************************************************************************
 template <typename T, size_t n>
 class Transformable
 {
 public:
 
-    //! \brief Empty constructor.
+    //--------------------------------------------------------------------------
+    //! \brief Empty constructor. Init position and origin to 0.
+    //! Init scale to 1. Init to transformation to identity matrix.
+    //--------------------------------------------------------------------------
     Transformable()
         : m_origin(maths::zero<T>()),
           m_position(maths::zero<T>()),
           m_scale(maths::one<T>()),
           m_local_scaling(maths::one<T>()),
-          m_axis(maths::one<T>()),
           m_transform(matrix::Identity),
           m_inverse_transform(matrix::Identity),
-          m_angle(maths::zero<T>()),
           m_transform_needs_update(false),
           m_inverse_trans_needs_update(false)
     {}
 
-    //! \brief Restore states to default.
-    inline Transformable<T,n>& reset()
+    //--------------------------------------------------------------------------
+    //! \brief Restore states to default. Init position and origin to 0.
+    //! Init scale to 1. Init to transformation to identity matrix.
+    //--------------------------------------------------------------------------
+    void reset()
     {
-        const Vector<T, n> Vz(maths::zero<T>());
-        const Vector<T, n> Vo(maths::one<T>());
-        const T z = maths::zero<T>();
-
-        m_origin = Vz;
-        m_position = Vz;
-        m_axis = Vo;
-        m_angle = z;
-        m_scale = Vo;
-        m_local_scaling = Vo;
+        m_origin = Vector<T, n>::ZERO;
+        m_position = Vector<T, n>::ZERO;
+        m_orientation = Quat<T>();
+        m_scale = Vector<T, n>::ONE;
+        m_local_scaling = Vector<T, n>::ONE;
         matrix::identity(m_transform);
         matrix::identity(m_inverse_transform);
         m_transform_needs_update = false;
         m_inverse_trans_needs_update = false;
-
-        return *this;
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Return the right vector.
+    //--------------------------------------------------------------------------
+    const Vector<T, n> right() const
+    {
+        return Vector<T, n>(rotation()[0]);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the up vector.
+    //--------------------------------------------------------------------------
+    const Vector<T, n> up() const
+    {
+        return Vector<T, n>(rotation()[1]);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the forward vector.
+    //--------------------------------------------------------------------------
+    const Vector<T, n> forward() const
+    {
+        return Vector<T, n>(rotation()[2]);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the direction.
+    //--------------------------------------------------------------------------
+    Vector<T, n> direction()
+    {
+        Matrix<T, n + 1_z, n + 1_z> m = matrix();
+        Vector<T, n> v(-m[0][2], -m[1][2], -m[2][2]);
+        return vector::normalize(v);
+    }
+
+    //--------------------------------------------------------------------------
     //! \brief Set the origin of the object (relative to word origin).
+    //--------------------------------------------------------------------------
     inline Transformable<T,n>& origin(Vector<T, n> const& origin)
     {
         m_origin = origin;
@@ -77,13 +113,17 @@ public:
         return *this;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Get the origin of the object (relative to word origin).
+    //--------------------------------------------------------------------------
     inline Vector<T, n> const& origin() const
     {
         return m_origin;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Set the relative position of the object from its own origin.
+    //--------------------------------------------------------------------------
     inline Transformable<T,n>& position(Vector<T, n> const& position)
     {
         m_position = position;
@@ -92,14 +132,18 @@ public:
         return *this;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Get the absolute position of the object from its own origin.
+    //--------------------------------------------------------------------------
     inline Vector<T, n> const& position() const
     {
         return m_position;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Move the object by a given offset.
     //! Do the same job than translate() or displace().
+    //--------------------------------------------------------------------------
     inline Transformable<T,n>& move(Vector<T, n> const& offset)
     {
         m_position += offset;
@@ -108,8 +152,10 @@ public:
         return *this;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Move the object by a given offset.
     //! Do the same job than move() or displace().
+    //--------------------------------------------------------------------------
     inline Transformable<T,n>& translate(Vector<T, n> const& offset)
     {
         m_position += offset;
@@ -118,8 +164,10 @@ public:
         return *this;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Move the object by a given offset.
     //! Do the same job than translate() or move().
+    //--------------------------------------------------------------------------
     inline Transformable<T,n>& displace(Vector<T, n> const& offset)
     {
         m_position += offset;
@@ -128,7 +176,45 @@ public:
         return *this;
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Move the object by a given offset to the right (positive offset)
+    //! or to the left (negative offset).
+    //--------------------------------------------------------------------------
+    inline Transformable<T,n>& moveRight(T const& offset)
+    {
+        m_position -= offset * right();
+        m_transform_needs_update = true;
+
+        return *this;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Move up the object by a given offset (positive offset)
+    //! or to move down (negative offset).
+    //--------------------------------------------------------------------------
+    inline Transformable<T,n>& moveUp(T const& offset)
+    {
+        m_position -= offset * up();
+        m_transform_needs_update = true;
+
+        return *this;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Move forward the object by a given offset (positive offset)
+    //! or to move backward (negative offset).
+    //--------------------------------------------------------------------------
+    inline Transformable<T,n>& moveForward(T const& offset)
+    {
+        m_position -= offset * forward();
+        m_transform_needs_update = true;
+
+        return *this;
+    }
+
+    //--------------------------------------------------------------------------
     //! \brief Set the absolute scale factor of the object.
+    //--------------------------------------------------------------------------
     inline Transformable<T,n>& scaling(Vector<T, n> const& scale)
     {
         m_scale = scale;
@@ -137,13 +223,17 @@ public:
         return *this;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Get the absolute scale factors of the object.
+    //--------------------------------------------------------------------------
     inline Vector<T, n> const& scaling() const
     {
         return m_scale;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Relative scaling of the object.
+    //--------------------------------------------------------------------------
     inline Transformable<T,n>& scale(Vector<T, n> const& factor)
     {
         m_scale *= factor;
@@ -152,12 +242,12 @@ public:
         return *this;
     }
 
-    //-----------------------------------------------------------------
+    //--------------------------------------------------------------------------
     //! \brief Set a local scaling of the object. By local we mean that
     //! will not impact children (they will not be scaled).
     //! \note for scaling children use methods Transformable::scale or
     //! Transformable::scaleFactor.
-    //-----------------------------------------------------------------
+    //--------------------------------------------------------------------------
     inline Transformable<T,n>& localScale(Vector<T, n> const &scale)
     {
         m_local_scaling = scale;
@@ -165,97 +255,68 @@ public:
         return *this;
     }
 
-    //-----------------------------------------------------------------
+    //--------------------------------------------------------------------------
     //! \brief Get the local scaling.
-    //-----------------------------------------------------------------
+    //--------------------------------------------------------------------------
     inline Vector<T, n> const &localScale() const
     {
         return m_local_scaling;
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    inline Matrix<T, n + 1_z, n + 1_z> rotation() const
+    {
+        return m_orientation.toMatrix();
+    }
+
+    //--------------------------------------------------------------------------
     //! \brief Set the absolute orientation of the object.
     //! \param angle in radian.
-    inline Transformable<T,n>& rotation(T const angle, Vector<T, n> const& axis)
+    //--------------------------------------------------------------------------
+    void rotate(T const angle, Vector<T, n> const& axis)
     {
-        m_angle = angle;
-        m_axis = axis;
+        Quat<T> rot = angleAxis(angle, axis);
+        rot.normalize();
+        m_orientation = m_orientation * rot;
         m_transform_needs_update = true;
-
-        return *this;
     }
 
-    //! \brief Set the absolute orientation of the object.
-    inline Transformable<T,n>& rotation(Vector<T, n> const& axis)
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    void pitch(T const angle)
     {
-        m_axis = axis;
+        Quat<T> rot = angleAxis(angle, right());
+        rot.normalize();
+        m_orientation = m_orientation * rot;
         m_transform_needs_update = true;
-
-        return *this;
     }
 
-    //! \brief Set the absolute orientation of the object.
-    inline Vector<T, n> const& rotation() const
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    void yaw(T const angle)
     {
-        return m_axis;
-    }
-
-    //! \brief Set the relative orientation of the object.
-    //! \param angle in radian.
-    inline Transformable<T,n>& rotate(T const angle)
-    {
-        m_angle += angle;
-        m_angle = maths::wrapTo2PI(m_angle);
+        Quat<T> rot = angleAxis(angle, up());
+        rot.normalize();
+        m_orientation = m_orientation * rot;
         m_transform_needs_update = true;
-
-        return *this;
     }
 
-    //! \brief Set the relative orientation of the object.
-    //! \param angle in radian.
-    inline Transformable<T,n>& rotate(T const angle, Vector<T, n> const& axis)
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    void roll(T const angle)
     {
-        m_angle += angle;
-        m_angle = maths::wrapTo2PI(m_angle);
-        m_axis = axis;
+        Quat<T> rot = angleAxis(angle, forward());
+        rot.normalize();
+        m_orientation = m_orientation * rot;
         m_transform_needs_update = true;
-
-        return *this;
     }
 
-    //! \brief Set the relative orientation of the object.
-    //! \param angle in radian.
-    inline Transformable<T,n>& rotateX(T const angle)
-    {
-        return rotate(angle, Vector<T, n>::UNIT_X);
-    }
-
-    //! \brief Set the relative orientation of the object.
-    //! \param angle in radian.
-    inline Transformable<T,n>& rotateY(T const angle)
-    {
-        return rotate(angle, Vector<T, n>::UNIT_Y);
-    }
-
-    //! \brief Set the relative orientation of the object.
-    //! \param angle in radian.
-    inline Transformable<T,n>& rotateZ(T const angle)
-    {
-        return rotate(angle, Vector<T, n>::UNIT_Z);
-    }
-
-    //! \brief Set the absolute orientation angle (in radian).
-    inline T const& angle() const
-    {
-        return m_angle;
-    }
-
-    Vector3f direction()
-    {
-        Matrix44f& m = matrix();
-        Vector3f v(-m[0][2], -m[1][2], -m[2][2]);
-        return vector::normalize(v);
-    }
-
+    //--------------------------------------------------------------------------
     //! \brief Return the 4x4 transform matrix combining the
     //! position/rotation/scale/origin of the object.
     //!
@@ -265,13 +326,13 @@ public:
     //! Note:
     //!   Be careful of operation order: we apply scale first, then
     //!   the rotation then the translation.
+    //--------------------------------------------------------------------------
     Matrix<T, n + 1_z, n + 1_z> const& matrix() // FIXME should be const
     {
         if (unlikely(m_transform_needs_update))
         {
-            Matrix<T, n+1_z, n+1_z> I(matrix::Identity);
-            m_transform = matrix::translate(I, m_position - m_origin);
-            m_transform = matrix::rotate(m_transform, m_angle, m_axis);
+            m_transform = rotation();
+            m_transform = matrix::translate(m_transform, m_position - m_origin);
             m_transform = matrix::scale(m_transform, m_scale);
             m_transform_needs_update = false;
             m_inverse_trans_needs_update = true;
@@ -280,7 +341,9 @@ public:
         return m_transform;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Return the 4x4 inverse transform matrix.
+    //--------------------------------------------------------------------------
     Matrix<T, n + 1_z, n + 1_z> const& invMatrix()
     {
         if (unlikely(m_inverse_trans_needs_update))
@@ -306,18 +369,19 @@ protected:
     Vector<T, n> m_origin;
     //! \brief Position of the object relative to its origin.
     Vector<T, n> m_position;
+    //! \brief Orientation (quaternion).
+    Quat<T> m_orientation;
     //! \brief Relative scaling of the object relative to the world.
     Vector<T, n> m_scale;
     //! \brief Scaling factors for the object.
     Vector<T, n> m_local_scaling;
-    //! \brief Axis rotation of the object.
-    Vector<T, n> m_axis;
-    //! \brief
+    //! \brief Local transformation
     Matrix<T, n + 1_z, n + 1_z> m_transform;
+    //! \brief Inversed transformation
     Matrix<T, n + 1_z, n + 1_z> m_inverse_transform;
-    //! \brief Angle of rotation of the object.
-    T m_angle;
+    //! \brief Shall m_transform need to be computed ?
     bool m_transform_needs_update;
+    //! \brief Shall m_inverse_transform need to be computed ?
     bool m_inverse_trans_needs_update;
 };
 

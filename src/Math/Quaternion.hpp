@@ -42,6 +42,7 @@ template <typename Scalar> class Quat
                   "Scalar must be a floating point type");
 
 public:
+
     /**
      *  @brief Create a quaternion with null rotation
      */
@@ -103,12 +104,11 @@ public:
      *  @brief Convert a rotation quaternion to its matrix form
      *  @param Matrix Any matrix-like type that supports the (i,j) operator.
      *  @note The result is not correct if this quaternion is not a member of S(4)
-     *  @return 3x3 Rotation matrix
+     *  @return 4x4 Rotation matrix
      */
-    template <typename Matrix>
-    Matrix toMatrix() const
+    Matrix<Scalar, 4_z, 4_z> toMatrix() const
     {
-        Matrix R;
+        Matrix<Scalar, 4_z, 4_z> R(0); // FIXME optim: avoid (0)
 
         const Scalar aa = a() * a();
         const Scalar bb = b() * b();
@@ -212,8 +212,7 @@ public:
      *  @see
      * http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
      */
-    template <typename Matrix>
-    static Quat fromMatrix(const Matrix &m)
+    static Quat fromMatrix(Matrix<Scalar, 4_z, 4_z> const& m)
     {
         Quat Q;
         const Scalar tr = m(0, 0) + m(1, 1) + m(2, 2); //  trace
@@ -419,6 +418,14 @@ Quat<Scalar> &operator+=(Quat<Scalar> &a, const Quat<Scalar> &b)
     }
 
     return a;
+}
+
+template <typename Scalar>
+Quat<Scalar> angleAxis(Scalar const angle, Vector<Scalar, 3u> const& v)
+{
+    Scalar const s = std::sin(angle * static_cast<Scalar>(0.5));
+    return { std::cos(angle * static_cast<Scalar>(0.5)),
+             v.x * s, v.y * s, v.z * s };
 }
 
 #endif // QUATERNION_HPP
