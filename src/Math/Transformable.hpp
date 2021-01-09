@@ -23,6 +23,7 @@
 
 #  include "Math/Transformation.hpp"
 #  include "Math/Quaternion.hpp"
+#include <iostream>
 
 // *****************************************************************************
 //! \brief a Transformable defines a 4x4 transformation matrix from a given
@@ -275,45 +276,53 @@ public:
     //! \brief Set the absolute orientation of the object.
     //! \param angle in radian.
     //--------------------------------------------------------------------------
-    void rotate(T const angle, Vector<T, n> const& axis)
+    Transformable<T,n>& rotate(T const angle, Vector<T, n> const& axis)
     {
         Quat<T> rot = angleAxis(angle, axis);
         rot.normalize();
         m_orientation = m_orientation * rot;
         m_transform_needs_update = true;
+
+        return *this;
     }
 
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    void pitch(T const angle)
+    Transformable<T,n>& pitch(T const angle)
     {
         Quat<T> rot = angleAxis(angle, right());
         rot.normalize();
         m_orientation = m_orientation * rot;
         m_transform_needs_update = true;
+
+        return *this;
     }
 
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    void yaw(T const angle)
+    Transformable<T,n>& yaw(T const angle)
     {
         Quat<T> rot = angleAxis(angle, up());
         rot.normalize();
         m_orientation = m_orientation * rot;
         m_transform_needs_update = true;
+
+        return *this;
     }
 
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    void roll(T const angle)
+    Transformable<T,n>& roll(T const angle)
     {
         Quat<T> rot = angleAxis(angle, forward());
         rot.normalize();
         m_orientation = m_orientation * rot;
         m_transform_needs_update = true;
+
+        return *this;
     }
 
     //--------------------------------------------------------------------------
@@ -331,8 +340,10 @@ public:
     {
         if (unlikely(m_transform_needs_update))
         {
-            m_transform = rotation();
             m_transform = matrix::translate(m_transform, m_position - m_origin);
+std::cout << "Angle: " << m_orientation.angle() << std::endl;
+std::cout << "Axis: " << m_orientation.axis() << std::endl;
+            m_transform = matrix::rotate(m_transform, m_orientation.angle(), m_orientation.axis());
             m_transform = matrix::scale(m_transform, m_scale);
             m_transform_needs_update = false;
             m_inverse_trans_needs_update = true;

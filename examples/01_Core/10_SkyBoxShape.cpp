@@ -164,7 +164,7 @@ bool SkyBoxShape::drawShape()
     // Apply a rotation to the box around the Y-axis
     Transformable<float, 3U> transform;
     transform.reset(); // restore to identity matrix
-    transform.rotateY(4.0f * cosf(time));
+    transform.yaw(4.0f * cosf(time));
     transform.translate(Vector3f(2.0f, 2.0f, 2.0f));
     m_progShape.scalarf("scale") = cosf(time) + 0.5f;
     m_progShape.matrix44f("model") = transform.matrix();

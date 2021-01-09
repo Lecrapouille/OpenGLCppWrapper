@@ -65,6 +65,20 @@ public:
         m_q[3] = d;
     }
 
+    Scalar angle()
+    {
+        return std::acos(d()) * Scalar(2);
+    }
+
+    Vector<Scalar, 3_z> axis()
+    {
+        Scalar tmp1 = static_cast<Scalar>(1) - d() * d();
+        if(tmp1 <= static_cast<Scalar>(0))
+            return Vector<Scalar, 3_z>(0, 0, 1);
+        Scalar tmp2 = static_cast<Scalar>(1) / std::sqrt(tmp1);
+        return Vector<Scalar, 3_z>(a() * tmp2, b() * tmp2, c() * tmp2);
+    }
+
     /**
      *  @brief L2 norm of the quaternion
      */
@@ -267,8 +281,8 @@ public:
      * @param i Index into quaternion, must be less than 4.
      * @return Element i of the quaternion.
      */
-    Scalar &operator()(unsigned int i) { return m_q[i]; }
-    const Scalar &operator()(unsigned int i) const { return m_q[i]; }
+    Scalar &operator()(size_t i) { return m_q[i]; }
+    const Scalar &operator()(size_t i) const { return m_q[i]; }
 
     Scalar &a() { return m_q[0]; } /**< Scalar component */
     const Scalar &a() const { return m_q[0]; }
@@ -335,7 +349,8 @@ Quat<Scalar> operator*(const Quat<Scalar> &a, const Scalar s)
 {
     Quat<Scalar> lhs;
 
-    for (int i = 0; i < 4; i++)
+    size_t i = 4u;
+    while (i--)
     {
         lhs(i) = a(i) * s;
     }
@@ -364,7 +379,8 @@ Quat<Scalar> operator*(const Scalar s, const Quat<Scalar> &a)
 template <typename Scalar>
 Quat<Scalar> &operator*=(Quat<Scalar> &a, const Scalar s)
 {
-    for (int i = 0; i < 4; i++)
+    size_t i = 4u;
+    while (i--)
     {
         a(i) *= s;
     }
@@ -395,7 +411,8 @@ Quat<Scalar> operator+(const Quat<Scalar> &a, const Quat<Scalar> &b)
 {
     Quat<Scalar> lhs;
 
-    for (int i = 0; i < 4; i++)
+    size_t i = 4u;
+    while (i--)
     {
         lhs(i) = a(i) + b(i);
     }
@@ -412,7 +429,8 @@ Quat<Scalar> operator+(const Quat<Scalar> &a, const Quat<Scalar> &b)
 template <typename Scalar>
 Quat<Scalar> &operator+=(Quat<Scalar> &a, const Quat<Scalar> &b)
 {
-    for (int i = 0; i < 4; i++)
+    size_t i = 4u;
+    while (i--)
     {
         a(i) += b(i);
     }
@@ -420,6 +438,9 @@ Quat<Scalar> &operator+=(Quat<Scalar> &a, const Quat<Scalar> &b)
     return a;
 }
 
+/**
+ * @brief Creates a rotation which rotates angle degrees around axis.
+ */
 template <typename Scalar>
 Quat<Scalar> angleAxis(Scalar const angle, Vector<Scalar, 3u> const& v)
 {
