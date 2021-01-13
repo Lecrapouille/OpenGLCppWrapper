@@ -40,9 +40,10 @@ public:
         Perspective(float const fov = 45.0f,
                     float const near = 0.1f,
                     float const far = 1000.0f)
-            : m_fov(maths::toRadian(fov)), m_near(near), m_far(far)
+            : m_fov(maths::toRadian(fov)),
+              m_near(near),
+              m_far(far)
         {
-            lookAt(Vector3f::UNIT_SCALE, Vector3f::ZERO, Vector3f::UNIT_Y);
             updateProjectionMatrix();
         }
 
@@ -59,18 +60,16 @@ public:
             updateProjectionMatrix();
         }
 
-        Matrix44f const& updateProjectionMatrix(float const width,
-                                                float const height)
+        Matrix44f updateProjectionMatrix(float const width,
+                                         float const height)
         {
             float const aspect = width / height;
 
             glCheck(glViewport(0, 0, int(width), int(height)));
-            m_projection = matrix::perspective(m_fov, m_aspect, m_near, m_far);
-
-            return m_projection;
+            return matrix::perspective(m_fov, aspect, m_near, m_far);
         }
 
-        Matrix44f const& updateProjectionMatrix()
+        Matrix44f updateProjectionMatrix()
         {
             GLint viewport[4];
 
@@ -80,10 +79,14 @@ public:
             float const height = static_cast<float>(viewport[3] - viewport[1]);
             float const aspect = width / height;
 
-            m_projection = matrix::perspective(m_fov, aspect, m_near, m_far);
-
-            return m_projection;
+            return matrix::perspective(m_fov, aspect, m_near, m_far);
         }
+
+    private:
+
+        float m_fov;
+        float m_near;
+        float m_far;
     };
 
 public:
@@ -93,21 +96,21 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    Camera(std::string const& name)
+    Camera(std::string const& name, Mode const mode = Mode::PERSPECTIVE)
         : SceneObject(name),
-          m_perspective_camera(components.addComponent<Perspective>())
+          m_perspective(components.addComponent<Perspective>()),
+          //m_orthographic(components.addComponent<Orthographic>("Orthographic"))
+          m_mode(mode)
     {
-        m_mode = PERSPECTIVE;
-        //;
-        //components.addComponent<Orthographic>("Orthographic");
+        transform.lookAt(Vector3f::UNIT_SCALE, Vector3f::ZERO, Vector3f::UNIT_Y);
     }
 
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    Perspective& usePerspective()
+    void setMode(Mode const mode)
     {
-        m_mode = PERSPECTIVE;
+        m_mode = mode;
     }
 
     //--------------------------------------------------------------------------
@@ -135,68 +138,40 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    //virtual Matrix44f const& updateProjectionMatrix(float const width, float const height) = 0;
+    void updateProjectionMatrix(float const width, float const height)
+    {
+        //if (m_mode = PERSPECTIVE)
+        m_projection = m_perspective.updateProjectionMatrix(width, height);
+        //else
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Update projection matrix from current viewport dimensions, should
     //! be called if window has been resized.
     //--------------------------------------------------------------------------
-    Matrix44f const& updateProjectionMatrix()
+    void updateProjectionMatrix()
     {
         //if (m_mode = PERSPECTIVE)
-            m_perspective_camera.updateProjectionMatrix();
-
+        m_projection = m_perspective.updateProjectionMatrix();
+        //else
     }
 
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    //virtual Matrix44f const& updateViewMatrix() = 0;
+    void updateViewMatrix()
+    {
+        m_view = matrix::lookAt(transform.position() - transform.origin(),
+                                transform.position() + transform.forward(),
+                                transform.up());
+    }
 
 protected:
 
-    Perspective& m_perspective_camera;
+    Perspective& m_perspective;
     Mode m_mode;
     Matrix44f m_projection;
     Matrix44f m_view;
-};
-
-// *****************************************************************************
-//! \brief
-// *****************************************************************************
-class PerspectiveCamera: public Camera
-{
-public:
-
-    PerspectiveCamera(std::string const& name,
-                      float const fov = 45.0f,
-                      float const near = 0.1f,
-                      float const far = 1000.0f)
-        : Camera(name),
-          m_fov(maths::toRadian(fov)), m_near(near), m_far(far)
-    {
-        lookAt(Vector3f::UNIT_SCALE, Vector3f::ZERO, Vector3f::UNIT_Y);
-        updateProjectionMatrix();
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    void setFieldOfView(float const fov = 45.0f)
-    {
-        m_fov = maths::toRadian(fov);
-        updateProjectionMatrix();
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    void setAspect(float const near = 0.1f, float const far = 1000.0f)
-    {
-        m_near = near;
-        m_far = far;
-        updateProjectionMatrix();
-    }
 };
 
 #endif

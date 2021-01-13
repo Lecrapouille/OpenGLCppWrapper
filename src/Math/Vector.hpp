@@ -34,9 +34,6 @@
 #  include "Math/Maths.hpp"
 #  include <initializer_list>
 #  include <algorithm>
-#  include <cstdint>
-#  include <cassert>
-#  include <cmath>
 #  include <fstream>
 
 // *****************************************************************************

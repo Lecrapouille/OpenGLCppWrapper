@@ -18,7 +18,7 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "01_SG_MaterialsAndShapes.hpp"
+#include "02_SG_MaterialsAndShapes.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
@@ -44,12 +44,12 @@ void SGMatAndShape::onWindowResized()
                                         width<float>() / height<float>(),
                                         0.1f, 100.0f);
 
-    m_scene.root->traverse([](SceneObject* node, Matrix44f const& mat)
+    m_scene.root->traverse([](SceneObject* node, Matrix44f const& mat_)
     {
         MyModel* n = dynamic_cast<MyModel*>(node);
         if (n != nullptr)
         {
-            n->projectionMatrix() = mat;
+            n->projectionMatrix() = mat_;
         }
     }, mat);
 }
@@ -60,20 +60,23 @@ bool SGMatAndShape::onSetup()
     glCheck(glEnable(GL_DEPTH_TEST));
     glCheck(glDepthFunc(GL_LESS));
 
-    m_scene.root = SceneObject::create<MyModel>("Tree0");
-    MyModel& t1 = m_scene.root->attach<MyModel>("Tree1");
-    MyModel& t2 = m_scene.root->attach<MyModel>("Tree2");
-    MyModel& t3 = t1.attach<MyModel>("Tree1.0");
-    MyModel& t4 = t2.attach<MyModel>("Tree1.1");
+    m_model.configure("textures/tree.obj");
+    m_material.diffuse() = Color().toVector3f();
+
+    m_scene.root = SceneObject::create<MyModel>("Tree0", m_model, m_material);
+    MyModel& t1 = m_scene.root->attach<MyModel>("Tree1", m_model, m_material);
+    MyModel& t2 = m_scene.root->attach<MyModel>("Tree2", m_model, m_material);
+    MyModel& t3 = t1.attach<MyModel>("Tree1.0", m_model, m_material);
+    MyModel& t4 = t2.attach<MyModel>("Tree1.1", m_model, m_material);
 
     //             Tree0
     //    Tree2             Tree1
     //              Tree1.0       Tree1.1
     //
-    t1.transform.translate(Vector3f(1.0f, 1.0f, 0.0f));
-    t2.transform.translate(Vector3f(-1.0f, -1.0f, 0.0f));
-    t3.transform.translate(Vector3f(1.0f, 1.0f, 0.0f));
-    t4.transform.translate(Vector3f(-1.0f, -1.0f, 0.0f));
+    t1.transform.position(Vector3f(1.0f, 1.0f, 0.0f));
+    t2.transform.position(Vector3f(-1.0f, -1.0f, 0.0f));
+    t3.transform.position(Vector3f(1.0f, 1.0f, 0.0f));
+    t4.transform.position(Vector3f(-1.0f, -1.0f, 0.0f));
 
     m_scene.debug();
 
@@ -96,9 +99,9 @@ bool SGMatAndShape::onPaint()
         MyModel* n = dynamic_cast<MyModel*>(node);
         if (n != nullptr)
         {
-            std::cout << n->name() << ": " << n->transform.position() << std::endl;
+            //std::cout << n->name() << ": " << n->transform.position() << std::endl;
 
-            n->viewMatrix() = matrix::lookAt(Vector3f(0,0,5),
+            n->viewMatrix() = matrix::lookAt(Vector3f(5,5,5),
                                              Vector3f(0,0,0),
                                              Vector3f(0,1,0));
         }

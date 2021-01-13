@@ -22,6 +22,7 @@
 #  define BASIC_MATERIAL_HPP
 
 #  include "Scene/Material/Material.hpp"
+#  include "Scene/Material/Color.hpp"
 
 class BasicMaterial: public Material
 {
@@ -47,18 +48,21 @@ public:
         //! of the light than the color of the object.
         bool useSpecularMap = false;
         //! \brief If true then apply a color to the object.
-        bool useColor = true;
+        bool useColor = false;
         //! \brief If true then apply a linear fog. Disabled if useExpFog is set to true.
         bool useFog = false;
         //! \brief If true then apply exponential fog and disable useFog.
         bool useExpFog = false;
     };
 
-    BasicMaterial(BasicMaterial::Config const& config = BasicMaterial::Config())
+public:
+
+    BasicMaterial(BasicMaterial::Config conf = BasicMaterial::Config())
         : Material("BasicMaterial"),
-          m_config(config)
+          m_config(conf)
     {}
 
+// FIXME should be Color
     inline Vector3f& diffuse()
     {
         return program.vector3f("diffuse");
@@ -106,8 +110,8 @@ public:
 
 private:
 
-    virtual void createShaders(GLVertexShader& vertexShader,
-                               GLFragmentShader& fragmentShader) override;
+    virtual void generate(GLVertexShader& vertexShader,
+                          GLFragmentShader& fragmentShader) override;
 
     virtual void init() override;
 

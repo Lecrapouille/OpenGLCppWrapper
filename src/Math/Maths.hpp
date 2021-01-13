@@ -334,23 +334,27 @@ static T linspace(T const start, T const end, size_t const N,
     const T not_a_number = std::numeric_limits<T>::quiet_NaN();
     result.clear();
 
-    if (0u == N) return not_a_number;
+    if (0u == N)
+    {
+        return not_a_number;
+    }
+
+    result.resize(N);
     if (1u == N)
     {
         result.push_back(start);
         return not_a_number;
     }
 
-    result.reserve(N);
     T delta = (end - start) / static_cast<T>(N - 1u);
     for (size_t i = 0u; i < N - 1u; ++i)
     {
-        result.push_back(start + delta * T(i));
+        result[i] = start + delta * T(i);
     }
 
     if (endpoint)
     {
-        result.push_back(end);
+        result[N - 1u] = end;
     }
     return delta;
 }

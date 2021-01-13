@@ -30,16 +30,11 @@ public:
 
     MySceneObject(std::string const& name)
         : SceneObject(name)
-    {}
+    {
+        std::cout << name << ": onCreate()" << std::endl;
+    }
 
     //FIXME private:
-
-    // Called just after Tree<T>::create or Tree<T>::attach
-    virtual bool onCreate() override
-    {
-        std::cout << name() << ": onCreate()" << std::endl;
-        return true;
-    }
 
     // Called Called by SceneTree (usually on onSetup())
     virtual bool onSetup() override
@@ -49,27 +44,27 @@ public:
     }
 
     // Called Called by SceneTree (usually on onPaint())
-    virtual void onUpdate(float const dt)
+    virtual void onUpdate(float const dt) override
     {
         std::cout << name() << ": onUpdate(" << dt << ')'
                   << std::endl;
     }
 
     // Called Called by SceneTree (usually on onPaint())
-    virtual void onDraw(Matrix44f const& modelMatrix)
+    virtual void onDraw(Matrix44f const& modelMatrix) override
     {
         std::cout << name() << ": onDraw("
                   << modelMatrix << ')' << std::endl;
     }
 
     // Called Called when you enable the node (traversable)
-    virtual void onEnable()
+    virtual void onEnable() override
     {
         std::cout << name() << ": onEnable()" << std::endl;
     }
 
     // Called Called when you disable the node (non traversable)
-    virtual void onDisable()
+    virtual void onDisable() override
     {
         std::cout << name() << ": onDisable()" << std::endl;
     }

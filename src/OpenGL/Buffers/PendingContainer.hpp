@@ -24,7 +24,6 @@
 #  include "Common/Pending.hpp"
 #  include "OpenGL/Buffers/GPUMemory.hpp"
 #  include <vector>
-#  include <algorithm>
 #  include <cmath>
 #  include <fstream>
 

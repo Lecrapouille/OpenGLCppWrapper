@@ -47,14 +47,6 @@ public:
     virtual ~Material() = default;
 
     //--------------------------------------------------------------------------
-    //! \brief Generate vertex and fragement shaders (virtual mathod to be
-    //! implemented by derived class). Compile shaders. Initialize materials
-    //! (uniform glsl variables) with default values.
-    //! \return true if shader have been compiled, else return false.
-    //--------------------------------------------------------------------------
-    bool create();
-
-    //--------------------------------------------------------------------------
     //! \brief Return the material name.
     //--------------------------------------------------------------------------
     inline std::string const& name() const
@@ -62,17 +54,23 @@ public:
         return m_name;
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Generate shaders, compile shaders and init their variables.
+    //! \return true if shader have been compiled, else return false.
+    //--------------------------------------------------------------------------
+    bool build();
+
 private:
+
+    //--------------------------------------------------------------------------
+    //! \brief Generate the code for vertex and fragment shaders.
+    //--------------------------------------------------------------------------
+    virtual void generate(GLVertexShader& vert, GLFragmentShader& frag) = 0;
 
     //--------------------------------------------------------------------------
     //! \brief Initialize uniform glsl variables with default values.
     //--------------------------------------------------------------------------
     virtual void init() = 0;
-
-    //--------------------------------------------------------------------------
-    //! \brief Generate the code for vertex and fragment shaders.
-    //--------------------------------------------------------------------------
-    virtual void createShaders(GLVertexShader& vert, GLFragmentShader& frag) = 0;
 
 public:
 

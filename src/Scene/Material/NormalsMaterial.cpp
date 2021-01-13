@@ -21,8 +21,8 @@
 #include "Scene/Material/NormalsMaterial.hpp"
 #include "Scene/Material/ShaderLib.hpp"
 
-void NormalsMaterial::createShaders(GLVertexShader& vertexShader,
-                                    GLFragmentShader& fragmentShader)
+void NormalsMaterial::generate(GLVertexShader& vertexShader,
+                               GLFragmentShader& fragmentShader)
 {
     shaders::materials::normals::code(vertexShader);
     shaders::materials::normals::code(fragmentShader);

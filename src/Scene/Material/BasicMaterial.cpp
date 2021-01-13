@@ -20,40 +20,70 @@
 
 #include "Scene/Material/BasicMaterial.hpp"
 #include "Scene/Material/ShaderLib.hpp"
-#include "Scene/Material/Color.hpp"
 
-void BasicMaterial::createShaders(GLVertexShader& vertexShader,
-                                  GLFragmentShader& fragmentShader)
+void BasicMaterial::generate(GLVertexShader& vertexShader,
+                             GLFragmentShader& fragmentShader)
 {
     shaders::materials::basic::code(vertexShader, m_config);
     shaders::materials::basic::code(fragmentShader, m_config);
 }
 
+
+
 void BasicMaterial::init()
-{
-    diffuse() = Color().toVector3f();
-    opacity() = 1.0f;
+{std::cout << "BasicMaterial::init()" << std::endl;
+    if (!program.hasUniform<Vector3f>("diffuse"))
+    {std::cout << "diffuse" << std::endl;
+        diffuse() = Vector3f(1.0f, 1.0f, 1.0f);
+    }
+
+    if (!program.hasUniform<float>("opacity"))
+    {
+        opacity() = 1.0f;
+    }
 
     if (m_config.useColor)
-        color() = diffuse();
+    {
+        std::cout << "usecolor" << std::endl;
+        if (!program.hasUniform<Vector3f>("color"))
+        {
+            std::cout << "color" << std::endl;
+            color() = diffuse();
+        }
+    }
 
     if (m_config.useAlphaTest)
-        alphaTest() = 0.5f;
+    {
+        if (!program.hasUniform<float>("ALPHATEST"))
+            alphaTest() = 0.5f;
+    }
 
     if ((m_config.useMap) || (m_config.useBumpMap) || (m_config.useSpecularMap))
-        offsetTexture() = Vector4f(0.0f, 0.0f, 1.0f, 1.0f);
+    {
+        if (!program.hasUniform<Vector4f>("offsetRepeat"))
+            offsetTexture() = Vector4f(0.0f, 0.0f, 1.0f, 1.0f);
+    }
 
     // Material flags useExpFog and useFog are exclusive. Disable useFog
     if ((m_config.useExpFog) && (m_config.useFog))
-        m_config.useFog = false;
+    {
+        if (!program.hasUniform<Vector3f>("color"))
+            m_config.useFog = false;
+    }
 
     if (m_config.useFog)
     {
-        fogColor() = Vector3f(0.5f, 0.5f, 0.5f);
-        fogNear() = 1.0f;
-        fogFar() = 10.0f;
+        if (!program.hasUniform<Vector3f>("fogColor"))
+            fogColor() = Vector3f(0.5f, 0.5f, 0.5f);
+        if (!program.hasUniform<float>("fogNear"))
+            fogNear() = 1.0f;
+        if (!program.hasUniform<float>("fogFar"))
+            fogFar() = 10.0f;
     }
 
     if (m_config.useExpFog)
-        fogDensity() = 0.00025f;
+    {
+        if (!program.hasUniform<float>("fogDensity"))
+            fogDensity() = 0.00025f;
+    }
 }

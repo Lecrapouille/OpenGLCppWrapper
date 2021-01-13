@@ -22,6 +22,7 @@
 #  define GEOMETRY_MODEL_HPP
 
 #  include "Scene/Geometry/Geometry.hpp"
+#  include <string>
 
 // *****************************************************************************
 //! \brief Generate the geometry from a file
@@ -33,7 +34,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Select the loader
     //--------------------------------------------------------------------------
-    Model& select(std::string const& filename);
+    Model& configure(std::string const& filename);
 
 private:
 

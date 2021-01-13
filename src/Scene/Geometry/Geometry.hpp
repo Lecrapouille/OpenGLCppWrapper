@@ -54,6 +54,7 @@ public:
     {
         if (m_vertices == nullptr)
             throw GL::Exception("You forget to call generate(vertice, normals, uv, index)");
+
         return *m_vertices;
     }
 
@@ -102,10 +103,10 @@ private:
 
 private:
 
-    GLVertexBuffer<Vector3f>* m_vertices;
-    GLVertexBuffer<Vector3f>* m_normals;
-    GLVertexBuffer<Vector2f>* m_uv;
-    GLIndex32*                m_index;
+    GLVertexBuffer<Vector3f>* m_vertices = nullptr;
+    GLVertexBuffer<Vector3f>* m_normals = nullptr;
+    GLVertexBuffer<Vector2f>* m_uv = nullptr;
+    GLIndex32*                m_index = nullptr;
 };
 
 #endif

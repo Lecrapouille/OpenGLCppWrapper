@@ -21,62 +21,52 @@
 #include "Scene/Geometry/Tube.hpp"
 
 //------------------------------------------------------------------------------
-Tube& Tube::configure(float const top_radius,
-                      float const base_radius,
-                      float const height,
-                      uint32_t const slices)
-{
-    m_top_radius = top_radius;
-    m_base_radius = base_radius;
-    m_height = height;
-    m_slices = slices;
-
-    return *this;
-}
-
-//------------------------------------------------------------------------------
-bool Tube::doGenerate(GLVertexBuffer<Vector3f>& vertices,
-                      GLVertexBuffer<Vector3f>& normals,
-                      GLVertexBuffer<Vector2f>& uv,
-                      GLIndex32& index)
+static bool generateTube(GLVertexBuffer<Vector3f>& vertices,
+                         GLVertexBuffer<Vector3f>& normals,
+                         GLVertexBuffer<Vector2f>& uv,
+                         GLIndex32& index,
+                         float const top_radius,
+                         float const base_radius,
+                         float const height,
+                         uint32_t const slices)
 {
     // Create caps ?
-    const bool base_caps = m_base_radius > 0.0f;
-    const bool top_caps = m_top_radius > 0.0f;
+    const bool base_caps = base_radius > 0.0f;
+    const bool top_caps = top_radius > 0.0f;
 
     std::vector<float> angle;
-    maths::linspace(0.0f, maths::TWO_PI<float>, m_slices + 1u, angle, true);
+    maths::linspace(0.0f, maths::TWO_PI<float>, slices + 1u, angle, true);
 
     std::vector<float> texture;
-    maths::linspace(0.0f, 1.0f, m_slices + 1u, texture, true);
+    maths::linspace(0.0f, 1.0f, slices + 1u, texture, true);
 
     // Reserve memory
-    //  (m_slices + 1u) vertices for by circle
+    //  (slices + 1u) vertices for by circle
     //  +1 by radius if cap it
     //  x2 because of top and base radius
-    uint32_t nb_points = 2u * (m_slices + 1u);
+    uint32_t nb_points = 2u * (slices + 1u);
     vertices.resize(nb_points);
     normals.resize(nb_points);
     uv.resize(nb_points);
-    nb_points = 6u * (m_slices + 1u)
-                + (base_caps ? 3u * m_slices : 0u)
-                + (top_caps ? 3u * m_slices : 0u);
+    nb_points = 6u * (slices + 1u)
+                + (base_caps ? 3u * slices : 0u)
+                + (top_caps ? 3u * slices : 0u);
     index.reserve(nb_points);
 
     // Constants
-    const float abs_top_radius = maths::abs(m_top_radius);
-    const float abs_base_radius = maths::abs(m_base_radius);
-    const float h2 = m_height / 2.0f;
+    const float abs_top_radius = maths::abs(top_radius);
+    const float abs_base_radius = maths::abs(base_radius);
+    const float h2 = height / 2.0f;
     const float r = abs_top_radius - abs_base_radius;
-    const float hypothenus = std::sqrt(r * r + m_height * m_height);
-    const float hh = m_height / hypothenus;
+    const float hypothenus = std::sqrt(r * r + height * height);
+    const float hh = height / hypothenus;
     const float rh = -r / hypothenus;
 
     // First index for top and base radius
     uint32_t const i0 = 0u;
-    uint32_t const i1 = i0 + m_slices + 1u;
+    uint32_t const i1 = i0 + slices + 1u;
 
-    for (uint32_t i = 0; i <= m_slices; ++i)
+    for (uint32_t i = 0; i <= slices; ++i)
     {
         float c = std::cos(angle[i]);
         float s = std::sin(angle[i]);
@@ -104,7 +94,7 @@ bool Tube::doGenerate(GLVertexBuffer<Vector3f>& vertices,
         normals.append(Vector3f(0.0f, 0.0f, 1.0f));
         uv.append(Vector2f(0.5f, 0.5f));
 
-        for (uint32_t i = 0; i < m_slices; ++i)
+        for (uint32_t i = 0; i < slices; ++i)
         {
             index.append(c0);
             index.append(i0 + i);
@@ -120,7 +110,7 @@ bool Tube::doGenerate(GLVertexBuffer<Vector3f>& vertices,
         normals.append(Vector3f(0.0f, 0.0f, -1.0f));
         uv.append(Vector2f(0.5f, 0.5f));
 
-        for (uint32_t i = 0; i < m_slices; ++i)
+        for (uint32_t i = 0; i < slices; ++i)
         {
             index.append(c1);
             index.append(i1 + i);
@@ -129,4 +119,42 @@ bool Tube::doGenerate(GLVertexBuffer<Vector3f>& vertices,
     }
 
     return true;
+}
+
+//------------------------------------------------------------------------------
+bool Tube::doGenerate(GLVertexBuffer<Vector3f>& vertices,
+                      GLVertexBuffer<Vector3f>& normals,
+                      GLVertexBuffer<Vector2f>& uv,
+                      GLIndex32& index)
+{
+    return generateTube(vertices, normals, uv, index, m_top_radius, m_base_radius,
+                        m_height, m_slices);
+}
+
+//------------------------------------------------------------------------------
+void Tube::configure(float const top_radius, float const base_radius,
+                      float const height, uint32_t const slices)
+{
+    m_top_radius = top_radius;
+    m_base_radius = base_radius;
+    m_height = height;
+    m_slices = slices;
+}
+
+//------------------------------------------------------------------------------
+void Cylinder::configure(float const radius, float const height, uint32_t const slices)
+{
+    Tube::configure(radius, radius, height, slices);
+}
+
+//------------------------------------------------------------------------------
+void Cone::configure(float const radius, float const height, uint32_t const slices)
+{
+    Tube::configure(0.0f, radius, height, slices);
+}
+
+//------------------------------------------------------------------------------
+void Pyramid::configure(float const radius, float const height)
+{
+    Tube::configure(0.0f, radius, height, 4u);
 }

@@ -56,13 +56,13 @@ SceneObject* SceneTree::get(std::string const& path)
     }
     else
     {
-        root->traverse([](SceneObject* node, std::string const& name, SceneObject* found)
+        root->traverse([](SceneObject* node, std::string const& name, SceneObject* found_)
         {
-            if (found == nullptr)
+            if (found_ == nullptr)
             {
                 if (node->name() == name)
                 {
-                    found = node;
+                    found_ = node;
                 }
             }
         }, path, found);
@@ -88,11 +88,11 @@ void SceneTree::getByTag(std::string const& tag, std::vector<Node*> found)
     if (root == nullptr)
         return ;
 
-    root->traverse([](SceneObject* node, std::string const& tag, std::vector<Node*> found)
+    root->traverse([](SceneObject* node, std::string const& tag_, std::vector<Node*> found_)
     {
-        if (node->tag == tag)
+        if (node->tag == tag_)
         {
-            found.push_back(node);
+            found_.push_back(node);
         }
     }, tag, found);
 }

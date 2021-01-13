@@ -43,8 +43,8 @@ public:
 
 private:
 
-    virtual void createShaders(GLVertexShader& vertexShader,
-                               GLFragmentShader& fragmentShader) override;
+    virtual void generate(GLVertexShader& vertexShader,
+                          GLFragmentShader& fragmentShader) override;
 
     virtual void init() override;
 };

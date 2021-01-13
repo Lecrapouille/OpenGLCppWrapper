@@ -46,7 +46,7 @@ public:
     {
         m_components.emplace_back(
             std::make_unique<ComponentType>(std::forward<Args>(params)...));
-        return *m_components.back();
+        return *static_cast<ComponentType*>(m_components.back().get());
     }
 
     // -------------------------------------------------------------------------

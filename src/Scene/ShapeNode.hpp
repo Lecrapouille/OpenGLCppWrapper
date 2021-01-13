@@ -35,58 +35,14 @@ class Shape: public SceneObject
 {
 public:
 
-    using Ptr = std::unique_ptr<Shape>;
-
     //--------------------------------------------------------------------------
     //! \brief Give a name to the shape.
     //--------------------------------------------------------------------------
-    Shape(std::string const& name)
-        : SceneObject(name), m_vao(name)
-    {}
-
-    // FIXME SceneObject::create should suffice
-    /*using Ptr = std::unique_ptr<Shape<Geometry,Material>>;
-    static Ptr create(std::string const& name)
+    Shape(std::string const& name, Geometry& geo, Material& mat)
+        : SceneObject(name), material(mat), geometry(geo), m_vao(name)
     {
-        Ptr obj = std::make_unique<Shape<Geometry,Material>>(name);
-        if (obj->onCreate())
-            throw GL::Exception("Failed creating the shape");
-        return std::move(obj);
-        }*/
-    // FIXME
-
-    //--------------------------------------------------------------------------
-    //! \brief Compile the material shaders and populate the geomatry.
-    //! \note some geometry have to be configurate before their generation ie
-    //! see their configure() method.
-    //--------------------------------------------------------------------------
-    virtual bool onCreate() override
-    {
-        std::cout << "Shape::onCreate()" << std::endl;
-        // FIXME since prog has MVP matrix and vertice position should not the
-        // GLProgram be external ?
-        if (!material.create())
-        {
-            std::cerr << "Failed creating material" << std::endl;
-            return false;
-        }
-
-        // FIXME: Not all these attributes are needed: ie depth material only use
-        // position so normals ans uv are useless
-        // FIXME because of that generate() has to be placed before binding VAO but
-        // should be after.
-        if (!geometry.generate(m_vao.vector3f("position"),
-                               m_vao.vector3f("normals"),
-                               m_vao.vector2f("uv"),
-                               m_vao.index()))
-        {
-            std::cerr << "Failed creating geometry" << std::endl;
-            return false;
-        }
-
-        // Populate VBOs in the VAO (note: should be before geometry.generate()
-        material.program.bind(m_vao);
-        return true;
+        if (!generate())
+            throw GL::Exception("Shape " + name + " failed during generation");
     }
 
     //--------------------------------------------------------------------------
@@ -122,10 +78,46 @@ public:
         return material.program.matrix44f("projectionMatrix");
     }
 
+    bool generate()
+    {
+        if (!material.build())
+        {
+            std::cerr << "Shape " << name()
+                      << ": Failed creating its material"
+                      << std::endl;
+            return false;
+        }
+
+        // FIXME: avoid creating too many VAO => shared VAO
+        // FIXME: Not all these attributes are needed: ie depth material only use
+        // position so normals ans uv are useless
+        if (!geometry.generate(m_vao.vector3f("position"),
+                               m_vao.vector3f("normals"),
+                               m_vao.vector2f("uv"),
+                               m_vao.index()))
+        {
+            std::cerr << "Shape " << name()
+                      << ": Failed creating its geometry"
+                      << std::endl;
+            return false;
+        }
+
+        // Populate VBOs in the VAO (note: should be before geometry.generate()
+        if (!material.program.bind(m_vao))
+        {
+            std::cerr << "Shape " << name()
+                      << ": Failed binding its VAO "
+                      << std::endl;
+            return false;
+        }
+
+        return true;
+    }
+
 public:
 
-    Material material;
-    Geometry geometry;
+    Material& material;
+    Geometry& geometry;
 
 protected:
 

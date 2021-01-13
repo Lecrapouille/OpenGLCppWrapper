@@ -142,6 +142,11 @@ public:
         return m_code;
     }
 
+    void clear()
+    {
+        m_code.clear();
+    }
+
     //--------------------------------------------------------------------------
     //! \brief Compile the shader.
     //! \return true if shader has been compiled, else return false. You also

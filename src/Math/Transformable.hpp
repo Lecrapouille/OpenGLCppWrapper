@@ -326,6 +326,25 @@ public:
     }
 
     //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    void lookAt(Vector3f const &target)
+    {
+       m_orientation = Quat<T>::fromMatrix(matrix::lookAt(m_position - m_origin, target, up())).conjugate();
+       m_transform_needs_update = true;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    void lookAt(Vector3f const &position, Vector3f const &target, Vector3f const &up)
+    {
+       m_position = position;
+       m_orientation = Quat<T>::fromMatrix(matrix::lookAt(m_position - m_origin, target, up)).conjugate();
+       m_transform_needs_update = true;
+    }
+
+    //--------------------------------------------------------------------------
     //! \brief Return the 4x4 transform matrix combining the
     //! position/rotation/scale/origin of the object.
     //!
@@ -368,11 +387,6 @@ std::cout << "Axis: " << m_orientation.axis() << std::endl;
         }
         return m_inverse_transform;
     }
-
-    //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    // TODO void lookAt(Vector3f const &target);
 
 protected:
 

@@ -373,6 +373,14 @@ public:
         }
     }
 
+    template<class T>
+    bool hasUniform(const char *name)
+    {
+        bool ret = m_uniforms.has<std::shared_ptr<GLUniform<T>>>(name);
+std::cout << "hasUniform " << name << " " << ret << std::endl;
+return ret;
+    }
+
 private:
 
     //--------------------------------------------------------------------------

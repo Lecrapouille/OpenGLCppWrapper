@@ -14,3 +14,5 @@ OpenGL calls:
 - VAO getTexture / getVBO => m_need_update = true; not in all cases
 - draw() return true not always the case
 - Texture multiple objects => KO
+
+Material should use Color instead of Vector3f or Vector4f

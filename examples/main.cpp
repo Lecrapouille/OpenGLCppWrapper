@@ -38,7 +38,7 @@
 #include "01_Core/13_PostProdFrameBuffer.hpp"
 
 #include "02_SceneGraph/00_SG_Base.hpp"
-#include "02_SceneGraph/01_SG_MaterialsAndShapes.hpp"
+#include "02_SceneGraph/02_SG_MaterialsAndShapes.hpp"
 
 #include <iostream>
 #include <stdlib.h>

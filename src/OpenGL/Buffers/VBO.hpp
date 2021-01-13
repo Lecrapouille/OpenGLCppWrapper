@@ -72,6 +72,12 @@ public:
         PendingContainer<T>::operator=(other);
         return *this;
     }
+
+    inline GLVertexBuffer<T>& operator=(GLVertexBuffer<T> const& other)
+    {
+        PendingContainer<T>::operator=(other);
+        return *this;
+    }
 };
 
 #endif // OPENGLCPPWRAPPER_VERTEX_BUFFER_OBJECT_HPP

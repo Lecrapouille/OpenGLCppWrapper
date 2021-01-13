@@ -22,7 +22,7 @@
 #include "Loaders/3D/OBJ.hpp"
 
 //--------------------------------------------------------------------------
-Model& Model::select(std::string const& filename)
+Model& Model::configure(std::string const& filename)
 {
     m_filename = filename;
     return *this;

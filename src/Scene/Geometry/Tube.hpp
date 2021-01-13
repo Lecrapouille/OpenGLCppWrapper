@@ -36,10 +36,10 @@ public:
     //! \brief Configure the shape.
     //! Call it before calling generate() else default parameters will be used.
     //--------------------------------------------------------------------------
-    Tube& configure(float const top_radius,
-                    float const base_radius,
-                    float const height,
-                    uint32_t const slices);
+    void configure(float const top_radius, float const base_radius,
+                   float const height, uint32_t const slices);
+
+private:
 
     //--------------------------------------------------------------------------
     //! \brief Constructor. Z-axis aligned tube centered at origin.
@@ -59,6 +59,57 @@ private:
     float m_base_radius = 1.0f;
     float m_height = 1.0f;
     uint32_t m_slices = 8.0f;
+};
+
+// *****************************************************************************
+//! \brief Class holding meshes of a cylinder. A cylinder is a Tube where top
+//! radius is equal to the the base radius.
+//! \ingroup Geometry
+// *****************************************************************************
+class Cylinder: protected Tube
+{
+public:
+
+    //--------------------------------------------------------------------------
+    //! \brief Constructor. Z-axis aligned tube centered at origin.
+    //! \param radius The radius of the cylinder
+    //! \param height The height of the cylinder
+    //! \param slices The number of subdivisions around the Z axis.
+    //--------------------------------------------------------------------------
+    void configure(float const radius, float const height, uint32_t const slices);
+};
+
+// *****************************************************************************
+//! \brief Class holding meshes of a cone. A cone is a Tube with no top radius.
+//! \ingroup Geometry
+// *****************************************************************************
+class Cone: protected Tube
+{
+public:
+
+    //--------------------------------------------------------------------------
+    //! \brief Constructor. Z-axis aligned tube centered at origin.
+    //! \param radius The radius of the cone.
+    //! \param height The height of the cone.
+    //! \param slices The number of subdivisions around the Z axis.
+    //--------------------------------------------------------------------------
+    void configure(float const radius, float const height, uint32_t const slices);
+};
+
+// *****************************************************************************
+//! \brief Class holding meshes of a pyramid. A pyramid is a cone with 4 slices.
+//! \ingroup Geometry
+// *****************************************************************************
+class Pyramid: protected Cone
+{
+public:
+
+    //--------------------------------------------------------------------------
+    //! \brief Constructor. Z-axis aligned tube centered at origin.
+    //! \param radius The radius of the pyramid.
+    //! \param height The height of the pyramid.
+    //--------------------------------------------------------------------------
+    void configure(float const radius, float const height);
 };
 
 #endif // OPENGLCPPWRAPPER_GEOMETRY_TUBE_HPP

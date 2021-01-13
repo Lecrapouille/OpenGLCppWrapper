@@ -39,21 +39,9 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Calback triggered when the object becomes disabled.
-    //! This is also called when the object is destroyed and can be used for any
-    //! cleanup code.
     //--------------------------------------------------------------------------
     virtual void onDisable()
     {}
-
-    //--------------------------------------------------------------------------
-    //! \brief Calback triggered just after the creation of an object and only
-    //! once during the lifetime of the instance. Used it for allocating memory
-    //! \return true when the creation succeeded, false on failure.
-    //--------------------------------------------------------------------------
-    virtual bool onCreate()
-    {
-        return true;
-    }
 
     //--------------------------------------------------------------------------
     //! \brief Calback triggered just when the scene is loaded. Used it for

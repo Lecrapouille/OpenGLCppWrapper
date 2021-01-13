@@ -27,11 +27,7 @@
 #ifndef OPENGLCPPWRAPPER_GLOBJECT_HPP
 #  define OPENGLCPPWRAPPER_GLOBJECT_HPP
 
-#  include "Common/NonCppStd.hpp"
 #  include "OpenGL/Context/OpenGL.hpp"
-#  include <string>
-
-#include <iostream> // TODO temporary
 
 // ***************************************************************************
 //! \class GLObject GLObject.hpp

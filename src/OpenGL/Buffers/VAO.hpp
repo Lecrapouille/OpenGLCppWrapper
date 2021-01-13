@@ -27,12 +27,9 @@
 #ifndef OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
 #  define OPENGLCPPWRAPPER_GLVERTEX_ARRAY_HPP
 
-#  include "OpenGL/Variables/Uniform.hpp"
 #  include "OpenGL/Buffers/VBO.hpp"
 #  include "OpenGL/Textures/Textures.hpp"
 #  include "OpenGL/Shaders/Program.hpp"
-#  include "Math/Vector.hpp"
-#  include "Common/Any.hpp"
 
 //--------------------------------------------------------------------------
 //! \brief Mode for drawing primitives (points, lines, triangles ...)
@@ -303,6 +300,14 @@ public:
         return getTexture<GLTextureCube>(name);
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Return true if this instance of VAO is bound to a GLProgram
+    //--------------------------------------------------------------------------
+    inline bool isBound() const
+    {
+        return (m_program != nullptr) && (m_program->handle() != 0u);
+    }
+
 private:
 
     //--------------------------------------------------------------------------
@@ -311,14 +316,6 @@ private:
     inline bool isBoundTo(GLenum const prog_id) const
     {
         return (m_program != nullptr) && (m_program->handle() == prog_id);
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Return true if this instance of VAO is bound to a GLProgram
-    //--------------------------------------------------------------------------
-    inline bool isBound() const
-    {
-        return (m_program != nullptr) && (m_program->handle() != 0u);
     }
 
     //--------------------------------------------------------------------------

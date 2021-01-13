@@ -21,8 +21,8 @@
 #include "Scene/Material/DepthMaterial.hpp"
 #include "Scene/Material/ShaderLib.hpp"
 
-void DepthMaterial::createShaders(GLVertexShader& vertexShader,
-                                  GLFragmentShader& fragmentShader)
+void DepthMaterial::generate(GLVertexShader& vertexShader,
+                             GLFragmentShader& fragmentShader)
 {
     shaders::materials::depth::code(vertexShader);
     shaders::materials::depth::code(fragmentShader);

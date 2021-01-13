@@ -20,9 +20,18 @@
 
 #include "Scene/Material/Material.hpp"
 
-bool Material::create()
+//------------------------------------------------------------------------------
+bool Material::build()
 {
-    createShaders(m_vert_shader, m_frag_shader);
+    if (program.compiled())
+        return true;
+
+    // Generate shaders
+    m_vert_shader.clear();
+    m_frag_shader.clear();
+    generate(m_vert_shader, m_frag_shader);
+
+    // Compile generated shaders
     if (!program.compile(m_vert_shader, m_frag_shader))
     {
         std::cerr << "Failed compiling Material " << name()
@@ -31,6 +40,8 @@ bool Material::create()
         return false;
     }
 
+    // Init variables of generated shaders
     init();
+
     return true;
 }

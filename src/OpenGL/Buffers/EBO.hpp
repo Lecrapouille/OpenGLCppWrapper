@@ -69,6 +69,12 @@ public:
         return *this;
     }
 
+    inline GLElementBuffer<T>& operator=(GLElementBuffer<T> const& other)
+    {
+        PendingContainer<T>::operator=(other);
+        return *this;
+    }
+
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
