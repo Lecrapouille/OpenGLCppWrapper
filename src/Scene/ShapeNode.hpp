@@ -26,97 +26,35 @@
 #  include "Scene/Material/Material.hpp"
 #  include "Scene/SceneTree.hpp"
 
-// *****************************************************************************
-//! \brief Base class for predefined 3D shape (cube, cylinder ...). A Shape is
-//! a geometry (purely shape construction) associated to a material (albedo ...)
-// *****************************************************************************
 template<class Geometry, class Material>
-class Renderable
+class Shape: public SceneObject
 {
 public:
 
-    //--------------------------------------------------------------------------
-    //! \brief Give a name to the shape.
-    //--------------------------------------------------------------------------
-    Renderable(std::string const& name)// Geometry& geo, Material& mat)
-        : vao(name), material(vao)
-    {
-        //if (!generate())
-        //    throw GL::Exception("Shape " + name + " failed during generation");
-    }
+    Shape(std::string const& name/*, Material::Config& = Material::Config*/)
+        : SceneObject(name),
+          m_vao("VAO_" + name),
+          material(m_vao)
+    {}
 
-    //--------------------------------------------------------------------------
-    //! \brief Draw the shape.
-    //--------------------------------------------------------------------------
-    bool draw(Mode const mode = Mode::TRIANGLES, Matrix44f const& model_matrix = Identity44f)
+    bool compile(/*Geometry::Configure, Material::Configure*/)
     {
-        modelMatrix() = model_matrix;
-        return vao.draw(mode);
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Return the model matrix of the Model-View-Projection
-    //--------------------------------------------------------------------------
-    inline Matrix44f& modelMatrix()
-    {
-        return material.program.matrix44f("modelMatrix");
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Return the view matrix of the Model-View-Projection
-    //--------------------------------------------------------------------------
-    inline Matrix44f& viewMatrix()
-    {
-        return material.program.matrix44f("viewMatrix");
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Return the projection matrix of the Model-View-Projection
-    //--------------------------------------------------------------------------
-    inline Matrix44f& projectionMatrix()
-    {
-        return material.program.matrix44f("projectionMatrix");
-    }
-
-    bool generate()
-    {std::cout << "Renderable " << name() << " generate:" << std::endl;
-        // Compile shader program
-        if (!material.build())
+        if (!material.compile())
         {
             std::cerr << "Shape " << name()
                       << ": Failed creating its material"
                       << std::endl;
 
-            std::vector<std::string> names;
-            size_t count = material.program.getFailedShaders(names);
-            std::cout << "  Has " << count << " failed shaders: " << std::endl;
-            for (auto& it: names)
-            {
-                std::cout << "    '" << it << "'" << std::endl;
-            }
-
             return false;
         }
 
-        // Display the list of Uniforms hold by the program
-        {
-            std::cout << "Debug GLProgram material " << name() << ":" << std::endl;
-            std::vector<std::string> names;
-            size_t count = material.program.getUniformNames(names);
-            std::cout << "  Has " << count << " uniforms: " << std::endl;
-            for (auto& it: names)
-            {
-                std::cout << "    '" << it << "'" << std::endl;
-            }
-        }
-
-        // FIXME: avoid creating too many VAO => shared VAO
-        // FIXME: Not all these attributes are needed: ie depth material only use
-        // position so normals ans uv are useless
-        if (!geometry.generate(vao.vector3f("position"),
-                               vao.vector3f("normals"),
-                               vao.vector2f("uv"),
-                               vao.index()))
+        // FIXME: should be called after material.program.bind(m_vao)
+        // but because not all materials use attributes "normals" or "UV"
+        // this will fail
+        if (!geometry.generate(m_vao.vector3f("position"),
+                               m_vao.vector3f("normals"),
+                               m_vao.vector2f("UV"),
+                               m_vao.index()))
         {
             std::cerr << "Shape " << name()
                       << ": Failed creating its geometry"
@@ -124,8 +62,7 @@ public:
             return false;
         }
 
-        // Populate VBOs in the VAO (note: should be before geometry.generate()
-        if (!material.program.bind(vao))
+        if (!material.program.bind(m_vao))
         {
             std::cerr << "Shape " << name()
                       << ": Failed binding its VAO "
@@ -136,41 +73,56 @@ public:
         return true;
     }
 
-    //--------------------------------------------------------------------------
-    //! \brief Return the object name. Should be unique.
-    //--------------------------------------------------------------------------
-    std::string const& name() const
+    virtual bool onDraw(Mode const mode = Mode::TRIANGLES,
+                        Matrix44f const& model_matrix = Identity44f) override
     {
-        return vao.name();
+        modelMatrix() = model_matrix;
+        return m_vao.draw(mode);
     }
+
+    GLIndex32& index()
+    {
+        return m_vao.index();
+    }
+
+    GLVertexBuffer<Vector3f>& vertices()
+    {
+        return m_vao.vector3f("position");
+    }
+
+    GLVertexBuffer<Vector3f>& normals()
+    {
+        return m_vao.vector3f("normals");
+    }
+
+    GLVertexBuffer<Vector2f>& uv()
+    {
+        return m_vao.vector2f("UV");
+    }
+
+    Matrix44f& modelMatrix()
+    {
+        return material.program.matrix44f("modelMatrix");
+    }
+
+    Matrix44f& viewMatrix()
+    {
+        return material.program.matrix44f("viewMatrix");
+    }
+
+    Matrix44f& projectionMatrix()
+    {
+        return material.program.matrix44f("projectionMatrix");
+    }
+
+protected:
+
+    GLVAO32 m_vao;
 
 public:
 
-    GLVAO32  vao;
     Material material;
     Geometry geometry;
-};
-
-template<class Geometry, class Material>
-class Shape : public SceneObject
-{
-public:
-
-    Shape(std::string const& name, Renderable<Model, BasicMaterial> &r) // TODO shared_ptr
-        : SceneObject(name), renderable(r)
-    {}
-
-    //--------------------------------------------------------------------------
-    //! \brief Draw the shape.
-    //--------------------------------------------------------------------------
-    virtual void onDraw(Matrix44f const& model_matrix = Identity44f) override
-    {
-        renderable.draw(Mode::TRIANGLES, model_matrix);
-    }
-
-public:
-
-    Renderable<Geometry,Material>& renderable;
 };
 
 #endif // OPENGLCPPWRAPPER_SCENEGRAPH_SHAPE_NODE_HPP

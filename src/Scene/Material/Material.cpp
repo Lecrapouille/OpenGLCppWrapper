@@ -21,7 +21,7 @@
 #include "Scene/Material/Material.hpp"
 
 //------------------------------------------------------------------------------
-bool Material::build()
+bool Material::compile()
 {
     if (program.compiled())
         return true;

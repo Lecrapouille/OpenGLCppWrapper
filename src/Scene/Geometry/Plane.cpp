@@ -35,10 +35,10 @@ Plane& Plane::configure(float width,
 }
 
 //------------------------------------------------------------------------------
-bool Plane::doGenerate(GLVertexBuffer<Vector3f>& vertices,
-                       GLVertexBuffer<Vector3f>& normals,
-                       GLVertexBuffer<Vector2f>& uv,
-                       GLIndex32& index)
+bool Plane::generate(GLVertexBuffer<Vector3f>& vertices,
+                     GLVertexBuffer<Vector3f>& normals,
+                     GLVertexBuffer<Vector2f>& uv,
+                     GLIndex32& index)
 {
     float const width_half = m_width / 2.0f;
     float const height_half = m_height / 2.0f;

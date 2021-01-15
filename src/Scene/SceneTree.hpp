@@ -102,6 +102,9 @@ public:
         //! current node to have local movement.
         Transformable3D transform;
 
+        //!
+        Mode mode = Mode::TRIANGLES;
+
     private:
 
         //! \brief The matrix transform to apply on the child. Transformations

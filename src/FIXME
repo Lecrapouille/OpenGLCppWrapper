@@ -15,4 +15,7 @@ OpenGL calls:
 - draw() return true not always the case
 - Texture multiple objects => KO
 
-Material should use Color instead of Vector3f or Vector4f
+5/ Material should use Color instead of Vector3f or Vector4f
+
+6/ ShapeNode geometry.generate(m_vao.vector3f("position"), m_vao.vector3f("normals"), ..) before material.program.bind(m_vao)
+because not all materials will use UV or normals

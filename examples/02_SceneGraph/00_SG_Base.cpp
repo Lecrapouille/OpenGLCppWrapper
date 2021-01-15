@@ -51,10 +51,11 @@ public:
     }
 
     // Called Called by SceneTree (usually on onPaint())
-    virtual void onDraw(Matrix44f const& modelMatrix) override
+    virtual bool onDraw(Mode const /*mode*/, Matrix44f const& modelMatrix) override
     {
         std::cout << name() << ": onDraw("
                   << modelMatrix << ')' << std::endl;
+        return true;
     }
 
     // Called Called when you enable the node (traversable)
@@ -72,7 +73,7 @@ public:
 
 //------------------------------------------------------------------------------
 SGBase::SGBase(uint32_t const width, uint32_t const height,
-                             const char *title)
+               const char *title)
     : GLWindow(width, height, title)
 {
     std::cout << "Hello SGBase: " << info() << std::endl;

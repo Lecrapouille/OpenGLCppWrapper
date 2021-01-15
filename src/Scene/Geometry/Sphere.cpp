@@ -60,10 +60,10 @@ Sphere& Sphere::configure(float const radius, uint32_t const slices, uint32_t co
 }
 
 //------------------------------------------------------------------------------
-bool Sphere::doGenerate(GLVertexBuffer<Vector3f>& vertices,
-                        GLVertexBuffer<Vector3f>& normals,
-                        GLVertexBuffer<Vector2f>& uv,
-                        GLIndex32& index)
+bool Sphere::generate(GLVertexBuffer<Vector3f>& vertices,
+                      GLVertexBuffer<Vector3f>& normals,
+                      GLVertexBuffer<Vector2f>& uv,
+                      GLIndex32& index)
 {
     std::vector<float> tmp, theta1, theta2;
     const uint32_t n = (m_slices + 1u) * (m_stacks + 1u);

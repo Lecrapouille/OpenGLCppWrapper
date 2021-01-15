@@ -34,11 +34,10 @@ public:
     //! \brief Give a name to the material. It will be passed to program and
     //! shaders.
     //--------------------------------------------------------------------------
-    Material(std::string const& name, GLVAO& vao) // FIXME bind VAO ugly but need to access to texture. Ideally this would be better to attach textures to GLProgram because Materials are shared while used alone we prefer VAO.texture("foo.jpg") :(
-        : program("Prog_" + name),
+    Material(std::string const& name, GLVAO& vao)
+        : program(name),
           m_vert_shader("VS_" + name),
           m_frag_shader("FS_" + name),
-          m_name(name),
           m_vao(vao)
     {}
 
@@ -52,14 +51,14 @@ public:
     //--------------------------------------------------------------------------
     inline std::string const& name() const
     {
-        return m_name;
+        return program.name();
     }
 
     //--------------------------------------------------------------------------
     //! \brief Generate shaders, compile shaders and init their variables.
     //! \return true if shader have been compiled, else return false.
     //--------------------------------------------------------------------------
-    bool build();
+    bool compile();
 
 private:
 
@@ -75,16 +74,16 @@ private:
 
 public:
 
-    // FIXME should be static to avoid loosing memory with duplicated things.
-    // Or tell the user to make them static but not compatible with Shape<Geometry, Material>
-    GLProgram        program;
+    GLProgram program;
+
+private:
+
+    GLVertexShader m_vert_shader;
+    GLFragmentShader m_frag_shader;
 
 protected:
 
-    GLVertexShader   m_vert_shader; // FIXME should be static
-    GLFragmentShader m_frag_shader; // FIXME should be static
-    std::string      m_name; // FIXME should be static
-    GLVAO&           m_vao;
+    GLVAO& m_vao;
 };
 
 #endif

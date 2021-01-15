@@ -37,15 +37,13 @@ public:
     Plane& configure(float width, float height, size_t widthSegments,
                      size_t heightSegments);
 
-private:
-
     //--------------------------------------------------------------------------
     //! \brief Generate the plane.
     //--------------------------------------------------------------------------
-    virtual bool doGenerate(GLVertexBuffer<Vector3f>& vertices,
-                            GLVertexBuffer<Vector3f>& normals,
-                            GLVertexBuffer<Vector2f>& uv,
-                            GLIndex32& index) override;
+    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
+                          GLVertexBuffer<Vector3f>& normals,
+                          GLVertexBuffer<Vector2f>& uv,
+                          GLIndex32& index) override;
 
 private:
 

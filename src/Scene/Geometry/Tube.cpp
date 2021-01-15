@@ -122,10 +122,10 @@ static bool generateTube(GLVertexBuffer<Vector3f>& vertices,
 }
 
 //------------------------------------------------------------------------------
-bool Tube::doGenerate(GLVertexBuffer<Vector3f>& vertices,
-                      GLVertexBuffer<Vector3f>& normals,
-                      GLVertexBuffer<Vector2f>& uv,
-                      GLIndex32& index)
+bool Tube::generate(GLVertexBuffer<Vector3f>& vertices,
+                    GLVertexBuffer<Vector3f>& normals,
+                    GLVertexBuffer<Vector2f>& uv,
+                    GLIndex32& index)
 {
     return generateTube(vertices, normals, uv, index, m_top_radius, m_base_radius,
                         m_height, m_slices);

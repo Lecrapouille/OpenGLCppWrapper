@@ -39,8 +39,6 @@ public:
     void configure(float const top_radius, float const base_radius,
                    float const height, uint32_t const slices);
 
-private:
-
     //--------------------------------------------------------------------------
     //! \brief Constructor. Z-axis aligned tube centered at origin.
     //! \param[in] m_top_radius The radius at the top of the tube.
@@ -48,10 +46,10 @@ private:
     //! \param[in] m_height The m_height of the tube.
     //! \param[in] m_slices The number of subdivisions around the Z axis.
     //--------------------------------------------------------------------------
-    virtual bool doGenerate(GLVertexBuffer<Vector3f>& vertices,
-                            GLVertexBuffer<Vector3f>& normals,
-                            GLVertexBuffer<Vector2f>& uv,
-                            GLIndex32&        index) override;
+    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
+                          GLVertexBuffer<Vector3f>& normals,
+                          GLVertexBuffer<Vector2f>& uv,
+                          GLIndex32&        index) override;
 
 private:
 

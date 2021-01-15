@@ -33,80 +33,12 @@ class Geometry
 {
 public:
 
-    //--------------------------------------------------------------------------
-    //! \brief Needed because of virtual methods
-    //--------------------------------------------------------------------------
     virtual ~Geometry() = default;
 
-    //--------------------------------------------------------------------------
-    //! \brief Entry point method for generating the geometry of the shape.
-    //! \return true on success, false on failure.
-    //--------------------------------------------------------------------------
-    bool generate(GLVertexBuffer<Vector3f>& vertices,
-                  GLVertexBuffer<Vector3f>& normals,
-                  GLVertexBuffer<Vector2f>& uv,
-                  GLIndex32&                index);
-
-    //--------------------------------------------------------------------------
-    //! \brief Return the VBO holding vertex positions.
-    //--------------------------------------------------------------------------
-    GLVertexBuffer<Vector3f>& vertices()
-    {
-        if (m_vertices == nullptr)
-            throw GL::Exception("You forget to call generate(vertice, normals, uv, index)");
-
-        return *m_vertices;
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Return the VBO holding vertex normals.
-    //--------------------------------------------------------------------------
-    GLVertexBuffer<Vector3f>& normals()
-    {
-        if (m_vertices == nullptr)
-            throw GL::Exception("You forget to call generate(vertice, normals, uv, index)");
-
-        return *m_normals;
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Return the VBO holding texture positions.
-    //--------------------------------------------------------------------------
-    GLVertexBuffer<Vector2f>& uv()
-    {
-        if (m_vertices == nullptr)
-            throw GL::Exception("You forget to call generate(vertice, normals, uv, index)");
-
-        return *m_uv;
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief Return the index for vertex positions.
-    //--------------------------------------------------------------------------
-    GLIndex32& index()
-    {
-        if (m_vertices == nullptr)
-            throw GL::Exception("You forget to call generate(vertice, normals, uv, index)");
-
-        return *m_index;
-    }
-
-private:
-
-    //--------------------------------------------------------------------------
-    //! \brief Method generating the shape (to be implemented by derived class)
-    //--------------------------------------------------------------------------
-    virtual bool doGenerate(GLVertexBuffer<Vector3f>& vertices,
-                            GLVertexBuffer<Vector3f>& normals,
-                            GLVertexBuffer<Vector2f>& uv,
-                            GLIndex32&        index) = 0;
-
-private:
-
-    GLVertexBuffer<Vector3f>* m_vertices = nullptr;
-    GLVertexBuffer<Vector3f>* m_normals = nullptr;
-    GLVertexBuffer<Vector2f>* m_uv = nullptr;
-    GLIndex32*                m_index = nullptr;
+    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
+                          GLVertexBuffer<Vector3f>& normals,
+                          GLVertexBuffer<Vector2f>& uv,
+                          GLIndex32&                index) = 0;
 };
 
 #endif

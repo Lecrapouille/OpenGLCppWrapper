@@ -29,10 +29,10 @@ Model& Model::configure(std::string const& filename)
 }
 
 //--------------------------------------------------------------------------
-bool Model::doGenerate(GLVertexBuffer<Vector3f>& vertices,
-                       GLVertexBuffer<Vector3f>& normals,
-                       GLVertexBuffer<Vector2f>& uv,
-                       GLIndex32& index)
+bool Model::generate(GLVertexBuffer<Vector3f>& vertices,
+                     GLVertexBuffer<Vector3f>& normals,
+                     GLVertexBuffer<Vector2f>& uv,
+                     GLIndex32& index)
 {
     if (m_filename.size() == 0u)
     {

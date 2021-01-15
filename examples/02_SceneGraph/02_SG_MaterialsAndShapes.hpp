@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_01_SG_MATERIALS_AND_SHAPES_HPP
-#  define EXAMPLE_01_SG_MATERIALS_AND_SHAPES_HPP
+#ifndef EXAMPLE_02_SG_MATERIALS_AND_SHAPES_HPP
+#  define EXAMPLE_02_SG_MATERIALS_AND_SHAPES_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 #  include "../debug.hpp"
@@ -30,6 +30,29 @@
 class SGMatAndShape: public GLWindow
 {
 public:
+
+    class MyShape: public Shape<Model, BasicMaterial>
+    {
+    public:
+
+        MyShape(std::string const& name, std::string const& path)
+            : Shape<Model, BasicMaterial>(name)
+        {
+            std::cout << "Create MyShape " << name << std::endl;
+
+            Shape<Model, BasicMaterial>::geometry.configure(path);
+            Shape<Model, BasicMaterial>::material.diffuse() = Color(1.0f, 0.0f, 0.0f).toVector3f();
+            if (!Shape<Model, BasicMaterial>::compile())
+            {
+                throw GL::Exception("Failed create renderable");
+            }
+        }
+
+        inline std::string const& name() const
+        {
+            return Shape<Model, BasicMaterial>::name();
+        }
+    };
 
     SGMatAndShape(uint32_t const width, uint32_t const height, const char *title);
     ~SGMatAndShape();
@@ -47,9 +70,7 @@ private:
     virtual bool onPaint() override;
     virtual void onPaintFailed(std::string const& reason) override;
 
-    Renderable<Model, BasicMaterial> m_renderable;
-    //Renderable<Model, BasicMaterial> m_renderable2;
     SceneTree     m_scene;
 };
 
-#endif // EXAMPLE_01_SG_MATERIALS_AND_SHAPES_HPP
+#endif // EXAMPLE_02_SG_MATERIALS_AND_SHAPES_HPP

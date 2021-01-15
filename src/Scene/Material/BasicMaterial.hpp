@@ -58,12 +58,11 @@ public:
 
 public:
 
-    BasicMaterial(GLVAO& vao, BasicMaterial::Config conf = BasicMaterial::Config())
+    BasicMaterial(GLVAO& vao, BasicMaterial::Config const& conf = BasicMaterial::Config())
         : Material("BasicMaterial", vao),
           config(conf)
     {}
 
-    // FIXME should be Color
     inline Vector3f& diffuse()
     {
         return program.vector3f("diffuse");
@@ -74,7 +73,7 @@ public:
         return program.scalarf("opacity");
     }
 
-    inline Vector3f& color() // alias to diffuse() ???
+    inline Vector3f& color()
     {
         return program.vector3f("color");
     }
