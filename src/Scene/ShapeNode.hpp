@@ -31,27 +31,27 @@
 //! a geometry (purely shape construction) associated to a material (albedo ...)
 // *****************************************************************************
 template<class Geometry, class Material>
-class Shape: public SceneObject
+class Renderable
 {
 public:
 
     //--------------------------------------------------------------------------
     //! \brief Give a name to the shape.
     //--------------------------------------------------------------------------
-    Shape(std::string const& name, Geometry& geo, Material& mat)
-        : SceneObject(name), material(mat), geometry(geo), m_vao(name)
+    Renderable(std::string const& name)// Geometry& geo, Material& mat)
+        : vao(name), material(vao)
     {
-        if (!generate())
-            throw GL::Exception("Shape " + name + " failed during generation");
+        //if (!generate())
+        //    throw GL::Exception("Shape " + name + " failed during generation");
     }
 
     //--------------------------------------------------------------------------
     //! \brief Draw the shape.
     //--------------------------------------------------------------------------
-    virtual void onDraw(Matrix44f const& model_matrix = Identity44f) override
+    bool draw(Mode const mode = Mode::TRIANGLES, Matrix44f const& model_matrix = Identity44f)
     {
         modelMatrix() = model_matrix;
-        m_vao.draw(Mode::TRIANGLES);
+        return vao.draw(mode);
     }
 
     //--------------------------------------------------------------------------
@@ -79,22 +79,44 @@ public:
     }
 
     bool generate()
-    {
+    {std::cout << "Renderable " << name() << " generate:" << std::endl;
+        // Compile shader program
         if (!material.build())
         {
             std::cerr << "Shape " << name()
                       << ": Failed creating its material"
                       << std::endl;
+
+            std::vector<std::string> names;
+            size_t count = material.program.getFailedShaders(names);
+            std::cout << "  Has " << count << " failed shaders: " << std::endl;
+            for (auto& it: names)
+            {
+                std::cout << "    '" << it << "'" << std::endl;
+            }
+
             return false;
+        }
+
+        // Display the list of Uniforms hold by the program
+        {
+            std::cout << "Debug GLProgram material " << name() << ":" << std::endl;
+            std::vector<std::string> names;
+            size_t count = material.program.getUniformNames(names);
+            std::cout << "  Has " << count << " uniforms: " << std::endl;
+            for (auto& it: names)
+            {
+                std::cout << "    '" << it << "'" << std::endl;
+            }
         }
 
         // FIXME: avoid creating too many VAO => shared VAO
         // FIXME: Not all these attributes are needed: ie depth material only use
         // position so normals ans uv are useless
-        if (!geometry.generate(m_vao.vector3f("position"),
-                               m_vao.vector3f("normals"),
-                               m_vao.vector2f("uv"),
-                               m_vao.index()))
+        if (!geometry.generate(vao.vector3f("position"),
+                               vao.vector3f("normals"),
+                               vao.vector2f("uv"),
+                               vao.index()))
         {
             std::cerr << "Shape " << name()
                       << ": Failed creating its geometry"
@@ -103,7 +125,7 @@ public:
         }
 
         // Populate VBOs in the VAO (note: should be before geometry.generate()
-        if (!material.program.bind(m_vao))
+        if (!material.program.bind(vao))
         {
             std::cerr << "Shape " << name()
                       << ": Failed binding its VAO "
@@ -114,15 +136,41 @@ public:
         return true;
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Return the object name. Should be unique.
+    //--------------------------------------------------------------------------
+    std::string const& name() const
+    {
+        return vao.name();
+    }
+
 public:
 
-    Material& material;
-    Geometry& geometry;
+    GLVAO32  vao;
+    Material material;
+    Geometry geometry;
+};
 
-protected:
+template<class Geometry, class Material>
+class Shape : public SceneObject
+{
+public:
 
-    //! \brief VAO with index
-    GLVAO32 m_vao;
+    Shape(std::string const& name, Renderable<Model, BasicMaterial> &r) // TODO shared_ptr
+        : SceneObject(name), renderable(r)
+    {}
+
+    //--------------------------------------------------------------------------
+    //! \brief Draw the shape.
+    //--------------------------------------------------------------------------
+    virtual void onDraw(Matrix44f const& model_matrix = Identity44f) override
+    {
+        renderable.draw(Mode::TRIANGLES, model_matrix);
+    }
+
+public:
+
+    Renderable<Geometry,Material>& renderable;
 };
 
 #endif // OPENGLCPPWRAPPER_SCENEGRAPH_SHAPE_NODE_HPP

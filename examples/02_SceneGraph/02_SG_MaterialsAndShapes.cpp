@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------
 SGMatAndShape::SGMatAndShape(uint32_t const width, uint32_t const height,
                              const char *title)
-    : GLWindow(width, height, title)
+    : GLWindow(width, height, title), m_renderable("tree")
 {
     std::cout << "Hello DepthMaterial: " << info() << std::endl;
 }
@@ -46,10 +46,10 @@ void SGMatAndShape::onWindowResized()
 
     m_scene.root->traverse([](SceneObject* node, Matrix44f const& mat_)
     {
-        MyModel* n = dynamic_cast<MyModel*>(node);
+        auto n = dynamic_cast<Shape<Model, BasicMaterial>*>(node);
         if (n != nullptr)
         {
-            n->projectionMatrix() = mat_;
+            n->renderable.projectionMatrix() = mat_;
         }
     }, mat);
 }
@@ -60,14 +60,20 @@ bool SGMatAndShape::onSetup()
     glCheck(glEnable(GL_DEPTH_TEST));
     glCheck(glDepthFunc(GL_LESS));
 
-    m_model.configure("textures/tree.obj");
-    m_material.diffuse() = Color().toVector3f();
+    std::cout << "SGMatAndShape::onSetup()" << std::endl;
+    m_renderable.geometry.configure("textures/tree.obj");
+    m_renderable.material.diffuse() = Color(1.0f, 0.0f, 0.0f).toVector3f();
+    if (!m_renderable.generate())
+    {
+        std::cerr << "Failed create renderable" << std::endl;
+        return false;
+    }
 
-    m_scene.root = SceneObject::create<MyModel>("Tree0", m_model, m_material);
-    MyModel& t1 = m_scene.root->attach<MyModel>("Tree1", m_model, m_material);
-    MyModel& t2 = m_scene.root->attach<MyModel>("Tree2", m_model, m_material);
-    MyModel& t3 = t1.attach<MyModel>("Tree1.0", m_model, m_material);
-    MyModel& t4 = t2.attach<MyModel>("Tree1.1", m_model, m_material);
+    m_scene.root = SceneObject::create<Shape<Model,BasicMaterial>>("Tree0", m_renderable);
+    Shape<Model,BasicMaterial>& t1 = m_scene.root->attach<Shape<Model,BasicMaterial>>("Tree1", m_renderable);
+    Shape<Model,BasicMaterial>& t2 = m_scene.root->attach<Shape<Model,BasicMaterial>>("Tree2", m_renderable);
+    Shape<Model,BasicMaterial>& t3 = t1.attach<Shape<Model,BasicMaterial>>("Tree1.0", m_renderable);
+    Shape<Model,BasicMaterial>& t4 = t2.attach<Shape<Model,BasicMaterial>>("Tree1.1", m_renderable);
 
     //             Tree0
     //    Tree2             Tree1
@@ -75,8 +81,8 @@ bool SGMatAndShape::onSetup()
     //
     t1.transform.position(Vector3f(1.0f, 1.0f, 0.0f));
     t2.transform.position(Vector3f(-1.0f, -1.0f, 0.0f));
-    t3.transform.position(Vector3f(1.0f, 1.0f, 0.0f));
-    t4.transform.position(Vector3f(-1.0f, -1.0f, 0.0f));
+    t3.transform.position(Vector3f(0.5f, 0.5f, 0.0f));
+    t4.transform.position(Vector3f(-0.5f, -0.5f, 0.0f));
 
     m_scene.debug();
 
@@ -96,14 +102,15 @@ bool SGMatAndShape::onPaint()
     // Simulate camera
     m_scene.root->traverse([](SceneObject* node)
     {
-        MyModel* n = dynamic_cast<MyModel*>(node);
+        auto n = dynamic_cast<Shape<Model, BasicMaterial>*>(node);
         if (n != nullptr)
         {
             //std::cout << n->name() << ": " << n->transform.position() << std::endl;
 
-            n->viewMatrix() = matrix::lookAt(Vector3f(5,5,5),
-                                             Vector3f(0,0,0),
-                                             Vector3f(0,1,0));
+            n->renderable.viewMatrix() =
+                    matrix::lookAt(Vector3f(5,5,5),
+                                   Vector3f(0,0,0),
+                                   Vector3f(0,1,0));
         }
     });
 

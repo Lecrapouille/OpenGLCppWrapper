@@ -67,7 +67,7 @@ public:
     GLUniform<T>& operator=(const U& val)
     {
         GLUniform<T>::m_data = T(val);
-        m_need_update = false;
+        m_need_update = true;
         return *this;
     }
 

@@ -27,8 +27,8 @@ class DepthMaterial : public Material
 {
 public:
 
-    DepthMaterial()
-        : Material("DepthMaterial")
+    DepthMaterial(GLVAO& vao)
+        : Material("DepthMaterial", vao)
     {}
 
     float& near()

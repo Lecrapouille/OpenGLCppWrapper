@@ -23,6 +23,7 @@
 
 #  include "Scene/Material/Material.hpp"
 #  include "Scene/Material/Color.hpp"
+#  include "OpenGL/Textures/Textures.hpp"
 
 class BasicMaterial: public Material
 {
@@ -48,7 +49,7 @@ public:
         //! of the light than the color of the object.
         bool useSpecularMap = false;
         //! \brief If true then apply a color to the object.
-        bool useColor = false;
+        bool useColor = true;
         //! \brief If true then apply a linear fog. Disabled if useExpFog is set to true.
         bool useFog = false;
         //! \brief If true then apply exponential fog and disable useFog.
@@ -57,12 +58,12 @@ public:
 
 public:
 
-    BasicMaterial(BasicMaterial::Config conf = BasicMaterial::Config())
-        : Material("BasicMaterial"),
-          m_config(conf)
+    BasicMaterial(GLVAO& vao, BasicMaterial::Config conf = BasicMaterial::Config())
+        : Material("BasicMaterial", vao),
+          config(conf)
     {}
 
-// FIXME should be Color
+    // FIXME should be Color
     inline Vector3f& diffuse()
     {
         return program.vector3f("diffuse");
@@ -81,6 +82,11 @@ public:
     inline float& alphaTest()
     {
         return program.scalarf("ALPHATEST");
+    }
+
+    GLTexture2D& texture()
+    {
+        return m_vao.texture2D("texture");
     }
 
     inline Vector4f& offsetTexture()
@@ -115,9 +121,9 @@ private:
 
     virtual void init() override;
 
-private:
+public:
 
-    Config m_config;
+    Config config;
 };
 
 #endif

@@ -39,48 +39,6 @@ public:
         return "Apply a depth material to a 3D shape";
     }
 
-    //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    class MyModel: public Shape<Model, BasicMaterial>
-    {
-    public:
-
-        MyModel(std::string const& name, Model& model, BasicMaterial& mat)
-            : Shape<Model, BasicMaterial>(name, model, mat)
-        {
-            std::cout << "Create MyModel " << name << std::endl;
-        }
-    };
-
-    /*
-    //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    class MySphere: public Shape<Sphere, NormalsMaterial>
-    {
-    public:
-
-        MySphere(std::string const& name, float const radius, uint32_t const slices,
-                 uint32_t const stacks)
-            : Shape<Sphere, NormalsMaterial>(name)
-        {
-            std::cout << "Create MySphere " << name << std::endl;
-            geometry.configure(radius, slices, stacks);
-            //return Shape<Sphere, NormalsMaterial>::onCreate();
-        }
-
-        virtual bool onSetup() override
-        {
-            std::cout << "MySphere::onSetup()" << std::endl;
-            //material.near() = 1.0f;
-            //material.far() = 10.0f;
-            //material.opacity() = 1.0f;
-            return true;
-        }
-    };
-    */
-
 private:
 
     virtual void onWindowResized() override;
@@ -89,9 +47,9 @@ private:
     virtual bool onPaint() override;
     virtual void onPaintFailed(std::string const& reason) override;
 
+    Renderable<Model, BasicMaterial> m_renderable;
+    //Renderable<Model, BasicMaterial> m_renderable2;
     SceneTree     m_scene;
-    Model         m_model;
-    BasicMaterial m_material;
 };
 
 #endif // EXAMPLE_01_SG_MATERIALS_AND_SHAPES_HPP

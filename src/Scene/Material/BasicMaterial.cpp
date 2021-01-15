@@ -21,19 +21,41 @@
 #include "Scene/Material/BasicMaterial.hpp"
 #include "Scene/Material/ShaderLib.hpp"
 
+//-----------------------------------------------------------------------------
 void BasicMaterial::generate(GLVertexShader& vertexShader,
                              GLFragmentShader& fragmentShader)
 {
-    shaders::materials::basic::code(vertexShader, m_config);
-    shaders::materials::basic::code(fragmentShader, m_config);
+    shaders::materials::basic::code(vertexShader, config);
+    shaders::materials::basic::code(fragmentShader, config);
 }
 
-
-
+//-----------------------------------------------------------------------------
 void BasicMaterial::init()
-{std::cout << "BasicMaterial::init()" << std::endl;
+{
+    std::cout << "BasicMaterial::init()" << std::endl;
+
+    if (program.hasUniform<float>("ALPHATEST"))
+        config.useAlphaTest = true;
+
+    if (program.hasUniform<Vector3f>("color"))
+        config.useColor = true;
+
+    if (program.hasUniform<Vector3f>("fogColor") ||
+        program.hasUniform<float>("fogNear") ||
+        program.hasUniform<float>("fogFar"))
+    {
+        config.useFog = true;
+    }
+
+    if (program.hasUniform<float>("fogDensity"))
+    {
+        config.useFog = true;
+        config.useExpFog = true;
+    }
+
     if (!program.hasUniform<Vector3f>("diffuse"))
-    {std::cout << "diffuse" << std::endl;
+    {
+        std::cout << "diffuse" << std::endl;
         diffuse() = Vector3f(1.0f, 1.0f, 1.0f);
     }
 
@@ -42,36 +64,36 @@ void BasicMaterial::init()
         opacity() = 1.0f;
     }
 
-    if (m_config.useColor)
+    if (config.useColor)
     {
         std::cout << "usecolor" << std::endl;
-        if (!program.hasUniform<Vector3f>("color"))
+        if (!config.useColor)
         {
             std::cout << "color" << std::endl;
             color() = diffuse();
         }
     }
 
-    if (m_config.useAlphaTest)
+    if (config.useAlphaTest)
     {
         if (!program.hasUniform<float>("ALPHATEST"))
             alphaTest() = 0.5f;
     }
 
-    if ((m_config.useMap) || (m_config.useBumpMap) || (m_config.useSpecularMap))
+    if ((config.useMap) || (config.useBumpMap) || (config.useSpecularMap))
     {
         if (!program.hasUniform<Vector4f>("offsetRepeat"))
             offsetTexture() = Vector4f(0.0f, 0.0f, 1.0f, 1.0f);
     }
 
     // Material flags useExpFog and useFog are exclusive. Disable useFog
-    if ((m_config.useExpFog) && (m_config.useFog))
+    if ((config.useExpFog) && (config.useFog))
     {
         if (!program.hasUniform<Vector3f>("color"))
-            m_config.useFog = false;
+            config.useFog = false;
     }
 
-    if (m_config.useFog)
+    if (config.useFog)
     {
         if (!program.hasUniform<Vector3f>("fogColor"))
             fogColor() = Vector3f(0.5f, 0.5f, 0.5f);
@@ -81,7 +103,7 @@ void BasicMaterial::init()
             fogFar() = 10.0f;
     }
 
-    if (m_config.useExpFog)
+    if (config.useExpFog)
     {
         if (!program.hasUniform<float>("fogDensity"))
             fogDensity() = 0.00025f;

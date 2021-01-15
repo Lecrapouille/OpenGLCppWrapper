@@ -27,8 +27,8 @@ class NormalsMaterial : public Material
 {
 public:
 
-    NormalsMaterial()
-        : Material("NormalsMaterial")
+    NormalsMaterial(GLVAO& vao)
+        : Material("NormalsMaterial", vao)
     {}
 
     inline float& opacity()

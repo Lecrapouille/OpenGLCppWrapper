@@ -348,7 +348,7 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
     switch (type)
     {
     case GL_FLOAT:
-        // TODO if (!m_uniforms.has<T>(name) {
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<float>>>(name))
         {
             auto ptr = std::make_shared<GLUniform<float>>(name, 1, GL_FLOAT, prog);
             m_uniforms.add(name, ptr);
@@ -356,6 +356,7 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
         }
         break;
     case GL_FLOAT_VEC2:
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector2f>>>(name))
         {
             auto ptr = std::make_shared<GLUniform<Vector2f>>(name, 2, GL_FLOAT, prog);
             m_uniforms.add(name, ptr);
@@ -363,6 +364,7 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
         }
         break;
     case GL_FLOAT_VEC3:
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector3f>>>(name))
         {
             auto ptr = std::make_shared<GLUniform<Vector3f>>(name, 3, GL_FLOAT, prog);
             m_uniforms.add(name, ptr);
@@ -370,6 +372,7 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
         }
         break;
     case GL_FLOAT_VEC4:
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector4f>>>(name))
         {
             auto ptr = std::make_shared<GLUniform<Vector4f>>(name, 4, GL_FLOAT, prog);
             m_uniforms.add(name, ptr);
@@ -377,6 +380,7 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
         }
         break;
     case GL_INT:
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<int>>>(name))
         {
             auto ptr = std::make_shared<GLUniform<int>>(name, 1, GL_INT, prog);
             m_uniforms.add(name, ptr);
@@ -384,6 +388,7 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
         }
         break;
     case GL_INT_VEC2:
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector2i>>>(name))
         {
             auto ptr = std::make_shared<GLUniform<Vector2i>>(name, 2, GL_INT, prog);
             m_uniforms.add(name, ptr);
@@ -391,6 +396,7 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
         }
         break;
     case GL_INT_VEC3:
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector3i>>>(name))
         {
             auto ptr = std::make_shared<GLUniform<Vector3i>>(name, 3, GL_INT, prog);
             m_uniforms.add(name, ptr);
@@ -398,6 +404,7 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
         }
         break;
     case GL_INT_VEC4:
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector4i>>>(name))
         {
             auto ptr = std::make_shared<GLUniform<Vector4i>>(name, 4, GL_INT, prog);
             m_uniforms.add(name, ptr);
@@ -405,13 +412,15 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
         }
         break;
     case GL_FLOAT_MAT2:
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<Matrix22f>>>(name))
         {
-        auto ptr = std::make_shared<GLUniform<Matrix22f>>(name, 4, GL_FLOAT, prog);
-        m_uniforms.add(name, ptr);
-        m_uniformLocations[name] = ptr;
+            auto ptr = std::make_shared<GLUniform<Matrix22f>>(name, 4, GL_FLOAT, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
         }
         break;
     case GL_FLOAT_MAT3:
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<Matrix33f>>>(name))
         {
             auto ptr = std::make_shared<GLUniform<Matrix33f>>(name, 9, GL_FLOAT, prog);
             m_uniforms.add(name, ptr);
@@ -419,6 +428,7 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
         }
         break;
     case GL_FLOAT_MAT4:
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<Matrix44f>>>(name))
         {
             auto ptr = std::make_shared<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, prog);
             m_uniforms.add(name, ptr);

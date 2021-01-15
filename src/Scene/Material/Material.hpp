@@ -21,7 +21,7 @@
 #ifndef MATERIAL_HPP
 #  define MATERIAL_HPP
 
-#  include "OpenGL/Shaders/Program.hpp"
+#  include "OpenGL/Buffers/VAO.hpp"
 
 // *****************************************************************************
 //! \brief Interface class for defining the reaction of an object to the light.
@@ -34,11 +34,12 @@ public:
     //! \brief Give a name to the material. It will be passed to program and
     //! shaders.
     //--------------------------------------------------------------------------
-    Material(std::string const& name)
+    Material(std::string const& name, GLVAO& vao) // FIXME bind VAO ugly but need to access to texture. Ideally this would be better to attach textures to GLProgram because Materials are shared while used alone we prefer VAO.texture("foo.jpg") :(
         : program("Prog_" + name),
           m_vert_shader("VS_" + name),
           m_frag_shader("FS_" + name),
-          m_name(name)
+          m_name(name),
+          m_vao(vao)
     {}
 
     //--------------------------------------------------------------------------
@@ -83,6 +84,7 @@ protected:
     GLVertexShader   m_vert_shader; // FIXME should be static
     GLFragmentShader m_frag_shader; // FIXME should be static
     std::string      m_name; // FIXME should be static
+    GLVAO&           m_vao;
 };
 
 #endif
