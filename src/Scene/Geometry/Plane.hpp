@@ -30,12 +30,14 @@ class Plane: public Geometry
 {
 public:
 
-    //--------------------------------------------------------------------------
-    //! \brief Configure the shape.
-    //! Call it before calling generate() else default parameters will be used.
-    //--------------------------------------------------------------------------
-    Plane& configure(float width, float height, size_t widthSegments,
-                     size_t heightSegments);
+    struct Config
+    {
+        Config() {}
+        float width = 1.0f;
+        float height = 1.0f;
+        size_t widthSegments = 1_z;
+        size_t heightSegments = 1_z;
+    };
 
     //--------------------------------------------------------------------------
     //! \brief Generate the plane.
@@ -45,12 +47,9 @@ public:
                           GLVertexBuffer<Vector2f>& uv,
                           GLIndex32& index) override;
 
-private:
+public:
 
-    float m_width = 1.0f;
-    float m_height = 1.0f;
-    size_t m_widthSegments = 1_z;
-    size_t m_heightSegments = 1_z;
+    Config config;
 };
 
 #endif

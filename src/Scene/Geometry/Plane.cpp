@@ -21,33 +21,19 @@
 #include "Scene/Geometry/Plane.hpp"
 
 //------------------------------------------------------------------------------
-Plane& Plane::configure(float width,
-                        float height,
-                        size_t widthSegments,
-                        size_t heightSegments)
-{
-    m_width = width;
-    m_height = height;
-    m_widthSegments = widthSegments;
-    m_heightSegments = heightSegments;
-
-    return *this;
-}
-
-//------------------------------------------------------------------------------
 bool Plane::generate(GLVertexBuffer<Vector3f>& vertices,
                      GLVertexBuffer<Vector3f>& normals,
                      GLVertexBuffer<Vector2f>& uv,
                      GLIndex32& index)
 {
-    float const width_half = m_width / 2.0f;
-    float const height_half = m_height / 2.0f;
-    size_t const gridX = m_widthSegments;
-    size_t const gridY = m_heightSegments;
+    float const width_half = config.width / 2.0f;
+    float const height_half = config.height / 2.0f;
+    size_t const gridX = config.widthSegments;
+    size_t const gridY = config.heightSegments;
     size_t const gridX1 = gridX + 1_z;
     size_t const gridY1 = gridY + 1_z;
-    float const segment_width = m_width / float(gridX);
-    float const segment_height = m_height / float(gridY);
+    float const segment_width = config.width / float(gridX);
+    float const segment_height = config.height / float(gridY);
 
     // TODO clear + reserve
     // vertices.reserve();

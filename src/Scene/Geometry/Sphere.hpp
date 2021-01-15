@@ -31,11 +31,13 @@ class Sphere: public Geometry
 {
 public:
 
-    //--------------------------------------------------------------------------
-    //! \brief Configure the shape.
-    //! Call it before calling generate() else default parameters will be used.
-    //--------------------------------------------------------------------------
-    Sphere& configure(float const radius, uint32_t const slices, uint32_t const stacks);
+    struct Config
+    {
+        Config() {}
+        float radius = 1.0f;
+        uint32_t slices = 32.0f;
+        uint32_t stacks = 32.0f;
+    };
 
     //--------------------------------------------------------------------------
     //! \brief Constructor. Z-axis aligned tube centered at origin.
@@ -49,11 +51,9 @@ public:
                           GLVertexBuffer<Vector2f>& uv,
                           GLIndex32&        index) override;
 
-private:
+public:
 
-    float m_radius = 1.0f;
-    uint32_t m_slices = 32.0f;
-    uint32_t m_stacks = 32.0f;
+    Config config;
 };
 
 #endif

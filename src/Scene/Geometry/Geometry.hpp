@@ -35,6 +35,10 @@ public:
 
     virtual ~Geometry() = default;
 
+    // TODO add param clear = true to clear VBOs before
+    // FIXME: normals and uv not always needed => may conflict with materials
+    // => prog.compile(shaders) cannot be called before geometry.generate()
+    // beause prog is managed by Material and some do not use UV, normals ...
     virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
                           GLVertexBuffer<Vector3f>& normals,
                           GLVertexBuffer<Vector2f>& uv,

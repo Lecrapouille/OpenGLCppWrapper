@@ -21,8 +21,6 @@
 #ifndef OPENGLCPPWRAPPER_SCENEGRAPH_BEHAVIOR_HPP
 #  define OPENGLCPPWRAPPER_SCENEGRAPH_BEHAVIOR_HPP
 
-#  include "OpenGL/Buffers/iVAO.hpp"
-
 // *****************************************************************************
 //! \brief Give some behavior for a game objects.
 //! Inspired by Unity's MonoBehavior class.
@@ -78,11 +76,10 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Callback triggered when drawing the scene.
-    //! \param[in] mode: Mode for drawing primitives (points, lines, triangles ...)
     //! \param[in] modelMatrix: Model matrix.
     //! \param return true if paint succeeded.
     //--------------------------------------------------------------------------
-    virtual bool onDraw(Mode const /*mode*/, Matrix44f const& /*modelMatrix*/)
+    virtual bool onDraw(Matrix44f const& /*modelMatrix*/)
     {
         return true;
     }

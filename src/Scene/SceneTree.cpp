@@ -160,8 +160,8 @@ void SceneTree::draw()
         // separator instead of this computation made everytime (even if
         // scaling a node it will also scale descendants)? Sometimes you
         // just want to scale the node not its descendants.
-        node->onDraw(node->mode, matrix::scale(node->m_world_transform,
-                                               node->transform.localScale()));
+        node->onDraw(matrix::scale(node->m_world_transform,
+                                   node->transform.localScale()));
     });
 }
 

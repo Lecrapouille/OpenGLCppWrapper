@@ -127,34 +127,47 @@ bool Tube::generate(GLVertexBuffer<Vector3f>& vertices,
                     GLVertexBuffer<Vector2f>& uv,
                     GLIndex32& index)
 {
-    return generateTube(vertices, normals, uv, index, m_top_radius, m_base_radius,
-                        m_height, m_slices);
+    return generateTube(vertices, normals, uv, index,
+                        config.top_radius,
+                        config.base_radius,
+                        config.height,
+                        config.slices);
 }
 
 //------------------------------------------------------------------------------
-void Tube::configure(float const top_radius, float const base_radius,
-                      float const height, uint32_t const slices)
+bool Cylinder::generate(GLVertexBuffer<Vector3f>& vertices,
+                        GLVertexBuffer<Vector3f>& normals,
+                        GLVertexBuffer<Vector2f>& uv,
+                        GLIndex32& index)
 {
-    m_top_radius = top_radius;
-    m_base_radius = base_radius;
-    m_height = height;
-    m_slices = slices;
+    return generateTube(vertices, normals, uv, index,
+                        config.radius,
+                        config.radius,
+                        config.height,
+                        config.slices);
 }
 
 //------------------------------------------------------------------------------
-void Cylinder::configure(float const radius, float const height, uint32_t const slices)
+bool Cone::generate(GLVertexBuffer<Vector3f>& vertices,
+                    GLVertexBuffer<Vector3f>& normals,
+                    GLVertexBuffer<Vector2f>& uv,
+                    GLIndex32& index)
 {
-    Tube::configure(radius, radius, height, slices);
+    return generateTube(vertices, normals, uv, index,
+                        0.0f,
+                        config.radius,
+                        config.height,
+                        config.slices);
 }
-
 //------------------------------------------------------------------------------
-void Cone::configure(float const radius, float const height, uint32_t const slices)
+bool Pyramid::generate(GLVertexBuffer<Vector3f>& vertices,
+                       GLVertexBuffer<Vector3f>& normals,
+                       GLVertexBuffer<Vector2f>& uv,
+                       GLIndex32& index)
 {
-    Tube::configure(0.0f, radius, height, slices);
-}
-
-//------------------------------------------------------------------------------
-void Pyramid::configure(float const radius, float const height)
-{
-    Tube::configure(0.0f, radius, height, 4u);
+    return generateTube(vertices, normals, uv, index,
+                        0.0f,
+                        config.radius,
+                        config.height,
+                        4u);
 }

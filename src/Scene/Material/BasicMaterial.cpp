@@ -25,15 +25,6 @@
 void BasicMaterial::generate(GLVertexShader& vertexShader,
                              GLFragmentShader& fragmentShader)
 {
-    shaders::materials::basic::code(vertexShader, config);
-    shaders::materials::basic::code(fragmentShader, config);
-}
-
-//-----------------------------------------------------------------------------
-void BasicMaterial::init()
-{
-    std::cout << "BasicMaterial::init()" << std::endl;
-
     if (program.hasUniform<float>("ALPHATEST"))
         config.useAlphaTest = true;
 
@@ -53,6 +44,13 @@ void BasicMaterial::init()
         config.useExpFog = true;
     }
 
+    shaders::materials::basic::code(vertexShader, config);
+    shaders::materials::basic::code(fragmentShader, config);
+}
+
+//-----------------------------------------------------------------------------
+void BasicMaterial::init()
+{
     if (!program.hasUniform<Vector3f>("diffuse"))
     {
         std::cout << "diffuse" << std::endl;

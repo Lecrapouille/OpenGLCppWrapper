@@ -31,29 +31,6 @@ class SGMatAndShape: public GLWindow
 {
 public:
 
-    class MyShape: public Shape<Model, BasicMaterial>
-    {
-    public:
-
-        MyShape(std::string const& name, std::string const& path)
-            : Shape<Model, BasicMaterial>(name)
-        {
-            std::cout << "Create MyShape " << name << std::endl;
-
-            Shape<Model, BasicMaterial>::geometry.configure(path);
-            Shape<Model, BasicMaterial>::material.diffuse() = Color(1.0f, 0.0f, 0.0f).toVector3f();
-            if (!Shape<Model, BasicMaterial>::compile())
-            {
-                throw GL::Exception("Failed create renderable");
-            }
-        }
-
-        inline std::string const& name() const
-        {
-            return Shape<Model, BasicMaterial>::name();
-        }
-    };
-
     SGMatAndShape(uint32_t const width, uint32_t const height, const char *title);
     ~SGMatAndShape();
 

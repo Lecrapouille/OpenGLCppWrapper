@@ -22,19 +22,12 @@
 #include "Loaders/3D/OBJ.hpp"
 
 //--------------------------------------------------------------------------
-Model& Model::configure(std::string const& filename)
-{
-    m_filename = filename;
-    return *this;
-}
-
-//--------------------------------------------------------------------------
 bool Model::generate(GLVertexBuffer<Vector3f>& vertices,
                      GLVertexBuffer<Vector3f>& normals,
                      GLVertexBuffer<Vector2f>& uv,
                      GLIndex32& index)
 {
-    if (m_filename.size() == 0u)
+    if (config.path.size() == 0u)
     {
         std::cerr << "ERROR: Model::doGenerate: no input file given"
                   << std::endl;
@@ -42,5 +35,5 @@ bool Model::generate(GLVertexBuffer<Vector3f>& vertices,
     }
 
     OBJFileLoader loader;
-    return loader.load(m_filename, vertices, normals, uv, index);
+    return loader.load(config.path, vertices, normals, uv, index);
 }

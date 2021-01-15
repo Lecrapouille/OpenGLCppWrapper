@@ -27,6 +27,8 @@ class DepthMaterial : public Material
 {
 public:
 
+    struct Config {};
+
     DepthMaterial(GLVAO& vao)
         : Material("DepthMaterial", vao)
     {}
@@ -52,6 +54,10 @@ private:
                           GLFragmentShader& fragmentShader) override;
 
     virtual void init() override;
+
+public:
+
+    Config config;
 };
 
 #endif

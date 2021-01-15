@@ -51,7 +51,7 @@ public:
     }
 
     // Called Called by SceneTree (usually on onPaint())
-    virtual bool onDraw(Mode const /*mode*/, Matrix44f const& modelMatrix) override
+    virtual bool onDraw(Matrix44f const& modelMatrix) override
     {
         std::cout << name() << ": onDraw("
                   << modelMatrix << ')' << std::endl;

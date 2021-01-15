@@ -27,6 +27,8 @@ class NormalsMaterial : public Material
 {
 public:
 
+    struct Config {};
+
     NormalsMaterial(GLVAO& vao)
         : Material("NormalsMaterial", vao)
     {}
@@ -47,6 +49,10 @@ private:
                           GLFragmentShader& fragmentShader) override;
 
     virtual void init() override;
+
+public:
+
+    Config config;
 };
 
 #endif

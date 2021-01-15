@@ -31,10 +31,14 @@ class Model: public Geometry
 {
 public:
 
-    //--------------------------------------------------------------------------
-    //! \brief Select the loader
-    //--------------------------------------------------------------------------
-    Model& configure(std::string const& filename);
+    struct Config
+    {
+        Config() {}
+        //! \brief Define the path to the model
+        std::string path;
+        //! \brief Select the model loader
+        // TBD OBJFileLoader loader;
+    };
 
     //--------------------------------------------------------------------------
     //! \brief
@@ -44,9 +48,9 @@ public:
                           GLVertexBuffer<Vector2f>& uv,
                           GLIndex32& index) override;
 
-private:
+public:
 
-    std::string m_filename;
+    Config config;
 };
 
 #endif // GEOMETRY_MODEL_HPP

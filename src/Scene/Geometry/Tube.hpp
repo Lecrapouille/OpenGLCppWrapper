@@ -32,12 +32,14 @@ class Tube: public Geometry
 {
 public:
 
-    //--------------------------------------------------------------------------
-    //! \brief Configure the shape.
-    //! Call it before calling generate() else default parameters will be used.
-    //--------------------------------------------------------------------------
-    void configure(float const top_radius, float const base_radius,
-                   float const height, uint32_t const slices);
+    struct Config
+    {
+        Config() {}
+        float top_radius = 1.0f;
+        float base_radius = 1.0f;
+        float height = 1.0f;
+        uint32_t slices = 8.0f;
+    };
 
     //--------------------------------------------------------------------------
     //! \brief Constructor. Z-axis aligned tube centered at origin.
@@ -51,12 +53,9 @@ public:
                           GLVertexBuffer<Vector2f>& uv,
                           GLIndex32&        index) override;
 
-private:
+public:
 
-    float m_top_radius = 1.0f;
-    float m_base_radius = 1.0f;
-    float m_height = 1.0f;
-    uint32_t m_slices = 8.0f;
+    Config config;
 };
 
 // *****************************************************************************
@@ -64,50 +63,98 @@ private:
 //! radius is equal to the the base radius.
 //! \ingroup Geometry
 // *****************************************************************************
-class Cylinder: protected Tube
+class Cylinder: protected Geometry
 {
 public:
 
+    struct Config
+    {
+        Config() {}
+        float radius = 1.0f;
+        float height = 1.0f;
+        uint32_t slices = 8.0f;
+    };
+
     //--------------------------------------------------------------------------
     //! \brief Constructor. Z-axis aligned tube centered at origin.
-    //! \param radius The radius of the cylinder
-    //! \param height The height of the cylinder
-    //! \param slices The number of subdivisions around the Z axis.
+    //! \param[in] m_top_radius The radius at the top of the tube.
+    //! \param[in] m_base_radius The radius at the base of the tube.
+    //! \param[in] m_height The m_height of the tube.
+    //! \param[in] m_slices The number of subdivisions around the Z axis.
     //--------------------------------------------------------------------------
-    void configure(float const radius, float const height, uint32_t const slices);
+    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
+                          GLVertexBuffer<Vector3f>& normals,
+                          GLVertexBuffer<Vector2f>& uv,
+                          GLIndex32&        index) override;
+
+public:
+
+    Config config;
 };
 
 // *****************************************************************************
 //! \brief Class holding meshes of a cone. A cone is a Tube with no top radius.
 //! \ingroup Geometry
 // *****************************************************************************
-class Cone: protected Tube
+class Cone: protected Geometry
 {
 public:
 
+    struct Config
+    {
+        Config() {}
+        float radius = 1.0f;
+        float height = 1.0f;
+        uint32_t slices = 8.0f;
+    };
+
     //--------------------------------------------------------------------------
     //! \brief Constructor. Z-axis aligned tube centered at origin.
-    //! \param radius The radius of the cone.
-    //! \param height The height of the cone.
-    //! \param slices The number of subdivisions around the Z axis.
+    //! \param[in] m_top_radius The radius at the top of the tube.
+    //! \param[in] m_base_radius The radius at the base of the tube.
+    //! \param[in] m_height The m_height of the tube.
+    //! \param[in] m_slices The number of subdivisions around the Z axis.
     //--------------------------------------------------------------------------
-    void configure(float const radius, float const height, uint32_t const slices);
+    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
+                          GLVertexBuffer<Vector3f>& normals,
+                          GLVertexBuffer<Vector2f>& uv,
+                          GLIndex32&        index) override;
+
+public:
+
+    Config config;
 };
 
 // *****************************************************************************
 //! \brief Class holding meshes of a pyramid. A pyramid is a cone with 4 slices.
 //! \ingroup Geometry
 // *****************************************************************************
-class Pyramid: protected Cone
+class Pyramid: protected Geometry
 {
 public:
 
+    struct Config
+    {
+        Config() {}
+        float radius = 1.0f;
+        float height = 1.0f;
+    };
+
     //--------------------------------------------------------------------------
     //! \brief Constructor. Z-axis aligned tube centered at origin.
-    //! \param radius The radius of the pyramid.
-    //! \param height The height of the pyramid.
+    //! \param[in] m_top_radius The radius at the top of the tube.
+    //! \param[in] m_base_radius The radius at the base of the tube.
+    //! \param[in] m_height The m_height of the tube.
+    //! \param[in] m_slices The number of subdivisions around the Z axis.
     //--------------------------------------------------------------------------
-    void configure(float const radius, float const height);
+    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
+                          GLVertexBuffer<Vector3f>& normals,
+                          GLVertexBuffer<Vector2f>& uv,
+                          GLIndex32&        index) override;
+
+public:
+
+    Config config;
 };
 
 #endif // OPENGLCPPWRAPPER_GEOMETRY_TUBE_HPP

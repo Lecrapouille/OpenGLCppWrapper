@@ -31,13 +31,22 @@ class Shape: public SceneObject
 {
 public:
 
-    Shape(std::string const& name/*, Material::Config& = Material::Config*/)
+    Shape(std::string const& name, Mode const mode = Mode::TRIANGLES)
         : SceneObject(name),
           m_vao("VAO_" + name),
-          material(m_vao)
+          material(m_vao), // will use the material default config
+          m_drawMode(mode)
     {}
 
-    bool compile(/*Geometry::Configure, Material::Configure*/)
+    // FIXME Does not compile but does not need
+    // bool compile(Geometry::Config& geo_conf, Material::Config& mat_conf)
+    // {
+    //    material.config = geo_conf;
+    //    geometry.config = mat_conf;
+    //    return compile();
+    // }
+
+    bool compile()
     {
         if (!material.compile())
         {
@@ -73,11 +82,10 @@ public:
         return true;
     }
 
-    virtual bool onDraw(Mode const mode = Mode::TRIANGLES,
-                        Matrix44f const& model_matrix = Identity44f) override
+    virtual bool onDraw(Matrix44f const& model_matrix = Identity44f) override
     {
         modelMatrix() = model_matrix;
-        return m_vao.draw(mode);
+        return m_vao.draw(m_drawMode);
     }
 
     GLIndex32& index()
@@ -123,6 +131,10 @@ public:
 
     Material material;
     Geometry geometry;
+
+private:
+
+    Mode const m_drawMode;
 };
 
 #endif // OPENGLCPPWRAPPER_SCENEGRAPH_SHAPE_NODE_HPP
