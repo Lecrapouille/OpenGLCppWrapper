@@ -168,6 +168,8 @@ bool GLProgram::onCreate()
 }
 
 //--------------------------------------------------------------------------
+// FIXME glObject::begin() calls onActivate() before onSetup() but for GLProgram
+// this should be the inversed.
 bool GLProgram::onSetup()
 {
     bool success = true;
@@ -212,6 +214,12 @@ bool GLProgram::onSetup()
     // Release shaders stored in GPU.
     detachAllShaders();
     m_need_update = true;
+
+    // FIXME: ugly
+    // Activate now because the user may have created uniforms before creating
+    // the Program and the next method called after this method is onUpdate().
+    glCheck(glUseProgram(m_handle));
+
     return !success;
 }
 
@@ -227,6 +235,8 @@ bool GLProgram::onUpdate()
 }
 
 //--------------------------------------------------------------------------
+// FIXME glObject::begin() calls onActivate() before onSetup() but for GLProgram
+// this should be the inversed so need the if(compiled())
 void GLProgram::onActivate()
 {
     if (compiled()) {
@@ -348,92 +358,37 @@ void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
     switch (type)
     {
     case GL_FLOAT:
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<float>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<float>>(name, 1, GL_FLOAT, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
-        }
+        doCreateUniform<float>(1, type, name, prog);
         break;
     case GL_FLOAT_VEC2:
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector2f>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<Vector2f>>(name, 2, GL_FLOAT, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
-        }
+        doCreateUniform<Vector2f>(2, type, name, prog);
         break;
     case GL_FLOAT_VEC3:
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector3f>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<Vector3f>>(name, 3, GL_FLOAT, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
-        }
+        doCreateUniform<Vector3f>(3, type, name, prog);
         break;
     case GL_FLOAT_VEC4:
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector4f>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<Vector4f>>(name, 4, GL_FLOAT, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
-        }
+        doCreateUniform<Vector4f>(4, type, name, prog);
         break;
     case GL_INT:
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<int>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<int>>(name, 1, GL_INT, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
-        }
+        doCreateUniform<int>(1, type, name, prog);
         break;
     case GL_INT_VEC2:
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector2i>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<Vector2i>>(name, 2, GL_INT, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
-        }
+        doCreateUniform<Vector2i>(2, type, name, prog);
         break;
     case GL_INT_VEC3:
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector3i>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<Vector3i>>(name, 3, GL_INT, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
-        }
+        doCreateUniform<Vector3i>(3, type, name, prog);
         break;
     case GL_INT_VEC4:
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<Vector4i>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<Vector4i>>(name, 4, GL_INT, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
-        }
+        doCreateUniform<Vector4i>(4, type, name, prog);
         break;
     case GL_FLOAT_MAT2:
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<Matrix22f>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<Matrix22f>>(name, 4, GL_FLOAT, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
-        }
+        doCreateUniform<Matrix22f>(4, type, name, prog);
         break;
     case GL_FLOAT_MAT3:
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<Matrix33f>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<Matrix33f>>(name, 9, GL_FLOAT, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
-        }
+        doCreateUniform<Matrix33f>(9, type, name, prog);
         break;
     case GL_FLOAT_MAT4:
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<Matrix44f>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
-        }
+        doCreateUniform<Matrix44f>(16, type, name, prog);
         break;
     case GL_SAMPLER_1D:
         m_samplers[name]

@@ -24,20 +24,17 @@
 //------------------------------------------------------------------------------
 //! \brief
 //------------------------------------------------------------------------------
-class MyShape: public Shape<Model, BasicMaterial>
+template<class Material>
+class MyShape: public Shape<Model, Material>
 {
 public:
 
     MyShape(std::string const& name, std::string const& path)
-        : Shape<Model, BasicMaterial>(name)
+        : Shape<Model, Material>(name)
     {
-        std::cout << "Create MyShape " << name << std::endl;
-
-        // Inherited from Shape<Model, BasicMaterial>
-        geometry.config.path = path;
-        material.diffuse() = Color(1.0f, 0.0f, 0.0f).toVector3f();
-
-        if (!Shape<Model, BasicMaterial>::compile())
+        Shape<Model, Material>::geometry.config.path = path;
+        initMaterial();
+        if (!Shape<Model, Material>::compile())
         {
             throw GL::Exception("Failed create renderable");
         }
@@ -45,22 +42,42 @@ public:
 
     inline std::string const& name() const
     {
-        return Shape<Model, BasicMaterial>::name();
+        return Shape<Model, Material>::name();
     }
+
+private:
+
+    inline void initMaterial();
 };
+
+template<> void MyShape<DepthMaterial>::initMaterial()
+{
+    Shape<Model, DepthMaterial>::material.near() = 0.1f;
+    Shape<Model, DepthMaterial>::material.far() = 5.0f;
+}
+
+template<> void MyShape<NormalsMaterial>::initMaterial()
+{
+    // Nothing to do
+}
+
+template<> void MyShape<BasicMaterial>::initMaterial()
+{
+    Shape<Model, BasicMaterial>::material.color() = Color(1.0f, 0.0f, 0.0f).toVector3f();
+}
 
 //------------------------------------------------------------------------------
 SGMatAndShape::SGMatAndShape(uint32_t const width, uint32_t const height,
                              const char *title)
     : GLWindow(width, height, title)
 {
-    std::cout << "Hello DepthMaterial: " << info() << std::endl;
+    std::cout << "Hello Material: " << info() << std::endl;
 }
 
 //------------------------------------------------------------------------------
 SGMatAndShape::~SGMatAndShape()
 {
-    std::cout << "Bye DepthMaterial" << std::endl;
+    std::cout << "Bye Material" << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -74,7 +91,7 @@ void SGMatAndShape::onWindowResized()
 
     m_scene.root->traverse([](SceneObject* node, Matrix44f const& mat_)
     {
-        auto n = dynamic_cast<MyShape*>(node);
+        auto n = dynamic_cast<BaseShape*>(node);
         if (n != nullptr)
         {
             n->projectionMatrix() = mat_;
@@ -88,12 +105,11 @@ bool SGMatAndShape::onSetup()
     glCheck(glEnable(GL_DEPTH_TEST));
     glCheck(glDepthFunc(GL_LESS));
 
-    std::cout << "SGMatAndShape::onSetup()" << std::endl;
-    m_scene.root = SceneObject::create<MyShape>("Tree0", "textures/tree.obj");
-    MyShape& t1 = m_scene.root->attach<MyShape>("Tree1", "textures/tree.obj");
-    MyShape& t2 = m_scene.root->attach<MyShape>("Tree2", "textures/tree.obj");
-    MyShape& t3 = t1.attach<MyShape>("Tree1.0", "textures/tree.obj");
-    MyShape& t4 = t2.attach<MyShape>("Tree1.1", "textures/tree.obj");
+    m_scene.root = SceneObject::create<MyShape<BasicMaterial>>("Tree0", "textures/tree.obj");
+    MyShape<DepthMaterial>& t1 = m_scene.root->attach<MyShape<DepthMaterial>>("Tree1", "textures/tree.obj");
+    MyShape<NormalsMaterial>& t2 = m_scene.root->attach<MyShape<NormalsMaterial>>("Tree2", "textures/tree.obj");
+    MyShape<DepthMaterial>& t3 = t1.attach<MyShape<DepthMaterial>>("Tree1.0", "textures/tree.obj");
+    MyShape<BasicMaterial>& t4 = t2.attach<MyShape<BasicMaterial>>("Tree1.1", "textures/tree.obj");
 
     //             Tree0
     //    Tree2             Tree1
@@ -122,11 +138,9 @@ bool SGMatAndShape::onPaint()
     // Simulate camera
     m_scene.root->traverse([](SceneObject* node)
     {
-        auto n = dynamic_cast<MyShape*>(node);
+        auto n = dynamic_cast<BaseShape*>(node);
         if (n != nullptr)
         {
-            //std::cout << n->name() << ": " << n->transform.position() << std::endl;
-
             n->viewMatrix() = matrix::lookAt(Vector3f(5,5,5),
                                              Vector3f(0,0,0),
                                              Vector3f(0,1,0));

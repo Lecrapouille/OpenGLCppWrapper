@@ -65,12 +65,14 @@ private:
     //--------------------------------------------------------------------------
     //! \brief Generate the code for vertex and fragment shaders.
     //--------------------------------------------------------------------------
-    virtual void generate(GLVertexShader& vert, GLFragmentShader& frag) = 0;
+    virtual void generate(GLVertexShader& /*vert*/, GLFragmentShader& /*frag*/)
+    {}
 
     //--------------------------------------------------------------------------
     //! \brief Initialize uniform glsl variables with default values.
     //--------------------------------------------------------------------------
-    virtual void init() = 0;
+    virtual void init()
+    {}
 
 public:
 

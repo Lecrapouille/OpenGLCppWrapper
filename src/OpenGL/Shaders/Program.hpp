@@ -383,6 +383,21 @@ return ret;
 
 private:
 
+    template<class T>
+    void doCreateUniform(GLint dim, GLenum type, const char *name, const GLuint prog)
+    {
+        if (!m_uniforms.has<std::shared_ptr<GLUniform<T>>>(name))
+        {
+            auto ptr = std::make_shared<GLUniform<T>>(name, dim, type, prog);
+            m_uniforms.add(name, ptr);
+            m_uniformLocations[name] = ptr;
+        }
+        else
+        {
+            m_uniforms.get<std::shared_ptr<GLUniform<T>>>(name)->m_program = prog;
+        }
+    }
+
     //--------------------------------------------------------------------------
     //! \brief From C++ type return the OpenGL enum (ie float => GL_FLOAT).
     //--------------------------------------------------------------------------

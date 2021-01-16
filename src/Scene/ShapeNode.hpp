@@ -26,8 +26,29 @@
 #  include "Scene/Material/Material.hpp"
 #  include "Scene/SceneTree.hpp"
 
+// *****************************************************************************
+//! \brief Base class for Shape<Geometry,Material> since sometines we need to
+//! get the ancestor (tree traversal) and with template class this quite boring.
+// *****************************************************************************
+class BaseShape
+{
+public:
+
+    virtual ~BaseShape() = default;
+    virtual GLIndex32& index() = 0;
+    virtual GLVertexBuffer<Vector3f>& vertices() = 0;
+    virtual GLVertexBuffer<Vector3f>& normals() = 0;
+    virtual GLVertexBuffer<Vector2f>& uv() = 0;
+    virtual Matrix44f& modelMatrix() = 0;
+    virtual Matrix44f& viewMatrix() = 0;
+    virtual Matrix44f& projectionMatrix() = 0;
+};
+
+// *****************************************************************************
+//! \brief
+// *****************************************************************************
 template<class Geometry, class Material>
-class Shape: public SceneObject
+class Shape: public BaseShape, public SceneObject
 {
 public:
 
@@ -88,37 +109,37 @@ public:
         return m_vao.draw(m_drawMode);
     }
 
-    GLIndex32& index()
+    virtual GLIndex32& index() override
     {
         return m_vao.index();
     }
 
-    GLVertexBuffer<Vector3f>& vertices()
+    virtual GLVertexBuffer<Vector3f>& vertices() override
     {
         return m_vao.vector3f("position");
     }
 
-    GLVertexBuffer<Vector3f>& normals()
+    virtual GLVertexBuffer<Vector3f>& normals() override
     {
         return m_vao.vector3f("normals");
     }
 
-    GLVertexBuffer<Vector2f>& uv()
+    virtual GLVertexBuffer<Vector2f>& uv() override
     {
         return m_vao.vector2f("UV");
     }
 
-    Matrix44f& modelMatrix()
+    virtual Matrix44f& modelMatrix() override
     {
         return material.program.matrix44f("modelMatrix");
     }
 
-    Matrix44f& viewMatrix()
+    virtual Matrix44f& viewMatrix() override
     {
         return material.program.matrix44f("viewMatrix");
     }
 
-    Matrix44f& projectionMatrix()
+    virtual Matrix44f& projectionMatrix() override
     {
         return material.program.matrix44f("projectionMatrix");
     }
