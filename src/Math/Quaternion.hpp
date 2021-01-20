@@ -65,18 +65,24 @@ public:
         m_q[3] = d;
     }
 
+    inline friend std::ostream& operator<<(std::ostream& os, Quat& q)
+    {
+        return os << "(" << q.x() << ", " << q.y() << ", "
+                  << q.z() << ", " << q.w() << ")";
+    }
+
     Scalar angle()
     {
-        return std::acos(d()) * Scalar(2);
+        return std::acos(w()) * Scalar(2);
     }
 
     Vector<Scalar, 3_z> axis()
     {
-        Scalar tmp1 = static_cast<Scalar>(1) - d() * d();
+        Scalar tmp1 = static_cast<Scalar>(1) - w() * w();
         if(tmp1 <= static_cast<Scalar>(0))
             return Vector<Scalar, 3_z>(0, 0, 1);
         Scalar tmp2 = static_cast<Scalar>(1) / std::sqrt(tmp1);
-        return Vector<Scalar, 3_z>(a() * tmp2, b() * tmp2, c() * tmp2);
+        return Vector<Scalar, 3_z>(x() * tmp2, y() * tmp2, z() * tmp2);
     }
 
     /**
@@ -84,7 +90,7 @@ public:
      */
     Scalar norm() const
     {
-        return std::sqrt(a() * a() + b() * b() + c() * c() + d() * d());
+        return std::sqrt(x() * x() + y() * y() + z() * z() + w() * w());
     }
 
     /**
@@ -101,7 +107,7 @@ public:
      */
     Quat conjugate() const
     {
-        return Quat(a(), -b(), -c(), -d());
+        return Quat(x(), -y(), -z(), -w());
     }
 
     /**
@@ -124,21 +130,21 @@ public:
     {
         Matrix<Scalar, 4_z, 4_z> R(0); // FIXME optim: avoid (0)
 
-        const Scalar aa = a() * a();
-        const Scalar bb = b() * b();
-        const Scalar cc = c() * c();
-        const Scalar dd = d() * d();
+        const Scalar aa = x() * x();
+        const Scalar bb = y() * y();
+        const Scalar cc = z() * z();
+        const Scalar dd = w() * w();
 
         R(0, 0) = aa + bb - cc - dd;
-        R(1, 0) = 2 * b() * c() + 2 * a() * d();
-        R(2, 0) = 2 * b() * d() - 2 * a() * c();
+        R(1, 0) = 2 * y() * z() + 2 * x() * w();
+        R(2, 0) = 2 * y() * w() - 2 * x() * z();
 
-        R(0, 1) = 2 * b() * c() - 2 * a() * d();
+        R(0, 1) = 2 * y() * z() - 2 * x() * w();
         R(1, 1) = aa - bb + cc - dd;
-        R(2, 1) = 2 * c() * d() + 2 * a() * b();
+        R(2, 1) = 2 * z() * w() + 2 * x() * y();
 
-        R(0, 2) = 2 * b() * d() + 2 * a() * c();
-        R(1, 2) = 2 * c() * d() - 2 * a() * b();
+        R(0, 2) = 2 * y() * w() + 2 * x() * z();
+        R(1, 2) = 2 * z() * w() - 2 * x() * y();
         R(2, 2) = aa - bb - cc + dd;
 
         return R;
@@ -236,41 +242,51 @@ public:
         {
             s = 2 * std::sqrt(1 + tr);
 
-            Q.a() = s / 4;
-            Q.b() = (m(2, 1) - m(1, 2)) / s;
-            Q.c() = (m(0, 2) - m(2, 0)) / s;
-            Q.d() = (m(1, 0) - m(0, 1)) / s;
+            Q.x() = s / 4;
+            Q.y() = (m(2, 1) - m(1, 2)) / s;
+            Q.z() = (m(0, 2) - m(2, 0)) / s;
+            Q.w() = (m(1, 0) - m(0, 1)) / s;
         }
         else if (m(0, 0) > m(1, 1) && m(0, 0) > m(2, 2))
         {
             s = 2 * std::sqrt(1 + m(0, 0) - m(1, 1) - m(2, 2));
 
-            Q.a() = (m(2, 1) - m(1, 2)) / s;
-            Q.b() = s / 4;
-            Q.c() = (m(0, 1) + m(1, 0)) / s;
-            Q.d() = (m(0, 2) + m(2, 0)) / s;
+            Q.x() = (m(2, 1) - m(1, 2)) / s;
+            Q.y() = s / 4;
+            Q.z() = (m(0, 1) + m(1, 0)) / s;
+            Q.w() = (m(0, 2) + m(2, 0)) / s;
         }
         else if (m(1, 1) > m(2, 2))
         {
             s = 2 * std::sqrt(1 + m(1, 1) - m(0, 0) - m(2, 2));
 
-            Q.a() = (m(0, 2) - m(2, 0)) / s;
-            Q.b() = (m(0, 1) + m(1, 0)) / s;
-            Q.c() = s / 4;
-            Q.d() = (m(1, 2) + m(2, 1)) / s;
+            Q.x() = (m(0, 2) - m(2, 0)) / s;
+            Q.y() = (m(0, 1) + m(1, 0)) / s;
+            Q.z() = s / 4;
+            Q.w() = (m(1, 2) + m(2, 1)) / s;
         }
         else
         {
             s = 2 * std::sqrt(1 + m(2, 2) - m(0, 0) - m(1, 1));
 
-            Q.a() = (m(1, 0) - m(0, 1)) / s;
-            Q.b() = (m(0, 2) + m(2, 0)) / s;
-            Q.c() = (m(1, 2) + m(2, 1)) / s;
-            Q.d() = s / 4;
+            Q.x() = (m(1, 0) - m(0, 1)) / s;
+            Q.y() = (m(0, 2) + m(2, 0)) / s;
+            Q.z() = (m(1, 2) + m(2, 1)) / s;
+            Q.w() = s / 4;
         }
 
         return Q;
     }
+
+    void generateW()
+    {
+        Scalar sw = Scalar(1) - (x() * x()) - (y() * y()) - (z() * z());
+        if (sw < Scalar(0))
+            w() = Scalar(0);
+        else
+            w() = - std::sqrt(sw);
+    }
+
 
     /*
      *  Accessors
@@ -284,17 +300,17 @@ public:
     Scalar &operator()(size_t i) { return m_q[i]; }
     const Scalar &operator()(size_t i) const { return m_q[i]; }
 
-    Scalar &a() { return m_q[0]; } /**< Scalar component */
-    const Scalar &a() const { return m_q[0]; }
+    Scalar &x() { return m_q[0]; } /**< Scalar component */
+    const Scalar &x() const { return m_q[0]; }
 
-    Scalar &b() { return m_q[1]; } /**< First complex dimension (i) */
-    const Scalar &b() const { return m_q[1]; }
+    Scalar &y() { return m_q[1]; } /**< First complex dimension (i) */
+    const Scalar &y() const { return m_q[1]; }
 
-    Scalar &c() { return m_q[2]; } /**< Second complex dimension (j) */
-    const Scalar &c() const { return m_q[2]; }
+    Scalar &z() { return m_q[2]; } /**< Second complex dimension (j) */
+    const Scalar &z() const { return m_q[2]; }
 
-    Scalar &d() { return m_q[3]; } /**< Third complex dimension (k) */
-    const Scalar &d() const { return m_q[3]; }
+    Scalar &w() { return m_q[3]; } /**< Third complex dimension (k) */
+    const Scalar &w() const { return m_q[3]; }
 
 private:
 

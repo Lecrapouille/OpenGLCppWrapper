@@ -20,6 +20,37 @@
 
 #include "Scene/Geometry/Model.hpp"
 #include "Loaders/3D/OBJ.hpp"
+//#include "Loaders/3D/MD5mesh.hpp"
+#include "Common/NonCppStd.hpp"
+
+static std::string extension(std::string const& path)
+{
+    std::string::size_type pos = path.find_last_of(".");
+    if (pos != std::string::npos)
+    {
+        std::string ext = path.substr(pos + 1, std::string::npos);
+
+        // Ignore the ~ in the extension (ie. foo.txt~)
+        if ('~' == ext.back())
+            ext.pop_back();
+
+        // Get the file extension in lower case
+        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+        return ext;
+    }
+    return "";
+}
+
+//--------------------------------------------------------------------------
+static std::map<std::string, std::unique_ptr<ShapeLoader>> loaders()
+{
+    std::map<std::string, std::unique_ptr<ShapeLoader>> mp;
+
+    mp["obj"] = std::make_unique<OBJFileLoader>();
+    //mp["md5mesh"] = std::make_unique<MD5MeshFileLoader>();
+
+    return mp;
+}
 
 //--------------------------------------------------------------------------
 bool Model::generate(GLVertexBuffer<Vector3f>& vertices,
@@ -27,6 +58,9 @@ bool Model::generate(GLVertexBuffer<Vector3f>& vertices,
                      GLVertexBuffer<Vector2f>& uv,
                      GLIndex32& index)
 {
+    static std::map<std::string, std::unique_ptr<ShapeLoader>>
+            s_loaders = loaders();
+
     if (config.path.size() == 0u)
     {
         std::cerr << "ERROR: Model::doGenerate: no input file given"
@@ -34,6 +68,13 @@ bool Model::generate(GLVertexBuffer<Vector3f>& vertices,
         return false;
     }
 
-    OBJFileLoader loader;
-    return loader.load(config.path, vertices, normals, uv, index);
+    std::string ext = extension(config.path);
+    auto loader = s_loaders.find(ext);
+    if (loader == s_loaders.end())
+    {
+        std::cerr << "This file extension '" << ext << "' is not managed"
+                  << std::endl;
+        return false;
+    }
+    return loader->second->load(config.path, vertices, normals, uv, index);
 }
