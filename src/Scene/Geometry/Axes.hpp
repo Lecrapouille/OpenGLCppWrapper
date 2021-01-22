@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2021 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -18,43 +18,32 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef GEOMETRY_MODEL_HPP
-#  define GEOMETRY_MODEL_HPP
+#ifndef AXES_HPP
+#  define AXES_HPP
 
 #  include "Scene/Geometry/Geometry.hpp"
-#  include <string>
 
 // *****************************************************************************
-//! \brief Generate the geometry from a file
+//! \brief Generate the geometry of a axis.
 // *****************************************************************************
-class Model: public Geometry
+class Axes: public Geometry
 {
 public:
 
     struct Config
     {
         Config() {}
-        //! \brief Define the path to the model
-        std::string path;
-        //! \brief Select the model loader
-        // TBD OBJFileLoader loader;
+        float size = 1.0f;
     };
 
+    //--------------------------------------------------------------------------
+    //! \brief Generate the plane.
+    //--------------------------------------------------------------------------
     virtual bool generate(GLVAO32& vao, const bool clear) override;
-
-protected:
-
-    //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    bool generate(GLVertexBuffer<Vector3f>& vertices,
-                  GLVertexBuffer<Vector3f>& normals,
-                  GLVertexBuffer<Vector2f>& uv,
-                  GLIndex32& index);
 
 public:
 
     Config config;
 };
 
-#endif // GEOMETRY_MODEL_HPP
+#endif

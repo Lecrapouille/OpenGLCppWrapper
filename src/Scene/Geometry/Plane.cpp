@@ -35,7 +35,7 @@ bool Plane::generate(GLVertexBuffer<Vector3f>& vertices,
     float const segment_width = config.width / float(gridX);
     float const segment_height = config.height / float(gridY);
 
-    // TODO clear + reserve
+    // TODO reserve
     // vertices.reserve();
     // normals.reserve();
     // uv.reserve();
@@ -73,4 +73,36 @@ bool Plane::generate(GLVertexBuffer<Vector3f>& vertices,
     }
 
     return true;
+}
+
+//------------------------------------------------------------------------------
+bool Plane::generate(GLVAO32& vao, const bool clear)
+{
+    if (!vao.has<Vector3f>(shaders::name::position))
+    {
+        std::cerr << "VBO for vertices is needed" << std::endl;
+        return false;
+    }
+
+    // Dummy containers.
+    GLVertexBuffer<Vector3f> tmp_normals;
+    GLVertexBuffer<Vector2f> tmp_uv;
+
+    auto& positions = vao.vector3f(shaders::name::position);
+    auto& normals = vao.has<Vector3f>(shaders::name::normal)
+                    ? vao.vector3f(shaders::name::normal)
+                    : tmp_normals;
+    auto& UVs = vao.has<Vector2f>(shaders::name::uv)
+                ? vao.vector2f(shaders::name::uv)
+                : tmp_uv;
+
+    if (clear)
+    {
+        positions.clear();
+        normals.clear();
+        UVs.clear();
+        vao.index().clear();
+    }
+
+    return generate(positions, normals, UVs, vao.index());
 }

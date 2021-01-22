@@ -79,24 +79,18 @@ public:
             return false;
         }
 
-        // FIXME: should be called after material.program.bind(m_vao)
-        // but because not all materials use attributes "normals" or "UV"
-        // this will fail
-        if (!geometry.generate(m_vao.vector3f(shaders::name::position),
-                               m_vao.vector3f(shaders::name::normal),
-                               m_vao.vector2f(shaders::name::uv),
-                               m_vao.index()))
-        {
-            std::cerr << "Shape " << name()
-                      << ": Failed creating its geometry"
-                      << std::endl;
-            return false;
-        }
-
         if (!material.program.bind(m_vao))
         {
             std::cerr << "Shape " << name()
                       << ": Failed binding its VAO "
+                      << std::endl;
+            return false;
+        }
+
+        if (!geometry.generate(m_vao, true))
+        {
+            std::cerr << "Shape " << name()
+                      << ": Failed creating its geometry"
                       << std::endl;
             return false;
         }

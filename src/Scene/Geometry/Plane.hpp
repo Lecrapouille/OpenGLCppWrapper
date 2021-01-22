@@ -39,13 +39,17 @@ public:
         size_t heightSegments = 1_z;
     };
 
+    virtual bool generate(GLVAO32& vao, const bool clear) override;
+
+protected:
+
     //--------------------------------------------------------------------------
     //! \brief Generate the plane.
     //--------------------------------------------------------------------------
-    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
-                          GLVertexBuffer<Vector3f>& normals,
-                          GLVertexBuffer<Vector2f>& uv,
-                          GLIndex32& index) override;
+    bool generate(GLVertexBuffer<Vector3f>& vertices,
+                  GLVertexBuffer<Vector3f>& normals,
+                  GLVertexBuffer<Vector2f>& uv,
+                  GLIndex32& index);
 
 public:
 

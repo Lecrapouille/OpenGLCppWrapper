@@ -92,6 +92,12 @@ public:
         m_usage = static_cast<GLenum>(usage);
     }
 
+    explicit GLBuffer()
+        : IGLBuffer("", GL_ARRAY_BUFFER)
+    {
+        m_usage = static_cast<GLenum>(BufferUsage::STATIC_DRAW);
+    }
+
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------

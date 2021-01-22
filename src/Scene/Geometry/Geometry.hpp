@@ -21,9 +21,8 @@
 #ifndef GEOMETRY_HPP
 #  define GEOMETRY_HPP
 
-#  include "OpenGL/Buffers/VBO.hpp"
-#  include "OpenGL/Buffers/EBO.hpp"
-#  include "Math/Vector.hpp"
+#  include "OpenGL/Buffers/iVAO.hpp"
+#  include "Scene/Material/ShaderLib.hpp"
 
 // *****************************************************************************
 //! \brief Base class for generating vertex positions, normals, texture
@@ -34,15 +33,7 @@ class Geometry
 public:
 
     virtual ~Geometry() = default;
-
-    // TODO add param clear = true to clear VBOs before
-    // FIXME: normals and uv not always needed => may conflict with materials
-    // => prog.compile(shaders) cannot be called before geometry.generate()
-    // beause prog is managed by Material and some do not use UV, normals ...
-    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
-                          GLVertexBuffer<Vector3f>& normals,
-                          GLVertexBuffer<Vector2f>& uv,
-                          GLIndex32&                index) = 0;
+    virtual bool generate(GLVAO32& vao, const bool clear = true) = 0;
 };
 
 #endif

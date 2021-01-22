@@ -23,6 +23,7 @@
 #include <fstream>
 #include <cstring>
 
+//------------------------------------------------------------------------------
 static bool readObjFile(std::stringstream& ss, const std::string& fileName)
 {
     std::ifstream objFile;
@@ -40,6 +41,7 @@ static bool readObjFile(std::stringstream& ss, const std::string& fileName)
     return true;
 }
 
+//------------------------------------------------------------------------------
 bool OBJFileLoader::load(std::string const& fileName,
                          GLVertexBuffer<Vector3f>& vertices,
                          GLVertexBuffer<Vector3f>& normals,
@@ -92,9 +94,10 @@ bool OBJFileLoader::load(std::string const& fileName,
     if (tmp_vertices.size() == 0u)
         return false;
 
-#warning "TO BE FIXED" // FIXME: index broken + FIXME: need cout << vertices() else not displayed
-    // Reorganize group of vertices, normals, uv in order
-    // of faces.
+    vertices.reserve(tmp_vertices.size());
+    uv.reserve(tmp_uv.size());
+    normals.reserve(tmp_normals.size());
+
     GLIndex32::Type count = 0u;
     for (auto& f : faces)
     {
@@ -112,13 +115,18 @@ bool OBJFileLoader::load(std::string const& fileName,
             try
             {
                 uint32_t index = uint32_t(std::stoul(str)) - 1u;
-                if (type == 1u) {
+                if (type == 1u)
+                {
                     vertices.append(tmp_vertices.at(index));
                 }
                 else if (type == 2u)
+                {
                     uv.append(tmp_uv.at(index));
+                }
                 else if (type == 3u)
+                {
                     normals.append(tmp_normals.at(index));
+                }
             }
             catch (std::exception const&)
             {

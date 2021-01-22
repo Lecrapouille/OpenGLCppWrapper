@@ -41,17 +41,7 @@ public:
         uint32_t slices = 8.0f;
     };
 
-    //--------------------------------------------------------------------------
-    //! \brief Constructor. Z-axis aligned tube centered at origin.
-    //! \param[in] m_top_radius The radius at the top of the tube.
-    //! \param[in] m_base_radius The radius at the base of the tube.
-    //! \param[in] m_height The m_height of the tube.
-    //! \param[in] m_slices The number of subdivisions around the Z axis.
-    //--------------------------------------------------------------------------
-    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
-                          GLVertexBuffer<Vector3f>& normals,
-                          GLVertexBuffer<Vector2f>& uv,
-                          GLIndex32&        index) override;
+    virtual bool generate(GLVAO32& vao, const bool clear) override;
 
 public:
 
@@ -75,17 +65,7 @@ public:
         uint32_t slices = 8.0f;
     };
 
-    //--------------------------------------------------------------------------
-    //! \brief Constructor. Z-axis aligned tube centered at origin.
-    //! \param[in] m_top_radius The radius at the top of the tube.
-    //! \param[in] m_base_radius The radius at the base of the tube.
-    //! \param[in] m_height The m_height of the tube.
-    //! \param[in] m_slices The number of subdivisions around the Z axis.
-    //--------------------------------------------------------------------------
-    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
-                          GLVertexBuffer<Vector3f>& normals,
-                          GLVertexBuffer<Vector2f>& uv,
-                          GLIndex32&        index) override;
+    virtual bool generate(GLVAO32& vao, const bool clear) override;
 
 public:
 
@@ -108,17 +88,7 @@ public:
         uint32_t slices = 8.0f;
     };
 
-    //--------------------------------------------------------------------------
-    //! \brief Constructor. Z-axis aligned tube centered at origin.
-    //! \param[in] m_top_radius The radius at the top of the tube.
-    //! \param[in] m_base_radius The radius at the base of the tube.
-    //! \param[in] m_height The m_height of the tube.
-    //! \param[in] m_slices The number of subdivisions around the Z axis.
-    //--------------------------------------------------------------------------
-    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
-                          GLVertexBuffer<Vector3f>& normals,
-                          GLVertexBuffer<Vector2f>& uv,
-                          GLIndex32&        index) override;
+    virtual bool generate(GLVAO32& vao, const bool clear) override;
 
 public:
 
@@ -140,17 +110,7 @@ public:
         float height = 1.0f;
     };
 
-    //--------------------------------------------------------------------------
-    //! \brief Constructor. Z-axis aligned tube centered at origin.
-    //! \param[in] m_top_radius The radius at the top of the tube.
-    //! \param[in] m_base_radius The radius at the base of the tube.
-    //! \param[in] m_height The m_height of the tube.
-    //! \param[in] m_slices The number of subdivisions around the Z axis.
-    //--------------------------------------------------------------------------
-    virtual bool generate(GLVertexBuffer<Vector3f>& vertices,
-                          GLVertexBuffer<Vector3f>& normals,
-                          GLVertexBuffer<Vector2f>& uv,
-                          GLIndex32&        index) override;
+    virtual bool generate(GLVAO32& vao, const bool clear) override;
 
 public:
 

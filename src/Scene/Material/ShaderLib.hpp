@@ -37,6 +37,7 @@
 #  define UV "uv"
 #  define POSITION "position"
 #  define NORMAL "normal"
+#  define COLOR "color"
 
 namespace shaders
 {
@@ -46,6 +47,7 @@ namespace shaders
          static const char* uv = UV;
          static const char* position = POSITION;
          static const char* normal = NORMAL;
+         static const char* color = COLOR;
     } // namespace name
 
     //==========================================================================

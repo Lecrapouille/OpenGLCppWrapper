@@ -139,6 +139,16 @@ public:
     }
 
     //--------------------------------------------------------------------------
+    template<class T>
+    bool has(const char *name)
+    {
+        if (nullptr == name)
+            return false;
+
+        return m_VBOs.has<std::shared_ptr<GLVertexBuffer<T>>>(name);
+    }
+
+    //--------------------------------------------------------------------------
     //! \brief Check if this instance has textures.
     //!
     //! \note Having no textures generally means that the shader has no sampler or

@@ -122,12 +122,46 @@ static bool generateTube(GLVertexBuffer<Vector3f>& vertices,
 }
 
 //------------------------------------------------------------------------------
-bool Tube::generate(GLVertexBuffer<Vector3f>& vertices,
-                    GLVertexBuffer<Vector3f>& normals,
-                    GLVertexBuffer<Vector2f>& uv,
-                    GLIndex32& index)
+static bool generateTube(GLVAO32& vao, const bool clear,
+                         float const top_radius,
+                         float const base_radius,
+                         float const height,
+                         uint32_t const slices)
 {
-    return generateTube(vertices, normals, uv, index,
+    if (!vao.has<Vector3f>(shaders::name::position))
+    {
+        std::cerr << "VBO for vertices is needed" << std::endl;
+        return false;
+    }
+
+    // Dummy containers.
+    GLVertexBuffer<Vector3f> tmp_normals;
+    GLVertexBuffer<Vector2f> tmp_uv;
+
+    auto& positions = vao.vector3f(shaders::name::position);
+    auto& normals = vao.has<Vector3f>(shaders::name::normal)
+                    ? vao.vector3f(shaders::name::normal)
+                    : tmp_normals;
+    auto& UVs = vao.has<Vector2f>(shaders::name::uv)
+                ? vao.vector2f(shaders::name::uv)
+                : tmp_uv;
+
+    if (clear)
+    {
+        positions.clear();
+        normals.clear();
+        UVs.clear();
+        vao.index().clear();
+    }
+
+    return generateTube(positions, normals, UVs, vao.index(),
+                        top_radius, base_radius, height, slices);
+}
+
+//------------------------------------------------------------------------------
+bool Tube::generate(GLVAO32& vao, const bool clear)
+{
+    return generateTube(vao, clear,
                         config.top_radius,
                         config.base_radius,
                         config.height,
@@ -135,12 +169,9 @@ bool Tube::generate(GLVertexBuffer<Vector3f>& vertices,
 }
 
 //------------------------------------------------------------------------------
-bool Cylinder::generate(GLVertexBuffer<Vector3f>& vertices,
-                        GLVertexBuffer<Vector3f>& normals,
-                        GLVertexBuffer<Vector2f>& uv,
-                        GLIndex32& index)
+bool Cylinder::generate(GLVAO32& vao, const bool clear)
 {
-    return generateTube(vertices, normals, uv, index,
+    return generateTube(vao, clear,
                         config.radius,
                         config.radius,
                         config.height,
@@ -148,24 +179,18 @@ bool Cylinder::generate(GLVertexBuffer<Vector3f>& vertices,
 }
 
 //------------------------------------------------------------------------------
-bool Cone::generate(GLVertexBuffer<Vector3f>& vertices,
-                    GLVertexBuffer<Vector3f>& normals,
-                    GLVertexBuffer<Vector2f>& uv,
-                    GLIndex32& index)
+bool Cone::generate(GLVAO32& vao, const bool clear)
 {
-    return generateTube(vertices, normals, uv, index,
+    return generateTube(vao, clear,
                         0.0f,
                         config.radius,
                         config.height,
                         config.slices);
 }
 //------------------------------------------------------------------------------
-bool Pyramid::generate(GLVertexBuffer<Vector3f>& vertices,
-                       GLVertexBuffer<Vector3f>& normals,
-                       GLVertexBuffer<Vector2f>& uv,
-                       GLIndex32& index)
+bool Pyramid::generate(GLVAO32& vao, const bool clear)
 {
-    return generateTube(vertices, normals, uv, index,
+    return generateTube(vao, clear,
                         0.0f,
                         config.radius,
                         config.height,

@@ -49,7 +49,7 @@ OBJ_OPENGL_TEXTURES += Textures.o
 OBJ_OPENGL_SHADERS = Shader.o Program.o
 OBJ_GUI = Window.o Application.o DearImGui.o
 OBJ_MATERIALS = Material.o DepthMaterial.o NormalsMaterial.o BasicMaterial.o Color.o
-OBJ_GEOMETRIES = Model.o Plane.o Tube.o Sphere.o
+OBJ_GEOMETRIES = Axes.o Model.o Plane.o Tube.o Sphere.o
 OBJ_LOADERS = OBJ.o SOIL.o
 OBJ_SCENE_GRAPH = SceneTree.o
 

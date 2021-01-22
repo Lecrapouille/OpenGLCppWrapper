@@ -27,6 +27,7 @@ class ShapeLoader
 {
 public:
 
+    virtual ~ShapeLoader() = default;
     virtual bool load(std::string const& fileName,
                       GLVertexBuffer<Vector3f>& vertices,
                       GLVertexBuffer<Vector3f>& normals,

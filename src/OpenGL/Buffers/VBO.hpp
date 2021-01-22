@@ -59,6 +59,10 @@ public:
         : GLBuffer<T>(name, GL_ARRAY_BUFFER, size, usage)
     {}
 
+    GLVertexBuffer()
+        : GLBuffer<T>()
+    {}
+
     template<typename U>
     inline GLVertexBuffer<T>& operator=(std::initializer_list<U> il)
     {

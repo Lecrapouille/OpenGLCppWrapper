@@ -53,10 +53,7 @@ static std::map<std::string, std::unique_ptr<ShapeLoader>> loaders()
 }
 
 //--------------------------------------------------------------------------
-bool Model::generate(GLVertexBuffer<Vector3f>& vertices,
-                     GLVertexBuffer<Vector3f>& normals,
-                     GLVertexBuffer<Vector2f>& uv,
-                     GLIndex32& index)
+bool Model::generate(GLVAO32& vao, const bool clear)
 {
     static std::map<std::string, std::unique_ptr<ShapeLoader>>
             s_loaders = loaders();
@@ -76,5 +73,32 @@ bool Model::generate(GLVertexBuffer<Vector3f>& vertices,
                   << std::endl;
         return false;
     }
-    return loader->second->load(config.path, vertices, normals, uv, index);
+
+    if (!vao.has<Vector3f>(shaders::name::position))
+    {
+        std::cerr << "VBO for vertices is needed" << std::endl;
+        return false;
+    }
+
+    // Dummy containers.
+    GLVertexBuffer<Vector3f> tmp_normals;
+    GLVertexBuffer<Vector2f> tmp_uv;
+
+    auto& positions = vao.vector3f(shaders::name::position);
+    auto& normals = vao.has<Vector3f>(shaders::name::normal)
+                    ? vao.vector3f(shaders::name::normal)
+                    : tmp_normals;
+    auto& UVs = vao.has<Vector2f>(shaders::name::uv)
+                ? vao.vector2f(shaders::name::uv)
+                : tmp_uv;
+
+    if (clear)
+    {
+        positions.clear();
+        normals.clear();
+        UVs.clear();
+        vao.index().clear();
+    }
+
+    return loader->second->load(config.path, positions, normals, UVs, vao.index());
 }
