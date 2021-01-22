@@ -25,6 +25,7 @@
 #  include "Scene/Geometry/Geometry.hpp"
 #  include "Scene/Material/Material.hpp"
 #  include "Scene/SceneTree.hpp"
+#  include "Scene/Material/ShaderLib.hpp"
 
 // *****************************************************************************
 //! \brief Base class for Shape<Geometry,Material> since sometines we need to
@@ -81,9 +82,9 @@ public:
         // FIXME: should be called after material.program.bind(m_vao)
         // but because not all materials use attributes "normals" or "UV"
         // this will fail
-        if (!geometry.generate(m_vao.vector3f("position"),
-                               m_vao.vector3f("normals"),
-                               m_vao.vector2f("UV"),
+        if (!geometry.generate(m_vao.vector3f(shaders::name::position),
+                               m_vao.vector3f(shaders::name::normal),
+                               m_vao.vector2f(shaders::name::uv),
                                m_vao.index()))
         {
             std::cerr << "Shape " << name()
@@ -116,17 +117,17 @@ public:
 
     virtual GLVertexBuffer<Vector3f>& vertices() override
     {
-        return m_vao.vector3f("position");
+        return m_vao.vector3f(shaders::name::position);
     }
 
     virtual GLVertexBuffer<Vector3f>& normals() override
     {
-        return m_vao.vector3f("normals");
+        return m_vao.vector3f(shaders::name::normal);
     }
 
     virtual GLVertexBuffer<Vector2f>& uv() override
     {
-        return m_vao.vector2f("UV");
+        return m_vao.vector2f(shaders::name::uv);
     }
 
     virtual Matrix44f& modelMatrix() override

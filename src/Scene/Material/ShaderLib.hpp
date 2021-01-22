@@ -30,11 +30,24 @@
 #  include "Scene/Material/BasicMaterial.hpp"
 #  include <string>
 
-#   pragma GCC diagnostic push
-#   pragma GCC diagnostic ignored "-Wunused-function"
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wunused-function"
+#    pragma GCC diagnostic ignored "-Wunused-variable"
+
+#  define UV "uv"
+#  define POSITION "position"
+#  define NORMAL "normal"
 
 namespace shaders
 {
+    //==========================================================================
+    namespace name
+    {
+         static const char* uv = UV;
+         static const char* position = POSITION;
+         static const char* normal = NORMAL;
+    } // namespace name
+
     //==========================================================================
     namespace common
     {
@@ -73,8 +86,8 @@ namespace shaders
                         "uniform mat4 viewMatrix;\n"
                         "uniform mat4 projectionMatrix;\n"
                         "uniform vec3 cameraPosition;\n"
-                        "in vec3 position;\n"
-                        "in vec3 normal;\n";
+                        "in vec3 " POSITION ";\n"
+                        "in vec3 " NORMAL ";\n";
             }
         } // namespace vertex
 
@@ -153,7 +166,7 @@ namespace shaders
             return
               "// Texture\n"
               "uniform vec4 offsetRepeat;\n"
-              "in vec2 UV;\n"
+              "in vec2 " UV ";\n"
               "out vec2 vUV;\n";
           return "";
         }
@@ -163,7 +176,7 @@ namespace shaders
           if ((config.useMap) || (config.useBumpMap) || (config.useSpecularMap))
             return
               "  // Texture\n"
-              "  vUV = UV * offsetRepeat.zw + offsetRepeat.xy;\n";
+              "  vUV = " UV "* offsetRepeat.zw + offsetRepeat.xy;\n";
           return "";
         }
       } // namespace vertex
@@ -416,7 +429,7 @@ namespace shaders
                         << "  gl_Position = projectionMatrix\n"
                         << "              * modelMatrix\n"
                         << "              * viewMatrix\n"
-                        << "              * vec4(position, 1.0);\n"
+                        << "              * vec4(" POSITION ", 1.0);\n"
                         << "}\n";
             }
 
@@ -448,8 +461,8 @@ namespace shaders
                         << "uniform mat3 normalMatrix; // = mat3(transpose(inverse(modelMatrix * viewMatrix)));\n"
                         << "out vec3 vNormal;\n"
                         << "\nvoid main()\n{\n"
-                        << "  vec4 mvPosition = modelMatrix * viewMatrix * vec4(position, 1.0);\n"
-                        << "  vNormal = normalMatrix * normal;\n"
+                        << "  vec4 mvPosition = modelMatrix * viewMatrix * vec4(" POSITION ", 1.0);\n"
+                        << "  vNormal = normalMatrix * " NORMAL ";\n"
                         << "  gl_Position = projectionMatrix * mvPosition;\n"
                         << "}\n";
             }
@@ -480,7 +493,7 @@ namespace shaders
                         << shaders::light::vertex::params(config)
                         << shaders::color::vertex::params(config)
                         << "\nvoid main()\n{\n"
-                        << "  vec4 mvPosition = modelMatrix * viewMatrix * vec4(position, 1.0);\n"
+                        << "  vec4 mvPosition = modelMatrix * viewMatrix * vec4(" POSITION ", 1.0);\n"
                         << shaders::texture::vertex::code(config)
                         << shaders::light::vertex::code(config)
                         << shaders::color::vertex::code(config)
