@@ -23,6 +23,9 @@
  *                C. Qu quchao [at] seas.upenn.edu
  */
 
+/* Modified code by Quentin Quadrat <lecrapouille@gmail.com>.
+ * See original code https://github.com/gareth-cross/quat/blob/master/include/quaternion.hpp */
+
 #ifndef QUATERNION_HPP
 #define QUATERNION_HPP
 
@@ -32,8 +35,14 @@
 
 /**
  *  @class Quat
- *  @brief Template representation of a quaternion.
- *  @note Supports multiplication, addition, scaling and integration.
+ *  @brief Template representation of a quaternion (a, (b,c,d))
+ *  where:
+ *    - \c a is the scalar component
+ *    - \c b is the first complex dimension (i)
+ *    - \c c is the second complex dimension (j)
+ *    - \c d is the third complex dimension (k)
+ *
+ *  Supports multiplication, addition, scaling and integration.
  */
 template <typename Scalar> class Quat
 {
@@ -48,14 +57,14 @@ public:
      */
     Quat()
     {
-        m_q[0] = 1;
-        m_q[1] = m_q[2] = m_q[3] = 0;
+        m_q[0] = Scalar(1);
+        m_q[1] = m_q[2] = m_q[3] = Scalar(0);
     }
 
     /**
      *  @brief Construct a quaterion
      *  @param a Scalar parameter
-     *  @param b,c,d Complex parameters
+     *  @param b,c,d Complex parameters (i, j, k)
      */
     Quat(Scalar a, Scalar b, Scalar c, Scalar d)
     {
@@ -67,22 +76,22 @@ public:
 
     inline friend std::ostream& operator<<(std::ostream& os, Quat& q)
     {
-        return os << "(" << q.x() << ", " << q.y() << ", "
-                  << q.z() << ", " << q.w() << ")";
+        return os << q.a() << "+ " << q.b() << "i + "
+                  << q.c() << "j + " << q.d() << "k";
     }
 
     Scalar angle()
     {
-        return std::acos(w()) * Scalar(2);
+        return std::acos(a()) * Scalar(2);
     }
 
     Vector<Scalar, 3_z> axis()
     {
-        Scalar tmp1 = static_cast<Scalar>(1) - w() * w();
+        Scalar tmp1 = static_cast<Scalar>(1) - a() * a();
         if(tmp1 <= static_cast<Scalar>(0))
             return Vector<Scalar, 3_z>(0, 0, 1);
         Scalar tmp2 = static_cast<Scalar>(1) / std::sqrt(tmp1);
-        return Vector<Scalar, 3_z>(x() * tmp2, y() * tmp2, z() * tmp2);
+        return Vector<Scalar, 3_z>(b() * tmp2, c() * tmp2, d() * tmp2);
     }
 
     /**
@@ -90,7 +99,7 @@ public:
      */
     Scalar norm() const
     {
-        return std::sqrt(x() * x() + y() * y() + z() * z() + w() * w());
+        return std::sqrt(a() * a() + b() * b() + c() * c() + d() * d());
     }
 
     /**
@@ -107,7 +116,7 @@ public:
      */
     Quat conjugate() const
     {
-        return Quat(x(), -y(), -z(), -w());
+        return Quat(a(), -b(), -c(), -d());
     }
 
     /**
@@ -130,21 +139,21 @@ public:
     {
         Matrix<Scalar, 4_z, 4_z> R(0); // FIXME optim: avoid (0)
 
-        const Scalar aa = x() * x();
-        const Scalar bb = y() * y();
-        const Scalar cc = z() * z();
-        const Scalar dd = w() * w();
+        const Scalar aa = a() * a();
+        const Scalar bb = b() * b();
+        const Scalar cc = c() * c();
+        const Scalar dd = d() * d();
 
         R(0, 0) = aa + bb - cc - dd;
-        R(1, 0) = 2 * y() * z() + 2 * x() * w();
-        R(2, 0) = 2 * y() * w() - 2 * x() * z();
+        R(1, 0) = 2 * b() * c() + 2 * a() * d();
+        R(2, 0) = 2 * b() * d() - 2 * a() * c();
 
-        R(0, 1) = 2 * y() * z() - 2 * x() * w();
+        R(0, 1) = 2 * b() * c() - 2 * a() * d();
         R(1, 1) = aa - bb + cc - dd;
-        R(2, 1) = 2 * z() * w() + 2 * x() * y();
+        R(2, 1) = 2 * c() * d() + 2 * a() * b();
 
-        R(0, 2) = 2 * y() * w() + 2 * x() * z();
-        R(1, 2) = 2 * z() * w() - 2 * x() * y();
+        R(0, 2) = 2 * b() * d() + 2 * a() * c();
+        R(1, 2) = 2 * c() * d() - 2 * a() * b();
         R(2, 2) = aa - bb - cc + dd;
 
         return R;
@@ -242,49 +251,49 @@ public:
         {
             s = 2 * std::sqrt(1 + tr);
 
-            Q.x() = s / 4;
-            Q.y() = (m(2, 1) - m(1, 2)) / s;
-            Q.z() = (m(0, 2) - m(2, 0)) / s;
-            Q.w() = (m(1, 0) - m(0, 1)) / s;
+            Q.a() = s / 4;
+            Q.b() = (m(2, 1) - m(1, 2)) / s;
+            Q.c() = (m(0, 2) - m(2, 0)) / s;
+            Q.d() = (m(1, 0) - m(0, 1)) / s;
         }
         else if (m(0, 0) > m(1, 1) && m(0, 0) > m(2, 2))
         {
             s = 2 * std::sqrt(1 + m(0, 0) - m(1, 1) - m(2, 2));
 
-            Q.x() = (m(2, 1) - m(1, 2)) / s;
-            Q.y() = s / 4;
-            Q.z() = (m(0, 1) + m(1, 0)) / s;
-            Q.w() = (m(0, 2) + m(2, 0)) / s;
+            Q.a() = (m(2, 1) - m(1, 2)) / s;
+            Q.b() = s / 4;
+            Q.c() = (m(0, 1) + m(1, 0)) / s;
+            Q.d() = (m(0, 2) + m(2, 0)) / s;
         }
         else if (m(1, 1) > m(2, 2))
         {
             s = 2 * std::sqrt(1 + m(1, 1) - m(0, 0) - m(2, 2));
 
-            Q.x() = (m(0, 2) - m(2, 0)) / s;
-            Q.y() = (m(0, 1) + m(1, 0)) / s;
-            Q.z() = s / 4;
-            Q.w() = (m(1, 2) + m(2, 1)) / s;
+            Q.a() = (m(0, 2) - m(2, 0)) / s;
+            Q.b() = (m(0, 1) + m(1, 0)) / s;
+            Q.c() = s / 4;
+            Q.d() = (m(1, 2) + m(2, 1)) / s;
         }
         else
         {
             s = 2 * std::sqrt(1 + m(2, 2) - m(0, 0) - m(1, 1));
 
-            Q.x() = (m(1, 0) - m(0, 1)) / s;
-            Q.y() = (m(0, 2) + m(2, 0)) / s;
-            Q.z() = (m(1, 2) + m(2, 1)) / s;
-            Q.w() = s / 4;
+            Q.a() = (m(1, 0) - m(0, 1)) / s;
+            Q.b() = (m(0, 2) + m(2, 0)) / s;
+            Q.c() = (m(1, 2) + m(2, 1)) / s;
+            Q.d() = s / 4;
         }
 
         return Q;
     }
 
-    void generateW()
+    void generateScalarComponent()
     {
-        Scalar sw = Scalar(1) - (x() * x()) - (y() * y()) - (z() * z());
-        if (sw < Scalar(0))
-            w() = Scalar(0);
+        Scalar w = Scalar(1) - (b() * b()) - (c() * c()) - (d() * d());
+        if (w < Scalar(0))
+            a() = Scalar(0);
         else
-            w() = - std::sqrt(sw);
+            a() = - std::sqrt(w);
     }
 
 
@@ -300,17 +309,29 @@ public:
     Scalar &operator()(size_t i) { return m_q[i]; }
     const Scalar &operator()(size_t i) const { return m_q[i]; }
 
-    Scalar &x() { return m_q[0]; } /**< Scalar component */
-    const Scalar &x() const { return m_q[0]; }
+    Scalar &a() { return m_q[0]; } /**< Scalar component */
+    const Scalar &a() const { return m_q[0]; }
 
-    Scalar &y() { return m_q[1]; } /**< First complex dimension (i) */
-    const Scalar &y() const { return m_q[1]; }
+    Scalar &b() { return m_q[1]; } /**< First complex dimension (i) */
+    const Scalar &b() const { return m_q[1]; }
 
-    Scalar &z() { return m_q[2]; } /**< Second complex dimension (j) */
-    const Scalar &z() const { return m_q[2]; }
+    Scalar &c() { return m_q[2]; } /**< Second complex dimension (j) */
+    const Scalar &c() const { return m_q[2]; }
 
-    Scalar &w() { return m_q[3]; } /**< Third complex dimension (k) */
-    const Scalar &w() const { return m_q[3]; }
+    Scalar &d() { return m_q[3]; } /**< Third complex dimension (k) */
+    const Scalar &d() const { return m_q[3]; }
+
+    Scalar &w() { return m_q[0]; } /**< Scalar component */
+    const Scalar &w() const { return m_q[0]; }
+
+    Scalar &x() { return m_q[1]; } /**< First complex dimension (i) */
+    const Scalar &x() const { return m_q[1]; }
+
+    Scalar &y() { return m_q[2]; } /**< Second complex dimension (j) */
+    const Scalar &y() const { return m_q[2]; }
+
+    Scalar &z() { return m_q[3]; } /**< Third complex dimension (k) */
+    const Scalar &z() const { return m_q[3]; }
 
 private:
 
