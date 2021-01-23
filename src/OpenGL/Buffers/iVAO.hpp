@@ -36,6 +36,9 @@
 template<class T>
 class GLVAOi: public GLVAO
 {
+    //! \brief GLProgram directly modifies GLVAO states.
+    friend class GLProgram;
+
 public:
 
     GLVAOi(std::string const& name, BufferUsage const usage = BufferUsage::DYNAMIC_DRAW,
@@ -61,6 +64,13 @@ public:
             m_program->begin(); // m_program->begin();
             begin(); // Optim: glBindVertexArray(m_vao->handle());
             m_index.begin(); // FIXME should be stored inside the VAO
+
+            for (auto& it: m_program->m_samplers)
+            {
+                it.second->begin();
+                m_listTextures[it.first]->begin();
+            }
+
             glCheck(glDrawElements(static_cast<GLenum>(mode),
                                    static_cast<GLsizei>(m_index.size()),
                                    m_index.gltype(), 0));

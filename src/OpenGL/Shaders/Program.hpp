@@ -505,8 +505,8 @@ private:
 
     Shaders    m_shaders;
     Attributes m_attributes;
-    Samplers   m_samplers;
-    Uniforms   m_uniforms;
+public:    Samplers   m_samplers; // FIXME private
+private:    Uniforms   m_uniforms;
     UniformLocations m_uniformLocations;
     std::vector<std::string> m_failedShaders;
     std::string m_error;

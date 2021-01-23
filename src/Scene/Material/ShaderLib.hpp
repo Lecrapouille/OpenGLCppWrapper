@@ -27,7 +27,7 @@
 //! https://github.com/jdduke/three_cpp
 //----------------------------------------------------------------------------
 
-#  include "Scene/Material/BasicMaterial.hpp"
+#  include "Scene/Material/MeshBasicMaterial.hpp"
 #  include <string>
 
 #    pragma GCC diagnostic push

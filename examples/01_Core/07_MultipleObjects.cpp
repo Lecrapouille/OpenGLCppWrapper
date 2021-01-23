@@ -201,8 +201,6 @@ bool MultipleObjects::onPaint()
     m_prog.vector4f("color") = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
     m_floor.transform.reset();
     m_floor.transform.position(Vector3f(0.0f, 0.0f, 0.0f)); // Apply a translation
-std::cout << "P: " << m_floor.transform.position() << " O: " << m_floor.transform.origin() << std::endl;
-std::cout << m_floor.transform.matrix() << std::endl;
     m_prog.matrix44f("model") = m_floor.transform.matrix();
     m_floor.vao.draw(Mode::TRIANGLES, 0, 6); // Style 03: do not pass implict bound VAO and no vertices count
 

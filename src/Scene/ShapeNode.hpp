@@ -53,20 +53,14 @@ class Shape: public BaseShape, public SceneObject
 {
 public:
 
+    using Ptr = std::unique_ptr<Shape<Geometry,Material>>;
+
     Shape(std::string const& name, Mode const mode = Mode::TRIANGLES)
         : SceneObject(name),
           m_vao("VAO_" + name),
           material(m_vao), // will use the material default config
           m_drawMode(mode)
     {}
-
-    // FIXME Does not compile but does not need
-    // bool compile(Geometry::Config& geo_conf, Material::Config& mat_conf)
-    // {
-    //    material.config = geo_conf;
-    //    geometry.config = mat_conf;
-    //    return compile();
-    // }
 
     bool compile()
     {

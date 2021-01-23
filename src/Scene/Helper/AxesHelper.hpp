@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2021 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -18,24 +18,24 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_INCLUDE_SCENE_GRAPH_HPP
-#  define OPENGLCPPWRAPPER_INCLUDE_SCENE_GRAPH_HPP
-
-#  include "Scene/Material/DepthMaterial.hpp"
-#  include "Scene/Material/NormalsMaterial.hpp"
-#  include "Scene/Material/MeshBasicMaterial.hpp"
-#  include "Scene/Material/LineBasicMaterial.hpp"
-
-#  include "Scene/Geometry/Plane.hpp"
-#  include "Scene/Geometry/Box.hpp"
-#  include "Scene/Geometry/Tube.hpp"
-#  include "Scene/Geometry/Sphere.hpp"
-#  include "Scene/Geometry/Model.hpp"
+#ifndef AXESHELPER_HPP
+#  define AXESHELPER_HPP
 
 #  include "Scene/ShapeNode.hpp"
-#  include "Scene/BlinkerNode.hpp"
-#  include "Scene/CameraNode.hpp"
+#  include "Scene/Geometry/Axes.hpp"
+#  include "Scene/Material/LineBasicMaterial.hpp"
 
-#  include "Scene/Helper/AxesHelper.hpp"
+class AxesHelper : public Shape<Axes, LineBasicMaterial>
+{
+public:
 
-#endif // OPENGLCPPWRAPPER_INCLUDE_SCENE_GRAPH_HPP
+    using Ptr = std::unique_ptr<AxesHelper>;
+
+    AxesHelper(std::string const& name)
+        : Shape<Axes, LineBasicMaterial>(name, Mode::LINES)
+    {
+        compile();
+    }
+};
+
+#endif

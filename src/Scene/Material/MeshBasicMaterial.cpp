@@ -18,7 +18,7 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "Scene/Material/BasicMaterial.hpp"
+#include "Scene/Material/MeshBasicMaterial.hpp"
 #include "Scene/Material/ShaderLib.hpp"
 
 //-----------------------------------------------------------------------------

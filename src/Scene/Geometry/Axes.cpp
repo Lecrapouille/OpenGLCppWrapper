@@ -39,9 +39,9 @@ bool Axes::generate(GLVAO32& vao, const bool clear)
         Vector3f(0.0f, 0.0f, 0.0f),  Vector3f(0.0f, 0.0f, config.size)
     };
 
-    if (vao.has<Vector4f>(shaders::name::color))
+    if (vao.has<Vector4f>("colors"))
     {
-        auto& color = vao.vector4f(shaders::name::color);
+        auto& color = vao.vector4f("colors");
 
         if (clear) { color.clear(); }
         color =
@@ -51,6 +51,8 @@ bool Axes::generate(GLVAO32& vao, const bool clear)
             Vector4f(0.0f, 0.6f, 1.0f, 1.0f),  Vector4f(0.0f, 0.0f, 1.0f, 1.0f)
         };
     }
+
+    vao.index() = { 0u, 1u, 0u, 3u, 0u, 5u };
 
     return true;
 }
