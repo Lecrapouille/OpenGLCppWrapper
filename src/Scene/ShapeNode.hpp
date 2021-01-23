@@ -124,17 +124,36 @@ public:
         return m_vao.vector2f(shaders::name::uv);
     }
 
-    virtual Matrix44f& modelMatrix() override
+    //! \bref Vertex coordinates of our model starts in local space as local
+    //! coordinates (relative to its local origin). This matrix make them
+    //! process to world coordinates which are coordinates in respect of a
+    //! larger world. These coordinates are relative to some global origin of
+    //! the world, together with many other objects also placed relative to this
+    //! world's origin.
+    //!
+    //! V_clip = M_proj * M_view * M_model * V_local
+    Matrix44f& modelMatrix()
     {
         return material.program.matrix44f("modelMatrix");
     }
 
-    virtual Matrix44f& viewMatrix() override
+    //! \bref After modelMatrix() this matrix make process coordinates of our
+    //! model to view coordinates in such a way that each coordinate is as seen
+    //! from the camera or viewer's point of view.
+    //!
+    //! V_clip = M_proj * M_view * M_model * V_local
+    Matrix44f& viewMatrix()
     {
         return material.program.matrix44f("viewMatrix");
     }
 
-    virtual Matrix44f& projectionMatrix() override
+    //! \bref After viewMatrix() the coordinates are in view space we want to
+    //! project them to clip coordinates. Clip coordinates are processed to the
+    //! -1.0 and 1.0 range and determine which vertices will end up on the
+    //! screen.
+    //!
+    //! V_clip = M_proj * M_view * M_model * V_local
+    Matrix44f& projectionMatrix()
     {
         return material.program.matrix44f("projectionMatrix");
     }

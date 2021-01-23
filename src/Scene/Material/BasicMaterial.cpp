@@ -44,8 +44,8 @@ void BasicMaterial::generate(GLVertexShader& vertexShader,
         config.useExpFog = true;
     }
 
-    shaders::materials::basic::code(vertexShader, config);
-    shaders::materials::basic::code(fragmentShader, config);
+    shaders::materials::basic::mesh::code(vertexShader, config);
+    shaders::materials::basic::mesh::code(fragmentShader, config);
 }
 
 //-----------------------------------------------------------------------------
