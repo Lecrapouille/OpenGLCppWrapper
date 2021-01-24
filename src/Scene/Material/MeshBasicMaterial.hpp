@@ -31,6 +31,8 @@ public:
 
     struct Config
     {
+        enum class Fog { None, Linear, Exponential };
+        enum class Light { None, Phong, Lambert };
         Config() {}
 
         //! \brief If true then allow to drop fragment colors if lower than a given
@@ -40,6 +42,11 @@ public:
         bool useGammaInput = false;
         //! \brief If true then taken into account gamma correction.
         bool useGammaOutput = false;
+        //! \brief
+        bool useLightMap = false;
+        Light useLight = Light::None;
+        //! \brief
+        bool useEnvMap = false;
         //! \brief If true then apply a texture to the object.
         bool useMap = false;
         //! \brief If true then apply a bump mapping texture to the object.
@@ -51,9 +58,11 @@ public:
         //! \brief If true then apply a color to the object.
         bool useColor = true;
         //! \brief If true then apply a linear fog. Disabled if useExpFog is set to true.
-        bool useFog = false;
-        //! \brief If true then apply exponential fog and disable useFog.
-        bool useExpFog = false;
+        Fog useFog = Fog::None;
+        bool useSkinning = false;
+        bool useBoneTexture = false;
+        bool useMorphTargets = false;
+        bool useShadowMap = false;
     };
 
 public:

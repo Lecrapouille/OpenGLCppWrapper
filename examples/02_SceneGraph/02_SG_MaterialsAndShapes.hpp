@@ -47,7 +47,31 @@ private:
     virtual bool onPaint() override;
     virtual void onPaintFailed(std::string const& reason) override;
 
+private:
+
+    //--------------------------------------------------------------------------
+    //! \brief Sub class managing Dear ImGui context and allowing to draw
+    //! widgets.  \note this class can be place outside \c SGMatAndShape
+    //--------------------------------------------------------------------------
+    class GUI: public DearImGui
+    {
+    public:
+
+        GUI(SGMatAndShape& window)
+            : m_window(window)
+        {}
+
+    protected:
+
+        virtual bool render() override;
+
+    private:
+
+        SGMatAndShape& m_window;
+    };
+
     SceneTree     m_scene;
+    GUI       m_imgui;
 };
 
 #endif // EXAMPLE_02_SG_MATERIALS_AND_SHAPES_HPP

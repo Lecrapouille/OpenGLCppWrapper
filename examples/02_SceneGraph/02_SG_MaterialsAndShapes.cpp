@@ -63,13 +63,15 @@ template<> void MyShape<NormalsMaterial>::initMaterial()
 
 template<> void MyShape<BasicMaterial>::initMaterial()
 {
-    Shape<Model, BasicMaterial>::material.color() = Color(1.0f, 0.0f, 0.0f).toVector3f();
+    Shape<Model, BasicMaterial>::material.color() = Color(0.5f, 0.0f, 0.0f).toVector3f();
+    Shape<Model, BasicMaterial>::material.diffuse() = Color(0.4f, 0.0f, 0.0f).toVector3f();
+    Shape<Model, BasicMaterial>::material.opacity() = 1.0f;
 }
 
 //------------------------------------------------------------------------------
 SGMatAndShape::SGMatAndShape(uint32_t const width, uint32_t const height,
                              const char *title)
-    : GLWindow(width, height, title)
+    : GLWindow(width, height, title), m_imgui(*this)
 {
     std::cout << "Hello Material: " << info() << std::endl;
 }
@@ -104,8 +106,12 @@ bool SGMatAndShape::onSetup()
 {
     glCheck(glEnable(GL_DEPTH_TEST));
     glCheck(glDepthFunc(GL_LESS));
+    glCheck(glEnable(GL_BLEND));
+    glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    //glCheck(glDisable(GL_CULL_FACE));
 
-    m_scene.root = SceneObject::create<MyShape<BasicMaterial>>("Tree0", "textures/tree.obj");
+    m_scene.root = AxesHelper::create<AxesHelper>("Axis");
+    m_scene.root->attach<MyShape<BasicMaterial>>("Tree0", "textures/tree.obj");
     MyShape<DepthMaterial>& t1 = m_scene.root->attach<MyShape<DepthMaterial>>("Tree1", "textures/tree.obj");
     MyShape<NormalsMaterial>& t2 = m_scene.root->attach<MyShape<NormalsMaterial>>("Tree2", "textures/tree.obj");
     MyShape<DepthMaterial>& t3 = t1.attach<MyShape<DepthMaterial>>("Tree1.0", "textures/tree.obj");
@@ -115,12 +121,59 @@ bool SGMatAndShape::onSetup()
     //    Tree2             Tree1
     //              Tree1.0       Tree1.1
     //
-    t1.transform.position(Vector3f(1.0f, 1.0f, 0.0f));
-    t2.transform.position(Vector3f(-1.0f, -1.0f, 0.0f));
-    t3.transform.position(Vector3f(0.5f, 0.5f, 0.0f));
-    t4.transform.position(Vector3f(-0.5f, -0.5f, 0.0f));
+    t1.transform.position(Vector3f(-2.0f, 0.0f, 2.0f));
+    t2.transform.position(Vector3f(2.0f, 0.0f, 2.0f));
+    t3.transform.position(Vector3f(-1.0f, 0.0f, 1.0f));
+    t4.transform.position(Vector3f(1.0f, 0.0f, 1.0f));
 
-    m_scene.debug();
+    //m_scene.debug();
+
+    return m_imgui.setup(*this);
+}
+
+//------------------------------------------------------------------
+//! \brief Paint some DearImGui widgets.
+//------------------------------------------------------------------
+bool SGMatAndShape::GUI::render()
+{
+    static float new_near = 6.5f;
+    static float previous_near = 0.0f;
+    static float new_far = 8.1f;
+    static float previous_far = 0.0f;
+
+    ImGui::Begin("Hello, world!");
+    ImGui::Text("Depth Material:");
+    ImGui::SliderFloat("near", &new_near, 0.01f, 10.0f);
+    ImGui::SliderFloat("far ", &new_far, 0.01f, 10.0f);
+    ImGui::End();
+
+    // Apply new depth near value to the shape
+    if (abs(new_near - previous_near) > 0.001f)
+    {
+        previous_near = new_near;
+        m_window.m_scene.root->traverse([](SceneObject* node, float const near_)
+        {
+            auto n = dynamic_cast<MyShape<DepthMaterial>*>(node);
+            if (n != nullptr)
+            {
+                n->material.near() = near_;
+            }
+        }, new_near);
+    }
+
+    // Apply new depth far value to the shape
+    if (abs(new_far - previous_far) > 0.001f)
+    {
+        previous_far = new_far;
+        m_window.m_scene.root->traverse([](SceneObject* node, float const far_)
+        {
+            auto n = dynamic_cast<MyShape<DepthMaterial>*>(node);
+            if (n != nullptr)
+            {
+                n->material.far() = far_;
+            }
+        }, new_far);
+    }
 
     return true;
 }
@@ -149,7 +202,8 @@ bool SGMatAndShape::onPaint()
 
     m_scene.draw();
 
-    return true;
+     // DearImGui
+    return m_imgui.draw();
 }
 
 //------------------------------------------------------------------------------

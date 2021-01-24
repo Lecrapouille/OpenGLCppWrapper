@@ -35,13 +35,12 @@ void BasicMaterial::generate(GLVertexShader& vertexShader,
         program.hasUniform<float>("fogNear") ||
         program.hasUniform<float>("fogFar"))
     {
-        config.useFog = true;
+        config.useFog = BasicMaterial::Config::Fog::Linear;
     }
 
     if (program.hasUniform<float>("fogDensity"))
     {
-        config.useFog = true;
-        config.useExpFog = true;
+        config.useFog = BasicMaterial::Config::Fog::Exponential;
     }
 
     shaders::materials::basic::mesh::code(vertexShader, config);
@@ -84,14 +83,13 @@ void BasicMaterial::init()
             offsetTexture() = Vector4f(0.0f, 0.0f, 1.0f, 1.0f);
     }
 
-    // Material flags useExpFog and useFog are exclusive. Disable useFog
-    if ((config.useExpFog) && (config.useFog))
+    if (config.useFog != BasicMaterial::Config::Fog::None)
     {
         if (!program.hasUniform<Vector3f>("color"))
-            config.useFog = false;
+            config.useFog = BasicMaterial::Config::Fog::Linear;
     }
 
-    if (config.useFog)
+    if (config.useFog == BasicMaterial::Config::Fog::Linear)
     {
         if (!program.hasUniform<Vector3f>("fogColor"))
             fogColor() = Vector3f(0.5f, 0.5f, 0.5f);
@@ -101,7 +99,7 @@ void BasicMaterial::init()
             fogFar() = 10.0f;
     }
 
-    if (config.useExpFog)
+    if (config.useFog == BasicMaterial::Config::Fog::Exponential)
     {
         if (!program.hasUniform<float>("fogDensity"))
             fogDensity() = 0.00025f;
