@@ -50,3 +50,9 @@ fi
 print-clone imgui
 git clone https://github.com/ocornut/imgui.git --depth=1 > /dev/null 2> /dev/null
 #(cd imgui && git reset --hard f9b873662baac2388a4ca78c967e53eb5d83d2a1)
+
+### Library for unit conversion library
+### License: MIT
+print-clone units
+git clone https://github.com/nholthaus/units.git --depth=1 > /dev/null 2> /dev/null
+(cd units/include && mkdir units && cp units.h units/units.hpp)

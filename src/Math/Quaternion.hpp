@@ -33,6 +33,13 @@
 #include <limits>
 #include <type_traits>
 
+#  pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wold-style-cast"
+#    pragma GCC diagnostic ignored "-Wfloat-equal"
+#    pragma GCC diagnostic ignored "-Wsign-conversion"
+#      include "units/units.hpp"
+#  pragma GCC diagnostic pop
+
 /**
  *  @class Quat
  *  @brief Template representation of a quaternion (a, (b,c,d))
@@ -80,9 +87,9 @@ public:
                   << q.c() << "j + " << q.d() << "k";
     }
 
-    Scalar angle()
+    units::angle::radian_t angle()
     {
-        return std::acos(a()) * Scalar(2);
+        return units::angle::radian_t(std::acos(a()) * Scalar(2));
     }
 
     Vector<Scalar, 3_z> axis()
@@ -209,10 +216,10 @@ public:
      *  @param y Y component
      *  @param z Z component
      */
-    static Quat rotation(Scalar theta, Scalar x, Scalar y, Scalar z)
+    static Quat rotation(units::angle::radian_t theta, Scalar x, Scalar y, Scalar z)
     {
-        const Scalar haversine = std::sin(theta / 2);
-        const Scalar havercosine = std::cos(theta / 2);
+        const Scalar haversine = std::sin(theta.to<Scalar>() / 2);
+        const Scalar havercosine = std::cos(theta.to<Scalar>() / 2);
 
         return Quat(havercosine, haversine * x, haversine * y, haversine * z);
     }
@@ -479,10 +486,10 @@ Quat<Scalar> &operator+=(Quat<Scalar> &a, const Quat<Scalar> &b)
  * @brief Creates a rotation which rotates angle degrees around axis.
  */
 template <typename Scalar>
-Quat<Scalar> angleAxis(Scalar const angle, Vector<Scalar, 3u> const& v)
+Quat<Scalar> angleAxis(units::angle::radian_t const angle, Vector<Scalar, 3u> const& v)
 {
-    Scalar const s = std::sin(angle * static_cast<Scalar>(0.5));
-    return { std::cos(angle * static_cast<Scalar>(0.5)),
+    Scalar const s = std::sin(angle.to<Scalar>() * static_cast<Scalar>(0.5));
+    return { std::cos(angle.to<Scalar>() * static_cast<Scalar>(0.5)),
              v.x * s, v.y * s, v.z * s };
 }
 

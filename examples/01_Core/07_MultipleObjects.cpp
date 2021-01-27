@@ -176,7 +176,7 @@ bool MultipleObjects::onPaint()
     // Apply a "pinkished" coloration.
     m_prog.vector4f("color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
     m_cube1.transform.reset();
-    m_cube1.transform.yaw(4.0f * cosf(time));                 // Apply a rotation around Y-axis
+    m_cube1.transform.yaw(units::angle::radian_t(cosf(time)));  // Apply a rotation around Y-axis
     m_cube1.transform.position(Vector3f(-1.0f, 0.0f, -1.0f)); // Apply a translation
     m_prog.matrix44f("model") = m_cube1.transform.matrix();   // Rotate and translate the cube
     m_cube1.vao.draw(Mode::TRIANGLES, 0, 36); // Style 01: pass all parameters

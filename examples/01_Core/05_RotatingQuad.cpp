@@ -166,7 +166,7 @@ bool RotatingQuad::onPaint()
 
     // Apply a rotation to the box around the Y-axis
     m_box.transform.reset(); // restore to identity matrix
-    m_box.transform.yaw(4.0f * cosf(time));
+    m_box.transform.yaw(units::angle::radian_t(4.0f * cosf(time)));
     m_prog.matrix44f("model") = m_box.transform.matrix();
 
     // Draw the box using the EBO. Do not pass vertices count or indice !!

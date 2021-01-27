@@ -60,6 +60,7 @@ endif
 #
 INCLUDES += -I$(P)/include -I$(P)/. -I$(P)/src -I$(THIRDPART)
 INCLUDES += -I$(THIRDPART)/imgui -I$(P)/src/Loaders/3D
+INCLUDES += -I$(THIRDPART)/units/include
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
@@ -70,4 +71,4 @@ VPATH += $(P)/src/OpenGL/Context $(P)/src/OpenGL/Shaders
 VPATH += $(P)/src/OpenGL/Textures $(P)/src/OpenGL/Variables
 VPATH += $(P)/src/UI $(P)/src/Loaders/Textures $(P)/src/Loaders/3D
 VPATH += $(P)/src/Scene/Material $(P)/src/Scene/Geometry $(P)/src/Scene
-VPATH += $(THIRDPART) $(THIRDPART)/imgui $(THIRDPART)/SOIL/obj
+VPATH += $(P)/src/Scene/Camera $(THIRDPART) $(THIRDPART)/imgui $(THIRDPART)/SOIL/obj
