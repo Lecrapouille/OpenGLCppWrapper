@@ -43,6 +43,7 @@
 #      include "external/imgui/backends/imgui_impl_opengl3.cpp"
 #      include "external/imgui/imgui_draw.cpp"
 #      include "external/imgui/imgui_widgets.cpp"
+#      include "external/imgui/imgui_tables.cpp"
 #      include "external/imgui/imgui.cpp"
 
 #   pragma GCC diagnostic pop
