@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2021 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -25,6 +25,14 @@
 // Original code: https://github.com/g-truc/glm/blob/master/glm/gtc/matrix_transform.inl
 
 #  include "Math/Matrix.hpp"
+
+#  pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wold-style-cast"
+#    pragma GCC diagnostic ignored "-Wfloat-equal"
+#    pragma GCC diagnostic ignored "-Wsign-conversion"
+#      include "units/units.hpp"
+#  pragma GCC diagnostic pop
+
 
 namespace matrix
 {
@@ -54,10 +62,10 @@ namespace matrix
 
   //! \brief angle in radian
   template<typename T>
-  Matrix<T, 4_z, 4_z> rotate(Matrix<T, 4_z, 4_z> const& m, T const angle, Vector<T, 3_z> const& v)
+  Matrix<T, 4_z, 4_z> rotate(Matrix<T, 4_z, 4_z> const& m, units::angle::radian_t const angle, Vector<T, 3_z> const& v)
   {
-    T const c = std::cos(angle);
-    T const s = std::sin(angle);
+    T const c = std::cos(angle.to<T>());
+    T const s = std::sin(angle.to<T>());
 
     Vector<T, 3_z> axis(vector::normalize(v));
     Vector<T, 3_z> temp((maths::one<T>() - c) * axis);

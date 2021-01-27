@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2021 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -275,7 +275,7 @@ public:
     //! \brief Set the absolute orientation of the object.
     //! \param angle in radian.
     //--------------------------------------------------------------------------
-    Transformable<T,n>& rotate(T const angle, Vector<T, n> const& axis)
+    Transformable<T,n>& rotate(units::angle::radian_t const angle, Vector<T, n> const& axis)
     {
         Quat<T> rot = angleAxis(angle, axis);
         rot.normalize();
@@ -288,7 +288,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    Transformable<T,n>& pitch(T const angle)
+    Transformable<T,n>& pitch(units::angle::radian_t const angle)
     {
         Quat<T> rot = angleAxis(angle, right());
         rot.normalize();
@@ -301,7 +301,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    Transformable<T,n>& yaw(T const angle)
+    Transformable<T,n>& yaw(units::angle::radian_t const angle)
     {
         Quat<T> rot = angleAxis(angle, up());
         rot.normalize();
@@ -314,7 +314,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    Transformable<T,n>& roll(T const angle)
+    Transformable<T,n>& roll(units::angle::radian_t const angle)
     {
         Quat<T> rot = angleAxis(angle, forward());
         rot.normalize();
@@ -383,6 +383,11 @@ public:
             m_inverse_trans_needs_update = false;
         }
         return m_inverse_transform;
+    }
+
+    inline bool modified() const
+    {
+       return m_transform_needs_update;
     }
 
 protected:
