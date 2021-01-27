@@ -67,8 +67,11 @@ public:
     //--------------------------------------------------------------------------
     virtual ~DearImGui()
     {
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
+        if (m_init)
+        {
+            ImGui_ImplGlfw_Shutdown();
+            ImGui::DestroyContext();
+        }
     }
 
     //--------------------------------------------------------------------------
