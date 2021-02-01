@@ -141,6 +141,16 @@ public:
     }
 
     //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    /*Matrix<T, n + 1_z, n + 1_z> translation()
+    {
+        Matrix<T, n+1_z, n+1_z> I(matrix::Identity);
+        m_transform = matrix::translate(I, m_position - m_origin);
+        return m_transform;
+    }*/
+
+    //--------------------------------------------------------------------------
     //! \brief Move the object by a given offset.
     //! Do the same job than translate() or displace().
     //--------------------------------------------------------------------------
@@ -326,21 +336,82 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief
+    //!
+    //! When multiplied by the LookAt view matrix, the world-space vectors are
+    //! rotated (brought) into the camera's view while the camera's orientation
+    //! is kept in place. So an actual rotation of the camera by 45 degress to
+    //! the right is achieved with a matrix which applies a 45 degree rotation
+    //! to the left to all the world-space vertices.
+    //!
+    //! Correct rotation can be done in two ways:
+    //!  - Calculate the inverse of the lookAt matrix and multiply the
+    //!    world-space direction vectors by this rotation matrix.
+    //!  - (more efficient) Convert the LookAt matrix into a quaternion and
+    //!    conjugate it instead of applying glm::inverse, since the result is a
+    //!    unit quat and for such quats the inverse is equal to the conjugate.
     //--------------------------------------------------------------------------
-    void lookAt(Vector3f const &target)
+    void lookAt(Vector3f const &position, Vector3f const &target, Vector3f const &up)
     {
-       m_orientation = Quat<T>::fromMatrix(matrix::lookAt(m_position - m_origin, target, up())).conjugate();
-       m_transform_needs_update = true;
+        m_position = position;
+        Matrix44f mat = matrix::lookAt(position, target, up);
+        m_orientation = Quatf::fromMatrix(mat).conjugate();
+        m_transform_needs_update = true;
+
+#if 0
+
+        std::cout << "==============\nqq::lookAt: " << matrix::lookAt(position, target, up) << std::endl;
+
+        glm::mat4 lookMat = glm::lookAt(glm::vec3(position.x,
+                                                  position.y,
+                                                  position.z),
+                                        glm::vec3(target.x,
+                                                  target.y,
+                                                  target.z),
+                                        glm::vec3(up.x,
+                                                  up.y,
+                                                  up.z));
+
+        glm::quat rotation1 = glm::quat_cast(lookMat);
+        glm::quat rotation = glm::conjugate(glm::quat_cast(lookMat));
+        std::cout << "glm::lookAt: " << glm::to_string(lookMat) << std::endl;
+        //std::cout << "glm::quat: " << glm::to_string(rotation1) << std::endl;
+        std::cout << "glm::quat conjug: " << glm::to_string(rotation) << std::endl;
+        std::cout << "=>: " << glm::angle(rotation) * 57.2958f << " " << glm::to_string(glm::axis(rotation)) << std::endl;
+
+        std::cout << "glm::rot: " << glm::to_string(glm::mat4_cast(rotation)) << std::endl;
+
+        m_position = position;
+
+        //std::cout << "Camera::lookAt: " << std::endl;
+        //std::cout << "  Position: " << position << std::endl;
+        //std::cout << "  Target: " << target << std::endl;
+        //std::cout << "  Up: " << up << std::endl;
+
+
+        Matrix44f mat = matrix::lookAt(m_position - m_origin, target, up);
+        //std::cout << "  LookAt: " << mat << std::endl;
+
+
+        Quatf q = Quat<T>::fromMatrix(mat); // FIXME pourquoi retourne le conjug ?
+        std::cout << "  quat: " << q << std::endl;
+        m_orientation = Quat<T>::fromMatrix(mat);//.conjugate();
+        units::angle::degree_t angle = m_orientation.angle();
+        //std::cout << "  quat conj: " << m_orientation << std::endl;
+        std::cout << "  Axe: " << m_orientation.axis() << " angle: " << angle.to<float>()
+                  << std::endl;
+
+        m_transform_needs_update = true;
+#endif
     }
 
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    void lookAt(Vector3f const &position, Vector3f const &target, Vector3f const &up)
+    void lookAt(Vector3f const &target)
     {
-       m_position = position;
-       m_orientation = Quat<T>::fromMatrix(matrix::lookAt(m_position - m_origin, target, up)).conjugate();
-       m_transform_needs_update = true;
+        m_orientation = Quat<T>::fromMatrix(
+            matrix::lookAt(m_position - m_origin, target, up())).conjugate();
+        m_transform_needs_update = true;
     }
 
     //--------------------------------------------------------------------------
@@ -358,7 +429,8 @@ public:
     {
         if (unlikely(m_transform_needs_update))
         {
-            m_transform = matrix::translate(m_transform, m_position - m_origin);
+            Matrix<T, n+1_z, n+1_z> I(matrix::Identity);
+            m_transform = matrix::translate(I, m_position - m_origin);
             m_transform = matrix::rotate(m_transform, m_orientation.angle(), m_orientation.axis());
             m_transform = matrix::scale(m_transform, m_scale);
             m_transform_needs_update = false;

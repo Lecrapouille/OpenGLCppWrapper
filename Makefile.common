@@ -60,7 +60,7 @@ endif
 #
 INCLUDES += -I$(P)/include -I$(P)/. -I$(P)/src -I$(THIRDPART)
 INCLUDES += -I$(THIRDPART)/imgui -I$(P)/src/Loaders/3D
-INCLUDES += -I$(THIRDPART)/units/include
+INCLUDES += -I$(THIRDPART)/units/include -I$(THIRDPART)/glm
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files

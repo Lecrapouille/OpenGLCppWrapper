@@ -34,7 +34,7 @@
 
 #  include "Scene/ShapeNode.hpp"
 #  include "Scene/BlinkerNode.hpp"
-#  include "Scene/CameraNode.hpp"
+#  include "Scene/Camera/CameraNode.hpp"
 
 #  include "Scene/Helper/AxesHelper.hpp"
 

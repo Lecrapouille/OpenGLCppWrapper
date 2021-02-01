@@ -81,9 +81,22 @@ public:
         m_q[3] = d;
     }
 
+    /**
+     *  @brief Construct a quaterion
+     *  @param s Scalar parameter
+     *  @param v Complex parameters (i, j, k)
+     */
+    Quat(Scalar s, Vector<Scalar, 3_z> const& v)
+    {
+        m_q[0] = s;
+        m_q[1] = v[0];
+        m_q[2] = v[1];
+        m_q[3] = v[2];
+    }
+
     inline friend std::ostream& operator<<(std::ostream& os, Quat& q)
     {
-        return os << q.a() << "+ " << q.b() << "i + "
+        return os << q.a() << " + " << q.b() << "i + "
                   << q.c() << "j + " << q.d() << "k";
     }
 
@@ -138,13 +151,37 @@ public:
 
     /**
      *  @brief Convert a rotation quaternion to its matrix form
-     *  @param Matrix Any matrix-like type that supports the (i,j) operator.
      *  @note The result is not correct if this quaternion is not a member of S(4)
      *  @return 4x4 Rotation matrix
      */
     Matrix<Scalar, 4_z, 4_z> toMatrix() const
     {
-        Matrix<Scalar, 4_z, 4_z> R(0); // FIXME optim: avoid (0)
+		Matrix<Scalar, 4_z, 4_z> Result(matrix::Identity);
+		Scalar qxx(b() * b());
+		Scalar qyy(c() * c());
+		Scalar qzz(d() * d());
+		Scalar qxz(b() * d());
+		Scalar qxy(b() * c());
+		Scalar qyz(c() * d());
+		Scalar qwx(a() * b());
+		Scalar qwy(a() * c());
+		Scalar qwz(a() * d());
+
+		Result[0][0] = Scalar(1) - Scalar(2) * (qyy +  qzz);
+		Result[0][1] = Scalar(2) * (qxy + qwz);
+		Result[0][2] = Scalar(2) * (qxz - qwy);
+
+		Result[1][0] = Scalar(2) * (qxy - qwz);
+		Result[1][1] = Scalar(1) - Scalar(2) * (qxx +  qzz);
+		Result[1][2] = Scalar(2) * (qyz + qwx);
+
+		Result[2][0] = Scalar(2) * (qxz + qwy);
+		Result[2][1] = Scalar(2) * (qyz - qwx);
+		Result[2][2] = Scalar(1) - Scalar(2) * (qxx +  qyy);
+
+		return Result;
+#if 0
+        Matrix<Scalar, 4_z, 4_z> R(matrix::Identity); // TODO to be optimized
 
         const Scalar aa = a() * a();
         const Scalar bb = b() * b();
@@ -164,6 +201,7 @@ public:
         R(2, 2) = aa - bb - cc + dd;
 
         return R;
+#endif
     }
 
     /**

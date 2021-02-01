@@ -71,7 +71,9 @@ template<> void MyShape<BasicMaterial>::initMaterial()
 //------------------------------------------------------------------------------
 SGMatAndShape::SGMatAndShape(uint32_t const width, uint32_t const height,
                              const char *title)
-    : GLWindow(width, height, title), m_imgui(*this)
+    : GLWindow(width, height, title),
+      m_camera("Camera1", 0.0f, 0.0f, 1.0f, 1.0f, Camera::Mode::PERSPECTIVE),
+      m_imgui(*this)
 {
     std::cout << "Hello Material: " << info() << std::endl;
 }
@@ -85,20 +87,14 @@ SGMatAndShape::~SGMatAndShape()
 //------------------------------------------------------------------------------
 void SGMatAndShape::onWindowResized()
 {
-    glCheck(glViewport(0, 0, width<int>(), height<int>()));
-
-    Matrix44f mat = matrix::perspective(maths::toRadian(60.0f),
-                                        width<float>() / height<float>(),
-                                        0.1f, 100.0f);
-
-    m_scene.root->traverse([](SceneObject* node, Matrix44f const& mat_)
+    m_scene.root->traverse([](SceneObject* node, Matrix44f const& matrix)
     {
         auto n = dynamic_cast<BaseShape*>(node);
         if (n != nullptr)
         {
-            n->projectionMatrix() = mat_;
+            n->projectionMatrix() = matrix;
         }
-    }, mat);
+    }, m_camera.updateProjectionMatrix(width<float>(), height<float>()));;
 }
 
 //------------------------------------------------------------------------------
@@ -110,24 +106,29 @@ bool SGMatAndShape::onSetup()
     glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     //glCheck(glDisable(GL_CULL_FACE));
 
-    m_scene.root = AxesHelper::create<AxesHelper>("Axis");
+    m_scene.root = AxesHelper::create<AxesHelper>("Axis", 10.0f);
     m_scene.root->attach<MyShape<BasicMaterial>>("Tree0", "textures/tree.obj");
     MyShape<DepthMaterial>& t1 = m_scene.root->attach<MyShape<DepthMaterial>>("Tree1", "textures/tree.obj");
     MyShape<NormalsMaterial>& t2 = m_scene.root->attach<MyShape<NormalsMaterial>>("Tree2", "textures/tree.obj");
     MyShape<DepthMaterial>& t3 = t1.attach<MyShape<DepthMaterial>>("Tree1.0", "textures/tree.obj");
-    MyShape<BasicMaterial>& t4 = t2.attach<MyShape<BasicMaterial>>("Tree1.1", "textures/tree.obj");
+    MyShape<BasicMaterial>& t4 = t1.attach<MyShape<BasicMaterial>>("Tree1.1", "textures/tree.obj");
 
-    //             Tree0
-    //    Tree2             Tree1
-    //              Tree1.0       Tree1.1
+    //      Y
+    //     |
+    //     |
+    //     |________ X
+    //    /
+    //   /          Tree0
+    //  /  Tree2             Tree1
+    // Z             Tree1.0       Tree1.1
     //
-    t1.transform.position(Vector3f(-2.0f, 0.0f, 2.0f));
-    t2.transform.position(Vector3f(2.0f, 0.0f, 2.0f));
-    t3.transform.position(Vector3f(-1.0f, 0.0f, 1.0f));
-    t4.transform.position(Vector3f(1.0f, 0.0f, 1.0f));
+    t1.transform.position(Vector3f(2.0f, 0.0f, 0.0f));
+    t2.transform.position(Vector3f(0.0f, 0.0f, 2.0f));
+    t3.transform.position(Vector3f(0.0f, 0.0f, 2.0f));
+    t4.transform.position(Vector3f(2.0f, 0.0f, 0.0f));
 
     //m_scene.debug();
-
+    //return false;
     return m_imgui.setup(*this);
 }
 
@@ -136,15 +137,15 @@ bool SGMatAndShape::onSetup()
 //------------------------------------------------------------------
 bool SGMatAndShape::GUI::render()
 {
-    static float new_near = 6.5f;
+    static float new_near = 3.0f;
     static float previous_near = 0.0f;
-    static float new_far = 8.1f;
+    static float new_far = 7.0f;
     static float previous_far = 0.0f;
 
     ImGui::Begin("Hello, world!");
     ImGui::Text("Depth Material:");
-    ImGui::SliderFloat("near", &new_near, 0.01f, 10.0f);
-    ImGui::SliderFloat("far ", &new_far, 0.01f, 10.0f);
+    ImGui::SliderFloat("near", &new_near, 0.01f, 15.0f);
+    ImGui::SliderFloat("far ", &new_far, 0.01f, 15.0f);
     ImGui::End();
 
     // Apply new depth near value to the shape
@@ -183,25 +184,37 @@ bool SGMatAndShape::GUI::render()
 //------------------------------------------------------------------------------
 bool SGMatAndShape::onPaint()
 {
+    //return false;
+
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     m_scene.update(dt());
 
     // Simulate camera
-    m_scene.root->traverse([](SceneObject* node)
+    m_camera.transform.lookAt(Vector3f(5,5,5),
+                              Vector3f(0,0,0),
+                              Vector3f(0,1,0));
+
+    std::cout << "glm::lookat " << matrix::lookAt(Vector3f(5,5,5),
+                                                  Vector3f(0,0,0),
+                                                  Vector3f(0,1,0)) << std::endl;
+    std::cout << "camera::view: " << m_camera.updateViewMatrix() << std::endl;
+    m_scene.root->traverse([](SceneObject* node, Matrix44f const& matrix)
     {
         auto n = dynamic_cast<BaseShape*>(node);
         if (n != nullptr)
         {
-            n->viewMatrix() = matrix::lookAt(Vector3f(5,5,5),
-                                             Vector3f(0,0,0),
-                                             Vector3f(0,1,0));
+            n->viewMatrix() = matrix;
+                    //matrix::lookAt(Vector3f(5,5,5),
+                    //                         Vector3f(0,0,0),
+                    //                         Vector3f(0,1,0));
         }
-    });
+    }, m_camera.updateViewMatrix());
 
     m_scene.draw();
 
+    //return false;
      // DearImGui
     return m_imgui.draw();
 }

@@ -70,8 +70,9 @@ private:
         SGMatAndShape& m_window;
     };
 
-    SceneTree     m_scene;
-    GUI       m_imgui;
+    Camera m_camera;
+    SceneTree m_scene;
+    GUI m_imgui;
 };
 
 #endif // EXAMPLE_02_SG_MATERIALS_AND_SHAPES_HPP
