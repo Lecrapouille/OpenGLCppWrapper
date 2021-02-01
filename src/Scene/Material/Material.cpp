@@ -32,8 +32,8 @@ bool Material::compile()
     generate(m_vert_shader, m_frag_shader);
 
     // Debug
-    std::cout << m_vert_shader << std::endl;
-    std::cout << m_frag_shader << std::endl;
+    //std::cout << m_vert_shader << std::endl;
+    //std::cout << m_frag_shader << std::endl;
 
     // Compile generated shaders
     if (!program.compile(m_vert_shader, m_frag_shader))

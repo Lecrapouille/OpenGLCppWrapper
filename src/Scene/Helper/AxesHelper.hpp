@@ -31,9 +31,10 @@ public:
 
     using Ptr = std::unique_ptr<AxesHelper>;
 
-    AxesHelper(std::string const& name)
+    AxesHelper(std::string const& name, float size = 1.0f)
         : Shape<Axes, LineBasicMaterial>(name, Mode::LINES)
     {
+        Shape<Axes, LineBasicMaterial>::geometry.config.size = size;
         compile();
     }
 };

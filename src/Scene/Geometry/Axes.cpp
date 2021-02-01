@@ -46,13 +46,13 @@ bool Axes::generate(GLVAO32& vao, const bool clear)
         if (clear) { color.clear(); }
         color =
         {
-            Vector4f(1.0f, 0.6f, 0.0f, 1.0f),  Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
-            Vector4f(0.6f, 1.0f, 0.0f, 1.0f),  Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
-            Vector4f(0.0f, 0.6f, 1.0f, 1.0f),  Vector4f(0.0f, 0.0f, 1.0f, 1.0f)
+            Vector4f(1.0f, 0.0f, 0.0f, 1.0f),  Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
+            Vector4f(0.0f, 1.0f, 0.0f, 1.0f),  Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
+            Vector4f(0.0f, 0.0f, 1.0f, 1.0f),  Vector4f(0.0f, 0.0f, 1.0f, 1.0f)
         };
     }
 
-    vao.index() = { 0u, 1u, 0u, 3u, 0u, 5u };
+    vao.index() = { 0u, 1u, 2u, 3u, 4u, 5u };
 
     return true;
 }
