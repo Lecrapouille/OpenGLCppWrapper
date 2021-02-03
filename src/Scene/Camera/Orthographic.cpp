@@ -18,21 +18,25 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "Scene/Camera/Perspective.hpp"
+#include "Scene/Camera/Orthographic.hpp"
 
 //------------------------------------------------------------------------------
-Perspective::Perspective(units::angle::radian_t const fov, float const near, float const far)
-    : m_projection(matrix::Identity), m_fov(fov), m_near(near), m_far(far), m_aspect(0.5f)
+Orthographic::Orthographic(float const left, float const right,
+                           float const bottom, float const top,
+                           float const near, float const far)
+    : m_left(left), m_right(right), m_bottom(bottom),
+      m_top(top), m_near(near), m_far(far)
 {
     m_dirty = true;
 }
 
 //------------------------------------------------------------------------------
-Matrix44f const& Perspective::matrix()
+Matrix44f const& Orthographic::matrix()
 {
     if (m_dirty)
     {
-        m_projection = matrix::perspective(m_fov.to<float>(), m_aspect, m_near, m_far);
+        m_projection = matrix::ortho(-m_aspect, m_aspect, m_bottom, m_top
+                                     /* TODO , m_near, m_far */);
         m_dirty = false;
     }
 
@@ -40,22 +44,21 @@ Matrix44f const& Perspective::matrix()
 }
 
 //------------------------------------------------------------------------------
-void Perspective::setFieldOfView(units::angle::radian_t const fov)
+void Orthographic::setPlanes(float const left, float const right,
+                                   float const bottom, float const top,
+                                   float const near, float const far)
 {
-    m_fov = fov;
-    m_dirty = true;
-}
-
-//------------------------------------------------------------------------------
-void Perspective::setClipping(float const near, float const far)
-{
+    m_left = left;
+    m_right = right;
+    m_bottom = bottom;
+    m_top = top;
     m_near = near;
     m_far = far;
     m_dirty = true;
 }
 
 //------------------------------------------------------------------------------
-void Perspective::setAspect(float const width, float const height)
+void Orthographic::setAspect(float const width, float const height)
 {
     m_aspect = width / height;
     m_dirty = true;

@@ -25,6 +25,8 @@
 #  include "Scene/Tree.hpp"
 #  include "Scene/GameObject.hpp"
 
+class Camera;
+
 // *****************************************************************************
 //! \brief Class container fo holding a scene.
 //!
@@ -141,6 +143,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Traverse the scene and call the draw() method.
     //--------------------------------------------------------------------------
+    void draw(Camera& camera);
     void draw();
 
     //--------------------------------------------------------------------------

@@ -23,73 +23,97 @@
 
 #  include "Scene/SceneTree.hpp"
 #  include "Scene/Camera/Perspective.hpp"
+#  include "Scene/Camera/Orthographic.hpp"
 
 // *****************************************************************************
-//! \brief
+//! \brief Define a basic 3D Camera that can be stored inside a scene tree.
 // *****************************************************************************
 class Camera: public SceneObject
 {
 public:
 
-    enum class Mode { ORTHOGRAPHIC, PERSPECTIVE };
+    enum class Type { ORTHOGRAPHIC, PERSPECTIVE };
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Initialize camera state with a given name and select a type of
+    //! projection (perspective (by default) or orthographic). The view port is
+    //! set to (x,y,w,h) = (0,0,1,1). Matrices for projection and view are set
+    //! to identity. The camera position is placed to (1,0,0) looks at (0,0,0)
+    //! and its normal is (0,1,0).
+    //!
+    //! \param[in] name: the name of the camera.
+    //! \param[in] mode: swith to orthographic or perspective mode.
     //--------------------------------------------------------------------------
-    Camera(std::string const& name,
-           float x, float y, float w, float h,
-           Mode const mode = Mode::PERSPECTIVE);
+    Camera(std::string const& name, Type const mode = Type::PERSPECTIVE);
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Swith the type of projection (perspective or orthographic).
+    //!
+    //! \param[in] mode: swith to Orthographic or Perspective mode.
+    //! \return the projection matrix of the new type of view.
     //--------------------------------------------------------------------------
-    void setMode(Mode const mode)
-    {
-        m_mode = mode;
-    }
+    Matrix44f const& setMode(Type const mode);
 
     //--------------------------------------------------------------------------
-    //! \brief Return the projection matrix.
+    //! \brief Define what region is shown on screen (GLWindow class) for
+    //! displaying the 3D scene. The view is defined by the coordinate of the
+    //! top-left corner and its dimension (width and height). Values of the view
+    //! shall be within the range [0 .. 1] to be independent of the screen
+    //! dimension. For example setViewPort(0.25f, 0.25f, 0.75f, 0.75f) with a
+    //! screen of dimension 800 x 600 will give a window with the following
+    //! coordinates: top-left corner (0.25 * 800, 0.25 * 600) and bottom-right
+    //! corner (0.75 * 800, 0.75 * 600).
+    //!
+    //! \param[in] x: X-coordinate of the top-left corner of the view port.
+    //!   Value shall be >= 0 and < 1.
+    //! \param[in] y: Y-coordinate of the top-left corner of the view port.
+    //!   Value shall be >= 0 and < 1.
+    //! \param[in] w: the width of the view port. Value shall be > 0 and <= 1.
+    //! \param[in] y: the height of the view port. Value shall be > 0 and <= 1.
+    //!
+    //! \return true if inputs are within [0 .. 1], else return false.
     //--------------------------------------------------------------------------
-    inline Matrix44f const& projection() const
-    {
-        return m_projection;
-    }
+    bool setViewPort(float x, float y, float w, float h);
 
     //--------------------------------------------------------------------------
-    //! \brief Return the view transformation matrix according to camera
-    //! position and orientation.
+    //! \brief Return the projection matrix. This method return the matrix that
+    //! shall have been computed by the method updateProjectionMatrix(). The
+    //! returned matrix can be directly be applied to OpenGL GLSL shader
+    //! (uniform variable).
+    //!
+    //! To be called when the screen (GLWindow class) has been resized.
+    //!
+    //! \param[in] width: new screen width.
+    //! \param[in] height: new screen height.
+    //! \retun The Matrix 4x4 of float.
     //--------------------------------------------------------------------------
-    inline Matrix44f const& view() const
-    {
-        return m_view;
-    }
+    Matrix44f const& projection(float const width, float const height);
+    Matrix44f const& projection();
 
     //--------------------------------------------------------------------------
-    //! \brief Update the projection matrix from the width and height of the
-    //! view port.
-    //! \fixme width and height should be normalized / screen.width ...
+    //! \brief Return the view transformation matrix according to its position
+    //! and orientation. This method return the matrix that shall have been
+    //! computed by the method updateViewMatrix(). The returned matrix can be
+    //! directly be applied to OpenGL GLSL shader (uniform variable).
+    //!
+    //! \retun The Matrix 4x4 of float.
     //--------------------------------------------------------------------------
-    Matrix44f const& updateProjectionMatrix(float const width, float const height);
-
-    //--------------------------------------------------------------------------
-    //! \brief Update projection matrix from current viewport dimensions, should
-    //! be called if window has been resized.
-    //--------------------------------------------------------------------------
-    Matrix44f const& updateProjectionMatrix();
-
-    //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    Matrix44f const& updateViewMatrix();
+    Matrix44f const& view();
 
 protected:
 
+    //! \brief Reference to the component applying the perspective projection.
+    Perspective& m_perspective;
+    //! \brief Reference to the component applying the orthographic projection.
+    Orthographic& m_orthographic;
+    //! \brief Current type of projection (perspective or orthographic).
+    Type m_type;
+    //! \brief The region shown on screen
     Vector4f m_viewport;
-    CameraPerspective& m_perspective;
-    Mode m_mode;
-    Matrix44f m_projection;
+    //! \brief View matrix
     Matrix44f m_view;
+    //! \brief Memorize the screen dimension
+    float m_width, m_height;
 };
 
 #endif

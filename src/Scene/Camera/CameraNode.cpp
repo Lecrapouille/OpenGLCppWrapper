@@ -19,57 +19,99 @@
 //=====================================================================
 
 #include "Scene/Camera/CameraNode.hpp"
+#include "OpenGL/Context/OpenGL.hpp"
 
-//--------------------------------------------------------------------------
-Camera::Camera(std::string const& name, float x, float y, float w, float h,
-               Mode const mode)
+//------------------------------------------------------------------------------
+Camera::Camera(std::string const& name, Type const type)
     : SceneObject(name),
-      m_viewport(x, y, w, h),
-      m_perspective(components.addComponent<CameraPerspective>()),
-      //m_orthographic(components.addComponent<Orthographic>("Orthographic"))
-      m_mode(mode)
+      m_perspective(components.addComponent<Perspective>(/*"Perspective"*/)),
+      m_orthographic(components.addComponent<Orthographic>(/*"Orthographic"*/)),
+      m_type(type),
+      m_viewport(0.0f, 0.0f, 1.0f, 1.0f)
 {
-    transform.lookAt(Vector3f::UNIT_SCALE, Vector3f::ZERO, Vector3f::UNIT_Y);
+    transform.lookAt(Vector3f::RIGHT, Vector3f::ZERO, Vector3f::UP);
 }
 
-//--------------------------------------------------------------------------
-Matrix44f const& Camera::updateProjectionMatrix(float const width, float const height)
+//------------------------------------------------------------------------------
+Matrix44f const& Camera::setMode(Type const type)
 {
-    //if (m_mode = PERSPECTIVE)
-    m_projection = m_perspective.updateProjectionMatrix(m_viewport, width, height);
-    //else
-
-    return m_projection;
+    m_type = type;
+    if (m_type == Type::PERSPECTIVE)
+    {
+        return m_perspective.matrix();
+    }
+    else
+    {
+        return m_orthographic.matrix();
+    }
 }
 
-//--------------------------------------------------------------------------
-Matrix44f const& Camera::updateProjectionMatrix()
+//------------------------------------------------------------------------------
+bool Camera::setViewPort(float x, float y, float w, float h)
 {
-    //if (m_mode = PERSPECTIVE)
-    m_projection = m_perspective.updateProjectionMatrix();
-    //else
+    if ((x >= 0.0f) && (x < 1.0f) &&
+        (y >= 0.0f) && (y < 1.0f) &&
+        (w > 0.0f) && (w <= 1.0f) &&
+        (h > 0.0f) && (h <= 1.0f))
+    {
+        m_viewport[0] = x;
+        m_viewport[1] = y;
+        m_viewport[2] = w;
+        m_viewport[3] = h;
 
-    return m_projection;
+        return true;
+    }
+
+    std::cerr << "Failed setViewPort" << std::endl;
+    return false;
 }
 
-//--------------------------------------------------------------------------
-Matrix44f const& Camera::updateViewMatrix()
+//------------------------------------------------------------------------------
+Matrix44f const& Camera::projection(float const width, float const height)
 {
-    // TODO transform.translation()
-    // negative translation:
+    m_perspective.setAspect(width, height);
+    m_orthographic.setAspect(width, height);
+
+    glCheck(glViewport(int(m_viewport[0] * width),
+                       int(m_viewport[1] * height),
+                       int(m_viewport[2] * width),
+                       int(m_viewport[3] * height)));
+
+    return projection();
+}
+
+//------------------------------------------------------------------------------
+Matrix44f const& Camera::projection()
+{
+    if (m_type == Type::PERSPECTIVE)
+    {
+        return m_perspective.matrix();
+    }
+    else
+    {
+        return m_orthographic.matrix();
+    }
+}
+
+//------------------------------------------------------------------------------
+Matrix44f const& Camera::view()
+{
+    // FIXME idea to avoid computing it everytimes
+    // if (transform.dirty()) {
+
+    // Negative translation because when camera is moving we move world in
+    // the opposite direction. For more explanaitions see this document:
     // https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/
     // Chapiter The View Matrix
     Matrix44f I(matrix::Identity);
     Matrix44f transl = matrix::translate(I, -transform.position());
 
-    std::cout << "Trans: " << transl << std::endl;
-    std::cout << "Rot: " << transform.rotation() << std::endl;
-
-    // FIXME shall be rotation * translation but glm seems to inverse matrix prodcut: A * B is made as B * A
+    // FIXME shall be rotation * translation but glm seems to inverse matrix
+    // prodcut: A * B is made as B * A
     // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back
     m_view = transl * transform.rotation();
-    //std::cout << "updateViewMatrix " << m_view << std::endl;
 
+    // } // if (transform.dirty())
 
     return m_view;
 }

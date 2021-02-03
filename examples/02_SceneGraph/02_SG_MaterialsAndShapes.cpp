@@ -72,7 +72,7 @@ template<> void MyShape<BasicMaterial>::initMaterial()
 SGMatAndShape::SGMatAndShape(uint32_t const width, uint32_t const height,
                              const char *title)
     : GLWindow(width, height, title),
-      m_camera("Camera1", 0.0f, 0.0f, 1.0f, 1.0f, Camera::Mode::PERSPECTIVE),
+      m_camera("camera"),
       m_imgui(*this)
 {
     std::cout << "Hello Material: " << info() << std::endl;
@@ -87,14 +87,7 @@ SGMatAndShape::~SGMatAndShape()
 //------------------------------------------------------------------------------
 void SGMatAndShape::onWindowResized()
 {
-    m_scene.root->traverse([](SceneObject* node, Matrix44f const& matrix)
-    {
-        auto n = dynamic_cast<BaseShape*>(node);
-        if (n != nullptr)
-        {
-            n->projectionMatrix() = matrix;
-        }
-    }, m_camera.updateProjectionMatrix(width<float>(), height<float>()));;
+    m_camera.projection(width<float>(), height<float>());
 }
 
 //------------------------------------------------------------------------------
@@ -184,38 +177,28 @@ bool SGMatAndShape::GUI::render()
 //------------------------------------------------------------------------------
 bool SGMatAndShape::onPaint()
 {
-    //return false;
-
     glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
     glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
+    // Update parent-child transform matrix for nodes
     m_scene.update(dt());
 
-    // Simulate camera
+    // Camera movement
     m_camera.transform.lookAt(Vector3f(5,5,5),
                               Vector3f(0,0,0),
                               Vector3f(0,1,0));
 
-    std::cout << "glm::lookat " << matrix::lookAt(Vector3f(5,5,5),
-                                                  Vector3f(0,0,0),
-                                                  Vector3f(0,1,0)) << std::endl;
-    std::cout << "camera::view: " << m_camera.updateViewMatrix() << std::endl;
-    m_scene.root->traverse([](SceneObject* node, Matrix44f const& matrix)
-    {
-        auto n = dynamic_cast<BaseShape*>(node);
-        if (n != nullptr)
-        {
-            n->viewMatrix() = matrix;
-                    //matrix::lookAt(Vector3f(5,5,5),
-                    //                         Vector3f(0,0,0),
-                    //                         Vector3f(0,1,0));
-        }
-    }, m_camera.updateViewMatrix());
+    // Perspective camera
+    m_camera.setMode(Camera::Type::PERSPECTIVE);
+    m_camera.setViewPort(0.0f, 0.0f, 0.5f, 1.0f);
+    m_scene.draw(m_camera);
 
-    m_scene.draw();
+    // Orthographic camera
+    m_camera.setMode(Camera::Type::ORTHOGRAPHIC);
+    m_camera.setViewPort(0.5f, 0.0f, 1.0f, 1.0f);
+    m_scene.draw(m_camera);
 
-    //return false;
-     // DearImGui
+    // DearImGui
     return m_imgui.draw();
 }
 

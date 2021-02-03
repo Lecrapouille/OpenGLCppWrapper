@@ -19,6 +19,8 @@
 //=====================================================================
 
 #include "Scene/SceneTree.hpp"
+#include "Scene/ShapeNode.hpp"
+#include "Scene/Camera/CameraNode.hpp"
 #include <iostream>
 #include <sstream>
 
@@ -127,6 +129,10 @@ void SceneTree::setup()
 //------------------------------------------------------------------------------
 void SceneTree::update(float const dt)
 {
+    // TODO
+    // if (!dirty())
+    // return
+
     if (root == nullptr)
         return ;
 
@@ -163,6 +169,42 @@ void SceneTree::draw()
         node->onDraw(matrix::scale(node->m_world_transform,
                                    node->transform.localScale()));
     });
+}
+
+//------------------------------------------------------------------------------
+void SceneTree::draw(Camera& camera)
+{
+    if (root == nullptr)
+        return ;
+
+    root->traverse([](SceneObject* node, Matrix44f const& view, Matrix44f const& proj)
+    {
+        if (!node->enabled())
+            return ;
+
+        auto n = dynamic_cast<BaseShape*>(node);
+        if (n != nullptr)
+        {
+            // Update the uniform shader view matrix
+            // TODO if (camera.viewMatrixChanged())
+            {
+                n->viewMatrix() = view;
+            }
+
+            // Update the uniform shader projection matrix
+            // TODO if (camera.projectionMatrixChanged())
+            {
+                n->projectionMatrix() = proj;
+            }
+        }
+
+        // TODO: this could be better to create an node like OpenInventor
+        // separator instead of this computation made everytime (even if
+        // scaling a node it will also scale descendants)? Sometimes you
+        // just want to scale the node not its descendants.
+        node->onDraw(matrix::scale(node->m_world_transform,
+                                   node->transform.localScale()));
+    }, camera.view(), camera.projection());
 }
 
 //------------------------------------------------------------------------------
