@@ -176,13 +176,13 @@ public:
     //! callback functions onResized().
     //--------------------------------------------------------------------------
     template<typename T>
-    inline T width() const { return static_cast<T>(m_width); }
+    static T width() { return static_cast<T>(staticWidth()); }
 
     //--------------------------------------------------------------------------
     //! \brief Return the current height of the window.
     //--------------------------------------------------------------------------
     template<typename T>
-    inline T height() const { return static_cast<T>(m_height); }
+    static T height() { return static_cast<T>(staticHeight()); }
 
     //--------------------------------------------------------------------------
     //! \brief Change the size of the window. Do not call this method if you
@@ -326,15 +326,27 @@ private:
 
 private:
 
+    //! \brief Windows current height
+    static uint32_t& staticHeight()
+    {
+        static uint32_t h;
+        return h;
+    }
+
+    //! \brief Windows current width
+    static uint32_t& staticWidth()
+    {
+        static uint32_t w;
+        return w;
+    }
+
+private:
+
     static bool const KEY_PRESS = true;
     static bool const KEY_RELEASE = false;
 
     //! \brief GLF window context
     GLFWwindow* m_context = nullptr;
-    //! \brief Windows current width
-    uint32_t m_width;
-    //! \brief Windows current height
-    uint32_t m_height;
     //! \brief Windows title
     const char *m_title = nullptr;
     //! \brief

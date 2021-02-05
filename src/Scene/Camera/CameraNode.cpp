@@ -19,13 +19,12 @@
 //=====================================================================
 
 #include "Scene/Camera/CameraNode.hpp"
-#include "OpenGL/Context/OpenGL.hpp"
 
 //------------------------------------------------------------------------------
 Camera::Camera(std::string const& name, Type const type)
     : SceneObject(name),
-      m_perspective(components.addComponent<Perspective>(/*"Perspective"*/)),
-      m_orthographic(components.addComponent<Orthographic>(/*"Orthographic"*/)),
+      perspective(components.addComponent<Perspective>(/*"Perspective"*/)),
+      orthographic(components.addComponent<Orthographic>(/*"Orthographic"*/)),
       m_type(type),
       m_viewport(0.0f, 0.0f, 1.0f, 1.0f)
 {
@@ -33,50 +32,71 @@ Camera::Camera(std::string const& name, Type const type)
 }
 
 //------------------------------------------------------------------------------
-Matrix44f const& Camera::setMode(Type const type)
+Matrix44f const& Camera::is(Type const type)
 {
     m_type = type;
     if (m_type == Type::PERSPECTIVE)
     {
-        return m_perspective.matrix();
+        return perspective.matrix();
     }
     else
     {
-        return m_orthographic.matrix();
+        return orthographic.matrix();
     }
 }
 
 //------------------------------------------------------------------------------
 bool Camera::setViewPort(float x, float y, float w, float h)
 {
-    if ((x >= 0.0f) && (x < 1.0f) &&
-        (y >= 0.0f) && (y < 1.0f) &&
-        (w > 0.0f) && (w <= 1.0f) &&
-        (h > 0.0f) && (h <= 1.0f))
+    if (!(x >= 0.0f) && (x < 1.0f))
     {
-        m_viewport[0] = x;
-        m_viewport[1] = y;
-        m_viewport[2] = w;
-        m_viewport[3] = h;
-
-        return true;
+        std::cerr << "Top-left x coordinate shall be within [0 .. 1[" << std::endl;
+        return false;
     }
 
-    std::cerr << "Failed setViewPort" << std::endl;
-    return false;
+    if (!(x >= 0.0f) && (y < 1.0f))
+    {
+        std::cerr << "Top-left y coordinate shall be within [0 .. 1[" << std::endl;
+        return false;
+    }
+
+    if (!(w > 0.0f) && (w <= 1.0f))
+    {
+        std::cerr << "Width shall be within ]0 .. 1]" << std::endl;
+        return false;
+    }
+
+    if (!(h > 0.0f) && (h <= 1.0f))
+    {
+        std::cerr << "Height shall be within ]0 .. 1]" << std::endl;
+        return false;
+    }
+
+    if (x + w > 1.0f)
+    {
+        std::cerr << "Top-left x coordinate + width shall be <= 1" << std::endl;
+        return false;
+    }
+
+    if (y + h > 1.0f)
+    {
+        std::cerr << "Top-left y coordinate + height shall be <= 1" << std::endl;
+        return false;
+    }
+
+    m_viewport[0] = x;
+    m_viewport[1] = y;
+    m_viewport[2] = w;
+    m_viewport[3] = h;
+
+    return true;
 }
 
 //------------------------------------------------------------------------------
 Matrix44f const& Camera::projection(float const width, float const height)
 {
-    m_perspective.setAspect(width, height);
-    m_orthographic.setAspect(width, height);
-
-    glCheck(glViewport(int(m_viewport[0] * width),
-                       int(m_viewport[1] * height),
-                       int(m_viewport[2] * width),
-                       int(m_viewport[3] * height)));
-
+    perspective.setAspect(width, height);
+    orthographic.setAspect(width, height);
     return projection();
 }
 
@@ -85,11 +105,11 @@ Matrix44f const& Camera::projection()
 {
     if (m_type == Type::PERSPECTIVE)
     {
-        return m_perspective.matrix();
+        return perspective.matrix();
     }
     else
     {
-        return m_orthographic.matrix();
+        return orthographic.matrix();
     }
 }
 

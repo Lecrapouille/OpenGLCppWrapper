@@ -154,6 +154,7 @@ public:
 
 private:
 
+    void applyViewPort(Camera& camera);
     Node* findChild(Node* node, std::string const& path);
 
 public:

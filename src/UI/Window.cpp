@@ -28,14 +28,14 @@
 
 //------------------------------------------------------------------------------
 GLWindow::GLWindow(uint32_t const width, uint32_t const height, const char *title)
-    : m_width(width),
-      m_height(height),
-      m_title(title),
+    : m_title(title),
       m_lastKeys(GLFW_KEY_LAST + 1),
       m_currentKeys(GLFW_KEY_LAST + 1)
 {
-    m_context = glfwCreateWindow(static_cast<int>(m_width),
-                                 static_cast<int>(m_height),
+    staticWidth() = width;
+    staticHeight() = height;
+    m_context = glfwCreateWindow(static_cast<int>(width),
+                                 static_cast<int>(height),
                                  m_title,
                                  nullptr,
                                  nullptr);
@@ -67,8 +67,8 @@ void GLWindow::showCursor()
 //------------------------------------------------------------------------------
 void GLWindow::resize(uint32_t const width, uint32_t const height)
 {
-    m_width = std::max(16u, width);
-    m_height = std::max(16u, height);
+    staticWidth() = std::max(16u, width);
+    staticHeight() = std::max(16u, height);
 
     // Callback to be implemented by the derived class
     onWindowResized();
@@ -275,8 +275,8 @@ bool GLWindow::setup()
 
         // Call the GLWindow callback that has to be implemented by the derived
         // class.
-        window->m_width = std::max(16u, static_cast<uint32_t>(width));
-        window->m_height = std::max(16u, static_cast<uint32_t>(height));
+        window->staticWidth() = std::max(16u, static_cast<uint32_t>(width));
+        window->staticHeight() = std::max(16u, static_cast<uint32_t>(height));
         window->onWindowResized();
 
         // Restore context.

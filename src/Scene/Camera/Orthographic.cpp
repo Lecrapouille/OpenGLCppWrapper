@@ -19,13 +19,15 @@
 //=====================================================================
 
 #include "Scene/Camera/Orthographic.hpp"
+#include <iostream>
 
 //------------------------------------------------------------------------------
 Orthographic::Orthographic(float const left, float const right,
                            float const bottom, float const top,
                            float const near, float const far)
     : m_left(left), m_right(right), m_bottom(bottom),
-      m_top(top), m_near(near), m_far(far)
+      m_top(top), m_near(near), m_far(far), m_aspect(1.0f),
+      m_frustum_size(1.0f)
 {
     m_dirty = true;
 }
@@ -35,8 +37,13 @@ Matrix44f const& Orthographic::matrix()
 {
     if (m_dirty)
     {
-        m_projection = matrix::ortho(-m_aspect, m_aspect, m_bottom, m_top
-                                     /* TODO , m_near, m_far */);
+        m_projection = matrix::ortho(m_left * m_frustum_size * m_aspect,
+                                     m_right * m_frustum_size * m_aspect,
+                                     m_bottom * m_frustum_size * m_aspect,
+                                     m_top * m_frustum_size * m_aspect,
+                                     m_near * m_frustum_size * m_aspect,
+                                     m_far * m_frustum_size * m_aspect);
+        std::cout << m_projection << std::endl;
         m_dirty = false;
     }
 
@@ -45,8 +52,8 @@ Matrix44f const& Orthographic::matrix()
 
 //------------------------------------------------------------------------------
 void Orthographic::setPlanes(float const left, float const right,
-                                   float const bottom, float const top,
-                                   float const near, float const far)
+                             float const bottom, float const top,
+                             float const near, float const far)
 {
     m_left = left;
     m_right = right;
@@ -55,6 +62,12 @@ void Orthographic::setPlanes(float const left, float const right,
     m_near = near;
     m_far = far;
     m_dirty = true;
+}
+
+//------------------------------------------------------------------------------
+void Orthographic::setFrustumSize(float const size)
+{
+    m_frustum_size = std::abs(size);
 }
 
 //------------------------------------------------------------------------------

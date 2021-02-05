@@ -356,61 +356,40 @@ public:
         Matrix44f mat = matrix::lookAt(position, target, up);
         m_orientation = Quatf::fromMatrix(mat).conjugate();
         m_transform_needs_update = true;
-
-#if 0
-
-        std::cout << "==============\nqq::lookAt: " << matrix::lookAt(position, target, up) << std::endl;
-
-        glm::mat4 lookMat = glm::lookAt(glm::vec3(position.x,
-                                                  position.y,
-                                                  position.z),
-                                        glm::vec3(target.x,
-                                                  target.y,
-                                                  target.z),
-                                        glm::vec3(up.x,
-                                                  up.y,
-                                                  up.z));
-
-        glm::quat rotation1 = glm::quat_cast(lookMat);
-        glm::quat rotation = glm::conjugate(glm::quat_cast(lookMat));
-        std::cout << "glm::lookAt: " << glm::to_string(lookMat) << std::endl;
-        //std::cout << "glm::quat: " << glm::to_string(rotation1) << std::endl;
-        std::cout << "glm::quat conjug: " << glm::to_string(rotation) << std::endl;
-        std::cout << "=>: " << glm::angle(rotation) * 57.2958f << " " << glm::to_string(glm::axis(rotation)) << std::endl;
-
-        std::cout << "glm::rot: " << glm::to_string(glm::mat4_cast(rotation)) << std::endl;
-
-        m_position = position;
-
-        //std::cout << "Camera::lookAt: " << std::endl;
-        //std::cout << "  Position: " << position << std::endl;
-        //std::cout << "  Target: " << target << std::endl;
-        //std::cout << "  Up: " << up << std::endl;
-
-
-        Matrix44f mat = matrix::lookAt(m_position - m_origin, target, up);
-        //std::cout << "  LookAt: " << mat << std::endl;
-
-
-        Quatf q = Quat<T>::fromMatrix(mat); // FIXME pourquoi retourne le conjug ?
-        std::cout << "  quat: " << q << std::endl;
-        m_orientation = Quat<T>::fromMatrix(mat);//.conjugate();
-        units::angle::degree_t angle = m_orientation.angle();
-        //std::cout << "  quat conj: " << m_orientation << std::endl;
-        std::cout << "  Axe: " << m_orientation.axis() << " angle: " << angle.to<float>()
-                  << std::endl;
-
-        m_transform_needs_update = true;
-#endif
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Same than lookAt(position, target, up) but the up direction is
+    //! deduced.
+    //--------------------------------------------------------------------------
+    void lookAt(Vector3f const &position, Vector3f const &target)
+    {
+        // Get back the up direction
+        Vector3f direction = vector::normalize(target - position);
+        Vector3f right = vector::cross(direction, Vector3f::UP);
+        Vector3f up = vector::cross(right, direction);
+
+        // Same than lookAt(position, target, up)
+        m_position = position;
+        Matrix44f mat = matrix::lookAt(m_position, target, up);
+        m_orientation = Quatf::fromMatrix(mat).conjugate();
+        m_transform_needs_update = true;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Same than lookAt(position, target, up) but the positon is not
+    //! changed and the up direction is deduced.
     //--------------------------------------------------------------------------
     void lookAt(Vector3f const &target)
     {
-        m_orientation = Quat<T>::fromMatrix(
-            matrix::lookAt(m_position - m_origin, target, up())).conjugate();
+        // Get back the up direction
+        Vector3f direction = vector::normalize(target - m_position);
+        Vector3f right = vector::cross(direction, Vector3f::UP);
+        Vector3f up = vector::cross(right, direction);
+
+        // Same than lookAt(position, target, up)
+        Matrix44f mat = matrix::lookAt(m_position, target, up);
+        m_orientation = Quatf::fromMatrix(mat).conjugate();
         m_transform_needs_update = true;
     }
 

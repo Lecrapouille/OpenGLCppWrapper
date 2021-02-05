@@ -21,6 +21,7 @@
 #include "Scene/SceneTree.hpp"
 #include "Scene/ShapeNode.hpp"
 #include "Scene/Camera/CameraNode.hpp"
+#include "UI/Window.hpp"
 #include <iostream>
 #include <sstream>
 
@@ -172,11 +173,23 @@ void SceneTree::draw()
 }
 
 //------------------------------------------------------------------------------
+void SceneTree::applyViewPort(Camera& camera)
+{
+    Vector4f viewport = camera.getViewPort();
+
+    glCheck(glViewport(int(viewport[0] * GLWindow::width<float>()),
+                       int(viewport[1] * GLWindow::height<float>()),
+                       int(viewport[2] * GLWindow::width<float>()),
+                       int(viewport[3] * GLWindow::height<float>())));
+}
+
+//------------------------------------------------------------------------------
 void SceneTree::draw(Camera& camera)
 {
     if (root == nullptr)
         return ;
 
+    applyViewPort(camera);
     root->traverse([](SceneObject* node, Matrix44f const& view, Matrix44f const& proj)
     {
         if (!node->enabled())

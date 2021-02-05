@@ -87,7 +87,9 @@ SGMatAndShape::~SGMatAndShape()
 //------------------------------------------------------------------------------
 void SGMatAndShape::onWindowResized()
 {
+    std::cerr << "onWindowResized {" << std::endl;
     m_camera.projection(width<float>(), height<float>());
+    std::cerr << "} onWindowResized" << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -183,19 +185,28 @@ bool SGMatAndShape::onPaint()
     // Update parent-child transform matrix for nodes
     m_scene.update(dt());
 
-    // Camera movement
+    // Perspective camera 1st view
     m_camera.transform.lookAt(Vector3f(5,5,5),
                               Vector3f(0,0,0),
                               Vector3f(0,1,0));
-
-    // Perspective camera
-    m_camera.setMode(Camera::Type::PERSPECTIVE);
+    m_camera.is(Camera::Type::PERSPECTIVE);
     m_camera.setViewPort(0.0f, 0.0f, 0.5f, 1.0f);
     m_scene.draw(m_camera);
 
-    // Orthographic camera
-    m_camera.setMode(Camera::Type::ORTHOGRAPHIC);
-    m_camera.setViewPort(0.5f, 0.0f, 1.0f, 1.0f);
+    // Perspective camera 2nd view
+    m_camera.transform.position(Vector3f(10,0,5));
+    m_camera.transform.lookAt(Vector3f(0,0,0));
+    m_camera.is(Camera::Type::PERSPECTIVE);
+    m_camera.setViewPort(0.5f, 0.0f, 0.5f, 0.5f);
+    m_scene.draw(m_camera);
+
+    // Orthographic camera 3th view
+    m_camera.transform.position(Vector3f(10,0,5));
+    m_camera.transform.lookAt(Vector3f(0,0,0));
+    m_camera.is(Camera::Type::ORTHOGRAPHIC);
+    m_camera.orthographic.setPlanes(0, 800, 600, 0);
+    m_camera.setViewPort(0.5f, 0.5f, 0.5f, 0.5f);
+    std::cout << m_camera.projection() << std::endl;
     m_scene.draw(m_camera);
 
     // DearImGui

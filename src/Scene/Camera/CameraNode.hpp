@@ -44,15 +44,15 @@ public:
     //! \param[in] name: the name of the camera.
     //! \param[in] mode: swith to orthographic or perspective mode.
     //--------------------------------------------------------------------------
-    Camera(std::string const& name, Type const mode = Type::PERSPECTIVE);
+    Camera(std::string const& name, Type const type = Type::PERSPECTIVE);
 
     //--------------------------------------------------------------------------
     //! \brief Swith the type of projection (perspective or orthographic).
     //!
-    //! \param[in] mode: swith to Orthographic or Perspective mode.
+    //! \param[in] type: swith to Orthographic or Perspective mode.
     //! \return the projection matrix of the new type of view.
     //--------------------------------------------------------------------------
-    Matrix44f const& setMode(Type const mode);
+    Matrix44f const& is(Type const type);
 
     //--------------------------------------------------------------------------
     //! \brief Define what region is shown on screen (GLWindow class) for
@@ -74,6 +74,14 @@ public:
     //! \return true if inputs are within [0 .. 1], else return false.
     //--------------------------------------------------------------------------
     bool setViewPort(float x, float y, float w, float h);
+
+    //--------------------------------------------------------------------------
+    //! \brief
+    //--------------------------------------------------------------------------
+    inline Vector4f const& getViewPort() const
+    {
+        return m_viewport;
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Return the projection matrix. This method return the matrix that
@@ -100,12 +108,15 @@ public:
     //--------------------------------------------------------------------------
     Matrix44f const& view();
 
-protected:
+public:
 
     //! \brief Reference to the component applying the perspective projection.
-    Perspective& m_perspective;
+    Perspective& perspective;
     //! \brief Reference to the component applying the orthographic projection.
-    Orthographic& m_orthographic;
+    Orthographic& orthographic;
+
+protected:
+
     //! \brief Current type of projection (perspective or orthographic).
     Type m_type;
     //! \brief The region shown on screen

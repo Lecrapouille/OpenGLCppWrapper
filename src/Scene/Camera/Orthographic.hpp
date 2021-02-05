@@ -67,6 +67,8 @@ public:
     //--------------------------------------------------------------------------
     void setAspect(float const width, float const height);
 
+    void setFrustumSize(float const size);
+
     //--------------------------------------------------------------------------
     //! \brief Compute if needed and return the projection matrix.
     //! \retun The Matrix 4x4 of float.
@@ -83,6 +85,7 @@ protected:
     float m_near;
     float m_far;
     float m_aspect;
+    float m_frustum_size;
     bool m_dirty;
 };
 

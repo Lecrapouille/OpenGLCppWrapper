@@ -40,7 +40,7 @@ public:
     //! \param[in] near:
     //! \param[in] far:
     //--------------------------------------------------------------------------
-    Perspective(units::angle::radian_t const fov = 60.0_deg,
+    Perspective(units::angle::radian_t const fov = 45.0_deg,
                 float const near = 0.1f,
                 float const far = 1000.0f);
 
@@ -48,7 +48,7 @@ public:
     //! \brief set the field of view of the camera.
     //! \param[in] fov: Field of View of the camera (in degrees).
     //--------------------------------------------------------------------------
-    void setFieldOfView(units::angle::radian_t const fov = 60.0_deg);
+    void setFieldOfView(units::angle::radian_t const fov = 45.0_deg);
 
     //--------------------------------------------------------------------------
     //! \brief
