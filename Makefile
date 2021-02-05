@@ -53,12 +53,13 @@ OBJ_CAMERA = Perspective.o Orthographic.o CameraNode.o
 OBJ_LOADERS = OBJ.o SOIL.o
 OBJ_MATERIALS = Material.o DepthMaterial.o NormalsMaterial.o MeshBasicMaterial.o LineBasicMaterial.o Color.o
 OBJ_GEOMETRIES = Axes.o Model.o Plane.o Tube.o Sphere.o
+OBJ_PHYSICS = Components.o BulletWrapper.o
 
 OBJS += $(THIRDPART_OBJS) $(OBJ_COMMON)
 OBJS += $(OBJ_OPENGL_CONTEXT) $(OBJ_OPENGL_VARIABLES)
 OBJS += $(OBJ_OPENGL_BUFFERS) $(OBJ_OPENGL_TEXTURES) $(OBJ_OPENGL_SHADERS)
 OBJS += $(OBJ_GUI) $(OBJ_LOADERS) $(OBJ_MATERIALS) $(OBJ_GEOMETRIES)
-OBJS += $(OBJ_CAMERA) $(OBJ_SCENE_GRAPH)
+OBJS += $(OBJ_PHYSICS) $(OBJ_CAMERA) $(OBJ_SCENE_GRAPH)
 
 ###################################################
 # Compile static and shared libraries

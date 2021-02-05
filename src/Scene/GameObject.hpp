@@ -22,7 +22,7 @@
 #  define OPENGLCPPWRAPPER_SCENEGRAPH_GAME_OBJECT_HPP
 
 #  include "Common/ClassCounter.hpp"
-#  include "Scene/Components.hpp"
+#  include "Components/Components.hpp"
 #  include "Scene/Behavior.hpp"
 
 //------------------------------------------------------------------------------

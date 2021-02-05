@@ -15,7 +15,7 @@ TARGET=OpenGLCppWrapper
 
 ### Delete all previous directories to be sure to have and compile
 ### fresh code source.
-rm -fr backward-cpp imgui SOIL 2> /dev/null
+rm -fr backward-cpp imgui SOIL units bullet3 2> /dev/null
 
 function print-clone
 {
@@ -49,10 +49,14 @@ fi
 ### License: MIT
 print-clone imgui
 git clone https://github.com/ocornut/imgui.git --depth=1 > /dev/null 2> /dev/null
-#(cd imgui && git reset --hard f9b873662baac2388a4ca78c967e53eb5d83d2a1)
 
 ### Library for unit conversion library
 ### License: MIT
 print-clone units
 git clone https://github.com/nholthaus/units.git --depth=1 > /dev/null 2> /dev/null
 (cd units/include && mkdir units && cp units.h units/units.hpp)
+
+### Library for real-time collision detection and multi-physics simulation
+### License: zlib
+print-clone bullet3
+git clone https://github.com/bulletphysics/bullet3.git --depth=1 > /dev/null 2> /dev/null

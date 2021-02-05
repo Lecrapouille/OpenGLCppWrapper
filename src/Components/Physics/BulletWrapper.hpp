@@ -18,12 +18,35 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
-#  define OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+#ifndef BULLETWRAPPER_HPP
+#  define BULLETWRAPPER_HPP
 
-#  include "OpenGLCppWrapper/OpenGL.hpp"
-#  include "OpenGLCppWrapper/UI.hpp"
-#  include "OpenGLCppWrapper/Scene.hpp"
-#  include "OpenGLCppWrapper/Components.hpp"
+#  pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wsign-conversion"
+#    pragma GCC diagnostic ignored "-Wold-style-cast"
+#    pragma GCC diagnostic ignored "-Wfloat-equal"
+#    pragma GCC diagnostic ignored "-Wold-style-cast"
+#    pragma GCC diagnostic ignored "-Wcast-qual"
+#    pragma GCC diagnostic ignored "-Wfloat-conversion"
+#    pragma GCC diagnostic ignored "-Wconversion"
+#    define BT_THREADSAFE 0
+#     include "bullet/btBulletDynamicsCommon.h"
+#   pragma GCC diagnostic pop
 
-#endif // OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+class PhysicWorld
+{
+public:
+
+    PhysicWorld();
+    btDynamicsWorld& getDynamic() { return *dynamic; }
+
+private:
+
+    btDynamicsWorld *dynamic;
+    btDbvtBroadphase* broadphase;
+    btDefaultCollisionConfiguration* collisionConfiguration;
+    btCollisionDispatcher* dispatcher;
+    btSequentialImpulseConstraintSolver* solver;
+};
+
+#endif

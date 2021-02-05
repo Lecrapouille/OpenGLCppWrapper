@@ -18,12 +18,9 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
-#  define OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+#ifndef OPENGLCPPWRAPPER_INCLUDE_COMPONENTS_HPP
+#  define OPENGLCPPWRAPPER_INCLUDE_COMPONENTS_HPP
 
-#  include "OpenGLCppWrapper/OpenGL.hpp"
-#  include "OpenGLCppWrapper/UI.hpp"
-#  include "OpenGLCppWrapper/Scene.hpp"
-#  include "OpenGLCppWrapper/Components.hpp"
+#  include "Components/Physics/BulletWrapper.hpp"
 
-#endif // OPENGLCPPWRAPPER_INCLUDE_OPENGLCPPWRAPPER_HPP
+#endif // OPENGLCPPWRAPPER_INCLUDE_COMPONENTS_HPP

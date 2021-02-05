@@ -21,7 +21,7 @@
 #ifndef SCENE_CAMERA_ORTHOGRAPHIC_HPP
 #  define SCENE_CAMERA_ORTHOGRAPHIC_HPP
 
-#  include "Scene/Components.hpp"
+#  include "Components/Components.hpp"
 #  include "Math/Transformable.hpp"
 
 // *****************************************************************************

@@ -45,6 +45,7 @@ external/SOIL
 external/imgui
 external/units
 external/glm
+external/bullet3
 external/backward-cpp
 external/OpenGLCppWrapper-data
 tests/result.txt
