@@ -169,7 +169,7 @@ public:
     //! mouse callback functions onMouseButtonPressed(), onMouseScrolled(),
     //! onMouseMoved().
     //--------------------------------------------------------------------------
-    inline GLWindow::Mouse& mouse() { return m_mouse; }
+    static GLWindow::Mouse& mouse() { return m_mouse; }
 
     //--------------------------------------------------------------------------
     //! \brief Return the current width of the window. To be used from mouse
@@ -204,7 +204,7 @@ public:
     //! \brief Is the key is currently pressed ?
     //! \return true if pressed, false else.
     //--------------------------------------------------------------------------
-    inline bool isKeyDown(size_t const key)
+    static bool isKeyDown(size_t const key)
     {
         return GLWindow::KEY_PRESS == m_currentKeys[key];
     }
@@ -213,7 +213,7 @@ public:
     //! \brief Is the key is currently released ?
     //! \return true if released, false else.
     //--------------------------------------------------------------------------
-    inline bool isKeyUp(size_t const key)
+    static bool isKeyUp(size_t const key)
     {
         return GLWindow::KEY_RELEASE == m_currentKeys[key];
     }
@@ -222,7 +222,7 @@ public:
     //! \brief Has the key been pressed ?
     //! \return true if currently pressed and was released the state before.
     //--------------------------------------------------------------------------
-    inline bool wasKeyPressed(size_t const key)
+    static bool wasKeyPressed(size_t const key)
     {
         return GLWindow::KEY_PRESS == m_currentKeys[key] &&
                 GLWindow::KEY_RELEASE == m_lastKeys[key];
@@ -232,7 +232,7 @@ public:
     //! \brief Has the key been pressed ?
     //! \return true if currently released and was pressed the state before.
     //--------------------------------------------------------------------------
-    inline bool wasKeyReleased(size_t const key)
+    static bool wasKeyReleased(size_t const key)
     {
         return GLWindow::KEY_RELEASE == m_currentKeys[key] &&
                 GLWindow::KEY_PRESS == m_lastKeys[key];
@@ -358,11 +358,11 @@ private:
     //! \brief
     float m_deltaTime = 0.0f;
     //! \brief GLWindow::Mouse states
-    GLWindow::Mouse m_mouse;
+    static GLWindow::Mouse m_mouse;
     //! \brief Previous keyboard map
-    std::vector<char> m_lastKeys;
+    static std::vector<char> m_lastKeys;
     //! \brief Current keyboard map
-    std::vector<char> m_currentKeys;
+    static std::vector<char> m_currentKeys;
     //! \brief
     size_t previous_gpu_mem = 0_z;
     //! \brief

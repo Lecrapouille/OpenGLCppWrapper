@@ -44,10 +44,10 @@ BasicWindowIOEvents::~BasicWindowIOEvents()
 void BasicWindowIOEvents::onWindowResized()
 {
     // Make the viewport matches the new window dimensions.
-    glCheck(glViewport(0, 0, width<int>(), height<int>()));
+    glCheck(glViewport(0, 0, GLWindow::width<int>(), GLWindow::height<int>()));
 
     // Note: height is never zero !
-    float ratio = width<float>() / height<float>();
+    float ratio = GLWindow::width<float>() / GLWindow::height<float>();
 
     std::cout << "New Window dimension "
               << width<int>() << " x " << height<int>()
@@ -61,22 +61,22 @@ void BasicWindowIOEvents::onWindowResized()
 // -----------------------------------------------------------------------------
 void BasicWindowIOEvents::onKeyboardEvent()
 {
-    if (isKeyDown(GLFW_KEY_F1))
+    if (GLWindow::isKeyDown(GLFW_KEY_F1))
         std::cout << std::endl << "Key pressed F1" << std::endl;
-    if (isKeyUp(GLFW_KEY_F1))
+    if (GLWindow::isKeyUp(GLFW_KEY_F1))
         std::cout << std::endl << "Key released F1" << std::endl;
-    if (wasKeyReleased(GLFW_KEY_F1))
+    if (GLWindow::wasKeyReleased(GLFW_KEY_F1))
         std::cout << std::endl << "Key was released F1" << std::endl;
-    if (wasKeyPressed(GLFW_KEY_F1))
+    if (GLWindow::wasKeyPressed(GLFW_KEY_F1))
         std::cout << std::endl << "Key was pressed F1" << std::endl;
 
-    if (isKeyDown(GLFW_KEY_A))
+    if (GLWindow::isKeyDown(GLFW_KEY_A))
         std::cout << std::endl << "Key pressed A" << std::endl;
-    if (isKeyUp(GLFW_KEY_A))
+    if (GLWindow::isKeyUp(GLFW_KEY_A))
         std::cout << std::endl << "Key released A" << std::endl;
-    if (wasKeyReleased(GLFW_KEY_A))
+    if (GLWindow::wasKeyReleased(GLFW_KEY_A))
         std::cout << std::endl << "Key was released A" << std::endl;
-    if (wasKeyPressed(GLFW_KEY_A))
+    if (GLWindow::wasKeyPressed(GLFW_KEY_A))
         std::cout << std::endl << "Key was pressed A" << std::endl;
 }
 
@@ -102,8 +102,8 @@ void BasicWindowIOEvents::onMouseButtonPressed()
 void BasicWindowIOEvents::onMouseMoved()
 {
     std::cout << "Mouse moved to: "
-              << static_cast<int>(mouse().position.x) << " x "
-              << static_cast<int>(mouse().position.y) << std::endl;
+              << static_cast<int>(GLWindow::mouse().position.x) << " x "
+              << static_cast<int>(GLWindow::mouse().position.y) << std::endl;
 
     std::cout << "Mouse delta movement: "
              << mouse().displacement.x << " x "

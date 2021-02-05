@@ -26,12 +26,17 @@
 #include <sstream>
 #include <cassert>
 
+GLWindow::Mouse GLWindow::m_mouse;
+std::vector<char> GLWindow::m_lastKeys;
+std::vector<char> GLWindow::m_currentKeys;
+
 //------------------------------------------------------------------------------
 GLWindow::GLWindow(uint32_t const width, uint32_t const height, const char *title)
-    : m_title(title),
-      m_lastKeys(GLFW_KEY_LAST + 1),
-      m_currentKeys(GLFW_KEY_LAST + 1)
+    : m_title(title)
 {
+    m_lastKeys.resize(GLFW_KEY_LAST + 1);
+    m_currentKeys.resize(GLFW_KEY_LAST + 1);
+
     staticWidth() = width;
     staticHeight() = height;
     m_context = glfwCreateWindow(static_cast<int>(width),
