@@ -25,11 +25,27 @@
 #  include "Math/Quaternion.hpp"
 
 // *****************************************************************************
+//! \brief The coordinate space in which to operate.
+// *****************************************************************************
+enum class Space
+{
+    //! \brief Use \c World to transform a GameObject the world coordinates.
+    World,
+    //! \brief Use \c Self to transform a GameObject using its own coordinates.
+    Self
+};
+
+// *****************************************************************************
 //! \brief a Transformable defines a 4x4 transformation matrix from a given
 //! translation, a given rotation and a given scale factor. This class allows an
 //! object to move inside a 2D-world (if n == 2U) or 3D-world (if n == 3U).
 //! The returned matrix will be given to OpenGL shader for rendering the object
 //! inside the world.
+//!
+//! \warning Note that all matrices are transposed to be directly usable by
+//!   OpenGL (since OpenGL matrices are column-major. Beware of option passed
+//!   to glUniformMatrix4fv that should be set to GL_FALSE). As consequence:
+//!   transpose(A * B) = transpos(B) * transpose(A).
 // *****************************************************************************
 template <typename T, size_t n>
 class Transformable
@@ -103,9 +119,10 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Set the origin of the object (relative to word origin).
+    //! \brief Set the origin of the object relative to the world origin.
+    //! \param[in] origin: World coordinates.
     //--------------------------------------------------------------------------
-    inline Transformable<T,n>& origin(Vector<T, n> const& origin)
+    inline Transformable<T, n>& origin(Vector<T, n> const& origin)
     {
         m_origin = origin;
         m_transform_needs_update = true;
@@ -114,7 +131,8 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Get the origin of the object (relative to word origin).
+    //! \brief Get the origin of the object relative to the world origin.
+    //! \return World coordinates.
     //--------------------------------------------------------------------------
     inline Vector<T, n> const& origin() const
     {
@@ -122,9 +140,10 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Set the relative position of the object from its own origin.
+    //! \brief Set the position of the object relative to the world origin.
+    //! \param[in] position: World coordinates.
     //--------------------------------------------------------------------------
-    inline Transformable<T,n>& position(Vector<T, n> const& position)
+    inline Transformable<T, n>& position(Vector<T, n> const& position)
     {
         m_position = position;
         m_transform_needs_update = true;
@@ -133,7 +152,8 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Get the absolute position of the object from its own origin.
+    //! \brief Get the position of the object (relative to the world origin).
+    //! \return World coordinates.
     //--------------------------------------------------------------------------
     inline Vector<T, n> const& position() const
     {
@@ -141,58 +161,57 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Set the position of the object (relative to its origin).
+    //! \param[in] position: World coordinates.
     //--------------------------------------------------------------------------
-    /*Matrix<T, n + 1_z, n + 1_z> translation()
+    inline Transformable<T,n>& local_position(Vector<T, n> const& position)
     {
-        Matrix<T, n+1_z, n+1_z> I(matrix::Identity);
-        m_transform = matrix::translate(I, m_position - m_origin);
-        return m_transform;
-    }*/
-
-    //--------------------------------------------------------------------------
-    //! \brief Move the object by a given offset.
-    //! Do the same job than translate() or displace().
-    //--------------------------------------------------------------------------
-    inline Transformable<T,n>& move(Vector<T, n> const& offset)
-    {
-        m_position += offset;
+        m_position = position + m_origin;
         m_transform_needs_update = true;
 
         return *this;
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Move the object by a given offset.
-    //! Do the same job than move() or displace().
+    //! \brief Get the position of the object (relative to its origin).
+    //! \return Local coordinates.
     //--------------------------------------------------------------------------
-    inline Transformable<T,n>& translate(Vector<T, n> const& offset)
+    inline Vector<T, n> local_position() const
     {
-        m_position += offset;
-        m_transform_needs_update = true;
-
-        return *this;
+        return m_position - m_origin;
     }
 
     //--------------------------------------------------------------------------
     //! \brief Move the object by a given offset.
-    //! Do the same job than translate() or move().
+    //! \note Do the same job than move() or displace().
+    //! \param[in] offset: relative displacement. How much we want to move the
+    //! object in which direction.
     //--------------------------------------------------------------------------
-    inline Transformable<T,n>& displace(Vector<T, n> const& offset)
+    inline Transformable<T,n>& translate(Vector<T, n> const& offset,
+                                         Space relativeTo = Space::World)
     {
-        m_position += offset;
-        m_transform_needs_update = true;
+        if (relativeTo == Space::World)
+        {
+            m_position += offset;
+        }
+        else
+        {
+            m_position += (m_orientation * offset);
+        }
 
+        m_transform_needs_update = true;
         return *this;
     }
 
     //--------------------------------------------------------------------------
     //! \brief Move the object by a given offset to the right (positive offset)
     //! or to the left (negative offset).
+    //! \param[in] offset: relative displacement. How much we want to move the
+    //! object along its right or left direction.
     //--------------------------------------------------------------------------
     inline Transformable<T,n>& moveRight(T const& offset)
     {
-        m_position -= offset * right();
+        m_position += offset * right();
         m_transform_needs_update = true;
 
         return *this;
@@ -201,10 +220,12 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Move up the object by a given offset (positive offset)
     //! or to move down (negative offset).
+    //! \param[in] offset: relative displacement. How much we want to move the
+    //! object along its up or down direction.
     //--------------------------------------------------------------------------
     inline Transformable<T,n>& moveUp(T const& offset)
     {
-        m_position -= offset * up();
+        m_position += offset * up();
         m_transform_needs_update = true;
 
         return *this;
@@ -213,17 +234,30 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Move forward the object by a given offset (positive offset)
     //! or to move backward (negative offset).
+    //! \param[in] offset: relative displacement. How much we want to move the
+    //! object along its forward or backward direction.
     //--------------------------------------------------------------------------
     inline Transformable<T,n>& moveForward(T const& offset)
     {
-        m_position -= offset * forward();
+        m_position += offset * forward();
         m_transform_needs_update = true;
 
         return *this;
     }
 
     //--------------------------------------------------------------------------
+    //! \brief Return the translation matrix
+    //--------------------------------------------------------------------------
+    Matrix<T, n + 1_z, n + 1_z> translation()
+    {
+        Matrix<T, n+1_z, n+1_z> I(matrix::Identity);
+        m_transform = matrix::translate(I, m_position);
+        return m_transform;
+    }
+
+    //--------------------------------------------------------------------------
     //! \brief Set the absolute scale factor of the object.
+    //! \param[in] offset: relative displacement.
     //--------------------------------------------------------------------------
     inline Transformable<T,n>& scaling(Vector<T, n> const& scale)
     {
@@ -274,7 +308,7 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Return the rotation matrix
     //--------------------------------------------------------------------------
     inline Matrix<T, n + 1_z, n + 1_z> rotation() const
     {
@@ -282,56 +316,73 @@ public:
     }
 
     //--------------------------------------------------------------------------
+    //! \brief Set the new attitude (new orientation).
+    //--------------------------------------------------------------------------
+    inline void attitude(Quatf const& q)
+    {
+        m_orientation = q;
+        m_transform_needs_update = true;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the quaternion orientation
+    //--------------------------------------------------------------------------
+    Quatf const& attitude() const
+    {
+        return m_orientation;
+    }
+
+    //--------------------------------------------------------------------------
     //! \brief Set the absolute orientation of the object.
     //! \param angle in radian.
     //--------------------------------------------------------------------------
-    Transformable<T,n>& rotate(units::angle::radian_t const angle, Vector<T, n> const& axis)
+    Transformable<T,n>& rotate(units::angle::radian_t const angle,
+                               Vector<T, n> const& axis,
+                               Space relativeTo = Space::Self)
     {
-        Quat<T> rot = angleAxis(angle, axis);
-        rot.normalize();
-        m_orientation = m_orientation * rot;
-        m_transform_needs_update = true;
-
-        return *this;
+        return rotate(Quatf::fromAngleAxis(angle, axis), relativeTo);
     }
 
     //--------------------------------------------------------------------------
     //! \brief
+    //--------------------------------------------------------------------------
+    Transformable<T,n>& rotate(Quat<T> const& q, Space relativeTo = Space::Self)
+    {
+        if (relativeTo == Space::Self)
+        {
+            m_orientation = m_orientation * q;
+        }
+        else
+        {
+            m_orientation = q * m_orientation;
+        }
+
+        m_transform_needs_update = true;
+        return *this;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Local rotation over its right axis.
     //--------------------------------------------------------------------------
     Transformable<T,n>& pitch(units::angle::radian_t const angle)
     {
-        Quat<T> rot = angleAxis(angle, right());
-        rot.normalize();
-        m_orientation = m_orientation * rot;
-        m_transform_needs_update = true;
-
-        return *this;
+        return rotate(angle, right(), Space::Self);
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Local rotation over its up axis.
     //--------------------------------------------------------------------------
     Transformable<T,n>& yaw(units::angle::radian_t const angle)
     {
-        Quat<T> rot = angleAxis(angle, up());
-        rot.normalize();
-        m_orientation = m_orientation * rot;
-        m_transform_needs_update = true;
-
-        return *this;
+        return rotate(angle, up(), Space::Self);
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Local rotation over its forward axis.
     //--------------------------------------------------------------------------
     Transformable<T,n>& roll(units::angle::radian_t const angle)
     {
-        Quat<T> rot = angleAxis(angle, forward());
-        rot.normalize();
-        m_orientation = m_orientation * rot;
-        m_transform_needs_update = true;
-
-        return *this;
+        return rotate(angle, forward(), Space::Self);
     }
 
     //--------------------------------------------------------------------------

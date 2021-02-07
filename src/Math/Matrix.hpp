@@ -37,16 +37,31 @@ namespace matrix
 } // namespace matrix
 
 
+// *****************************************************************************
+//! \brief Class for small matrices (up to 4x4). Elements are consecutive values
+//! of type T using the row-major order. Example for a 4x4 matrix:
+//!     | a1  a2  a3  a4  |
+//! M = | a5  a6  a7  a8  |
+//!     | a9  a10 a11 a12 |
+//!     | a13 a14 a15 a16 |
+//!
+//! \note Beware OpenGL uses column-major order and therefore uses transposed
+//!   matrices.
+//!
+//! \warning do not use big matrices since this class hold a static array and
+//!   therefore not store in the heap but stored in the stack of called
+//!   function. Too big matrices will create a stack overflow.
+// *****************************************************************************
 template <typename T, size_t rows, size_t cols>
 class Matrix
 {
 public:
 
   //! \brief Empty constructor. It does NOT initialize the matrix for efficiency.
-  Matrix()
-  {}
+  Matrix() = default;
 
-  //! \brief Constructor with initialization list.
+  //! \brief Constructor with initialization list in the way. Matrix will be
+  //! filled using the row-major order.
   Matrix(std::initializer_list<T> initList)
   {
     size_t m = std::min(rows * cols, size_t(initList.size()));
@@ -349,75 +364,6 @@ Matrix<T, rows, cols> operator*(Matrix<T, rows, inner> const &a, Matrix<T, inner
         result(i, j) += a(i, k) * b(k, j);
   return result;
 }
-
-#if 0
-template <typename T>
-Matrix<T, 4_z, 4_z> operator*(Matrix<T, 4_z, 4_z> const &A, Matrix<T, 4_z, 4_z> const &B)
-{
-  float const a00 = A(0, 0);
-  float const a01 = A(0, 1);
-  float const a02 = A(0, 2);
-  float const a03 = A(0, 3);
-
-  float const a10 = A(1, 0);
-  float const a11 = A(1, 1);
-  float const a12 = A(1, 2);
-  float const a13 = A(1, 3);
-
-  float const a20 = A(2, 0);
-  float const a21 = A(2, 1);
-  float const a22 = A(2, 2);
-  float const a23 = A(2, 3);
-
-  float const a30 = A(3, 0);
-  float const a31 = A(3, 1);
-  float const a32 = A(3, 2);
-  float const a33 = A(3, 3);
-
-  float const b00 = A(0, 0);
-  float const b01 = A(0, 1);
-  float const b02 = A(0, 2);
-  float const b03 = A(0, 3);
-
-  float const b10 = A(1, 0);
-  float const b11 = A(1, 1);
-  float const b12 = A(1, 2);
-  float const b13 = A(1, 3);
-
-  float const b20 = B(2, 0);
-  float const b21 = B(2, 1);
-  float const b22 = B(2, 2);
-  float const b23 = B(2, 3);
-
-  float const b30 = B(3, 0);
-  float const b31 = B(3, 1);
-  float const b32 = B(3, 2);
-  float const b33 = B(3, 3);
-
-  static Matrix<T, 4_z, 4_z> matrix;
-  matrix(0, 0) = a00*b00+a10*b01+a20*b02+a30*b03;
-  matrix(0, 1) = a01*b00+a11*b01+a21*b02+a31*b03;
-  matrix(0, 2) = a02*b00+a12*b01+a22*b02+a32*b03;
-  matrix(0, 3) = a03*b00+a13*b01+a23*b02+a33*b03;
-
-  matrix(1, 0) = a00*b10+a10*b11+a20*b12+a30*b13;
-  matrix(1, 1) = a01*b10+a11*b11+a21*b12+a31*b13;
-  matrix(1, 2) = a02*b10+a12*b11+a22*b12+a32*b13;
-  matrix(1, 3) = a03*b10+a13*b11+a23*b12+a33*b13;
-
-  matrix(2, 0) = a00*b20+a10*b21+a20*b22+a30*b23;
-  matrix(2, 1) = a01*b20+a11*b21+a21*b22+a31*b23;
-  matrix(2, 2) = a02*b20+a12*b21+a22*b22+a32*b23;
-  matrix(2, 3) = a03*b20+a13*b21+a23*b22+a33*b23;
-
-  matrix(3, 0) = a00*b30+a10*b31+a20*b32+a30*b33;
-  matrix(3, 1) = a01*b30+a11*b31+a21*b32+a31*b33;
-  matrix(3, 2) = a02*b30+a12*b31+a22*b32+a32*b33;
-  matrix(3, 3) = a03*b30+a13*b31+a23*b32+a33*b33;
-
-  return matrix;
-}
-#endif
 
 //! \brief Matrix-Vector multiplication.
 template <typename T, size_t rows, size_t cols>

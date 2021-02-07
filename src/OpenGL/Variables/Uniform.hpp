@@ -203,18 +203,21 @@ inline void GLUniform<Vector4i>::apply(const Vector4i& value) const
 template<>
 inline void GLUniform<Matrix22f>::apply(const Matrix22f& m) const
 {
+    // GL_FALSE because our matrices are already transposed (column-major).
     glCheck(glUniformMatrix2fv(m_handle, 1, GL_FALSE, m));
 }
 
 template<>
 inline void GLUniform<Matrix33f>::apply(const Matrix33f& m) const
 {
+    // GL_FALSE because our matrices are already transposed (column-major).
     glCheck(glUniformMatrix3fv(m_handle, 1, GL_FALSE, m));
 }
 
 template<>
 inline void GLUniform<Matrix44f>::apply(const Matrix44f& m) const
 {
+    // GL_FALSE because our matrices are already transposed (column-major).
     glCheck(glUniformMatrix4fv(m_handle, 1, GL_FALSE, m));
 }
 

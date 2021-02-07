@@ -145,13 +145,23 @@ private:                                                                \
 operator bool()
 
 // *****************************************************************************
-//! \brief Generic mathematic vector for a given dimension.
+//! \brief Generic mathematic vector for a given dimension. Note contrary to a
+//! mathematic point a view and currently purely for lazy reasons, the vector is
+//! not a column or a row vector and therefore dimensions are not matched on
+//! certain type of operations: so transpose() has not to be called but beware of
+//! errorneous results particularly because OpenGL uses transposed matrix vectors
+//! and positions shall be considered as column vector.
 //!
 //! \tparam T the type of the vector (float, int).
 //! \tparam n the vector dimension.
-//! \note be n small enough to be stored inside the stack of the program without
-//! making a stack overflow. No checks are made again stack overflow.
+//!
+//! \warning be n small enough to be stored inside the stack of the program
+//!   without making a stack overflow. No checks are made again stack overflow.
 // *****************************************************************************
+// TODO: manage row and column vectors:
+// template <T, n, m> vector + check if n or m are 1.
+// => ColumnVecor<T, n> = Vector<T, n, 1>
+// => RowVecor<T, n> = Vector<T, 1, n>
 template <typename T, size_t n>
 class Vector
 {
@@ -1067,33 +1077,33 @@ Vector<T, n> operator%(Vector<T, n> const& a, Vector<T, n> const& b)
 template <typename T, size_t n>
 std::ostream& operator<<(std::ostream& os, Vector<T, n> const& v)
 {
-    os << "Vector(" << v[0];
+    os << "[" << v[0];
     for (size_t i = 1; i < n; ++i)
     {
         os << ", " << v[i];
     }
-    return os << ')';
+    return os << ']';
 }
 
 //! \brief Display a vector (specialization for 2D vectors).
 template <typename T>
 std::ostream& operator<<(std::ostream& os, Vector<T, 2_z> const& v)
 {
-    return os << "Vector(" << v[0] << ", " << v[1] << ')';
+    return os << "[" << v[0] << ", " << v[1] << ']';
 }
 
 //! \brief Display a vector (specialization for 3D vectors).
 template <typename T>
 std::ostream& operator<<(std::ostream& os, Vector<T, 3_z> const& v)
 {
-    return os << "Vector(" << v[0] << ", " << v[1] << ", " << v[2] << ')';
+    return os << "[" << v[0] << ", " << v[1] << ", " << v[2] << ']';
 }
 
 //! \brief Display a vector (specialization for 4D vectors).
 template <typename T>
 std::ostream& operator<<(std::ostream& os, Vector<T, 4_z> const& v)
 {
-    return os << "Vector(" << v[0] << ", " << v[1] << ", " << v[2]  << ", " << v[3] << ')';
+    return os << "[" << v[0] << ", " << v[1] << ", " << v[2]  << ", " << v[3] << ']';
 }
 
 // *****************************************************************************

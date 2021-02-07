@@ -1,5 +1,5 @@
 /*
- * quaternion.hpp
+ * Quaternion.hpp
  *
  *  Copyright (c) 2014 G. Cross and C. Qu. MIT License
  *
@@ -23,15 +23,17 @@
  *                C. Qu quchao [at] seas.upenn.edu
  */
 
-/* Modified code by Quentin Quadrat <lecrapouille@gmail.com>.
- * See original code https://github.com/gareth-cross/quat/blob/master/include/quaternion.hpp */
+// *****************************************************************************
+// Modified code by Quentin Quadrat <lecrapouille@gmail.com>.
+// See original code https://github.com/gareth-cross/quat/blob/master/include/quaternion.hpp */
+// *****************************************************************************
 
 #ifndef QUATERNION_HPP
-#define QUATERNION_HPP
+#  define QUATERNION_HPP
 
-#include <cmath>
-#include <limits>
-#include <type_traits>
+#  include <cmath>
+#  include <limits>
+#  include <type_traits>
 
 #  pragma GCC diagnostic push
 #    pragma GCC diagnostic ignored "-Wold-style-cast"
@@ -40,17 +42,18 @@
 #      include "units/units.hpp"
 #  pragma GCC diagnostic pop
 
-/**
- *  @class Quat
- *  @brief Template representation of a quaternion (a, (b,c,d))
- *  where:
- *    - \c a is the scalar component
- *    - \c b is the first complex dimension (i)
- *    - \c c is the second complex dimension (j)
- *    - \c d is the third complex dimension (k)
- *
- *  Supports multiplication, addition, scaling and integration.
- */
+// *****************************************************************************
+//! \class Quat
+//! \brief Template representation of a quaternion (a, (b,c,d))
+//!
+//! where:
+//!   - \c a is the scalar component
+//!   - \c b is the first complex dimension (i-axis)
+//!   - \c c is the second complex dimension (j-axis)
+//!   - \c d is the third complex dimension (k-axis)
+//!
+//! Supports multiplication, addition, scaling and integration.
+// *****************************************************************************
 template <typename Scalar> class Quat
 {
     static_assert(std::is_fundamental<Scalar>::value &&
@@ -59,52 +62,136 @@ template <typename Scalar> class Quat
 
 public:
 
-    /**
-     *  @brief Create a quaternion with null rotation
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Create a quaternion with null rotation (1, (0,0,0))
+    //--------------------------------------------------------------------------
     Quat()
     {
-        m_q[0] = Scalar(1);
-        m_q[1] = m_q[2] = m_q[3] = Scalar(0);
+        data[0] = Scalar(1);
+        data[1] = data[2] = data[3] = Scalar(0);
     }
 
-    /**
-     *  @brief Construct a quaterion
-     *  @param a Scalar parameter
-     *  @param b,c,d Complex parameters (i, j, k)
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Construct a quaterion a + b i + c j + d k
+    //! \param[in] a Scalar parameter
+    //! \param[in] b Complex parameters complex i-axis
+    //! \param[in] c Complex parameters complex j-axis
+    //! \param[in] d Complex parameters complex k-axis
+    //--------------------------------------------------------------------------
     Quat(Scalar a, Scalar b, Scalar c, Scalar d)
     {
-        m_q[0] = a;
-        m_q[1] = b;
-        m_q[2] = c;
-        m_q[3] = d;
+        data[0] = a;
+        data[1] = b;
+        data[2] = c;
+        data[3] = d;
     }
 
-    /**
-     *  @brief Construct a quaterion
-     *  @param s Scalar parameter
-     *  @param v Complex parameters (i, j, k)
-     */
-    Quat(Scalar s, Vector<Scalar, 3_z> const& v)
+    //--------------------------------------------------------------------------
+    //! \brief Construct a quaterion a + b i + c j + d k
+    //! \param[in] a Scalar parameter
+    //! \param[in] bcd Complex parameters (i, j, k)
+    //! \note do not confuse with angleAxis() which builds a quaternion from a
+    //!   given angle and a given rotation axis.
+    //--------------------------------------------------------------------------
+    Quat(Scalar a, Vector<Scalar, 3_z> const& bcd)
     {
-        m_q[0] = s;
-        m_q[1] = v[0];
-        m_q[2] = v[1];
-        m_q[3] = v[2];
+        data[0] = a;
+        data[1] = bcd[0];
+        data[2] = bcd[1];
+        data[3] = bcd[2];
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Construct an unit quaterion a + b i + c j + d k where the scalar
+    //! component \c a is not given but rebuild.
+    //! \param[in] b Complex parameters complex i-axis
+    //! \param[in] c Complex parameters complex j-axis
+    //! \param[in] d Complex parameters complex k-axis
+    //! \note the length of (b, c, d) shall be <= 1.
+    //--------------------------------------------------------------------------
+    Quat(Scalar b, Scalar c, Scalar d)
+    {
+        Scalar n = (b * b) + (c * c) + (d * d);
+        assert(n <= Scalar(1));
+
+        data[0] = -std::sqrt(Scalar(1) - n);
+        data[1] = b;
+        data[2] = c;
+        data[3] = d;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Copy constructor
+    //--------------------------------------------------------------------------
+    Quat(Quat const& other)
+    {
+        *this = other;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Construct a quaternion from a rotation matrix
+    //--------------------------------------------------------------------------
+    Quat(Matrix<Scalar, 4_z, 4_z> const& m)
+    {
+        *this = Quat::fromMatrix(m);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Copy operator
+    //--------------------------------------------------------------------------
+    Quat& operator=(Quat const& other)
+    {
+        if (this != &other)
+        {
+            data[0] = other.data[0];
+            data[1] = other.data[1];
+            data[2] = other.data[2];
+            data[3] = other.data[3];
+        }
+
+        return *this;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Creates a rotation which rotates angle degrees around axis.
+    //--------------------------------------------------------------------------
+    static Quat<Scalar> fromAngleAxis(units::angle::radian_t const angle, Vector<Scalar, 3u> const& v)
+    {
+        Scalar const s = std::sin(angle.to<Scalar>() * static_cast<Scalar>(0.5));
+        Quat<Scalar> q(std::cos(angle.to<Scalar>() * static_cast<Scalar>(0.5)),
+                       v.x * s, v.y * s, v.z * s);
+        q.normalize();
+        return q;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Construct a quaternion from an angle/axis
+    //--------------------------------------------------------------------------
+    Quat(units::angle::radian_t const angle, Vector<Scalar, 3u> const& axis)
+    {
+        *this = fromAngleAxis(angle, axis);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Print quaternion
+    //--------------------------------------------------------------------------
     inline friend std::ostream& operator<<(std::ostream& os, Quat& q)
     {
-        return os << q.a() << " + " << q.b() << "i + "
-                  << q.c() << "j + " << q.d() << "k";
+        return os << "Quat(" << q.a() << ",  (" << q.b() << ", "
+                  << q.c() << ", " << q.d() << "))";
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Return the angle of rotation in radian.
+    //--------------------------------------------------------------------------
     units::angle::radian_t angle()
     {
         return units::angle::radian_t(std::acos(a()) * Scalar(2));
     }
 
+    //--------------------------------------------------------------------------
+    //! \brief Return the rotation axis (x,y,z).
+    //--------------------------------------------------------------------------
     Vector<Scalar, 3_z> axis()
     {
         Scalar tmp1 = static_cast<Scalar>(1) - a() * a();
@@ -114,73 +201,83 @@ public:
         return Vector<Scalar, 3_z>(b() * tmp2, c() * tmp2, d() * tmp2);
     }
 
-    /**
-     *  @brief L2 norm of the quaternion
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Return the L2 norm of the quaternion.
+    //--------------------------------------------------------------------------
     Scalar norm() const
     {
         return std::sqrt(a() * a() + b() * b() + c() * c() + d() * d());
     }
 
-    /**
-     *  @brief Normalize quaternion
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Normalize quaternion.
+    //--------------------------------------------------------------------------
     void normalize()
     {
         const Scalar n = norm();
         operator*=(*this, 1 / n);
     }
 
-    /**
-     *  @brief Complex conjugate quaternion
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Complex conjugate quaternion.
+    //--------------------------------------------------------------------------
     Quat conjugate() const
     {
         return Quat(a(), -b(), -c(), -d());
     }
 
-    /**
-     *  @brief Rotate a vector using this quaternion
-     *  @param v Vector stored in the three complex terms
-     */
+    Quat operator-() const
+    {
+        return {
+            -data[0], -data[1], -data[2], -data[3]
+        };
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Rotate a vector using this quaternion.
+    //! \param[in] v Vector stored in the three complex terms
+    //--------------------------------------------------------------------------
     Quat transform(const Quat &v) const
     {
         const Quat &q = *this;
         return q * v * q.conjugate();
     }
 
-    /**
-     *  @brief Convert a rotation quaternion to its matrix form
-     *  @note The result is not correct if this quaternion is not a member of S(4)
-     *  @return 4x4 Rotation matrix
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Convert a rotation quaternion to its matrix form.
+    //! \note The result is not correct if this quaternion is not a member of
+    //!   S(4).
+    //! \return 4x4 Rotation matrix.
+    //--------------------------------------------------------------------------
     Matrix<Scalar, 4_z, 4_z> toMatrix() const
     {
-		Matrix<Scalar, 4_z, 4_z> Result(matrix::Identity);
-		Scalar qxx(b() * b());
-		Scalar qyy(c() * c());
-		Scalar qzz(d() * d());
-		Scalar qxz(b() * d());
-		Scalar qxy(b() * c());
-		Scalar qyz(c() * d());
-		Scalar qwx(a() * b());
-		Scalar qwy(a() * c());
-		Scalar qwz(a() * d());
+        // glm code
+        Matrix<Scalar, 4_z, 4_z> Result(matrix::Identity);
+        Scalar qxx(b() * b());
+        Scalar qyy(c() * c());
+        Scalar qzz(d() * d());
+        Scalar qxz(b() * d());
+        Scalar qxy(b() * c());
+        Scalar qyz(c() * d());
+        Scalar qwx(a() * b());
+        Scalar qwy(a() * c());
+        Scalar qwz(a() * d());
 
-		Result[0][0] = Scalar(1) - Scalar(2) * (qyy +  qzz);
-		Result[0][1] = Scalar(2) * (qxy + qwz);
-		Result[0][2] = Scalar(2) * (qxz - qwy);
+        Result[0][0] = Scalar(1) - Scalar(2) * (qyy +  qzz);
+        Result[0][1] = Scalar(2) * (qxy + qwz);
+        Result[0][2] = Scalar(2) * (qxz - qwy);
 
-		Result[1][0] = Scalar(2) * (qxy - qwz);
-		Result[1][1] = Scalar(1) - Scalar(2) * (qxx +  qzz);
-		Result[1][2] = Scalar(2) * (qyz + qwx);
+        Result[1][0] = Scalar(2) * (qxy - qwz);
+        Result[1][1] = Scalar(1) - Scalar(2) * (qxx +  qzz);
+        Result[1][2] = Scalar(2) * (qyz + qwx);
 
-		Result[2][0] = Scalar(2) * (qxz + qwy);
-		Result[2][1] = Scalar(2) * (qyz - qwx);
-		Result[2][2] = Scalar(1) - Scalar(2) * (qxx +  qyy);
+        Result[2][0] = Scalar(2) * (qxz + qwy);
+        Result[2][1] = Scalar(2) * (qyz - qwx);
+        Result[2][2] = Scalar(1) - Scalar(2) * (qxx +  qyy);
 
-		return Result;
-#if 0
+        return Result;
+
+#if 0 // FIXME original code
         Matrix<Scalar, 4_z, 4_z> R(matrix::Identity); // TODO to be optimized
 
         const Scalar aa = a() * a();
@@ -204,12 +301,12 @@ public:
 #endif
     }
 
-    /**
-     *  @brief Integrate a rotation quaternion using 4th order Runge Kutta
-     *  @param w Angular velocity (body frame), stored in 3 complex terms
-     *  @param dt Time interval in seconds
-     *  @param normalize If true, quaternion is normalized after integration
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Integrate a rotation quaternion using 4th order Runge Kutta.
+    //! \param[in] w Angular velocity (body frame), stored in 3 complex terms.
+    //! \param[in] dt Time interval in seconds.
+    //! \param[in] normalize If true, quaternion is normalized after integration.
+    //--------------------------------------------------------------------------
     void integrateRungeKutta4(const Quat &w, Scalar dt, bool normalize = true)
     {
         const static Scalar half = static_cast<Scalar>(0.5);
@@ -230,12 +327,12 @@ public:
         }
     }
 
-    /**
-     *  @brief Integrate a rotation quaterion using Euler integration
-     *  @param w Angular velocity (body frame), stored in 3 complex terms
-     *  @param dt Time interval in seconds
-     *  @param normalize If True, quaternion is normalized after integration
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Integrate a rotation quaterion using Euler integration.
+    //! \param[in] w Angular velocity (body frame), stored in 3 complex terms.
+    //! \param[in] dt Time interval in seconds.
+    //! \param[in] normalize If True, quaternion is normalized after integration.
+    //--------------------------------------------------------------------------
     void integrateEuler(const Quat &w, Scalar dt, bool normalize = true)
     {
         Quat &q = *this;
@@ -247,13 +344,13 @@ public:
         }
     }
 
-    /**
-     *  @brief Create a rotation quaterion
-     *  @param theta Angle of rotation, radians
-     *  @param x X component of rotation vector
-     *  @param y Y component
-     *  @param z Z component
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Create a rotation quaterion
+    //! \param[in] theta Angle of rotation (unit: radian).
+    //! \param[in] x X component of rotation vector.
+    //! \param[in] y Y component of rotation vector.
+    //! \param[in] z Z component of rotation vector.
+    //--------------------------------------------------------------------------
     static Quat rotation(units::angle::radian_t theta, Scalar x, Scalar y, Scalar z)
     {
         const Scalar haversine = std::sin(theta.to<Scalar>() / 2);
@@ -262,10 +359,10 @@ public:
         return Quat(havercosine, haversine * x, haversine * y, haversine * z);
     }
 
-    /**
-     *  @brief Create a rotation quaternion from rotation vector [x,y,z]
-     *  @note If x/y/z have 0 norm, this function returns the identity transform
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Create a rotation quaternion from rotation vector [x,y,z].
+    //! \note If x/y/z have 0 norm, this function returns the identity transform.
+    //--------------------------------------------------------------------------
     static Quat rotation(Scalar x, Scalar y, Scalar z)
     {
         const Scalar theta = std::sqrt(x * x + y * y + z * z);
@@ -278,23 +375,22 @@ public:
         return rotation(theta, x / theta, y / theta, z / theta);
     }
 
-    /**
-     *  @brief Create quaternion from matrix
-     *  @param m Rotation matrix, should be a member of SO(3).
-     *  @param Matrix Any matrix-like type which supports the (i,j) operator.
-     *  @note All singularities are handled, provided m belongs to SO(3).
-     *  @see
-     * http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Create quaternion from matrix.
+    //! \param[in] m Rotation matrix, should be a member of SO[3].
+    //! \param[in] Matrix Any matrix-like type which supports the (i,j) operator.
+    //! \note All singularities are handled, provided \c m belongs to SO[3].
+    //! \see http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
+    //--------------------------------------------------------------------------
     static Quat fromMatrix(Matrix<Scalar, 4_z, 4_z> const& m)
     {
         Quat Q;
-        const Scalar tr = m(0, 0) + m(1, 1) + m(2, 2); //  trace
+        const Scalar trace = m(0, 0) + m(1, 1) + m(2, 2);
         Scalar s = 0;
 
-        if (tr > 0)
+        if (trace > 0)
         {
-            s = 2 * std::sqrt(1 + tr);
+            s = 2 * std::sqrt(1 + trace);
 
             Q.a() = s / 4;
             Q.b() = (m(2, 1) - m(1, 2)) / s;
@@ -332,203 +428,221 @@ public:
         return Q;
     }
 
-    void generateScalarComponent()
-    {
-        Scalar w = Scalar(1) - (b() * b()) - (c() * c()) - (d() * d());
-        if (w < Scalar(0))
-            a() = Scalar(0);
-        else
-            a() = - std::sqrt(w);
-    }
+    //--------------------------------------------------------------------------
+    //! \brief Pointer accessor for direct copying
+    //-------------------------------------------------------------------------
+    inline Scalar* ptr() { return data; }
+    inline const Scalar* ptr() const { return data; }
 
+    //--------------------------------------------------------------------------
+    //! \brief operator () Element-wise accessor.
+    //! \param[in] i Index into quaternion, must be less than 4 (not checked).
+    //! \return Element i of the quaternion.
+    //--------------------------------------------------------------------------
+    Scalar &operator[](size_t const i) { assert(i < 4u); return data[i]; }
+    const Scalar &operator[](size_t const i) const { assert(i < 4u); return data[i]; }
 
-    /*
-     *  Accessors
-     */
+    //--------------------------------------------------------------------------
+    //! \brief Scalar component
+    //--------------------------------------------------------------------------
+    Scalar &a() { return data[0]; }
+    const Scalar &a() const { return data[0]; }
 
-    /**
-     * @brief operator () Element-wise accessor
-     * @param i Index into quaternion, must be less than 4.
-     * @return Element i of the quaternion.
-     */
-    Scalar &operator()(size_t i) { return m_q[i]; }
-    const Scalar &operator()(size_t i) const { return m_q[i]; }
+    //--------------------------------------------------------------------------
+    //! \brief First complex dimension (i)
+    //--------------------------------------------------------------------------
+    Scalar &b() { return data[1]; }
+    const Scalar &b() const { return data[1]; }
 
-    Scalar &a() { return m_q[0]; } /**< Scalar component */
-    const Scalar &a() const { return m_q[0]; }
+    //--------------------------------------------------------------------------
+    //! \brief Second complex dimension (j)
+    //--------------------------------------------------------------------------
+    Scalar &c() { return data[2]; }
+    const Scalar &c() const { return data[2]; }
 
-    Scalar &b() { return m_q[1]; } /**< First complex dimension (i) */
-    const Scalar &b() const { return m_q[1]; }
+    //--------------------------------------------------------------------------
+    //! \brief Third complex dimension (k)
+    //--------------------------------------------------------------------------
+    Scalar &d() { return data[3]; }
+    const Scalar &d() const { return data[3]; }
 
-    Scalar &c() { return m_q[2]; } /**< Second complex dimension (j) */
-    const Scalar &c() const { return m_q[2]; }
+    //--------------------------------------------------------------------------
+    //! \brief Scalar component
+    //--------------------------------------------------------------------------
+    Scalar &w() { return data[0]; }
+    const Scalar &w() const { return data[0]; }
 
-    Scalar &d() { return m_q[3]; } /**< Third complex dimension (k) */
-    const Scalar &d() const { return m_q[3]; }
+    //--------------------------------------------------------------------------
+    //! \brief First complex dimension (i)
+    //--------------------------------------------------------------------------
+    Scalar &x() { return data[1]; }
+    const Scalar &x() const { return data[1]; }
 
-    Scalar &w() { return m_q[0]; } /**< Scalar component */
-    const Scalar &w() const { return m_q[0]; }
+    //--------------------------------------------------------------------------
+    //! \brief Second complex dimension (j)
+    //--------------------------------------------------------------------------
+    Scalar &y() { return data[2]; }
+    const Scalar &y() const { return data[2]; }
 
-    Scalar &x() { return m_q[1]; } /**< First complex dimension (i) */
-    const Scalar &x() const { return m_q[1]; }
-
-    Scalar &y() { return m_q[2]; } /**< Second complex dimension (j) */
-    const Scalar &y() const { return m_q[2]; }
-
-    Scalar &z() { return m_q[3]; } /**< Third complex dimension (k) */
-    const Scalar &z() const { return m_q[3]; }
+    //--------------------------------------------------------------------------
+    //! \brief Third complex dimension (k)
+    //--------------------------------------------------------------------------
+    Scalar &z() { return data[3]; }
+    const Scalar &z() const { return data[3]; }
 
 private:
 
-    Scalar m_q[4];
+    Scalar data[4];
 };
 
-/*
- *  Typedefs for common types
- */
+//------------------------------------------------------------------------------
+// \brief Typedefs for common float64 quaternion.
+//------------------------------------------------------------------------------
 typedef Quat<double> Quatd;
+
+//------------------------------------------------------------------------------
+// \brief Typedefs for common float32 quaternion.
+//------------------------------------------------------------------------------
 typedef Quat<float> Quatf;
 
-/**
- *  @brief Multiply two quaternions
- *  @param a Left quaternion
- *  @param b Right quaternion
- *  @return Product of both quaternions
- */
+//------------------------------------------------------------------------------
+//! \brief Multiply two quaternions.
+//! \param[in] a Left quaternion
+//! \param[in] b Right quaternion
+//! \return Product of both quaternions
+//------------------------------------------------------------------------------
 template <typename Scalar>
 Quat<Scalar> operator*(const Quat<Scalar> &a, const Quat<Scalar> &b)
 {
     Quat<Scalar> lhs;
 
-    lhs(0) = a(0) * b(0) - a(1) * b(1) - a(2) * b(2) - a(3) * b(3);
-    lhs(1) = a(0) * b(1) + a(1) * b(0) + a(2) * b(3) - a(3) * b(2);
-    lhs(2) = a(0) * b(2) - a(1) * b(3) + a(2) * b(0) + a(3) * b(1);
-    lhs(3) = a(0) * b(3) + a(1) * b(2) - a(2) * b(1) + a(3) * b(0);
+    lhs[0] = a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3];
+    lhs[1] = a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2];
+    lhs[2] = a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1];
+    lhs[3] = a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0];
 
     return lhs;
 }
 
-/**
- *  @brief Divide a quaternion by a scalar
- *  @param a Quaternion
- *  @param s Scalar
- *  @return Scaled quaternion
- */
+//------------------------------------------------------------------------------
+//! \brief Rotation of a vector by a quaternion
+//------------------------------------------------------------------------------
 template <typename Scalar>
-Quat<Scalar> operator/(const Quat<Scalar> &a, const Scalar s)
+Vector3f operator*(const Quat<Scalar> &q, const Vector3f& v)
 {
-    return operator*(a, 1 / s);
+    Vector3f uv, uuv;
+    Vector3f qvec(q.b(), q.c(), q.d());
+
+    uv = qvec % v; // Cross product
+    uuv = qvec % uv;
+    uv *= (2.0f * q.a());
+    uuv *= 2.0f;
+
+    return v + uv + uuv;
 }
 
-/**
- *  @brief Right-multiply a quaternion by a scalar
- *  @param a Quaternion
- *  @param s Scalar
- *  @return Scaled quaterion
- */
+//------------------------------------------------------------------------------
+//! \brief Divide a quaternion by a scalar.
+//! \param[in] a Quaternion.
+//! \param[in] s Scalar.
+//! \return Scaled quaternion.
+//------------------------------------------------------------------------------
 template <typename Scalar>
-Quat<Scalar> operator*(const Quat<Scalar> &a, const Scalar s)
+Quat<Scalar> operator/(const Quat<Scalar> &q, const Scalar s)
 {
-    Quat<Scalar> lhs;
-
-    size_t i = 4u;
-    while (i--)
-    {
-        lhs(i) = a(i) * s;
-    }
-
-    return lhs;
+    return operator*(q, Scalar(1) / s);
 }
 
-/**
- *  @brief Left-multiply a quaternion by a scalar
- *  @param a Quaternion
- *  @param s Scalar
- *  @return Scaled quaterion
- */
+//------------------------------------------------------------------------------
+//! \brief Right-multiply a quaternion by a scalar
+//! \param[in] a Quaternion
+//! \param[in] s Scalar
+//! \return Scaled quaterion
+//------------------------------------------------------------------------------
 template <typename Scalar>
-Quat<Scalar> operator*(const Scalar s, const Quat<Scalar> &a)
+Quat<Scalar> operator*(const Quat<Scalar> &q, const Scalar s)
 {
-    return operator*(a, s);
+    return {
+        q.data[0] * s,
+        q.data[1] * s,
+        q.data[2] * s,
+        q.data[3] * s
+    };
 }
 
-/**
- *  @brief Multiply a quaternion by a scalar, in place
- *  @param a Quaternion to scale
- *  @param s Scalar
- *  @return a
- */
+//------------------------------------------------------------------------------
+//! \brief Left-multiply a quaternion by a scalar
+//! \param[in] a Quaternion
+//! \param[in] s Scalar
+//! \return Scaled quaterion
+//------------------------------------------------------------------------------
 template <typename Scalar>
-Quat<Scalar> &operator*=(Quat<Scalar> &a, const Scalar s)
+Quat<Scalar> operator*(const Scalar s, const Quat<Scalar> &q)
 {
-    size_t i = 4u;
-    while (i--)
-    {
-        a(i) *= s;
-    }
-
-    return a;
+    return operator*(q, s);
 }
 
-/**
- *  @brief Divide a quaternion by a scalar, in place
- *  @param a Quaternion to scale
- *  @param s Scalar
- *  @return a
- */
+//------------------------------------------------------------------------------
+//! \brief Multiply a quaternion by a scalar, in place
+//! \param[in] a Quaternion to scale
+//! \param[in] s Scalar
+//! \return a
+//------------------------------------------------------------------------------
 template <typename Scalar>
-Quat<Scalar> &operator/=(Quat<Scalar> &a, const Scalar s)
+Quat<Scalar> &operator*=(Quat<Scalar> &q, const Scalar s)
 {
-    return operator*=(a, 1 / s);
+    q.a() *= s;
+    q.b() *= s;
+    q.c() *= s;
+    q.d() *= s;
+
+    return q;
 }
 
-/**
- *  @brief Add two quaternions (element-wise summation)
- *  @param a First quaternion
- *  @param b Second quaternion
- *  @return Sum
- */
+//------------------------------------------------------------------------------
+//! \brief Divide a quaternion by a scalar, in place
+//! \param[in] a Quaternion to scale
+//! \param[in] s Scalar
+//! \return a
+//------------------------------------------------------------------------------
+template <typename Scalar>
+Quat<Scalar> &operator/=(Quat<Scalar> &q, const Scalar s)
+{
+    return operator*=(q, Scalar(1) / s);
+}
+
+//------------------------------------------------------------------------------
+//! \brief Add two quaternions (element-wise summation)
+//! \param[in] a First quaternion
+//! \param[in] b Second quaternion
+//! \return Sum
+//------------------------------------------------------------------------------
 template <typename Scalar>
 Quat<Scalar> operator+(const Quat<Scalar> &a, const Quat<Scalar> &b)
 {
-    Quat<Scalar> lhs;
-
-    size_t i = 4u;
-    while (i--)
-    {
-        lhs(i) = a(i) + b(i);
-    }
-
-    return lhs;
+    return {
+        a.a() + b.a(),
+        a.b() + b.b(),
+        a.c() + b.c(),
+        a.d() + b.d()
+    };
 }
 
-/**
- *  @brief Add-in place quaterion
- *  @param a First quaternion, is modified
- *  @param b Second quaternion
- *  @return Sum
- */
+//------------------------------------------------------------------------------
+//! \brief Add-in place quaterion
+//! \param[in] a First quaternion, is modified
+//! \param[in] b Second quaternion
+//! \return Sum
+//------------------------------------------------------------------------------
 template <typename Scalar>
 Quat<Scalar> &operator+=(Quat<Scalar> &a, const Quat<Scalar> &b)
 {
-    size_t i = 4u;
-    while (i--)
-    {
-        a(i) += b(i);
-    }
+    a.a() += b.a();
+    a.b() += b.b();
+    a.c() += b.c();
+    a.d() += b.d();
 
     return a;
-}
-
-/**
- * @brief Creates a rotation which rotates angle degrees around axis.
- */
-template <typename Scalar>
-Quat<Scalar> angleAxis(units::angle::radian_t const angle, Vector<Scalar, 3u> const& v)
-{
-    Scalar const s = std::sin(angle.to<Scalar>() * static_cast<Scalar>(0.5));
-    return { std::cos(angle.to<Scalar>() * static_cast<Scalar>(0.5)),
-             v.x * s, v.y * s, v.z * s };
 }
 
 #endif // QUATERNION_HPP
