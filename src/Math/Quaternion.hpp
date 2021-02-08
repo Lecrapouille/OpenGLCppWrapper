@@ -175,10 +175,10 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Print quaternion
     //--------------------------------------------------------------------------
-    inline friend std::ostream& operator<<(std::ostream& os, Quat& q)
+    inline friend std::ostream& operator<<(std::ostream& os, Quat const& q)
     {
-        return os << "Quat(" << q.a() << ",  (" << q.b() << ", "
-                  << q.c() << ", " << q.d() << "))";
+        return os << "Quat(" << q.a() << ",  (" << q.b() << "i, "
+                  << q.c() << "j, " << q.d() << "k))";
     }
 
     //--------------------------------------------------------------------------

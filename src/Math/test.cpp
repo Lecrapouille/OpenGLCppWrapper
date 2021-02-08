@@ -120,11 +120,17 @@ int main()
         std::cout << "-----" << std::endl;
         M.position(Vector3f(10,0,0));
         M.yaw(degree_t(45.0f));
+        std::cout << "Quat " << M.attitude() << std::endl;
         std::cout << "Position " << M.position() << std::endl;
         std::cout << "Local Position " << M.local_position() << std::endl;
         M.translate(Vector3f(10,0,0), Space::Self);
         std::cout << "Position " << M.position() << std::endl;
         std::cout << "Local Position " << M.local_position() << std::endl;
+
+        std::cout << "=====" << std::endl;
+        M.position(Vector3f(10,0,0));
+        M.yaw(degree_t(45.0f), Space::World);
+        std::cout << "Quat " << M.attitude() << std::endl;
     }
 
     return 0;

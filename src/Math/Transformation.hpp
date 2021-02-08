@@ -39,13 +39,6 @@
 
 #  include "Math/Matrix.hpp"
 
-#  pragma GCC diagnostic push
-#    pragma GCC diagnostic ignored "-Wold-style-cast"
-#    pragma GCC diagnostic ignored "-Wfloat-equal"
-#    pragma GCC diagnostic ignored "-Wsign-conversion"
-#      include "units/units.hpp"
-#  pragma GCC diagnostic pop
-
 namespace matrix
 {
     //--------------------------------------------------------------------------
@@ -231,10 +224,6 @@ namespace matrix
                                Vector<T, 3_z> const& target,
                                Vector<T, 3_z> const& upwards)
     {
-        std::cout << "P " << position << std::endl;
-        std::cout << "T " << target << std::endl;
-        std::cout << "U " << upwards << std::endl;
-
         Vector<T, 3_z> const direction(vector::normalize(target - position));
         Vector<T, 3_z> const right(vector::normalize(vector::cross(direction, upwards)));
         Vector<T, 3_z> const up(vector::cross(right, direction));

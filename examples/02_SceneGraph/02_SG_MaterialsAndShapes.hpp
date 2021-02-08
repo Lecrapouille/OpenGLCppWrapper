@@ -72,6 +72,8 @@ private:
 
     Camera m_camera;
     SceneTree m_scene;
+    rigidbody::WorldPlane m_ground;
+    DynamicWorld m_dynamic;
     GUI m_imgui;
 };
 

@@ -21,6 +21,13 @@
 #ifndef OPENGLCPPWRAPPER_MATHS_HPP
 #  define OPENGLCPPWRAPPER_MATHS_HPP
 
+#  pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wold-style-cast"
+#    pragma GCC diagnostic ignored "-Wfloat-equal"
+#    pragma GCC diagnostic ignored "-Wsign-conversion"
+#      include "units/units.hpp"
+#  pragma GCC diagnostic pop
+
 #  include <cstdint>
 #  include <vector>
 #  include <cassert>

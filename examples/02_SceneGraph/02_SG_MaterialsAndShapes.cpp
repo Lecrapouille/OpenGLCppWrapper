@@ -30,7 +30,8 @@ class MyShape: public Shape<Model, Material>
 public:
 
     MyShape(std::string const& name, std::string const& path)
-        : Shape<Model, Material>(name)
+        : Shape<Model, Material>(name),
+          body(Shape<Model, Material>::transform, 1.0f, units::mass::kilogram_t(0.001))
     {
         Shape<Model, Material>::geometry.config.path = path;
         initMaterial();
@@ -48,6 +49,10 @@ public:
 private:
 
     inline void initMaterial();
+
+public:
+
+    rigidbody::Sphere body;
 };
 
 template<> void MyShape<DepthMaterial>::initMaterial()
@@ -73,6 +78,8 @@ SGMatAndShape::SGMatAndShape(uint32_t const width, uint32_t const height,
                              const char *title)
     : GLWindow(width, height, title),
       m_camera("camera"),
+      m_ground(Vector3f(50, 50, 50)),
+      m_dynamic(Vector3f(0.0f, 0.001f, 0.0f)),
       m_imgui(*this)
 {
     std::cout << "Hello Material: " << info() << std::endl;
@@ -87,9 +94,7 @@ SGMatAndShape::~SGMatAndShape()
 //------------------------------------------------------------------------------
 void SGMatAndShape::onWindowResized()
 {
-    std::cerr << "onWindowResized {" << std::endl;
     m_camera.projection(width<float>(), height<float>());
-    std::cerr << "} onWindowResized" << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -121,6 +126,9 @@ bool SGMatAndShape::onSetup()
     t2.transform.position(Vector3f(0.0f, 0.0f, 2.0f));
     t3.transform.position(Vector3f(0.0f, 0.0f, 2.0f));
     t4.transform.position(Vector3f(2.0f, 0.0f, 0.0f));
+
+    m_dynamic.attach(t1.body);
+    m_dynamic.attach(m_ground);
 
     //m_scene.debug();
     //return false;
@@ -184,6 +192,7 @@ bool SGMatAndShape::onPaint()
 
     // Update parent-child transform matrix for nodes
     m_scene.update(dt());
+    m_dynamic.update(dt());
 
     // Perspective camera 1st view
     m_camera.transform.lookAt(Vector3f(5,5,5),
@@ -206,7 +215,6 @@ bool SGMatAndShape::onPaint()
     m_camera.is(Camera::Type::ORTHOGRAPHIC);
     m_camera.orthographic.setPlanes(0, 800, 600, 0);
     m_camera.setViewPort(0.5f, 0.5f, 0.5f, 0.5f);
-    std::cout << m_camera.projection() << std::endl;
     m_scene.draw(m_camera);
 
     // DearImGui

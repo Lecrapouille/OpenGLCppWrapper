@@ -43,7 +43,6 @@ Matrix44f const& Orthographic::matrix()
                                      m_top * m_frustum_size * m_aspect,
                                      m_near * m_frustum_size * m_aspect,
                                      m_far * m_frustum_size * m_aspect);
-        std::cout << m_projection << std::endl;
         m_dirty = false;
     }
 

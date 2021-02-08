@@ -356,6 +356,7 @@ public:
         {
             m_orientation = q * m_orientation;
         }
+        m_orientation.normalize();
 
         m_transform_needs_update = true;
         return *this;
@@ -364,25 +365,28 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Local rotation over its right axis.
     //--------------------------------------------------------------------------
-    Transformable<T,n>& pitch(units::angle::radian_t const angle)
+    Transformable<T,n>& pitch(units::angle::radian_t const angle,
+                              Space relativeTo = Space::Self)
     {
-        return rotate(angle, right(), Space::Self);
+        return rotate(angle, right(), relativeTo);
     }
 
     //--------------------------------------------------------------------------
     //! \brief Local rotation over its up axis.
     //--------------------------------------------------------------------------
-    Transformable<T,n>& yaw(units::angle::radian_t const angle)
+    Transformable<T,n>& yaw(units::angle::radian_t const angle,
+                            Space relativeTo = Space::Self)
     {
-        return rotate(angle, up(), Space::Self);
+        return rotate(angle, up(), relativeTo);
     }
 
     //--------------------------------------------------------------------------
     //! \brief Local rotation over its forward axis.
     //--------------------------------------------------------------------------
-    Transformable<T,n>& roll(units::angle::radian_t const angle)
+    Transformable<T,n>& roll(units::angle::radian_t const angle,
+                             Space relativeTo = Space::Self)
     {
-        return rotate(angle, forward(), Space::Self);
+        return rotate(angle, forward(), relativeTo);
     }
 
     //--------------------------------------------------------------------------
