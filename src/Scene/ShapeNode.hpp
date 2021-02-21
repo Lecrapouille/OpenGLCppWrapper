@@ -26,6 +26,7 @@
 #  include "Scene/Material/Material.hpp"
 #  include "Scene/SceneTree.hpp"
 #  include "Scene/Material/ShaderLib.hpp"
+#  include "Scene/Camera/CameraNode.hpp"
 
 // *****************************************************************************
 //! \brief Base class for Shape<Geometry,Material> since sometines we need to
@@ -90,6 +91,13 @@ public:
         }
 
         return true;
+    }
+
+    virtual void onCameraUpdated(Camera& camera) override
+    {
+        // TODO if camera.updated()
+        viewMatrix() = camera.view();
+        projectionMatrix() = camera.projection();
     }
 
     virtual bool onDraw(Matrix44f const& model_matrix = Identity44f) override

@@ -23,6 +23,24 @@
 using namespace units::mass;
 
 //------------------------------------------------------------------------------
+static btVector3 thickness2norm(Vector3f const& thickness)
+{
+    float dx = std::max(thickness.x, 0.01f);
+    float dy = std::max(thickness.y, 0.01f);
+    float dz = std::max(thickness.z, 0.01f);
+
+    btVector3 norm;
+    if (dx < dy && dx < dz)
+        norm = btVector3(1.0f, 0.0f, 0.0f);
+    else if (dy < dx && dy < dz)
+        norm = btVector3(0.0f, 1.0f, 0.0f);
+    else
+        norm = btVector3(0.0f, 0.0f, 1.0f);
+
+    return norm;
+}
+
+//------------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& os, btVector3 const& v)
 {
     return os << "[" << v[0] << ", " << v[1] << ", " << v[2] << ']';
@@ -60,36 +78,59 @@ inline static Quatf cast_quaternion(btQuaternion const& q)
 }
 
 //------------------------------------------------------------------------------
-DynamicWorld::DynamicWorld(Vector3f const& gravity)
+PhysicsManager::PhysicsManager(Vector3f const& gravity)
 {
     m_collisionConfiguration = std::make_unique<btDefaultCollisionConfiguration>();
     m_dispatcher = std::make_unique<btCollisionDispatcher>(m_collisionConfiguration.get());
     m_broadphase = std::make_unique<btDbvtBroadphase>();
     m_solver = std::make_unique<btSequentialImpulseConstraintSolver>();
-    m_dynamic = std::make_unique<btDiscreteDynamicsWorld>
-                (m_dispatcher.get(), m_broadphase.get(),
-                 m_solver.get(), m_collisionConfiguration.get());
-    m_dynamic->setGravity(btVector3(gravity.x, gravity.y, gravity.z));
+    m_dynamicsWorld = std::make_unique<btDiscreteDynamicsWorld>
+                      (m_dispatcher.get(), m_broadphase.get(),
+                       m_solver.get(), m_collisionConfiguration.get());
+    m_dynamicsWorld->setGravity(btVector3(gravity.x, gravity.y, gravity.z));
+}
+
+//void PhysicsManager::debugDraw(int debugFlags)
+//{
+//    if (m_dynamicsWorldsWorld->getDebugDrawer())
+//        m_dynamicsWorldsWorld->getDebugDrawer()->setDebugMode(debugFlags);
+//    m_dynamicsWorldsWorld->debugDrawWorld();
+//}
+
+//------------------------------------------------------------------------------
+void PhysicsManager::attach(RigidBody& obj)
+{
+    m_dynamicsWorld->addRigidBody(&obj.rigidBody());
+    m_objects.push_front(&obj);
+    m_initialTransformSaved = false;
 }
 
 //------------------------------------------------------------------------------
-void DynamicWorld::attach(RigidBody& obj)
+void PhysicsManager::detach(RigidBody& obj)
 {
-    m_dynamic->addRigidBody(&obj.rigidBody());
+    m_dynamicsWorld->removeRigidBody(&obj.rigidBody());
     m_objects.push_front(&obj);
 }
 
 //------------------------------------------------------------------------------
-void DynamicWorld::detach(RigidBody& obj)
+void PhysicsManager::memorizeStates()
 {
-    m_dynamic->removeRigidBody(&obj.rigidBody());
-    m_objects.push_front(&obj);
+    for (auto it: m_objects)
+    {
+        it->setInitialTransform(it->m_transform, true);
+    }
+    m_initialTransformSaved = true;
 }
 
 //------------------------------------------------------------------------------
-void DynamicWorld::update(float dt)
+void PhysicsManager::update(float dt)
 {
-    m_dynamic->stepSimulation(dt);
+    if (m_initialTransformSaved == false)
+    {
+        memorizeStates();
+    }
+
+    m_dynamicsWorld->stepSimulation(dt);
 
     for (auto it: m_objects)
     {
@@ -98,7 +139,7 @@ void DynamicWorld::update(float dt)
 }
 
 //------------------------------------------------------------------------------
-void DynamicWorld::reset()
+void PhysicsManager::reset()
 {
     for (auto it: m_objects)
     {
@@ -116,9 +157,17 @@ RigidBody::RigidBody(Transformable3D& transform,
       m_initial_transform(cast_quaternion(transform.attitude()),
                           cast_vector(transform.position()))
 {
+std::cout << "CST------------" << std::endl;
+    std::cout << "bullet\n  pos: " << m_initial_transform.getOrigin() << std::endl;
+    std::cout << "  qua: " << m_initial_transform.getRotation() << std::endl;
+
+    std::cout << "qq\n  pos: " << transform.position() << std::endl;
+    std::cout << "  qua: " << transform.attitude() << std::endl;
+
+
+
     m_collision_shape = std::move(shape);
-    btTransform t(btQuaternion(0,0,0,1), btVector3(0,0,0));
-    m_motion = std::make_unique<btDefaultMotionState>(t);
+    m_motion = std::make_unique<btDefaultMotionState>(m_initial_transform);
     btVector3 inertia(0,0,0);
     btRigidBody::btRigidBodyConstructionInfo
             info(mass.to<btScalar>(),
@@ -137,6 +186,12 @@ void RigidBody::setInitialTransform(Transformable3D const& transform, bool apply
     btTransform t(cast_quaternion(transform.attitude()),
                   cast_vector(transform.position()));
     m_initial_transform = t;
+    std::cout << "setInit------------" << std::endl;
+    std::cout << "bullet\n  pos: " << t.getOrigin() << std::endl;
+    std::cout << "  qua: " << t.getRotation() << std::endl;
+
+    std::cout << "qq\n  pos: " << transform.position() << std::endl;
+    std::cout << "  qua: " << transform.attitude() << std::endl;
     if (apply) { reset(); }
 }
 
@@ -189,31 +244,12 @@ void RigidBody::update()
     std::cout << "  qua: " << m_transform.attitude() << std::endl;
 }
 
-//------------------------------------------------------------------------------
-static btVector3 thickness2norm(Vector3f const& thickness)
-{
-    float dx = std::max(thickness.x, 0.01f);
-    float dy = std::max(thickness.y, 0.01f);
-    float dz = std::max(thickness.z, 0.01f);
-
-    btVector3 norm;
-    if (dx < dy && dx < dz)
-        norm = btVector3(1.0f, 0.0f, 0.0f);
-    else if (dy < dx && dy < dz)
-        norm = btVector3(0.0f, 1.0f, 0.0f);
-    else
-        norm = btVector3(0.0f, 0.0f, 1.0f);
-
-    return norm;
-}
-
 namespace rigidbody
 {
-
     //--------------------------------------------------------------------------
-    WorldPlane::WorldPlane(Vector3f const& thickness,
+    WorldPlane::WorldPlane(Transformable3D& transform, Vector3f const& thickness,
                            float restitution, float friction)
-        : RigidBody(m_transform_,
+        : RigidBody(transform,
                     std::make_unique<btStaticPlaneShape>(thickness2norm(thickness), 0),
                     kilogram_t(0), restitution, friction)
     {}
@@ -222,6 +258,31 @@ namespace rigidbody
     Sphere::Sphere(Transformable3D& transform, float radius, kilogram_t mass,
                    float restitution, float friction)
         : RigidBody(transform, std::make_unique<btSphereShape>(radius),
+                    mass, restitution, friction)
+    {}
+
+    //--------------------------------------------------------------------------
+    Box::Box(Transformable3D& transform, Vector3f const& dimensions, kilogram_t mass,
+                   float restitution, float friction)
+        : RigidBody(transform,
+                    std::make_unique<btBoxShape>(cast_vector(dimensions)),
+                    mass, restitution, friction)
+    {}
+
+    //--------------------------------------------------------------------------
+    Capsule::Capsule(Transformable3D& transform, float radius, float height,
+                     units::mass::kilogram_t mass,
+                     float restitution, float friction)
+        : RigidBody(transform,
+                    std::make_unique<btCapsuleShape>(radius, height),
+                    mass, restitution, friction)
+    {}
+
+    //--------------------------------------------------------------------------
+    Cylinder::Cylinder(Transformable3D& transform, Vector3f const& dimensions, kilogram_t mass,
+                       float restitution, float friction)
+        : RigidBody(transform,
+                    std::make_unique<btCylinderShape>(cast_vector(dimensions)),
                     mass, restitution, friction)
     {}
 

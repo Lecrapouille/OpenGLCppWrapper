@@ -116,7 +116,10 @@ public:
     //--------------------------------------------------------------------------
     //! \brief For accepting std::endl to the shader.
     //--------------------------------------------------------------------------
-    GLShader& operator<<(std::ostream& (*os)(std::ostream&));
+    GLShader& operator<<(std::ostream& (*/*os*/)(std::ostream&))
+    {
+       return operator<<('\n');
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Read the whole shader code from the given ascii file.

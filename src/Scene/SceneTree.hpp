@@ -28,7 +28,7 @@
 class Camera;
 
 // *****************************************************************************
-//! \brief Class container fo holding a scene.
+//! \brief Class container for holding a 3D scene.
 //!
 //! A scene is a spatial representation of a graphical scene using a tree
 //! structure. Instead of storing 3D models (entities) in an array, where
@@ -37,7 +37,7 @@ class Camera;
 //! tree structure where parent-children relations between nodes allow to
 //! define relative transformations of their positions given by a transform
 //! matrix (translation, rotation and scaling). This way, the animation of
-//! entities are easier because modifying the matrix of one done will
+//! entities are easier because modifying the matrix of one node will
 //! automatically impact the position of the descendant nodes. Computed
 //! matrices are usually passed to the GLSL shaders through a 4x4 uniform
 //! matrix with the name of "model matrix".
@@ -50,8 +50,7 @@ class SceneTree
 public:
 
     //--------------------------------------------------------------------------
-    //! \brief Release all node attached to this scene. Each node before its
-    //! \brief destruction has its method onDisable() called.
+    //! \brief Release all node attached to this scene.
     //--------------------------------------------------------------------------
     ~SceneTree();
 
@@ -67,6 +66,7 @@ public:
 
         //----------------------------------------------------------------------
         //! \brief Print on the console internal states of a node.
+        //! \note This is not a recursive method, call debug() instead.
         //----------------------------------------------------------------------
         inline friend std::ostream& operator<<(std::ostream& os, Node& node)
         {
@@ -83,15 +83,29 @@ public:
         }
 
         //----------------------------------------------------------------------
-        //! \brief Create a Node with a name
+        //! \brief Create a Node with a name. Names are supposed to be unique
+        //! over stored nodes. For performance reason unicity of names will not
+        //! be checked. The transform matrix maked the node be placed at the
+        //! origin of the world.
         //----------------------------------------------------------------------
-        Node(std::string const& name)
+        Node(std::string const& name /* TODO: components*/)
             : GameObject(name)
         {}
 
         //----------------------------------------------------------------------
+        //! \brief Create a Node with a name and a tag. Name are supposed to be
+        //! unique over stored nodes. For performance reason unicity of names
+        //! will not be checked. Tags allows to search group of nodes. The
+        //! transform matrix maked the node be placed at the origin of the
+        //! world.
+        //----------------------------------------------------------------------
+        Node(std::string const& name, std::string const& tag)
+            : GameObject(name, tag)
+        {}
+
+        //----------------------------------------------------------------------
         //! \brief Return the const reference of the world transformation
-        //! matrix.
+        //! matrix. This matrix allows to place the object in the world.
         //----------------------------------------------------------------------
         inline Matrix44f const& worldTransform() const
         {
@@ -100,8 +114,8 @@ public:
 
     public:
 
-        //! \brief Relative transformation to parent node. This allow the
-        //! current node to have local movement.
+        //! \brief Relative transformation to parent node. This allows to give
+        //! to this instance a relative movement to its parent.
         Transformable3D transform;
 
     private:
@@ -112,16 +126,28 @@ public:
     };
 
     //--------------------------------------------------------------------------
-    //! \brief Find an element by its name. If the name uses and starts with '/'
-    //! then search the path and return the node.
+    //! \brief Find the first node by its name or by hierarchy.
+    //!
+    //! \param[in] name: the name of the node.
+    //!   - If \c name starts by '/' then do a hierarchy search from the
+    //!     root. Each node shall be seperated by the '/' char. Complexity is
+    //!     O(n) where n the number of '/' chars.
+    //!   - If \c name does not start by '/' then find and return the first node
+    //!     matching the given node. Complexity is O(n) where n the number of
+    //!     nodes.
+    //!
     //! \return the Node address if found or nullptr if not found.
     //--------------------------------------------------------------------------
     Node* get(std::string const& name);
 
     //--------------------------------------------------------------------------
-    //! \brief Find an element by its tag.
+    //! \brief Find several elements from their tag.
+    //! \param[in] tag the tag filtering nodes.
+    //! \param[out] found the container holding found nodes.
+    //! \param[in] clear if true \c found id clear first.
+    //! \return the number of elements found.
     //--------------------------------------------------------------------------
-    void getByTag(std::string const& name, std::vector<Node*> found);
+    size_t getByTag(std::string const& tag, std::vector<Node*> found, bool clear = true);
 
     //--------------------------------------------------------------------------
     //! \brief Traverse the scene and print information on each node to the
@@ -135,7 +161,8 @@ public:
     void setup();
 
     //--------------------------------------------------------------------------
-    //! \brief Traverse the scene and call onUpdate() on each node.
+    //! \brief Traverse the scene and call onUpdate() on each node to rebuild
+    //! tansformation matrices.
     //! \param[in] dt: delta time from the previous frame.
     //--------------------------------------------------------------------------
     void update(float const dt);

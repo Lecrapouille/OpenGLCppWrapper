@@ -39,16 +39,78 @@
 
 class RigidBody;
 
-class DynamicWorld
+// *****************************************************************************
+//! \brief Responsible class for tracking, updating, and synchronizing the state
+//! of the physical world and all non-static geometry in the scene. The physical
+//! world in this case consists of any objects which can be manipulated
+//! (kinematically or dynamically) or simulated and anything such objects must
+//! be aware of (e.g. static scene collision geometry).
+// *****************************************************************************
+class PhysicsManager
 {
 public:
 
-    DynamicWorld(Vector3f const& gravity = Vector3f(0.0f, -9.8f, 0.0f));
+    //--------------------------------------------------------------------------
+    //! \brief Initiate assets from the Bullet3 library needed for tracking,
+    //! updating, and synchronizing the state of the physical world and all
+    //! non-static geometry in the scene.
+    //!
+    //! \param[in] gravity: Set the gravity of the physical world. Default
+    //! direction is X = 0, Y = -9.8 and Z = 0. Like OpenGL, the X-axis shows
+    //! the right direction, the Y shows the up direction and the Z-axis is
+    //! facing the player.
+    //--------------------------------------------------------------------------
+    PhysicsManager(Vector3f const& gravity = Vector3f(0.0f, -9.8f, 0.0f));
+
+    //--------------------------------------------------------------------------
+    //! \brief Getter. Return the DiscreteDynamicsWorld used.
+    //--------------------------------------------------------------------------
+    btDiscreteDynamicsWorld& world() { return *m_dynamicsWorld; }
+
+    //--------------------------------------------------------------------------
+    //! \brief Add a object in the list of objects to update the dynamic.
+    //--------------------------------------------------------------------------
     void attach(RigidBody& obj);
+
+    //--------------------------------------------------------------------------
+    //! \brief Remove a object from the list of objects to update the dynamic.
+    //--------------------------------------------------------------------------
     void detach(RigidBody& obj);
+
+    //--------------------------------------------------------------------------
+    //! \brief Save the current transform states (position and attitude) of each
+    //! 3d models into their associated RigidBody instance. This transform is
+    //! needed by this manager instance for initializing and reseting objects
+    //! positions and attitude in the solver.
+    //!
+    //! Call this method between the initialisation of the transform of the 3d
+    //! model and the first call of update(). If not done the updat() will call
+    //! at the first iteration and only once. To change initial states. Call
+    //! this method explicitly.
+    //!
+    //! \code
+    //! SceneTree scene; PhysicsManager pm;
+    //! auto& node = scene.root.attach<Shape<Model, Material>>(...);
+    //! node.transform.xxx
+    //! pm.attach(node);
+    //! pm.update(...); // will call pm.memorizeStates();
+    //! node.transform.xxx
+    //! pm.memorizeStates();
+    //! pm.update(...);
+    //! \endcode
+    //--------------------------------------------------------------------------
+    void memorizeStates();
+
+    //--------------------------------------------------------------------------
+    //! \brief Do a simulation step.
+    //! \param[in] dt: the delta time from the previous call. Shall be seconds.
+    //--------------------------------------------------------------------------
     void update(float dt); // FIXME in seconds
-    void reset(); //     void setInitState();
-    btDynamicsWorld& dynamic() { return *m_dynamic; }
+
+    //--------------------------------------------------------------------------
+    //! \brief Restore solver to initial states for each objects.
+    //--------------------------------------------------------------------------
+    void reset();
 
 private:
 
@@ -56,8 +118,9 @@ private:
     std::unique_ptr<btCollisionDispatcher> m_dispatcher;
     std::unique_ptr<btDbvtBroadphase> m_broadphase;
     std::unique_ptr<btSequentialImpulseConstraintSolver> m_solver;
-    std::unique_ptr<btDynamicsWorld> m_dynamic;
+    std::unique_ptr<btDiscreteDynamicsWorld> m_dynamicsWorld;
     std::forward_list<RigidBody*> m_objects;
+    bool m_initialTransformSaved = false;
 };
 
 
@@ -68,6 +131,8 @@ private:
 // *****************************************************************************
 class RigidBody
 {
+    friend class PhysicsManager;
+
 public:
 
     //--------------------------------------------------------------------------
@@ -118,7 +183,7 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Update callback.
-    //! This function is called automatically by DynamicWorld::update() for each
+    //! This function is called automatically by PhysicsManager::update() for each
     //! registered object. It update position and attitude of graphical object
     //! from its physhical state.
     //--------------------------------------------------------------------------
@@ -152,12 +217,8 @@ namespace rigidbody
     {
     public:
 
-        WorldPlane(Vector3f const& thickness,
+        WorldPlane(Transformable3D& transform, Vector3f const& thickness,
                    float restitution = 0.0f, float friction = 0.5f);
-
-    private:
-
-        Transformable3D m_transform_;
     };
 
     // *************************************************************************
@@ -171,6 +232,41 @@ namespace rigidbody
                float restitution = 0.0f, float friction = 0.5f);
     };
 
+    // *************************************************************************
+    //! \brief
+    // *************************************************************************
+    class Box: public RigidBody
+    {
+    public:
+
+        Box(Transformable3D& transform, Vector3f const& dimensions,
+            units::mass::kilogram_t mass,
+            float restitution = 0.0f, float friction = 0.5f);
+    };
+
+    // *************************************************************************
+    //! \brief
+    // *************************************************************************
+    class Capsule: public RigidBody
+    {
+    public:
+
+        Capsule(Transformable3D& transform, float radius, float height,
+                units::mass::kilogram_t mass,
+                float restitution = 0.0f, float friction = 0.5f);
+    };
+
+    // *************************************************************************
+    //! \brief
+    // *************************************************************************
+    class Cylinder: public RigidBody
+    {
+    public:
+
+        Cylinder(Transformable3D& transform, Vector3f const& dimensions,
+                 units::mass::kilogram_t mass,
+                 float restitution = 0.0f, float friction = 0.5f);
+    };
 } // namespace rigidbody
 
 #endif // BULLETWRAPPER_HPP

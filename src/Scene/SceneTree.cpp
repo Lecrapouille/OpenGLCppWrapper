@@ -86,11 +86,15 @@ SceneObject* SceneTree::findChild(SceneObject* node, std::string const& name)
 }
 
 //------------------------------------------------------------------------------
-void SceneTree::getByTag(std::string const& tag, std::vector<Node*> found)
+size_t SceneTree::getByTag(std::string const& tag, std::vector<Node*> found, bool clear)
 {
-    if (root == nullptr)
-        return ;
+    if (clear)
+        found.clear();
 
+    if (root == nullptr)
+        return 0u;
+
+    size_t counter = found.size();
     root->traverse([](SceneObject* node, std::string const& tag_, std::vector<Node*> found_)
     {
         if (node->tag == tag_)
@@ -98,6 +102,8 @@ void SceneTree::getByTag(std::string const& tag, std::vector<Node*> found)
             found_.push_back(node);
         }
     }, tag, found);
+
+    return found.size() - counter;
 }
 
 //------------------------------------------------------------------------------
@@ -184,40 +190,31 @@ void SceneTree::applyViewPort(Camera& camera)
 }
 
 //------------------------------------------------------------------------------
-void SceneTree::draw(Camera& camera)
+void SceneTree::draw(Camera& camera_)
 {
     if (root == nullptr)
         return ;
 
-    applyViewPort(camera);
-    root->traverse([](SceneObject* node, Matrix44f const& view, Matrix44f const& proj)
+    applyViewPort(camera_);
+    root->traverse([](SceneObject* node, Camera& camera)
     {
         if (!node->enabled())
             return ;
 
-        auto n = dynamic_cast<BaseShape*>(node);
-        if (n != nullptr)
+        //auto shape = node.getComponent<Shape<G,M>>();
+        //if (node != nullptr)
         {
-            // Update the uniform shader view matrix
-            // TODO if (camera.viewMatrixChanged())
-            {
-                n->viewMatrix() = view;
-            }
+            // Update the uniform shader view and projection matrices
+            node->onCameraUpdated(camera);
 
-            // Update the uniform shader projection matrix
-            // TODO if (camera.projectionMatrixChanged())
-            {
-                n->projectionMatrix() = proj;
-            }
+            // TODO: this could be better to create an node like OpenInventor
+            // separator instead of this computation made everytime (even if
+            // scaling a node it will also scale descendants)? Sometimes you
+            // just want to scale the node not its descendants.
+            node->onDraw(matrix::scale(node->m_world_transform,
+                                       node->transform.localScale()));
         }
-
-        // TODO: this could be better to create an node like OpenInventor
-        // separator instead of this computation made everytime (even if
-        // scaling a node it will also scale descendants)? Sometimes you
-        // just want to scale the node not its descendants.
-        node->onDraw(matrix::scale(node->m_world_transform,
-                                   node->transform.localScale()));
-    }, camera.view(), camera.projection());
+    }, camera_);
 }
 
 //------------------------------------------------------------------------------

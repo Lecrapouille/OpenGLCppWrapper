@@ -21,6 +21,8 @@
 #ifndef OPENGLCPPWRAPPER_SCENEGRAPH_BEHAVIOR_HPP
 #  define OPENGLCPPWRAPPER_SCENEGRAPH_BEHAVIOR_HPP
 
+class Camera;
+
 // *****************************************************************************
 //! \brief Give some behavior for a game objects.
 //! Inspired by Unity's MonoBehavior class.
@@ -83,6 +85,13 @@ public:
     {
         return true;
     }
+
+    //--------------------------------------------------------------------------
+    //! \brief Callback triggered when the camera has moved.
+    //! \param[in] camera.
+    //--------------------------------------------------------------------------
+    virtual void onCameraUpdated(Camera& /*camera*/)
+    {}
 };
 
 #endif // OPENGLCPPWRAPPER_SCENEGRAPH_BEHAVIOR_HPP

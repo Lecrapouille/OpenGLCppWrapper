@@ -53,15 +53,15 @@ public:
     //! \brief
     // -------------------------------------------------------------------------
     template<class ComponentType>
-    ComponentType& getComponent()
+    ComponentType* getComponent()
     {
         for (auto && component: m_components)
         {
             if (component->isClassType(ComponentType::Type))
-                return *static_cast<ComponentType*>(component.get());
+                return static_cast<ComponentType*>(component.get());
         }
 
-        return *std::unique_ptr<ComponentType>(nullptr);
+        return std::unique_ptr<ComponentType>(nullptr);
     }
 
     // -------------------------------------------------------------------------

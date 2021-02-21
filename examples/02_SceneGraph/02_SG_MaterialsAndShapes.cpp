@@ -31,7 +31,8 @@ public:
 
     MyShape(std::string const& name, std::string const& path)
         : Shape<Model, Material>(name),
-          body(Shape<Model, Material>::transform, 1.0f, units::mass::kilogram_t(0.001))
+          body(Shape<Model, Material>::transform, 1.0f, 10.0f,
+               units::mass::kilogram_t(0.01))
     {
         Shape<Model, Material>::geometry.config.path = path;
         initMaterial();
@@ -52,7 +53,7 @@ private:
 
 public:
 
-    rigidbody::Sphere body;
+    rigidbody::Capsule body;
 };
 
 template<> void MyShape<DepthMaterial>::initMaterial()
@@ -78,8 +79,7 @@ SGMatAndShape::SGMatAndShape(uint32_t const width, uint32_t const height,
                              const char *title)
     : GLWindow(width, height, title),
       m_camera("camera"),
-      m_ground(Vector3f(50, 50, 50)),
-      m_dynamic(Vector3f(0.0f, 0.001f, 0.0f)),
+      //m_ground(Vector3f(50, 50, 50)),
       m_imgui(*this)
 {
     std::cout << "Hello Material: " << info() << std::endl;
@@ -107,11 +107,12 @@ bool SGMatAndShape::onSetup()
     //glCheck(glDisable(GL_CULL_FACE));
 
     m_scene.root = AxesHelper::create<AxesHelper>("Axis", 10.0f);
+    //SceneObject&  m_scene.root->attach<SceneObject>("WorldGround");
     m_scene.root->attach<MyShape<BasicMaterial>>("Tree0", "textures/tree.obj");
     MyShape<DepthMaterial>& t1 = m_scene.root->attach<MyShape<DepthMaterial>>("Tree1", "textures/tree.obj");
-    MyShape<NormalsMaterial>& t2 = m_scene.root->attach<MyShape<NormalsMaterial>>("Tree2", "textures/tree.obj");
-    MyShape<DepthMaterial>& t3 = t1.attach<MyShape<DepthMaterial>>("Tree1.0", "textures/tree.obj");
-    MyShape<BasicMaterial>& t4 = t1.attach<MyShape<BasicMaterial>>("Tree1.1", "textures/tree.obj");
+    //MyShape<NormalsMaterial>& t2 = m_scene.root->attach<MyShape<NormalsMaterial>>("Tree2", "textures/tree.obj");
+    //MyShape<DepthMaterial>& t3 = t1.attach<MyShape<DepthMaterial>>("Tree1.0", "textures/tree.obj");
+    //MyShape<BasicMaterial>& t4 = t1.attach<MyShape<BasicMaterial>>("Tree1.1", "textures/tree.obj");
 
     //      Y
     //     |
@@ -122,13 +123,13 @@ bool SGMatAndShape::onSetup()
     //  /  Tree2             Tree1
     // Z             Tree1.0       Tree1.1
     //
-    t1.transform.position(Vector3f(2.0f, 0.0f, 0.0f));
-    t2.transform.position(Vector3f(0.0f, 0.0f, 2.0f));
-    t3.transform.position(Vector3f(0.0f, 0.0f, 2.0f));
-    t4.transform.position(Vector3f(2.0f, 0.0f, 0.0f));
+    t1.transform.position(Vector3f(2.0f, 15.0f, 0.0f));
+    //t2.transform.position(Vector3f(0.0f, 10.0f, 2.0f));
+    //t3.transform.position(Vector3f(0.0f, 10.0f, 2.0f));
+    //t4.transform.position(Vector3f(2.0f, 10.0f, 0.0f));
 
-    m_dynamic.attach(t1.body);
-    m_dynamic.attach(m_ground);
+    m_physics.attach(t1.body);
+    //m_physics.attach(m_ground);
 
     //m_scene.debug();
     //return false;
@@ -192,7 +193,7 @@ bool SGMatAndShape::onPaint()
 
     // Update parent-child transform matrix for nodes
     m_scene.update(dt());
-    m_dynamic.update(dt());
+    m_physics.update(dt());
 
     // Perspective camera 1st view
     m_camera.transform.lookAt(Vector3f(5,5,5),
