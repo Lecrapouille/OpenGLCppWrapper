@@ -17,39 +17,52 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
+// This code has been inspired by the Youtube channel Game Dev Guide
+// Please watch this video "Building a Camera Controller for a Strategy Game"
+// https://www.youtube.com/watch?v=rnqF6S7PfFA
+// *****************************************************************************
 
-#ifndef GEOMETRY_HPP
-#  define GEOMETRY_HPP
+#ifndef RIG_CAMERA_CONTROLLER_HPP
+#  define RIG_CAMERA_CONTROLLER_HPP
 
-#  include "OpenGL/Buffers/iVAO.hpp"
-#  include "Scene/Material/ShaderLib.hpp"
+#  include "Scene/RigNode.hpp"
+#  include "Scene/Camera/CameraNode.hpp"
 
 // *****************************************************************************
-//! \brief Base class for generating vertex positions, normals, texture
-//! coordinates and index of predefined shapes (cube, sphere, tube ...)
+//! \brief Camera rig reactive to keyboard IO for strategy games
 // *****************************************************************************
-class Geometry
+class RigNode: public SceneObject
 {
 public:
 
     //--------------------------------------------------------------------------
-    //! \brief Virtual destructor because of pure virtual method.
-    //--------------------------------------------------------------------------
-    virtual ~Geometry() = default;
+    RigNode(std::string const& name, Camera& camera);
 
     //--------------------------------------------------------------------------
-    //! \brief Do the generation of the geometry (vertices, normals, texture
-    //! coordinates). Data will be stored inside the VBOs of the given VAO.
-    //!
-    //! \param[in,out] vao: Indexed VAO that will hold vertices, normals,
-    //!   texture coordinates inside VBOs. The VAO should be bound to GLProgram
-    //!   before being passed as param to this method to know if normals and
-    //!   texture coordinates shall be populated or not; else only vertices will
-    //!   be populated.
-    //! \param[in] clear: if true clear VBOs before generating data.
-    //! \return true in case of success.
+    void control(Camera& camera);
+
+private:
+
     //--------------------------------------------------------------------------
-    virtual bool generate(GLVAO32& vao, const bool clear = true) = 0;
+    virtual void onUpdate(float const /*dt*/) override;
+
+    //--------------------------------------------------------------------------
+    virtual void handleMouseInput();
+    virtual void handleKeyBoardInput();
+    virtual void handleMovementInput(float const dt);
+
+public:
+
+    float normalSpeed = 0.1f;
+    float fastSpeed = 1.0f;
+    float movementTime = 0.1f;
+    float zoomAmount = 0.1f;
+
+private:
+
+    Camera* m_camera;
+    Transformable3D m_newTransform;
+    float m_fov, m_newZoom;
 };
 
-#endif
+#endif // RIG_CAMERA_CONTROLLER_HPP

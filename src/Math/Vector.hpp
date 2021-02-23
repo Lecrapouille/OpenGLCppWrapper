@@ -191,7 +191,8 @@ public:
             m_data[i] *= l;
     }
 
-    void lerpSelf(Vector<T,n> const& uv, T const alpha)
+    //! \brief Self linear interpolation
+    void lerp(Vector<T,n> const& uv, T const alpha)
     {
         size_t i = n;
 
@@ -771,6 +772,20 @@ void swap(Vector<T, n> &a, Vector<T, n> &b)
             std::swap(a[i], b[i]);
         }
     }
+}
+
+template <typename T, size_t n>
+Vector<T, n> lerp(Vector<T, n> const& a, Vector<T, n> const& b, float t)
+{
+   Vector<T, n> r;
+
+   size_t i = n;
+   while (i--)
+   {
+      r[i] = maths::lerp(a[i], b[i], t);
+   }
+
+   return r;
 }
 
 //! \brief Get the coeficient of collinearity (k) of two vectors (u and v).

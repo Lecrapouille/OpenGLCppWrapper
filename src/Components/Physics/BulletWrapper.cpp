@@ -100,6 +100,7 @@ PhysicsManager::PhysicsManager(Vector3f const& gravity)
 //------------------------------------------------------------------------------
 void PhysicsManager::attach(RigidBody& obj)
 {
+    assert(m_dynamicsWorld != nullptr);
     m_dynamicsWorld->addRigidBody(&obj.rigidBody());
     m_objects.push_front(&obj);
     m_initialTransformSaved = false;
@@ -108,6 +109,7 @@ void PhysicsManager::attach(RigidBody& obj)
 //------------------------------------------------------------------------------
 void PhysicsManager::detach(RigidBody& obj)
 {
+    assert(m_dynamicsWorld != nullptr);
     m_dynamicsWorld->removeRigidBody(&obj.rigidBody());
     m_objects.push_front(&obj);
 }
@@ -125,6 +127,7 @@ void PhysicsManager::memorizeStates()
 //------------------------------------------------------------------------------
 void PhysicsManager::update(float dt)
 {
+    assert(m_dynamicsWorld != nullptr);
     if (m_initialTransformSaved == false)
     {
         memorizeStates();
@@ -157,23 +160,12 @@ RigidBody::RigidBody(Transformable3D& transform,
       m_initial_transform(cast_quaternion(transform.attitude()),
                           cast_vector(transform.position()))
 {
-std::cout << "CST------------" << std::endl;
-    std::cout << "bullet\n  pos: " << m_initial_transform.getOrigin() << std::endl;
-    std::cout << "  qua: " << m_initial_transform.getRotation() << std::endl;
-
-    std::cout << "qq\n  pos: " << transform.position() << std::endl;
-    std::cout << "  qua: " << transform.attitude() << std::endl;
-
-
-
     m_collision_shape = std::move(shape);
     m_motion = std::make_unique<btDefaultMotionState>(m_initial_transform);
-    btVector3 inertia(0,0,0);
-    btRigidBody::btRigidBodyConstructionInfo
-            info(mass.to<btScalar>(),
-                 m_motion.get(),
-                 m_collision_shape.get(),
-                 inertia);
+
+    btRigidBody::btRigidBodyConstructionInfo info(mass.to<btScalar>(),
+                                                  m_motion.get(),
+                                                  m_collision_shape.get());
     info.m_restitution = restitution;
     info.m_friction = friction;
     m_rigid_body = std::make_unique<btRigidBody>(info);
@@ -183,15 +175,8 @@ std::cout << "CST------------" << std::endl;
 //------------------------------------------------------------------------------
 void RigidBody::setInitialTransform(Transformable3D const& transform, bool apply)
 {
-    btTransform t(cast_quaternion(transform.attitude()),
-                  cast_vector(transform.position()));
-    m_initial_transform = t;
-    std::cout << "setInit------------" << std::endl;
-    std::cout << "bullet\n  pos: " << t.getOrigin() << std::endl;
-    std::cout << "  qua: " << t.getRotation() << std::endl;
-
-    std::cout << "qq\n  pos: " << transform.position() << std::endl;
-    std::cout << "  qua: " << transform.attitude() << std::endl;
+    m_initial_transform = btTransform(cast_quaternion(transform.attitude()),
+                                      cast_vector(transform.position()));
     if (apply) { reset(); }
 }
 
@@ -235,13 +220,6 @@ void RigidBody::update()
     m_rigid_body->getMotionState()->getWorldTransform(wTrans);
     m_transform.attitude(cast_quaternion(wTrans.getRotation()));
     m_transform.position(cast_vector(wTrans.getOrigin()));
-
-    std::cout << "------------" << std::endl;
-    std::cout << "bullet\n  pos: " << wTrans.getOrigin() << std::endl;
-    std::cout << "  qua: " << wTrans.getRotation() << std::endl;
-
-    std::cout << "qq\n  pos: " << m_transform.position() << std::endl;
-    std::cout << "  qua: " << m_transform.attitude() << std::endl;
 }
 
 namespace rigidbody

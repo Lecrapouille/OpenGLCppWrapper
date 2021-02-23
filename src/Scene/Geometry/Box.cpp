@@ -58,44 +58,43 @@ bool Box::generate(GLVertexBuffer<Vector3f>& vertices,
                    GLVertexBuffer<Vector2f>& uv,
                    GLIndex32& index)
 {
-    uint32_t vertexCounter = 0;
     uint32_t numberOfVertices = 0;
 
-    buildPlane('z', 'y', 'x', -1.0f, -1.0f,
+    buildPlane(Z, Y, X, -1.0f, -1.0f,
                config.depth, config.height, config.width,
                config.depthSegments, config.heightSegments,
                vertices, normals, uv, index,
-               vertexCounter, numberOfVertices); // px
+               numberOfVertices); // px
 
-    buildPlane('z', 'y', 'x',  1.0f, -1.0f,
+    buildPlane(Z, Y, X,  1.0f, -1.0f,
                config.depth, config.height, -config.width,
                config.depthSegments, config.heightSegments,
                vertices, normals, uv, index,
-               vertexCounter, numberOfVertices); // nx
+               numberOfVertices); // nx
 
-    buildPlane('x', 'z', 'y',  1.0f,  1.0f,
+    buildPlane(X, Z, Y,  1.0f,  1.0f,
                config.width, config.depth, config.height,
                config.widthSegments, config.depthSegments,
                vertices, normals, uv, index,
-               vertexCounter, numberOfVertices); // py
+               numberOfVertices); // py
 
-    buildPlane('x', 'z', 'y',  1.0f, -1.0f,
+    buildPlane(X, Z, Y,  1.0f, -1.0f,
                config.width, config.depth, -config.height,
                config.widthSegments, config.depthSegments,
                vertices, normals, uv, index,
-               vertexCounter, numberOfVertices); // ny
+               numberOfVertices); // ny
 
-    buildPlane('x', 'y', 'z',  1.0f, -1.0f,
+    buildPlane(X, Y, Z,  1.0f, -1.0f,
                config.width, config.height, config.depth,
                config.widthSegments, config.heightSegments,
                vertices, normals, uv, index,
-               vertexCounter, numberOfVertices); // pz
+               numberOfVertices); // pz
 
-    buildPlane('x', 'y', 'z', -1.0f, -1.0f,
+    buildPlane(X, Y, Z, -1.0f, -1.0f,
                config.width, config.height, -config.depth,
                config.widthSegments, config.heightSegments,
                vertices, normals, uv, index,
-               vertexCounter, numberOfVertices); // nz
+               numberOfVertices); // nz
 
     return true;
 }
@@ -104,14 +103,13 @@ bool Box::generate(GLVertexBuffer<Vector3f>& vertices,
 // Original code https://github.com/mrdoob/three.js/
 // three.js/src/geometries/BoxBufferGeometry.js
 //------------------------------------------------------------------------------
-void Box::buildPlane(char u, char v, char w, float udir, float vdir,
+void Box::buildPlane(Side u, Side v, Side w, float udir, float vdir,
                      float width, float height, float depth,
                      uint32_t gridX, uint32_t gridY,
                      GLVertexBuffer<Vector3f>& vertices,
                      GLVertexBuffer<Vector3f>& normals,
                      GLVertexBuffer<Vector2f>& uv,
                      GLIndex32& index,
-                     uint32_t& vertexCounter,
                      uint32_t& numberOfVertices)
 {
     const float segmentWidth = width / float(gridX);
@@ -125,6 +123,7 @@ void Box::buildPlane(char u, char v, char w, float udir, float vdir,
     const uint32_t gridY1 = gridY + 1u;
 
     Vector3f vec;
+    uint32_t vertexCounter = 0u;
 
     for (uint32_t iy = 0u; iy < gridY1; ++iy)
     {
@@ -134,15 +133,15 @@ void Box::buildPlane(char u, char v, char w, float udir, float vdir,
             const float x = float(ix) * segmentWidth - widthHalf;
 
             // vertices buffer
-            vec[u - 'x'] = x * udir;
-            vec[v - 'x'] = y * vdir;
-            vec[w - 'x'] = depthHalf;
+            vec[u] = x * udir;
+            vec[v] = y * vdir;
+            vec[w] = depthHalf;
             vertices.append(vec);
 
             // normals buffer
-            vec[u - 'x'] = 0;
-            vec[v - 'x'] = 0;
-            vec[w - 'x'] = depth > 0.0f ? 1.0f : -1.0f;
+            vec[u] = 0;
+            vec[v] = 0;
+            vec[w] = depth > 0.0f ? 1.0f : -1.0f;
             normals.append(vec);
 
             // UV buffer
@@ -172,4 +171,3 @@ void Box::buildPlane(char u, char v, char w, float udir, float vdir,
 
     numberOfVertices += vertexCounter;
 }
-

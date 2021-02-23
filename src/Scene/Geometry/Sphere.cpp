@@ -57,15 +57,13 @@ bool Sphere::generate(GLVertexBuffer<Vector3f>& vertices,
                       GLIndex32& index)
 {
     std::vector<float> tmp, theta1, theta2;
-    const uint32_t n = (config.slices + 1u) * (config.stacks + 1u);
 
     // Vertices
     maths::linspace(0.0f, maths::PI<float>, config.stacks, tmp, true);
     repeat(tmp, config.slices, theta1);
     maths::linspace(0.0f, maths::TWO_PI<float>, config.slices, tmp, true);
     tile(tmp, config.stacks, theta2);
-
-    vertices.resize(n);
+    vertices.resize(config.slices * config.stacks);
     for (size_t i = 0u; i < vertices.size(); ++i)
     {
         vertices[i] = Vector3f(
@@ -82,7 +80,6 @@ bool Sphere::generate(GLVertexBuffer<Vector3f>& vertices,
     repeat(tmp, config.stacks, theta1);
     maths::linspace(1.0f, 0.0f, config.stacks, tmp, true);
     tile(tmp, config.slices, theta2);
-
     for (size_t i = 0u; i < tmp.size(); ++i)
     {
         uv[i] = Vector2f(theta1[i], theta2[i]);

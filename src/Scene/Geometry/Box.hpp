@@ -28,6 +28,8 @@
 // *****************************************************************************
 class Box: public Geometry
 {
+    enum Side { X = 0, Y = 1, Z = 2 };
+
 public:
 
     struct Config
@@ -53,14 +55,13 @@ protected:
                   GLVertexBuffer<Vector2f>& uv,
                   GLIndex32& index);
 
-    void buildPlane(char u, char v, char w, float udir, float vdir,
+    void buildPlane(Side u, Side v, Side w, float udir, float vdir,
                     float width, float height, float depth,
                     uint32_t gridX, uint32_t gridY,
                     GLVertexBuffer<Vector3f>& vertices,
                     GLVertexBuffer<Vector3f>& normals,
                     GLVertexBuffer<Vector2f>& uv,
                     GLIndex32& index,
-                    uint32_t& vertexCounter,
                     uint32_t& numberOfVertices);
 
 public:

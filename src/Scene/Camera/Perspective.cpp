@@ -22,9 +22,9 @@
 
 //------------------------------------------------------------------------------
 Perspective::Perspective(units::angle::radian_t const fov, float const near, float const far)
-    : m_projection(matrix::Identity), m_fov(fov), m_near(near), m_far(far), m_aspect(0.5f)
+    : m_projection(matrix::Identity), m_near(near), m_far(far), m_aspect(0.5f)
 {
-    m_dirty = true;
+    setFieldOfView(fov);
 }
 
 //------------------------------------------------------------------------------
@@ -42,7 +42,9 @@ Matrix44f const& Perspective::matrix()
 //------------------------------------------------------------------------------
 void Perspective::setFieldOfView(units::angle::radian_t const fov)
 {
-    m_fov = fov;
+    // Constrain between 1 deg and 179 deg
+    float angle = maths::clamp(fov.to<float>(), 0.0174533f, 3.12414f);
+    m_fov = units::angle::radian_t(angle);
     m_dirty = true;
 }
 

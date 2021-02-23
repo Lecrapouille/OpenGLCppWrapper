@@ -49,10 +49,10 @@ OBJ_OPENGL_TEXTURES += Textures.o
 OBJ_OPENGL_SHADERS = Shader.o Program.o
 OBJ_GUI = Window.o Application.o DearImGui.o
 OBJ_SCENE_GRAPH = SceneTree.o
-OBJ_CAMERA = Perspective.o Orthographic.o CameraNode.o
+OBJ_CAMERA = Perspective.o Orthographic.o CameraNode.o RigNode.o
 OBJ_LOADERS = OBJ.o SOIL.o
 OBJ_MATERIALS = Material.o DepthMaterial.o NormalsMaterial.o MeshBasicMaterial.o LineBasicMaterial.o Color.o
-OBJ_GEOMETRIES = Axes.o Model.o Plane.o Tube.o Sphere.o
+OBJ_GEOMETRIES = Axes.o Model.o Plane.o Tube.o Sphere.o Box.o
 OBJ_PHYSICS = Components.o BulletWrapper.o
 
 OBJS += $(THIRDPART_OBJS) $(OBJ_COMMON)

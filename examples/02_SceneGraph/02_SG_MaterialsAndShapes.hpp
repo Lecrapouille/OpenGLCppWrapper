@@ -72,7 +72,6 @@ private:
 
     Camera m_camera;
     SceneTree m_scene;
-    //rigidbody::WorldPlane m_ground;
     PhysicsManager m_physics;
     GUI m_imgui;
 };

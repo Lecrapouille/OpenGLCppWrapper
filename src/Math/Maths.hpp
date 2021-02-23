@@ -316,7 +316,7 @@ static inline T lmap(T const x, T const start1, T const stop1, T const start2, T
 template<typename T>
 static inline T lerp(T const a, T const b, T const t)
 {
-    static_assert((t >= zero<T>()) && (t <= one<T>()), "param t shall be [0 1]");
+    assert((t >= zero<T>()) && (t <= one<T>()) && "param t shall be [0 1]");
     return (one<T>() - t) * a + t * b;
 }
 

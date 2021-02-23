@@ -21,6 +21,52 @@
 #include "02_SG_MaterialsAndShapes.hpp"
 #include <iostream>
 
+class WorldGround: public Shape<Box, BasicMaterial> //SceneObject
+{
+public:
+
+    WorldGround(std::string const& name, Vector3f const& dimensions)
+        : Shape<Box, BasicMaterial>(name),
+          body(transform, dimensions, units::mass::kilogram_t(0))
+    {
+        Shape<Box, BasicMaterial>::material.color() = Color(0.5f, 0.0f, 0.0f).toVector3f();
+        Shape<Box, BasicMaterial>::material.diffuse() = Color(0.4f, 0.0f, 0.0f).toVector3f();
+        Shape<Box, BasicMaterial>::material.opacity() = 1.0f;
+
+        geometry.config.width = dimensions[0];
+        geometry.config.height = dimensions[1];
+        geometry.config.depth = dimensions[2];
+        if (!Shape<Box, BasicMaterial>::compile())
+        {
+            throw GL::Exception("Failed create renderable");
+        }
+    }
+
+public:
+
+    rigidbody::Box body;
+};
+
+class MySphere: public Shape<Sphere, NormalsMaterial>
+{
+public:
+
+    MySphere(std::string const& name, float const size)
+        : Shape<Sphere, NormalsMaterial>(name),
+          body(transform, size, units::mass::kilogram_t(0.01))
+    {
+        geometry.config.radius = 1.0f;
+        if (!Shape<Sphere, NormalsMaterial>::compile())
+        {
+            throw GL::Exception("Failed create renderable");
+        }
+    }
+
+public:
+
+    rigidbody::Sphere body;
+};
+
 //------------------------------------------------------------------------------
 //! \brief
 //------------------------------------------------------------------------------
@@ -31,15 +77,16 @@ public:
 
     MyShape(std::string const& name, std::string const& path)
         : Shape<Model, Material>(name),
-          body(Shape<Model, Material>::transform, 1.0f, 10.0f,
+          body(Shape<Model, Material>::transform, 1.0f,
                units::mass::kilogram_t(0.01))
     {
         Shape<Model, Material>::geometry.config.path = path;
-        initMaterial();
         if (!Shape<Model, Material>::compile())
         {
             throw GL::Exception("Failed create renderable");
         }
+        // FIXME: devrait pouvoir l'appeller avant compile()
+        initMaterial();
     }
 
     inline std::string const& name() const
@@ -53,12 +100,12 @@ private:
 
 public:
 
-    rigidbody::Capsule body;
+    rigidbody::Sphere body;
 };
 
 template<> void MyShape<DepthMaterial>::initMaterial()
 {
-    Shape<Model, DepthMaterial>::material.near() = 0.1f;
+    Shape<Model, DepthMaterial>::material.near() = 3.0f;
     Shape<Model, DepthMaterial>::material.far() = 5.0f;
 }
 
@@ -79,9 +126,15 @@ SGMatAndShape::SGMatAndShape(uint32_t const width, uint32_t const height,
                              const char *title)
     : GLWindow(width, height, title),
       m_camera("camera"),
-      //m_ground(Vector3f(50, 50, 50)),
       m_imgui(*this)
 {
+    makeReactOn(Event::MouseMove | Event::MouseScroll |
+                Event::MouseButton | Event::Keyboard);
+
+    m_camera.transform.position(Vector3f(10,0,5));
+    m_camera.transform.lookAt(Vector3f(0,0,0));
+    m_camera.is(Camera::Type::PERSPECTIVE);
+
     std::cout << "Hello Material: " << info() << std::endl;
 }
 
@@ -107,10 +160,13 @@ bool SGMatAndShape::onSetup()
     //glCheck(glDisable(GL_CULL_FACE));
 
     m_scene.root = AxesHelper::create<AxesHelper>("Axis", 10.0f);
-    //SceneObject&  m_scene.root->attach<SceneObject>("WorldGround");
-    m_scene.root->attach<MyShape<BasicMaterial>>("Tree0", "textures/tree.obj");
+    RigNode& rig = m_scene.root->attach<RigNode>("Rig", m_camera);
+
+    WorldGround& wg = m_scene.root->attach<WorldGround>("WorldGround", Vector3f(10.0f, 1.0f, 10.0f));
+    //MyShape<BasicMaterial>& t0 = m_scene.root->attach<MyShape<BasicMaterial>>("Tree0", "textures/tree.obj");
     MyShape<DepthMaterial>& t1 = m_scene.root->attach<MyShape<DepthMaterial>>("Tree1", "textures/tree.obj");
     //MyShape<NormalsMaterial>& t2 = m_scene.root->attach<MyShape<NormalsMaterial>>("Tree2", "textures/tree.obj");
+    MySphere& t2 = m_scene.root->attach<MySphere>("Tree2", 1.0f);
     //MyShape<DepthMaterial>& t3 = t1.attach<MyShape<DepthMaterial>>("Tree1.0", "textures/tree.obj");
     //MyShape<BasicMaterial>& t4 = t1.attach<MyShape<BasicMaterial>>("Tree1.1", "textures/tree.obj");
 
@@ -123,13 +179,16 @@ bool SGMatAndShape::onSetup()
     //  /  Tree2             Tree1
     // Z             Tree1.0       Tree1.1
     //
-    t1.transform.position(Vector3f(2.0f, 15.0f, 0.0f));
-    //t2.transform.position(Vector3f(0.0f, 10.0f, 2.0f));
+    //wg.transform.position(Vector3f(0.0f, 0.0f, 0.0f));
+    t1.transform.position(Vector3f(2.0f, 5.0f, 0.0f));
+    t2.transform.position(Vector3f(0.0f, 5.0f, 2.0f));
     //t3.transform.position(Vector3f(0.0f, 10.0f, 2.0f));
     //t4.transform.position(Vector3f(2.0f, 10.0f, 0.0f));
 
+    //m_physics.attach(t0.body);
     m_physics.attach(t1.body);
-    //m_physics.attach(m_ground);
+    m_physics.attach(t2.body);
+    m_physics.attach(wg.body);
 
     //m_scene.debug();
     //return false;
@@ -196,7 +255,7 @@ bool SGMatAndShape::onPaint()
     m_physics.update(dt());
 
     // Perspective camera 1st view
-    m_camera.transform.lookAt(Vector3f(5,5,5),
+    /*m_camera.transform.lookAt(Vector3f(5,5,5),
                               Vector3f(0,0,0),
                               Vector3f(0,1,0));
     m_camera.is(Camera::Type::PERSPECTIVE);
@@ -211,11 +270,11 @@ bool SGMatAndShape::onPaint()
     m_scene.draw(m_camera);
 
     // Orthographic camera 3th view
-    m_camera.transform.position(Vector3f(10,0,5));
+    //m_camera.transform.position(Vector3f(10,0,5));
     m_camera.transform.lookAt(Vector3f(0,0,0));
     m_camera.is(Camera::Type::ORTHOGRAPHIC);
     m_camera.orthographic.setPlanes(0, 800, 600, 0);
-    m_camera.setViewPort(0.5f, 0.5f, 0.5f, 0.5f);
+    m_camera.setViewPort(0.5f, 0.5f, 0.5f, 0.5f);*/
     m_scene.draw(m_camera);
 
     // DearImGui
