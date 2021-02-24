@@ -382,8 +382,8 @@ public:
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::DUMMY(maths::nan<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ZERO(maths::zero<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ONE(maths::one<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::POSITIVE_INFINITY(maths::inf<T>(), maths::inf<T>(), maths::inf<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_INFINITY(-maths::inf<T>(), -maths::inf<T>(), maths::inf<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::POSITIVE_INFINITY(maths::inf<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_INFINITY(-maths::inf<T>());
 
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_SCALE(maths::one<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_SCALE(-maths::one<T>());

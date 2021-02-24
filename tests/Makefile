@@ -38,7 +38,7 @@ include $(M)/Makefile.header
 ###################################################
 # List of files to compile.
 #
-OBJS = tests-tree.o main.o
+OBJS = Exception.o VectorTests.o OpenGL.o GLObjectTests.o main.o
 
 ###################################################
 # Project defines
@@ -61,12 +61,12 @@ LINKER_FLAGS += -lreadline -ldl
 # Inform Makefile where to find header files
 #
 INCLUDES += \
-  -I$(P)/include -I$(P)/src
+  -I$(P)/include -I$(P)/src -I$(P)/src/Common -I$(P)/src/OpenGL/Context -I$(THIRDPART)/units/include
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
 #
-VPATH +=
+VPATH += $(P)/src/Common $(P)/src/OpenGL/Context
 
 ###################################################
 # Compile SimTaDyn unit tests
