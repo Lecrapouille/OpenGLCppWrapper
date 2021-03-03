@@ -61,22 +61,22 @@ void RigNode::handleKeyBoardInput()
 
     if (GLWindow::isKeyDown(GLFW_KEY_UP))
     {
-        std::cout << "UP avant " << m_newTransform.position()
-                  << " + " << speed << " * " << transform.forward() << std::endl;
+        //std::cout << "UP avant " << m_newTransform.position()
+        //          << " + " << speed << " * " << transform.forward() << std::endl;
         m_newTransform.position(m_newTransform.position() + speed * transform.forward());
-        std::cout << "UP apres " << m_newTransform.position() << std::endl;
+        //std::cout << "UP apres " << m_newTransform.position() << std::endl;
     }
     else if (GLWindow::isKeyDown(GLFW_KEY_DOWN))
-    {std::cout << "DW" << std::endl;
+    {//std::cout << "DW" << std::endl;
         m_newTransform.position(m_newTransform.position() - speed * transform.forward());
     }
 
     if (GLWindow::isKeyDown(GLFW_KEY_RIGHT))
-    {std::cout << "RI" << std::endl;
+    {//std::cout << "RI" << std::endl;
         m_newTransform.position(m_newTransform.position() + speed * transform.right());
     }
     else if (GLWindow::isKeyDown(GLFW_KEY_LEFT))
-    {std::cout << "LE" << std::endl;
+    {//std::cout << "LE" << std::endl;
         m_newTransform.position(m_newTransform.position() - speed * transform.right());
     }
 
@@ -99,9 +99,9 @@ void RigNode::handleMovementInput(float const dt)
                      dt * movementTime));
     */
     m_camera->transform.position(m_newTransform.position());
-std::cout << "camera " << m_camera->transform.position() << std::endl;
+//std::cout << "camera " << m_camera->transform.position() << std::endl;
 
     m_fov = maths::lerp(m_fov, m_newZoom, dt * movementTime);
     m_camera->perspective.setFieldOfView(units::angle::radian_t(m_fov)); // TODO ortho
-    std::cout << "Zoom " << m_fov << std::endl;
+    //std::cout << "Zoom " << m_fov << std::endl;
 }

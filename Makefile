@@ -33,35 +33,6 @@ M := $(P)/.makefile
 include $(P)/Makefile.common
 
 ###################################################
-# Project specific
-#
-ifeq ($(ARCHI),Darwin)
-OBJ_OPENGL_TEXTURES = $(abspath $(THIRDPART)/SOIL/*.o)
-else
-OBJ_OPENGL_TEXTURES = $(abspath $(THIRDPART)/SOIL/obj/*.o)
-endif
-
-OBJ_COMMON = Exception.o
-OBJ_OPENGL_CONTEXT = OpenGL.o
-OBJ_OPENGL_VARIABLES = Variables.o
-OBJ_OPENGL_BUFFERS = EBO.o VBO.o VAO.o
-OBJ_OPENGL_TEXTURES += Textures.o
-OBJ_OPENGL_SHADERS = Shader.o Program.o
-OBJ_GUI = Window.o Application.o DearImGui.o
-OBJ_SCENE_GRAPH = SceneTree.o
-OBJ_CAMERA = Perspective.o Orthographic.o CameraNode.o RigNode.o
-OBJ_LOADERS = OBJ.o SOIL.o
-OBJ_MATERIALS = Material.o DepthMaterial.o NormalsMaterial.o MeshBasicMaterial.o LineBasicMaterial.o Color.o
-OBJ_GEOMETRIES = Axes.o Model.o Plane.o Tube.o Sphere.o Box.o
-OBJ_PHYSICS = Components.o BulletWrapper.o
-
-OBJS += $(THIRDPART_OBJS) $(OBJ_COMMON)
-OBJS += $(OBJ_OPENGL_CONTEXT) $(OBJ_OPENGL_VARIABLES)
-OBJS += $(OBJ_OPENGL_BUFFERS) $(OBJ_OPENGL_TEXTURES) $(OBJ_OPENGL_SHADERS)
-OBJS += $(OBJ_GUI) $(OBJ_LOADERS) $(OBJ_MATERIALS) $(OBJ_GEOMETRIES)
-OBJS += $(OBJ_PHYSICS) $(OBJ_CAMERA) $(OBJ_SCENE_GRAPH)
-
-###################################################
 # Compile static and shared libraries
 all: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
 

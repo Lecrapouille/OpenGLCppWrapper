@@ -131,11 +131,11 @@ public:
     //! \note Having no VBO generally means that this instance of VAO have not yet
     //! been bound to a GLProgram. See the bind() method.
     //!
-    //! \return true if this instance has VBOs.
+    //! \return the number of VBOs.
     //--------------------------------------------------------------------------
-    inline bool hasVBOs() const
+    inline size_t hasVBOs() const
     {
-        return 0_z != m_VBOs.size();
+        return m_VBOs.size();
     }
 
     //--------------------------------------------------------------------------
@@ -155,11 +155,11 @@ public:
     //! this instance of VAO have not yet been bound to a GLProgram. See the bind()
     //! method.
     //!
-    //! \return true if this instance has textures.
+    //! \return the number of textures.
     //--------------------------------------------------------------------------
-    inline bool hasTextures() const
+    inline size_t hasTextures() const
     {
-        return 0_z != m_textures.size();
+        return m_textures.size();
     }
 
     //--------------------------------------------------------------------------

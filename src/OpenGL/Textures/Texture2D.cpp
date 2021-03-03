@@ -9,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// OpenGLCppWrapper is distributedin the hope that it will be useful, but
+// OpenGLCppWrapper is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -18,24 +18,17 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "00_BasicWindow.hpp"
-#include <iostream>
-#include <stdlib.h>
-#include <limits.h>
+#include "OpenGL/Textures/Texture2D.hpp"
+#include "Loaders/Textures/SOIL.hpp"
 
-//------------------------------------------------------------------------------
-int main()
+bool GLTexture2D::load(const char *const filename)
 {
-  std::unique_ptr<IGLWindow> win;
-  try
-    {
-      win = std::make_unique<BasicWindow>();
-      return win->start() ? EXIT_SUCCESS : EXIT_FAILURE;
-    }
-  catch (const OpenGLException& e)
-    {
-      // Caught OpenGLException from constructors
-      ERROR("Caught exception: '%s'", e.message().c_str());
-      return EXIT_FAILURE;
-    }
+    SOIL soil;
+    return load(filename, soil);
+}
+
+bool GLTexture2D::save(const char *const filename)
+{
+    SOIL soil;
+    return save(filename, soil);
 }

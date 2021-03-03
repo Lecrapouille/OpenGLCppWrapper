@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2021 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -9,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -22,166 +22,162 @@
 #define private public
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wfloat-equal"
-#include "Math/Matrix.hpp"
-# pragma GCC diagnostic pop
+#    include "Math/Matrix.hpp"
+#  pragma GCC diagnostic pop
 #undef protected
 #undef private
-#include <crpcut.hpp>
-#include <string>
 
-    Matrix44f A({1, 0, 0, 0,
-                 0, 1, 0, 0,
-                 0, 0, 1, 0,
-                 1, 0, 0, 1});
-    Matrix44f B({0, 0, -1, 0,
-                 0, 1, 0, 0,
-                 1, 0, 0, 0,
-                 0, 0, 0, 1});
-std::cout << A * B << std::endl;
+/*
+  Matrix44f A({1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  1, 0, 0, 1});
+  Matrix44f B({0, 0, -1, 0,
+  0, 1, 0, 0,
+  1, 0, 0, 0,
+  0, 0, 0, 1});
+  std::cout << A * B << std::endl;
 
--->A=[
--->1 0 0 0;
--->0 1 0 0;
--->0 0 1 0;
--->1 0 0 1]
- A  =
+  -->A=[
+  -->1 0 0 0;
+  -->0 1 0 0;
+  -->0 0 1 0;
+  -->1 0 0 1]
+  A  =
 
-    1.    0.    0.    0.
-    0.    1.    0.    0.
-    0.    0.    1.    0.
-    1.    0.    0.    1.
+  1.    0.    0.    0.
+  0.    1.    0.    0.
+  0.    0.    1.    0.
+  1.    0.    0.    1.
 
--->B=[
--->0 0 -1 0;
--->0 1 0 0;
--->1 0 0 0;
--->0 0 0 1]
- B  =
+  -->B=[
+  -->0 0 -1 0;
+  -->0 1 0 0;
+  -->1 0 0 0;
+  -->0 0 0 1]
+  B  =
 
-    0.    0.  - 1.    0.
-    0.    1.    0.    0.
-    1.    0.    0.    0.
-    0.    0.    0.    1.
+  0.    0.  - 1.    0.
+  0.    1.    0.    0.
+  1.    0.    0.    0.
+  0.    0.    0.    1.
 
--->A*B
- ans  =
+  -->A*B
+  ans  =
 
-    0.    0.  - 1.    0.
-    0.    1.    0.    0.
-    1.    0.    0.    0.
-    0.    0.  - 1.    1.
+  0.    0.  - 1.    0.
+  0.    1.    0.    0.
+  1.    0.    0.    0.
+  0.    0.  - 1.    1.
 
--->
-
-
-
-using namespace glwrap;
+  -->
+*/
 
 // Expected results are computed by the ScicosLab tool
 static Matrix33f I3 =
-  {
+{
     1.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 1.0f
-  };
+};
 static Matrix33f ID3(matrix::Identity);
 static Matrix33f A3 =
-  {
+{
     1.0f, 2.0f, 3.0f,
     4.0f, 5.0f, 6.0f,
     7.0f, 8.0f, 9.0f
-  };
+};
 static Matrix33f HA3 =
-  {
+{
     1.0f, 4.0f, 9.0f,
     16.0f, 25.0f, 36.0f,
     49.0f, 64.0f, 81.0f
-  };
+};
 static Matrix44f A4 =
-  {
+{
     1.0f,   2.0f,  3.0f,  4.0f,
     5.0f,   6.0f,  7.0f,  8.0f,
     9.0f,  10.0f, 11.0f, 12.0f,
     13.0f, 14.0f, 15.0f, 16.0f
-  };
+};
 static Matrix33f AA(A4);
 static Matrix33f A(A3);
 static Matrix33f Atrunc =
-  {
+{
     1.0f,   2.0f,  3.0f,
     5.0f,   6.0f,  7.0f,
     9.0f,  10.0f, 11.0f
-  };
+};
 static Matrix33f minusA =
-  {
+{
     -1.0f, -2.0f, -3.0f,
     -4.0f, -5.0f, -6.0f,
     -7.0f, -8.0f, -9.0f
-  };
+};
 static Matrix33f B3 =
-  {
+{
     1.0f, 4.0f, 7.0f,
     2.0f, 5.0f, 8.0f,
     3.0f, 6.0f, 9.0f
-  };
+};
 static Matrix44f B4 =
-  {
+{
     1.0f, 5.0f, 9.0f,  13.0f,
     2.0f, 6.0f, 10.0f, 14.0f,
     3.0f, 7.0f, 11.0f, 15.0f,
     4.0f, 8.0f, 12.0f, 16.0f
-  };
+};
 static Matrix33f BB(B4);
 static Matrix33f B(B3);
 static Matrix33f Btrunc =
-  {
+{
     1.0f, 5.0f, 9.0f,
     2.0f, 6.0f, 10.0f,
     3.0f, 7.0f, 11.0f,
     4.0f, 8.0f, 12.0f
-  };
+};
 static Matrix33f O = { 0.0f };
 static Matrix33i one(1);
 static Matrix33i two(2);
 static Matrix33i four(4);
 static Matrix33f A_times_B =
-  {
+{
     14,    32,     50,
     32,    77,     122,
     50,    122,    194
-  };
+};
 static Matrix33f B_times_A =
-  {
+{
     66,    78,     90,
     78,    93,     108,
     90,    108,    126
-  };
+};
 static Matrix33f A_plus_B =
-  {
+{
     2,     6,     10,
     6,     10,    14,
     10,    14,    18
-  };
+};
 static Matrix33f A_minus_B =
-  {
-    0,  - 2,  - 4,
-    2,    0,  - 2,
-    4,    2,    0
-  };
+{
+    0,  -2,  -4,
+    2,   0,  -2,
+    4,   2,   0
+};
 static Matrix33f B_minus_A =
-  {
-      0,    2,    4,
-    - 2,    0,    2,
-    - 4,  - 2,    0
-  };
+{
+     0,   2,  4,
+    -2,   0,  2,
+    -4,  -2,  0
+};
 static Matrix44f M4(one);
 static Matrix44f M =
-  {
+{
     1, 1, 1, 0,
     1, 1, 1, 0,
     1, 1, 1, 0,
     0, 0, 0, 0
-  };
+};
 static Matrix33b Mfalse(false);
 static Matrix33b Mtrue(true);
 static Vector3f V(5.0f, 4.0f, 3.0f);
@@ -190,41 +186,11 @@ static Vector3f v_times_A(42, 54, 66);
 
 //--------------------------------------------------------------------------
 template <typename T, size_t r, size_t c>
-static void compareMatricesEps(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
+static void compareMatrices(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
 {
-  for (size_t i = 0_z; i < r * c; ++i)
+    for (size_t i = 0_z; i < r * c; ++i)
     {
-      ASSERT_EQ(true, maths::abs(a.m_data[i] - b.m_data[i]) < T(0.000001));
-    }
-}
-
-//--------------------------------------------------------------------------
-template <typename T, size_t r, size_t c>
-static void compareMatricesUlps(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
-{
-  for (size_t i = 0_z; i < r * c; ++i)
-    {
-      ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), a.m_data[i], b.m_data[i]);
-    }
-}
-
-//--------------------------------------------------------------------------
-template <typename T, size_t r, size_t c>
-static void compareMatrix_(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b, const bool expected)
-{
-  std::cout << "Comparing: " << std::endl << a
-            << "With: " << std::endl << b
-            << std::endl;
-
-  Matrix<bool,r,c> res = (a == b);
-  for (size_t i = 0_z; i < r * c; ++i)
-    {
-      //ASSERT_EQ(true, res.m_data[i]);
-      if (expected != res.m_data[i])
-        {
-          std::cout << "KOOOOOOO" << std::endl;
-          exit(1);
-        }
+        ASSERT_EQ(a.m_data[i], b.m_data[i]);
     }
 }
 
@@ -232,38 +198,35 @@ static void compareMatrix_(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b, const
 template <typename T, size_t r, size_t c>
 static void isTrueMatrix(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b)
 {
-  compareMatrix_(a, b, true);
+    compareMatrix(a, b, true);
 }
 
 //--------------------------------------------------------------------------
 template <typename T, size_t r, size_t c>
 static void isFalseMatrix(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b)
 {
-  compareMatrix_(a, b, false);
+    compareMatrix(a, b, false);
 }
 
 //--------------------------------------------------------------------------
 static void checkVector3f(Vector3f const& v, const float x, const float y, const float z)
 {
-  ASSERT_EQ(x, v.x);
-  ASSERT_EQ(y, v.y);
-  ASSERT_EQ(z, v.z);
+    ASSERT_EQ(x, v.x);
+    ASSERT_EQ(y, v.y);
+    ASSERT_EQ(z, v.z);
 }
 
 //--------------------------------------------------------------------------
 static void checkAlmostVectorUlps(Vector3g const& v, const double x, const double y, const double z)
 {
-  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), x, v.x);
-  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), y, v.y);
-  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), z, v.z);
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), x, v.x);
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), y, v.y);
+    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), z, v.z);
 }
 
 //--------------------------------------------------------------------------
-TESTSUITE(Matrices)
+TEST(TestMatrices, testCreator)
 {
-  //--------------------------------------------------------------------------
-  TEST(testCreator)
-  {
     size_t rows = 0_z;
     size_t cols = 0_z;
 
@@ -284,16 +247,16 @@ TESTSUITE(Matrices)
     checkVector3f(A3[0], 1.0f, 2.0f, 3.0f);
     checkVector3f(A3[1], 4.0f, 5.0f, 6.0f);
     checkVector3f(A3[2], 7.0f, 8.0f, 9.0f);
-  }
+}
 
-  //--------------------------------------------------------------------------
-  TEST(testSwap)
-  {
-  }
+//--------------------------------------------------------------------------
+TEST(TestMatrices, testSwap)
+{
+}
 
-  //--------------------------------------------------------------------------
-  TEST(testEquality)
-  {
+//--------------------------------------------------------------------------
+TEST(TestMatrices, testEquality)
+{
     isFalseMatrix(one, two);
     isTrueMatrix(Mtrue, one < four);
     isTrueMatrix(Mtrue, one <= four);
@@ -329,11 +292,11 @@ TESTSUITE(Matrices)
     ASSERT_EQ(false, matrix::allTrue(A == B));
     ASSERT_EQ(false, matrix::allFalse(matrix::transpose(A) == B));
     ASSERT_EQ(false, matrix::allFalse(A == B));
-  }
+}
 
-  //--------------------------------------------------------------------------
-  TEST(testArithmetic)
-  {
+//--------------------------------------------------------------------------
+TEST(TestMatrices, testArithmetic)
+{
     isTrueMatrix(O, O * I3);
     isTrueMatrix(O, I3 * O);
     isTrueMatrix(A, A * I3);
@@ -389,11 +352,11 @@ TESTSUITE(Matrices)
     ASSERT_EQ(true, matrix::isSymmetric(I3));
     //ASSERT_EQ(true, matrix::isSymetric(I3 * 0.0001f));
     ASSERT_EQ(false, matrix::isSymmetric(HA3));
-  }
+}
 
-  //--------------------------------------------------------------------------
-  TEST(testCopy)
-  {
+//--------------------------------------------------------------------------
+TEST(TestMatrices, testCopy)
+{
     Matrix33f O3 = O;
 
     O = I3;
@@ -427,53 +390,54 @@ TESTSUITE(Matrices)
     checkVector3f(tmp[0], 7.0f, 8.0f, 9.0f);
     checkVector3f(tmp[1], 4.0f, 5.0f, 6.0f);
     checkVector3f(tmp[2], 1.0f, 2.0f, 3.0f);
-  }
+}
 
-  //--------------------------------------------------------------------------
-  TEST(testOperations)
-  {
+//--------------------------------------------------------------------------
+TEST(TestMatrices, testOperations)
+{
     // Random matrix
     Matrix44g Ra =
-      {
+    {
         -0.5003796,   0.1910551,  -0.1043591,  -0.3966362,
         1.1937458,  -1.3189198,   0.2973099,   0.5163254,
         -1.5206395,   0.9307226,   0.5308515,   0.0075659,
         1.8655072,  -0.8575199,  -1.5404673,   1.0422456,
-      };
+    };
     // LU decomposition of Ra. Expected result.
     Matrix44g U =
-      {
+    {
         1.8655072,  -0.8575199,  -1.5404673,   1.0422456,
         0.0,        -0.7701892,   1.2830613,  -0.1506119,
         0.0,         0.0,        -0.5824496,  -0.1094599,
         0.0,         0.0,         0.0,         0.8754921
-      };
+    };
     // LU decomposition of Ra. Expected result.
     Matrix44g L =
-      {
+    {
         1.0,         0.0,          0.0,          0.0,
         0.6399042,   1.0,          0.0,          0.0,
         -0.2682271,   0.0505785,    1.0,          0.0,
         -0.8151346,  -0.3008722,    0.5816799,    1.0,
-      };
+    };
 
     Matrix44g LL(11111.0), UU(22222.0), P(333.3); // Init with random values
     matrix::LUdecomposition(Ra, LL, UU, P);
     maths::maxUlps = 1U;
-    compareMatricesEps(LL, L);
-    compareMatricesEps(UU, U);
+    compareMatrices(LL, L);
+    compareMatrices(UU, U);
 
     Vector3g a(3.0f, -24.0f, 30.0f);
-    Matrix33g B = {
-      9.0f,   -36.0f,    30.0f,
-      -36.0f,   192.0f,  -180.0f,
-      30.0f,  -180.0f,   180.0f
+    Matrix33g B =
+    {
+        9.0f,   -36.0f,    30.0f,
+        -36.0f,   192.0f,  -180.0f,
+        30.0f,  -180.0f,   180.0f
     };
+
     // ScicosLab: x = a / B
     Vector3g x(matrix::LUsolve(B, a));
     Vector3g Z(x * B - a);
 
     checkAlmostVectorUlps(x, 1.0, 1.0, 1.0); // Close to 1
     checkAlmostVectorUlps(Z, 0.0, 0.0, 0.0); // Close to 0
-  }
 }

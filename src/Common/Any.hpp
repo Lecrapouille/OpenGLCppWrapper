@@ -40,50 +40,6 @@
 // *****************************************************************************
 struct Any
 {
-#if 0
-private:
-
-    template<class...>
-    struct type_list
-    {};
-
-    template<class... TYPES>
-    struct visitor_base
-    {
-        using types = Any::type_list<TYPES...>;
-    };
-
-    template<class T, class U>
-    using visit_function = decltype(std::declval<T>().operator()(std::declval<U&>()));
-
-    template<class T, class U>
-    static constexpr bool has_visit_v = std::experimental::is_detected<visit_function, T, U>::value;
-
-    template<class T, template<class...> class TLIST, class... TYPES>
-    void visit_impl(T&& visitor, TLIST<TYPES...>)
-    {
-        (..., visit_impl_help<std::decay_t<T>, TYPES>(visitor));
-    }
-
-    template<class T, class U>
-    void visit_impl_help(T& visitor)
-    {
-        static_assert(has_visit_v<T, U>, "Visitors must provide a visit function accepting a reference for each type");
-        for (auto&& element : items<U>[this])
-        {
-            visitor(element);
-        }
-    }
-
-public:
-
-    template<class T>
-    void visit(T&& visitor)
-    {
-        visit_impl(visitor, typename std::decay_t<T>::types{});
-    }
-#endif
-
 public:
 
     Any() = default;

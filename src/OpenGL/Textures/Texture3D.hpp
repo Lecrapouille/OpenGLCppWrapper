@@ -52,11 +52,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    bool load(std::vector<std::string> const& filenames)
-    {
-        SOIL soil;
-        return load(filenames, soil);
-    }
+    bool load(std::vector<std::string> const& filenames);
 
     //--------------------------------------------------------------------------
     //! \brief

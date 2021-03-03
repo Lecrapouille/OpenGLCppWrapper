@@ -62,7 +62,8 @@ private:
 
     Camera* m_camera;
     Transformable3D m_newTransform;
-    float m_fov, m_newZoom;
+    float m_fov = units::angle::radian_t(45.0f).to<float>();
+    float m_newZoom = 1.0f;
 };
 
 #endif // RIG_CAMERA_CONTROLLER_HPP

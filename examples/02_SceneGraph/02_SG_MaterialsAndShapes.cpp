@@ -67,6 +67,28 @@ public:
     rigidbody::Sphere body;
 };
 
+class MyBox: public Shape<Box, NormalsMaterial>
+{
+public:
+
+    MyBox(std::string const& name, Vector3f const& dimensions)
+        : Shape<Box, NormalsMaterial>(name),
+          body(transform, dimensions, units::mass::kilogram_t(0.1))
+    {
+        geometry.config.width = 2.0f * dimensions[0];
+        geometry.config.height = 2.0f * dimensions[1];
+        geometry.config.depth = 2.0f * dimensions[2];
+        if (!Shape<Box, NormalsMaterial>::compile())
+        {
+            throw GL::Exception("Failed create renderable");
+        }
+    }
+
+public:
+
+    rigidbody::Box body;
+};
+
 //------------------------------------------------------------------------------
 //! \brief
 //------------------------------------------------------------------------------
@@ -160,13 +182,14 @@ bool SGMatAndShape::onSetup()
     //glCheck(glDisable(GL_CULL_FACE));
 
     m_scene.root = AxesHelper::create<AxesHelper>("Axis", 10.0f);
-    RigNode& rig = m_scene.root->attach<RigNode>("Rig", m_camera);
+    //RigNode& rig = m_scene.root->attach<RigNode>("Rig", m_camera);
 
     WorldGround& wg = m_scene.root->attach<WorldGround>("WorldGround", Vector3f(10.0f, 1.0f, 10.0f));
     //MyShape<BasicMaterial>& t0 = m_scene.root->attach<MyShape<BasicMaterial>>("Tree0", "textures/tree.obj");
     MyShape<DepthMaterial>& t1 = m_scene.root->attach<MyShape<DepthMaterial>>("Tree1", "textures/tree.obj");
     //MyShape<NormalsMaterial>& t2 = m_scene.root->attach<MyShape<NormalsMaterial>>("Tree2", "textures/tree.obj");
     MySphere& t2 = m_scene.root->attach<MySphere>("Tree2", 1.0f);
+    MyBox& t3 = m_scene.root->attach<MyBox>("Tree2", Vector3f(1,1,3));
     //MyShape<DepthMaterial>& t3 = t1.attach<MyShape<DepthMaterial>>("Tree1.0", "textures/tree.obj");
     //MyShape<BasicMaterial>& t4 = t1.attach<MyShape<BasicMaterial>>("Tree1.1", "textures/tree.obj");
 
@@ -181,13 +204,14 @@ bool SGMatAndShape::onSetup()
     //
     //wg.transform.position(Vector3f(0.0f, 0.0f, 0.0f));
     t1.transform.position(Vector3f(2.0f, 5.0f, 0.0f));
-    t2.transform.position(Vector3f(0.0f, 5.0f, 2.0f));
-    //t3.transform.position(Vector3f(0.0f, 10.0f, 2.0f));
+    t2.transform.position(Vector3f(0.0f, 3.0f, 2.0f));
+    t3.transform.position(Vector3f(0.0f, 10.0f, 0.0f));
     //t4.transform.position(Vector3f(2.0f, 10.0f, 0.0f));
 
     //m_physics.attach(t0.body);
     m_physics.attach(t1.body);
     m_physics.attach(t2.body);
+    m_physics.attach(t3.body);
     m_physics.attach(wg.body);
 
     //m_scene.debug();
@@ -255,7 +279,7 @@ bool SGMatAndShape::onPaint()
     m_physics.update(dt());
 
     // Perspective camera 1st view
-    /*m_camera.transform.lookAt(Vector3f(5,5,5),
+    m_camera.transform.lookAt(Vector3f(5,5,5),
                               Vector3f(0,0,0),
                               Vector3f(0,1,0));
     m_camera.is(Camera::Type::PERSPECTIVE);
@@ -274,7 +298,7 @@ bool SGMatAndShape::onPaint()
     m_camera.transform.lookAt(Vector3f(0,0,0));
     m_camera.is(Camera::Type::ORTHOGRAPHIC);
     m_camera.orthographic.setPlanes(0, 800, 600, 0);
-    m_camera.setViewPort(0.5f, 0.5f, 0.5f, 0.5f);*/
+    m_camera.setViewPort(0.5f, 0.5f, 0.5f, 0.5f);
     m_scene.draw(m_camera);
 
     // DearImGui

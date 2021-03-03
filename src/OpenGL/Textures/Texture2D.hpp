@@ -34,7 +34,8 @@
 // *****************************************************************************
 
 #  include "OpenGL/Textures/Texture.hpp"
-#  include "Loaders/Textures/SOIL.hpp"
+#  include "Loaders/TextureLoader.hpp"
+#  include <iostream>
 
 // *****************************************************************************
 //! \brief A 2D Texture.
@@ -142,11 +143,7 @@ public:
         return loader.load(filename, m_buffer, m_width, m_height);
     }
 
-    inline bool load(const char *const filename)
-    {
-        SOIL soil;
-        return load(filename, soil);
-    }
+    bool load(const char *const filename);
 
     //--------------------------------------------------------------------------
     //! \brief Save the texture into a picture file depending on the file extension
@@ -163,11 +160,7 @@ public:
         return false;
     }
 
-    bool save(const char *const filename)
-    {
-        SOIL soil;
-        return save(filename, soil);
-    }
+    bool save(const char *const filename);
 
     //--------------------------------------------------------------------------
     //! \brief Set to the nth byte of the texture (write access).

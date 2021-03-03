@@ -213,30 +213,30 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Check if program has a non empty list of shader attributes.
-    //! \return true if the list is non empty.
+    //! \return the number of attributes.
     //--------------------------------------------------------------------------
-    inline bool hasAttributes() const
+    inline size_t hasAttributes() const
     {
-        return 0_z != m_attributes.size();
+        return m_attributes.size();
     }
 
     //--------------------------------------------------------------------------
     //! \brief Check if program has a non empty list of uniform texture sampler.
-    //! \return true if the list is non empty.
+    //! \return the number of samplers.
     //--------------------------------------------------------------------------
-    inline bool hasSamplers() const
+    inline size_t hasSamplers() const
     {
-        return 0_z != m_samplers.size();
+        return m_samplers.size();
     }
 
     //--------------------------------------------------------------------------
     //! \brief Check if program has a non empty list of shader uniforms.
     //!
-    //! \return true if the list is non empty.
+    //! \return the number of uniforms.
     //--------------------------------------------------------------------------
-    inline bool hasUniforms() const
+    inline size_t hasUniforms() const
     {
-        return 0_z != m_uniforms.size();
+        return m_uniforms.size();
     }
 
     //--------------------------------------------------------------------------
@@ -358,17 +358,24 @@ public:
         if (unlikely(nullptr == name))
             throw GL::Exception("nullptr passed to uniform");
 
+        std::cout << "QQQQQQQQQQQQQQQQQQQQQQq 11" << std::endl;
         if (unlikely(!compiled()))
         {
+            std::cout << "QQQQQQQQQQQQQQQQQQQQQQq 22" << std::endl;
             createUniform(getGLType<T>(), name, handle());
         }
 
         try
         {
+            std::cout << "QQQQQQQQQQQQQQQQQQQQQQq 33 "
+                      << m_uniforms.has<std::shared_ptr<GLUniform<T>>>(name)
+                      << std::endl;
+            std::cout << "QQQQQQQQQQQQQQQQQQQQQQq 33bis" << std::endl;
             return *(m_uniforms.get<std::shared_ptr<GLUniform<T>>>(name));
         }
         catch (std::exception&)
         {
+            std::cout << "QQQQQQQQQQQQQQQQQQQQQQq 44" << std::endl;
             throw GL::Exception("GLUniform '" + std::string(name) + "' does not exist");
         }
     }
@@ -376,9 +383,20 @@ public:
     template<class T>
     bool hasUniform(const char *name)
     {
-        bool ret = m_uniforms.has<std::shared_ptr<GLUniform<T>>>(name);
-std::cout << "hasUniform " << name << " " << ret << std::endl;
-return ret;
+        return m_uniforms.has<std::shared_ptr<GLUniform<T>>>(name);
+    }
+
+    bool hasAttribute(const char *name)
+    {
+        return m_attributes.find(name) != m_attributes.end();
+    }
+
+    GLAttribute& attribute(const char *name)
+    {
+        auto it = m_attributes.find(name);
+        if (it == m_attributes.end())
+            throw GL::Exception("GLAttribute '" + std::string(name) + "' does not exist");
+        return *(it->second);
     }
 
 private:
