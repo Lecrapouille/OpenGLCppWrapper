@@ -31,6 +31,7 @@
 #ifndef QUATERNION_HPP
 #  define QUATERNION_HPP
 
+#  include "Matrix.hpp"
 #  include <cmath>
 #  include <limits>
 #  include <type_traits>
@@ -103,7 +104,7 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Construct an unit quaterion a + b i + c j + d k where the scalar
-    //! component \c a is not given but rebuild.
+    //! component \c a is not given but rebuild. Used for reading md5mesh files.
     //! \param[in] b Complex parameters complex i-axis
     //! \param[in] c Complex parameters complex j-axis
     //! \param[in] d Complex parameters complex k-axis
@@ -114,7 +115,7 @@ public:
         Scalar n = (b * b) + (c * c) + (d * d);
         assert(n <= Scalar(1));
 
-        data[0] = -std::sqrt(Scalar(1) - n);
+        data[0] = std::sqrt(Scalar(1) - n);
         data[1] = b;
         data[2] = c;
         data[3] = d;
@@ -141,13 +142,10 @@ public:
     //--------------------------------------------------------------------------
     Quat& operator=(Quat const& other)
     {
-        if (this != &other)
-        {
-            data[0] = other.data[0];
-            data[1] = other.data[1];
-            data[2] = other.data[2];
-            data[3] = other.data[3];
-        }
+        data[0] = other.data[0];
+        data[1] = other.data[1];
+        data[2] = other.data[2];
+        data[3] = other.data[3];
 
         return *this;
     }
@@ -177,7 +175,7 @@ public:
     //--------------------------------------------------------------------------
     inline friend std::ostream& operator<<(std::ostream& os, Quat const& q)
     {
-        return os << "Quat(" << q.a() << ",  (" << q.b() << "i, "
+        return os << "Quat(" << q.a() << ", (" << q.b() << "i, "
                   << q.c() << "j, " << q.d() << "k))";
     }
 
@@ -641,6 +639,23 @@ Quat<Scalar> &operator+=(Quat<Scalar> &a, const Quat<Scalar> &b)
     a.b() += b.b();
     a.c() += b.c();
     a.d() += b.d();
+
+    return a;
+}
+
+//------------------------------------------------------------------------------
+//! \brief Substarct a quaternion by a scalar, in place
+//! \param[in] a Quaternion to scale
+//! \param[in] s Scalar
+//! \return a
+//------------------------------------------------------------------------------
+template <typename Scalar>
+Quat<Scalar> &operator-=(Quat<Scalar> &a, const Quat<Scalar> &b)
+{
+    a.a() -= b.a();
+    a.b() -= b.b();
+    a.c() -= b.c();
+    a.d() -= b.d();
 
     return a;
 }

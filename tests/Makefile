@@ -37,7 +37,8 @@ include $(P)/Makefile.common
 ###################################################
 # List of files to compile.
 #
-OBJS += GLObjectTests.o GLProgramTests.o main.o
+OBJS += VectorTests.o QuaternionTests.o GLObjectTests.o main.o
+# GLProgramTests.o
 
 ###################################################
 # Project defines
