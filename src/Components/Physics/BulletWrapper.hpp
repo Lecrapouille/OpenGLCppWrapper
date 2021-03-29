@@ -29,6 +29,7 @@
 #      pragma GCC diagnostic ignored "-Wcast-qual"
 #      pragma GCC diagnostic ignored "-Wfloat-conversion"
 #      pragma GCC diagnostic ignored "-Wconversion"
+#      pragma GCC diagnostic ignored "-Wcast-align"
 #      define BT_THREADSAFE 0
 #      include "bullet/btBulletDynamicsCommon.h"
 #    pragma GCC diagnostic pop

@@ -137,6 +137,8 @@
     typedef const T(&const_array_t)[N];                                 \
     operator array_t ()                   { return m_data; }            \
     operator const_array_t () const       { return m_data; }            \
+    array_t& data()                       { return m_data; }            \
+    const_array_t& data() const           { return m_data; }            \
                                                                         \
 private:                                                                \
                                                                         \

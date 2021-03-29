@@ -29,6 +29,7 @@
 #  pragma GCC diagnostic pop
 
 #  include <cstdint>
+#  include <cstring>
 #  include <vector>
 #  include <cassert>
 #  include <cmath>
@@ -159,33 +160,52 @@ static inline double sqrt(double const x)
 #   pragma GCC diagnostic ignored "-Wsign-conversion"
 
 //! \brief
-static uint32_t maxUlps = 4U;
+static uint32_t maxUlps = 6U;
 
-static inline bool almostEqual(float const A, float const B)
+//! \brief https://bitbashing.io/comparing-floats.html
+//! T/R float/int32_t
+template<typename T, typename R>
+static R ulpsDistance(const T a, const T b)
 {
-    if (A == B)
-        return true;
+    // Save work if the floats are equal.
+    // Also handles +0 == -0
+    if (a == b)
+        return 0;
 
-    // Make sure maxUlps is non-negative and small enough that the
-    // default NAN won't compare as equal to anything.
-    assert(maths::maxUlps < 4U * 1024U * 1024U);
+    const auto max = std::numeric_limits<R>::max();
 
-    int aInt = *(int*) &A;
+    // Max distance for NaN
+    if (std::isnan(a) || std::isnan(b))
+        return max;
 
-    // Make aInt lexicographically ordered as a twos-complement int
-    if (aInt < 0)
-        aInt = 0x80000000 - aInt;
+    // If one's infinite and they're not equal, max distance.
+    if (std::isinf(a) || std::isinf(b))
+        return max;
 
-    // Make bInt lexicographically ordered as a twos-complement int
-    int bInt = *(int*) &B;
+    // Float to int without strict aliasing rules warnings
+    R ia, ib;
+    memcpy(&ia, &a, sizeof(T));
+    memcpy(&ib, &b, sizeof(T));
 
-    if (bInt < 0)
-        bInt = 0x80000000 - bInt;
+    // Don't compare differently-signed floats.
+    if ((ia < 0) != (ib < 0))
+        return max;
 
-    int intDiff = maths::abs(aInt - bInt);
-    if (intDiff <= (int) maths::maxUlps)
-        return true;
-    return false;
+    // Return the absolute value of the distance in ULPs.
+    R distance = ia - ib;
+    if (distance < 0)
+        distance = -distance;
+    return distance;
+}
+
+static inline bool almostEqual(float const a, float const b)
+{
+    return ulpsDistance<float, int32_t>(a, b) <= int32_t(maths::maxUlps);
+}
+
+static inline bool almostEqual(double const a, double const b)
+{
+    return ulpsDistance<double, int64_t>(a, b) <= int32_t(maths::maxUlps);
 }
 
 #   pragma GCC diagnostic pop

@@ -173,7 +173,7 @@ TEST(TestQuaternions, testmatrix)
         Matrix44f m = q.toMatrix();
         check_matrix(Matrix44f({0.707107f, 0.0f, -0.707107f, 0.0f,
                                 0.0f, 1.0f, 0.0f, 0.0f,
-                                0.707107f, 0.0f, 0.707107, 0.0f,
+                                0.707107f, 0.0f, 0.707107f, 0.0f,
                                 0.0f, 0.0f, 0.0f, 1.0f}), m);
     }
 }

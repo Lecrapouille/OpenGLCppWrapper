@@ -18,6 +18,7 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
+#include "main.hpp"
 #define protected public
 #define private public
 #  pragma GCC diagnostic push
@@ -27,381 +28,607 @@
 #undef protected
 #undef private
 
-/*
-  Matrix44f A({1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  1, 0, 0, 1});
-  Matrix44f B({0, 0, -1, 0,
-  0, 1, 0, 0,
-  1, 0, 0, 0,
-  0, 0, 0, 1});
-  std::cout << A * B << std::endl;
-
-  -->A=[
-  -->1 0 0 0;
-  -->0 1 0 0;
-  -->0 0 1 0;
-  -->1 0 0 1]
-  A  =
-
-  1.    0.    0.    0.
-  0.    1.    0.    0.
-  0.    0.    1.    0.
-  1.    0.    0.    1.
-
-  -->B=[
-  -->0 0 -1 0;
-  -->0 1 0 0;
-  -->1 0 0 0;
-  -->0 0 0 1]
-  B  =
-
-  0.    0.  - 1.    0.
-  0.    1.    0.    0.
-  1.    0.    0.    0.
-  0.    0.    0.    1.
-
-  -->A*B
-  ans  =
-
-  0.    0.  - 1.    0.
-  0.    1.    0.    0.
-  1.    0.    0.    0.
-  0.    0.  - 1.    1.
-
-  -->
-*/
-
-// Expected results are computed by the ScicosLab tool
-static Matrix33f I3 =
-{
-    1.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f
-};
-static Matrix33f ID3(matrix::Identity);
-static Matrix33f A3 =
-{
-    1.0f, 2.0f, 3.0f,
-    4.0f, 5.0f, 6.0f,
-    7.0f, 8.0f, 9.0f
-};
-static Matrix33f HA3 =
-{
-    1.0f, 4.0f, 9.0f,
-    16.0f, 25.0f, 36.0f,
-    49.0f, 64.0f, 81.0f
-};
-static Matrix44f A4 =
-{
-    1.0f,   2.0f,  3.0f,  4.0f,
-    5.0f,   6.0f,  7.0f,  8.0f,
-    9.0f,  10.0f, 11.0f, 12.0f,
-    13.0f, 14.0f, 15.0f, 16.0f
-};
-static Matrix33f AA(A4);
-static Matrix33f A(A3);
-static Matrix33f Atrunc =
-{
-    1.0f,   2.0f,  3.0f,
-    5.0f,   6.0f,  7.0f,
-    9.0f,  10.0f, 11.0f
-};
-static Matrix33f minusA =
-{
-    -1.0f, -2.0f, -3.0f,
-    -4.0f, -5.0f, -6.0f,
-    -7.0f, -8.0f, -9.0f
-};
-static Matrix33f B3 =
-{
-    1.0f, 4.0f, 7.0f,
-    2.0f, 5.0f, 8.0f,
-    3.0f, 6.0f, 9.0f
-};
-static Matrix44f B4 =
-{
-    1.0f, 5.0f, 9.0f,  13.0f,
-    2.0f, 6.0f, 10.0f, 14.0f,
-    3.0f, 7.0f, 11.0f, 15.0f,
-    4.0f, 8.0f, 12.0f, 16.0f
-};
-static Matrix33f BB(B4);
-static Matrix33f B(B3);
-static Matrix33f Btrunc =
-{
-    1.0f, 5.0f, 9.0f,
-    2.0f, 6.0f, 10.0f,
-    3.0f, 7.0f, 11.0f,
-    4.0f, 8.0f, 12.0f
-};
-static Matrix33f O = { 0.0f };
-static Matrix33i one(1);
-static Matrix33i two(2);
-static Matrix33i four(4);
-static Matrix33f A_times_B =
-{
-    14,    32,     50,
-    32,    77,     122,
-    50,    122,    194
-};
-static Matrix33f B_times_A =
-{
-    66,    78,     90,
-    78,    93,     108,
-    90,    108,    126
-};
-static Matrix33f A_plus_B =
-{
-    2,     6,     10,
-    6,     10,    14,
-    10,    14,    18
-};
-static Matrix33f A_minus_B =
-{
-    0,  -2,  -4,
-    2,   0,  -2,
-    4,   2,   0
-};
-static Matrix33f B_minus_A =
-{
-     0,   2,  4,
-    -2,   0,  2,
-    -4,  -2,  0
-};
-static Matrix44f M4(one);
-static Matrix44f M =
-{
-    1, 1, 1, 0,
-    1, 1, 1, 0,
-    1, 1, 1, 0,
-    0, 0, 0, 0
-};
-static Matrix33b Mfalse(false);
-static Matrix33b Mtrue(true);
-static Vector3f V(5.0f, 4.0f, 3.0f);
-static Vector3f A_times_v(22, 58, 94);
-static Vector3f v_times_A(42, 54, 66);
-
 //--------------------------------------------------------------------------
-template <typename T, size_t r, size_t c>
-static void compareMatrices(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
-{
-    for (size_t i = 0_z; i < r * c; ++i)
-    {
-        ASSERT_EQ(a.m_data[i], b.m_data[i]);
+#define ASSERT_ARR_FLOATS_NEARLY_EQ(expected, actual, size, thresh)     \
+    for (size_t idx = 0; idx < size; ++idx)                             \
+    {                                                                   \
+        ASSERT_NEAR(expected[idx], actual[idx], thresh) << "at index: " << idx; \
     }
-}
 
 //--------------------------------------------------------------------------
-template <typename T, size_t r, size_t c>
-static void isTrueMatrix(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b)
-{
-    compareMatrix(a, b, true);
-}
+#define ASSERT_VECT_FLOATS_NEARLY_EQ(expected, actual, thresh)          \
+    ASSERT_EQ(expected.size(), actual.size()) << "Array sizes differ."; \
+    for (size_t idx = 0; idx < std::min(expected.size(), actual.size()); ++idx) \
+    {                                                                   \
+        ASSERT_NEAR(expected[idx], actual[idx], thresh) << "at index: " << idx; \
+    }
 
 //--------------------------------------------------------------------------
-template <typename T, size_t r, size_t c>
-static void isFalseMatrix(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b)
-{
-    compareMatrix(a, b, false);
-}
-
-//--------------------------------------------------------------------------
-static void checkVector3f(Vector3f const& v, const float x, const float y, const float z)
-{
-    ASSERT_EQ(x, v.x);
-    ASSERT_EQ(y, v.y);
-    ASSERT_EQ(z, v.z);
-}
-
-//--------------------------------------------------------------------------
-static void checkAlmostVectorUlps(Vector3g const& v, const double x, const double y, const double z)
-{
-    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), x, v.x);
-    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), y, v.y);
-    ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), z, v.z);
-}
-
-//--------------------------------------------------------------------------
-TEST(TestMatrices, testCreator)
+TEST(TestMatrices, testConstructor)
 {
     size_t rows = 0_z;
     size_t cols = 0_z;
 
-    B4.size(rows, cols);
-    ASSERT_EQ(4_z, rows);
-    ASSERT_EQ(4_z, cols);
+    Matrix44f A1;
+    A1.size(rows, cols);
+    ASSERT_EQ(rows, 4_z);
+    ASSERT_EQ(cols, 4_z);
 
-    B.size(rows, cols);
-    ASSERT_EQ(3_z, rows);
-    ASSERT_EQ(3_z, cols);
+    Matrix33g A2;
+    A2.size(rows, cols);
+    ASSERT_EQ(rows, 3_z);
+    ASSERT_EQ(cols, 3_z);
 
-    // Check accessor
-    checkVector3f(I3[0], 1.0f, 0.0f, 0.0f);
-    checkVector3f(I3[1], 0.0f, 1.0f, 0.0f);
-    checkVector3f(I3[2], 0.0f, 0.0f, 1.0f);
+    Matrix32i A3;
+    A3.size(rows, cols);
+    ASSERT_EQ(rows, 3_z);
+    ASSERT_EQ(cols, 2_z);
 
-    // Check accessor
-    checkVector3f(A3[0], 1.0f, 2.0f, 3.0f);
-    checkVector3f(A3[1], 4.0f, 5.0f, 6.0f);
-    checkVector3f(A3[2], 7.0f, 8.0f, 9.0f);
+    Matrix23i A4;
+    A4.size(rows, cols);
+    ASSERT_EQ(rows, 2_z);
+    ASSERT_EQ(cols, 3_z);
+
+    Matrix33f A5(0); // FIXME .data() should be implicit but this is not the case
+    ASSERT_THAT(A5[0].data(), ElementsAre(0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(A5[1].data(), ElementsAre(0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(A5[2].data(), ElementsAre(0.0f, 0.0f, 0.0f));
+    return ;
+
+    Matrix44i A6(42);
+    ASSERT_THAT(A6[0].data(), ElementsAre(42, 42, 42, 42));
+    ASSERT_THAT(A6[1].data(), ElementsAre(42, 42, 42, 42));
+    ASSERT_THAT(A6[2].data(), ElementsAre(42, 42, 42, 42));
+    ASSERT_THAT(A6[3].data(), ElementsAre(42, 42, 42, 42));
+
+    Matrix44f I1(matrix::Identity);
+    ASSERT_THAT(I1[0].data(), ElementsAre(1.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(I1[1].data(), ElementsAre(0.0f, 1.0f, 0.0f, 0.0f));
+    ASSERT_THAT(I1[2].data(), ElementsAre(0.0f, 0.0f, 1.0f, 0.0f));
+    ASSERT_THAT(I1[3].data(), ElementsAre(0.0f, 0.0f, 0.0f, 1.0f));
+
+    Matrix33i I2(matrix::Identity);
+    ASSERT_THAT(I2[0].data(), ElementsAre(1, 0, 0));
+    ASSERT_THAT(I2[1].data(), ElementsAre(0, 1, 0));
+    ASSERT_THAT(I2[2].data(), ElementsAre(0, 0, 1));
+
+    Matrix44i O0(matrix::Zero);
+    ASSERT_THAT(O0[0].data(), ElementsAre(0, 0, 0, 0));
+    ASSERT_THAT(O0[1].data(), ElementsAre(0, 0, 0, 0));
+    ASSERT_THAT(O0[2].data(), ElementsAre(0, 0, 0, 0));
+    ASSERT_THAT(O0[3].data(), ElementsAre(0, 0, 0, 0));
+
+    Matrix33f O1(matrix::Zero);
+    ASSERT_THAT(O1[0].data(), ElementsAre(0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(O1[1].data(), ElementsAre(0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(O1[2].data(), ElementsAre(0.0f, 0.0f, 0.0f));
+
+    Matrix22i O2(matrix::One);
+    ASSERT_THAT(O2[0].data(), ElementsAre(1, 1));
+    ASSERT_THAT(O2[1].data(), ElementsAre(1, 1));
+
+    Matrix33f O3(matrix::One);
+    ASSERT_THAT(O3[0].data(), ElementsAre(1.0f, 1.0f, 1.0f));
+    ASSERT_THAT(O3[1].data(), ElementsAre(1.0f, 1.0f, 1.0f));
+    ASSERT_THAT(O3[2].data(), ElementsAre(1.0f, 1.0f, 1.0f));
+
+    Matrix44f B1(O3);
+    ASSERT_THAT(B1[0].data(), ElementsAre(1.0f, 1.0f, 1.0f, 0.0f));
+    ASSERT_THAT(B1[1].data(), ElementsAre(1.0f, 1.0f, 1.0f, 0.0f));
+    ASSERT_THAT(B1[2].data(), ElementsAre(1.0f, 1.0f, 1.0f, 0.0f));
+    ASSERT_THAT(B1[3].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+
+    Matrix44f B2({1.0f, 2.0f, 3.0f, 4.0f,
+                  5.0f, 6.0f, 7.0f, 8.0f,
+                  9.0f, 10.0f, 11.0f, 12.0f,
+                  13.0f, 14.0f, 15.0f, 16.0f});
+    ASSERT_THAT(B2[0].data(), ElementsAre(1.0f, 2.0f, 3.0f, 4.0f));
+    ASSERT_THAT(B2[1].data(), ElementsAre(5.0f, 6.0f, 7.0f, 8.0f));
+    ASSERT_THAT(B2[2].data(), ElementsAre(9.0f, 10.0f, 11.0f, 12.0f));
+    ASSERT_THAT(B2[3].data(), ElementsAre(13.0f, 14.0f, 15.0f, 16.0f));
+
+    Matrix33f B3({1.0f, 2.0f, 3.0f, 4.0f,
+                  5.0f, 6.0f, 7.0f, 8.0f,
+                  9.0f, 10.0f, 11.0f, 12.0f,
+                  13.0f, 14.0f, 15.0f, 16.0f});
+    ASSERT_THAT(B3[0].data(), ElementsAre(1.0f, 2.0f, 3.0f));
+    ASSERT_THAT(B3[1].data(), ElementsAre(4.0f, 5.0f, 6.0f));
+    ASSERT_THAT(B3[2].data(), ElementsAre(7.0f, 8.0f, 9.0f));
+
+    Matrix44f B4({1.0f, 2.0f, 3.0f, 4.0f});
+    ASSERT_THAT(B4[0].data(), ElementsAre(1.0f, 2.0f, 3.0f, 4.0f));
+    ASSERT_THAT(B4[1].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(B4[2].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(B4[3].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+
+    Matrix44f B5({1.0f, 2.0f, 3.0f, 4.0f}, 42.0f);
+    ASSERT_THAT(B5[0].data(), ElementsAre(1.0f, 2.0f, 3.0f, 4.0f));
+    ASSERT_THAT(B5[1].data(), ElementsAre(42.0f, 42.0f, 42.0f, 42.0f));
+    ASSERT_THAT(B5[2].data(), ElementsAre(42.0f, 42.0f, 42.0f, 42.0f));
+    ASSERT_THAT(B5[3].data(), ElementsAre(42.0f, 42.0f, 42.0f, 42.0f));
+
+    Matrix33f C1 = {
+        1.0f, 2.0f, 3.0f,
+        4.0f, 5.0f, 6.0f,
+        7.0f, 8.0f, 9.0f
+    };
+    ASSERT_THAT(C1[0].data(), ElementsAre(1.0f, 2.0f, 3.0f));
+    ASSERT_THAT(C1[1].data(), ElementsAre(4.0f, 5.0f, 6.0f));
+    ASSERT_THAT(C1[2].data(), ElementsAre(7.0f, 8.0f, 9.0f));
+
+    Matrix33f C2 = C1;
+    ASSERT_THAT(C2[0].data(), ElementsAre(1.0f, 2.0f, 3.0f));
+    ASSERT_THAT(C2[1].data(), ElementsAre(4.0f, 5.0f, 6.0f));
+    ASSERT_THAT(C2[2].data(), ElementsAre(7.0f, 8.0f, 9.0f));
+
+    Matrix22f C3(C1);
+    ASSERT_THAT(C3[0].data(), ElementsAre(1.0f, 2.0f));
+    ASSERT_THAT(C3[1].data(), ElementsAre(4.0f, 5.0f));
+
+    Matrix44f C4(C1);
+    ASSERT_THAT(C4[0].data(), ElementsAre(1.0f, 2.0f, 3.0f, 0.0f));
+    ASSERT_THAT(C4[1].data(), ElementsAre(4.0f, 5.0f, 6.0f, 0.0f));
+    ASSERT_THAT(C4[2].data(), ElementsAre(7.0f, 8.0f, 9.0f, 0.0f));
+    ASSERT_THAT(C4[3].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+
+    Matrix44f D;
+    matrix::identity(D);
+    ASSERT_THAT(D[0].data(), ElementsAre(1.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(D[1].data(), ElementsAre(0.0f, 1.0f, 0.0f, 0.0f));
+    ASSERT_THAT(D[2].data(), ElementsAre(0.0f, 0.0f, 1.0f, 0.0f));
+    ASSERT_THAT(D[3].data(), ElementsAre(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 //--------------------------------------------------------------------------
-TEST(TestMatrices, testSwap)
+TEST(TestMatrices, testPrint)
 {
+    Matrix44f A(matrix::Identity);
+
+    std::stringstream buffer;
+    std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
+    std::cout << A << std::endl;
+    std::cout.rdbuf(old);
+
+    ASSERT_THAT(buffer.str().c_str(), HasSubstr("[1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 1]"));
 }
 
 //--------------------------------------------------------------------------
-TEST(TestMatrices, testEquality)
+TEST(TestMatrices, testSwapRows)
 {
-    isFalseMatrix(one, two);
-    isTrueMatrix(Mtrue, one < four);
-    isTrueMatrix(Mtrue, one <= four);
-    isTrueMatrix(Mtrue, one <= one);
-    isTrueMatrix(Mfalse, one < one);
-    isTrueMatrix(Mfalse, one > one);
-    isTrueMatrix(Mtrue, one >= one);
-    isTrueMatrix(Mfalse, one > four);
-    isTrueMatrix(Mfalse, one >= four);
-    isTrueMatrix(Mfalse, one == four);
-    isTrueMatrix(Mtrue, one != four);
-    isTrueMatrix(Mtrue, !Mfalse);
-    isTrueMatrix(Mfalse, !Mtrue);
+    Matrix33f M = {
+        1.0f, 2.0f, 3.0f,
+        4.0f, 5.0f, 6.0f,
+        7.0f, 8.0f, 9.0f
+    };
 
-    isTrueMatrix(Mfalse, Mtrue & Mfalse);
-    isTrueMatrix(Mtrue, Mtrue | Mfalse);
-    isTrueMatrix(Mfalse, Mtrue ^ Mtrue);
+    ASSERT_THAT(M[0].data(), ElementsAre(1.0f, 2.0f, 3.0f));
+    ASSERT_THAT(M[1].data(), ElementsAre(4.0f, 5.0f, 6.0f));
+    ASSERT_THAT(M[2].data(), ElementsAre(7.0f, 8.0f, 9.0f));
 
-    isTrueMatrix(I3, ID3);
-    isTrueMatrix(A, A3);
-    isTrueMatrix(Atrunc, AA);
-    isTrueMatrix(B, B3);
-    isTrueMatrix(Btrunc, BB);
-    isTrueMatrix(M, M4);
-    isTrueMatrix(matrix::transpose(A), B);
-    isTrueMatrix(matrix::transpose(B), A);
+    ASSERT_EQ(true, matrix::swapRows(M, 0U, 2U));
+    ASSERT_THAT(M[0].data(), ElementsAre(7.0f, 8.0f, 9.0f));
+    ASSERT_THAT(M[1].data(), ElementsAre(4.0f, 5.0f, 6.0f));
+    ASSERT_THAT(M[2].data(), ElementsAre(1.0f, 2.0f, 3.0f));
 
-    ASSERT_EQ(true, matrix::allTrue(Matrix33b(true)));
-    ASSERT_EQ(false, matrix::allFalse(Matrix33b(true)));
-    ASSERT_EQ(true, matrix::allFalse(Matrix33b(false)));
-    ASSERT_EQ(false, matrix::allTrue(Matrix33b(false)));
-    ASSERT_EQ(true, matrix::allTrue(matrix::transpose(A) == B));
-    ASSERT_EQ(false, matrix::allTrue(A == B));
-    ASSERT_EQ(false, matrix::allFalse(matrix::transpose(A) == B));
-    ASSERT_EQ(false, matrix::allFalse(A == B));
+    ASSERT_EQ(true, matrix::swapRows(M, 0U, 0U));
+    ASSERT_THAT(M[0].data(), ElementsAre(7.0f, 8.0f, 9.0f));
+    ASSERT_THAT(M[1].data(), ElementsAre(4.0f, 5.0f, 6.0f));
+    ASSERT_THAT(M[2].data(), ElementsAre(1.0f, 2.0f, 3.0f));
+
+    ASSERT_EQ(true, matrix::swapRows(M, 10U, 10U));
+    ASSERT_THAT(M[0].data(), ElementsAre(7.0f, 8.0f, 9.0f));
+    ASSERT_THAT(M[1].data(), ElementsAre(4.0f, 5.0f, 6.0f));
+    ASSERT_THAT(M[2].data(), ElementsAre(1.0f, 2.0f, 3.0f));
+
+    ASSERT_EQ(false, matrix::swapRows(M, 0U, 10U));
+    ASSERT_THAT(M[0].data(), ElementsAre(7.0f, 8.0f, 9.0f));
+    ASSERT_THAT(M[1].data(), ElementsAre(4.0f, 5.0f, 6.0f));
+    ASSERT_THAT(M[2].data(), ElementsAre(1.0f, 2.0f, 3.0f));
+}
+
+//--------------------------------------------------------------------------
+TEST(TestMatrices, testSwapMatrices)
+{
+    // TODO
+}
+
+//--------------------------------------------------------------------------
+TEST(TestMatrices, testComparaisons)
+{
+    Matrix44f one(1.0f);
+    Matrix44f two(2.0f);
+
+    // Operator <
+    {
+        Matrix44b A = (one < two);
+        Matrix44b B = (two < one);
+        Matrix44b C = (one < one);
+
+        ASSERT_THAT(A[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[3].data(), ElementsAre(true, true, true, true));
+
+        ASSERT_THAT(B[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(C[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[3].data(), ElementsAre(false, false, false, false));
+    }
+
+    // Operator >
+    {
+        Matrix44b A = (one > two);
+        Matrix44b B = (two > one);
+        Matrix44b C = (one > one);
+
+        ASSERT_THAT(A[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(B[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(B[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(B[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(B[3].data(), ElementsAre(true, true, true, true));
+
+        ASSERT_THAT(C[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[3].data(), ElementsAre(false, false, false, false));
+    }
+
+    // Operator <=
+    {
+        Matrix44b A = (one <= two);
+        Matrix44b B = (two <= one);
+        Matrix44b C = (one <= one);
+
+        ASSERT_THAT(A[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[3].data(), ElementsAre(true, true, true, true));
+
+        ASSERT_THAT(B[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(C[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[3].data(), ElementsAre(true, true, true, true));
+    }
+
+    // Operator >=
+    {
+        Matrix44b A = (one >= two);
+        Matrix44b B = (two >= one);
+        Matrix44b C = (one >= one);
+
+        ASSERT_THAT(A[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(B[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(B[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(B[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(B[3].data(), ElementsAre(true, true, true, true));
+
+        ASSERT_THAT(C[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[3].data(), ElementsAre(true, true, true, true));
+    }
+
+    // Operator ==
+    {
+        Matrix44b A = (one == two);
+        Matrix44b B = (two == one);
+        Matrix44b C = (one == one);
+
+        ASSERT_THAT(A[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(B[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(C[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[3].data(), ElementsAre(true, true, true, true));
+    }
+
+
+    // Operator ==
+    {
+        Matrix44b A = (one == two);
+        Matrix44b B = (two == one);
+        Matrix44b C = (one == one);
+
+        ASSERT_THAT(A[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(A[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(B[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(C[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[3].data(), ElementsAre(true, true, true, true));
+    }
+
+    // Operator !=
+    {
+        Matrix44b A = (one != two);
+        Matrix44b B = (two != one);
+        Matrix44b C = (one != one);
+
+        ASSERT_THAT(A[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[3].data(), ElementsAre(true, true, true, true));
+
+        ASSERT_THAT(B[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(B[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(B[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(B[3].data(), ElementsAre(true, true, true, true));
+
+        ASSERT_THAT(C[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[3].data(), ElementsAre(false, false, false, false));
+    }
+
+    // Operator !
+    {
+        Matrix44b A = (one != two);
+        Matrix44b B = !A;
+        Matrix44b C = !B;
+
+        ASSERT_THAT(A[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[3].data(), ElementsAre(true, true, true, true));
+
+        ASSERT_THAT(B[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(C[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(C[3].data(), ElementsAre(true, true, true, true));
+    }
+
+    // Operator &
+    {
+        Matrix44b A(true);
+        Matrix44b B(false);
+        Matrix44b C = A & B;
+        Matrix44b D = A | B;
+        Matrix44b E = A ^ true;
+        Matrix44b F = true ^ B;
+
+        ASSERT_THAT(A[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(A[3].data(), ElementsAre(true, true, true, true));
+
+        ASSERT_THAT(B[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(B[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(C[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(C[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(D[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(D[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(D[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(D[3].data(), ElementsAre(true, true, true, true));
+
+        ASSERT_THAT(E[0].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(E[1].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(E[2].data(), ElementsAre(false, false, false, false));
+        ASSERT_THAT(E[3].data(), ElementsAre(false, false, false, false));
+
+        ASSERT_THAT(F[0].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(F[1].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(F[2].data(), ElementsAre(true, true, true, true));
+        ASSERT_THAT(F[3].data(), ElementsAre(true, true, true, true));
+    }
+}
+
+//--------------------------------------------------------------------------
+TEST(TestMatrices, testProduct)
+{
+    Matrix44f A({1, 0, 0, 0,
+                 0, 1, 0, 0,
+                 0, 0, 1, 0,
+                 1, 0, 0, 1});
+    Matrix44f B({0, 0, -1, 0,
+                 0, 1, 0, 0,
+                 1, 0, 0, 0,
+                 0, 0, 0, 1});
+
+    Matrix44f C = A * B;
+    ASSERT_THAT(C[0].data(), ElementsAre(0.0f, 0.0f, -1.0f, 0.0f));
+    ASSERT_THAT(C[1].data(), ElementsAre(0.0f, 1.0f,  0.0f, 0.0f));
+    ASSERT_THAT(C[2].data(), ElementsAre(1.0f, 0.0f,  0.0f, 0.0f));
+    ASSERT_THAT(C[3].data(), ElementsAre(0.0f, 0.0f, -1.0f, 1.0f));
+
+    Matrix44f D = B * A;
+    ASSERT_THAT(D[0].data(), ElementsAre(0.0f, 0.0f, -1.0f, 0.0f));
+    ASSERT_THAT(D[1].data(), ElementsAre(0.0f, 1.0f,  0.0f, 0.0f));
+    ASSERT_THAT(D[2].data(), ElementsAre(1.0f, 0.0f,  0.0f, 0.0f));
+    ASSERT_THAT(D[3].data(), ElementsAre(1.0f, 0.0f,  0.0f, 1.0f));
+
+    Matrix44f E1 = matrix::hadamard(A, B);
+    ASSERT_THAT(E1[0].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(E1[1].data(), ElementsAre(0.0f, 1.0f, 0.0f, 0.0f));
+    ASSERT_THAT(E1[2].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(E1[3].data(), ElementsAre(0.0f, 0.0f, 0.0f, 1.0f));
+
+    Matrix44f E2 = matrix::hadamard(B, A);
+    ASSERT_THAT(E2[0].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(E2[1].data(), ElementsAre(0.0f, 1.0f, 0.0f, 0.0f));
+    ASSERT_THAT(E2[2].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(E2[3].data(), ElementsAre(0.0f, 0.0f, 0.0f, 1.0f));
+
+    ASSERT_THAT(matrix::isDiagonal(A), false);
+    ASSERT_THAT(matrix::isDiagonal(E1), true);
+    ASSERT_THAT(matrix::isDiagonal(E2), true);
 }
 
 //--------------------------------------------------------------------------
 TEST(TestMatrices, testArithmetic)
 {
-    isTrueMatrix(O, O * I3);
-    isTrueMatrix(O, I3 * O);
-    isTrueMatrix(A, A * I3);
-    isTrueMatrix(B, I3 * B);
-    isTrueMatrix(A_times_B, A * B);
-    isTrueMatrix(B_times_A, B * A);
+    Matrix44f A({1, 0, 0, 0,
+                 0, 1, 0, 0,
+                 0, 0, 1, 0,
+                 1, 0, 0, 1});
+    Matrix44f B({0, 0, -1, 0,
+                 0, 1, 0, 0,
+                 1, 0, 0, 0,
+                 0, 0, 0, 1});
 
-    isTrueMatrix(I3, O + I3);
-    isTrueMatrix(I3, I3 + O);
-    isTrueMatrix(I3 + A, A + I3);
-    isTrueMatrix(A_plus_B, A + B);
-    isTrueMatrix(A_plus_B, B + A);
-    isTrueMatrix(A_minus_B, A - B);
-    isTrueMatrix(B_minus_A, B - A);
+    Matrix44f C1 = A + B;
+    ASSERT_THAT(C1[0].data(), ElementsAre(1.0f, 0.0f, -1.0f, 0.0f));
+    ASSERT_THAT(C1[1].data(), ElementsAre(0.0f, 2.0f,  0.0f, 0.0f));
+    ASSERT_THAT(C1[2].data(), ElementsAre(1.0f, 0.0f,  1.0f, 0.0f));
+    ASSERT_THAT(C1[3].data(), ElementsAre(1.0f, 0.0f,  0.0f, 2.0f));
 
-    one += 1;
-    isTrueMatrix(two, one);
-    one -= 1;
-    one *= 4;
-    isTrueMatrix(four, one);
-    one /= 4;
-    one += 1;
-    isTrueMatrix(two, one);
-    one -= 1;
+    Matrix44f C2 = B + A;
+    ASSERT_THAT(C2[0].data(), ElementsAre(1.0f, 0.0f, -1.0f, 0.0f));
+    ASSERT_THAT(C2[1].data(), ElementsAre(0.0f, 2.0f,  0.0f, 0.0f));
+    ASSERT_THAT(C2[2].data(), ElementsAre(1.0f, 0.0f,  1.0f, 0.0f));
+    ASSERT_THAT(C2[3].data(), ElementsAre(1.0f, 0.0f,  0.0f, 2.0f));
 
-    isTrueMatrix(minusA, A * -1.0f);
-    isTrueMatrix(minusA, -1.0f * A);
-    isTrueMatrix(minusA, -A);
-    isTrueMatrix(four, 4 * one);
-    isTrueMatrix(four, one * 4);
-    isTrueMatrix(one, 4 / four);
-    isTrueMatrix(one, four / 4);
+    Matrix44f C3 = matrix::transpose(C2);
+    ASSERT_THAT(C3[0].data(), ElementsAre( 1.0f, 0.0f, 1.0f, 1.0f));
+    ASSERT_THAT(C3[1].data(), ElementsAre( 0.0f, 2.0f, 0.0f, 0.0f));
+    ASSERT_THAT(C3[2].data(), ElementsAre(-1.0f, 0.0f, 1.0f, 0.0f));
+    ASSERT_THAT(C3[3].data(), ElementsAre( 0.0f, 0.0f, 0.0f, 2.0f));
 
-    checkVector3f(A * V, A_times_v.x, A_times_v.y, A_times_v.z);
-    checkVector3f(V * A, v_times_A.x, v_times_A.y, v_times_A.z);
+    Matrix44f C4 = matrix::transpose(C3);
+    ASSERT_THAT(C4[0].data(), ElementsAre(1.0f, 0.0f, -1.0f, 0.0f));
+    ASSERT_THAT(C4[1].data(), ElementsAre(0.0f, 2.0f,  0.0f, 0.0f));
+    ASSERT_THAT(C4[2].data(), ElementsAre(1.0f, 0.0f,  1.0f, 0.0f));
+    ASSERT_THAT(C4[3].data(), ElementsAre(1.0f, 0.0f,  0.0f, 2.0f));
 
-    Vector3f v1(V);
-    v1 *= A;
-    checkVector3f(v1, v_times_A.x, v_times_A.y, v_times_A.z);
-    Matrix33f C(A);
-    C *= B;
-    isTrueMatrix(C, A_times_B);
+    Matrix44f C5 = 42.0f * A * 3.0f + 4.0f * B * 6.0f;
+    ASSERT_THAT(C5[0].data(), ElementsAre(126.0f,   0.0f, -24.0f,    0.0f));
+    ASSERT_THAT(C5[1].data(), ElementsAre(0.0f,   150.0f,   0.0f,    0.0f));
+    ASSERT_THAT(C5[2].data(), ElementsAre(24.0f,    0.0f, 126.0f,    0.0f));
+    ASSERT_THAT(C5[3].data(), ElementsAre(126.0f,   0.0f,   0.0f,  150.0f));
 
-    isTrueMatrix(HA3, matrix::Hprod(A3, A3));
-
-    ASSERT_EQ(true, matrix::allTrue(matrix::compare(I3, I3)));
-    //ASSERT_EQ(true, matrix::allTrue(matrix::compare(I3, I3 * 0.00001f)));
-
-    ASSERT_EQ(107.0f, matrix::trace(HA3));
-    ASSERT_EQ(true, matrix::isDiagonal(I3));
-    //ASSERT_EQ(true, matrix::isDiagonal(I3 * 0.0001f));
-    ASSERT_EQ(false, matrix::isDiagonal(HA3));
-    ASSERT_EQ(true, matrix::isSymmetric(I3));
-    //ASSERT_EQ(true, matrix::isSymetric(I3 * 0.0001f));
-    ASSERT_EQ(false, matrix::isSymmetric(HA3));
+    ASSERT_THAT(matrix::trace(C5), 552.0f);
 }
 
 //--------------------------------------------------------------------------
-TEST(TestMatrices, testCopy)
+TEST(TestMatrices, testSelfArithmetic)
 {
-    Matrix33f O3 = O;
+    Matrix44f A(1.0f);
+    Matrix44f B;
 
-    O = I3;
-    isTrueMatrix(I3, (O * O));
-    O = O3;
-    isTrueMatrix(O, (O * I3));
-    isTrueMatrix(I3, (I3 + O));
+    //
+    A *= 2.0f;
+    ASSERT_THAT(A[0].data(), ElementsAre(2.0f, 2.0f, 2.0f, 2.0f));
+    ASSERT_THAT(A[1].data(), ElementsAre(2.0f, 2.0f, 2.0f, 2.0f));
+    ASSERT_THAT(A[2].data(), ElementsAre(2.0f, 2.0f, 2.0f, 2.0f));
+    ASSERT_THAT(A[3].data(), ElementsAre(2.0f, 2.0f, 2.0f, 2.0f));
 
-    // Swap rows
-    Matrix33f tmp = A3;
-    checkVector3f(tmp[0], 1.0f, 2.0f, 3.0f);
-    checkVector3f(tmp[1], 4.0f, 5.0f, 6.0f);
-    checkVector3f(tmp[2], 7.0f, 8.0f, 9.0f);
+    //
+    A /= 2.0f;
+    ASSERT_THAT(A[0].data(), ElementsAre(1.0f, 1.0f, 1.0f, 1.0f));
+    ASSERT_THAT(A[1].data(), ElementsAre(1.0f, 1.0f, 1.0f, 1.0f));
+    ASSERT_THAT(A[2].data(), ElementsAre(1.0f, 1.0f, 1.0f, 1.0f));
+    ASSERT_THAT(A[3].data(), ElementsAre(1.0f, 1.0f, 1.0f, 1.0f));
 
-    ASSERT_EQ(true, matrix::swapRows(tmp, 0U, 2U));
-    checkVector3f(tmp[0], 7.0f, 8.0f, 9.0f);
-    checkVector3f(tmp[1], 4.0f, 5.0f, 6.0f);
-    checkVector3f(tmp[2], 1.0f, 2.0f, 3.0f);
+    //
+    A -= 1.0f;
+    ASSERT_THAT(A[0].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(A[1].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(A[2].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_THAT(A[3].data(), ElementsAre(0.0f, 0.0f, 0.0f, 0.0f));
 
-    ASSERT_EQ(true, matrix::swapRows(tmp, 0U, 0U));
-    checkVector3f(tmp[0], 7.0f, 8.0f, 9.0f);
-    checkVector3f(tmp[1], 4.0f, 5.0f, 6.0f);
-    checkVector3f(tmp[2], 1.0f, 2.0f, 3.0f);
+    //
+    A += 1.0f;
+    ASSERT_THAT(A[0].data(), ElementsAre(1.0f, 1.0f, 1.0f, 1.0f));
+    ASSERT_THAT(A[1].data(), ElementsAre(1.0f, 1.0f, 1.0f, 1.0f));
+    ASSERT_THAT(A[2].data(), ElementsAre(1.0f, 1.0f, 1.0f, 1.0f));
+    ASSERT_THAT(A[3].data(), ElementsAre(1.0f, 1.0f, 1.0f, 1.0f));
 
-    ASSERT_EQ(true, matrix::swapRows(tmp, 10U, 10U));
-    checkVector3f(tmp[0], 7.0f, 8.0f, 9.0f);
-    checkVector3f(tmp[1], 4.0f, 5.0f, 6.0f);
-    checkVector3f(tmp[2], 1.0f, 2.0f, 3.0f);
-
-    ASSERT_EQ(false, matrix::swapRows(tmp, 0U, 10U));
-    checkVector3f(tmp[0], 7.0f, 8.0f, 9.0f);
-    checkVector3f(tmp[1], 4.0f, 5.0f, 6.0f);
-    checkVector3f(tmp[2], 1.0f, 2.0f, 3.0f);
+    //
+    B = -A;
+    ASSERT_THAT(B[0].data(), ElementsAre(-1.0f, -1.0f, -1.0f, -1.0f));
+    ASSERT_THAT(B[1].data(), ElementsAre(-1.0f, -1.0f, -1.0f, -1.0f));
+    ASSERT_THAT(B[2].data(), ElementsAre(-1.0f, -1.0f, -1.0f, -1.0f));
+    ASSERT_THAT(B[3].data(), ElementsAre(-1.0f, -1.0f, -1.0f, -1.0f));
 }
 
 //--------------------------------------------------------------------------
 TEST(TestMatrices, testOperations)
 {
+    Matrix22f A(matrix::Identity);
+    Matrix33f B(matrix::Zero);
+    Matrix33f C({
+            9.0f,   -36.0f,    30.0f,
+            -36.0f,   192.0f,  -180.0f,
+            30.0f,  -180.0f,   180.0f
+        });
+    Matrix44f D(matrix::One);
+    Matrix44f E({0.0f, 1.0f});
+    Matrix44g F({
+            -0.5003796,   0.1910551,  -0.1043591,  -0.3966362,
+             1.1937458,  -1.3189198,   0.2973099,   0.5163254,
+            -1.5206395,   0.9307226,   0.5308515,   0.0075659,
+             1.8655072,  -0.8575199,  -1.5404673,   1.0422456,
+        });
+
+
+    ASSERT_THAT(matrix::isSymmetric(A), true);
+    ASSERT_THAT(matrix::isSymmetric(B), true);
+    ASSERT_THAT(matrix::isSymmetric(C), true);
+    ASSERT_THAT(matrix::isSymmetric(D), true);
+    ASSERT_THAT(matrix::isSymmetric(E), false);
+    ASSERT_THAT(matrix::isSymmetric(F), false);
+
+    ASSERT_THAT(matrix::determinant(A), 1.0f);
+    ASSERT_THAT(matrix::determinant(B), 0.0f);
+    ASSERT_THAT(matrix::determinant(C), 2160.0f);
+    ASSERT_THAT(matrix::determinant(D), 0.0f);
+    ASSERT_THAT(matrix::determinant(E), 0.0f);
+    ASSERT_NEAR(matrix::determinant(F), 0.732664, 10e-6);
+}
+
+//--------------------------------------------------------------------------
+TEST(TestMatrices, testDecomposition)
+{
     // Random matrix
     Matrix44g Ra =
     {
         -0.5003796,   0.1910551,  -0.1043591,  -0.3966362,
-        1.1937458,  -1.3189198,   0.2973099,   0.5163254,
+         1.1937458,  -1.3189198,   0.2973099,   0.5163254,
         -1.5206395,   0.9307226,   0.5308515,   0.0075659,
-        1.8655072,  -0.8575199,  -1.5404673,   1.0422456,
+         1.8655072,  -0.8575199,  -1.5404673,   1.0422456,
     };
     // LU decomposition of Ra. Expected result.
     Matrix44g U =
@@ -416,21 +643,21 @@ TEST(TestMatrices, testOperations)
     {
         1.0,         0.0,          0.0,          0.0,
         0.6399042,   1.0,          0.0,          0.0,
-        -0.2682271,   0.0505785,    1.0,          0.0,
-        -0.8151346,  -0.3008722,    0.5816799,    1.0,
+       -0.2682271,   0.0505785,    1.0,          0.0,
+       -0.8151346,  -0.3008722,    0.5816799,    1.0,
     };
 
     Matrix44g LL(11111.0), UU(22222.0), P(333.3); // Init with random values
     matrix::LUdecomposition(Ra, LL, UU, P);
     maths::maxUlps = 1U;
-    compareMatrices(LL, L);
-    compareMatrices(UU, U);
+    ASSERT_ARR_FLOATS_NEARLY_EQ(LL.data(), L.data(), 16u, 0.001);
+    ASSERT_ARR_FLOATS_NEARLY_EQ(UU.data(), U.data(), 16u, 0.001);
 
     Vector3g a(3.0f, -24.0f, 30.0f);
     Matrix33g B =
     {
         9.0f,   -36.0f,    30.0f,
-        -36.0f,   192.0f,  -180.0f,
+       -36.0f,   192.0f,  -180.0f,
         30.0f,  -180.0f,   180.0f
     };
 
@@ -438,6 +665,25 @@ TEST(TestMatrices, testOperations)
     Vector3g x(matrix::LUsolve(B, a));
     Vector3g Z(x * B - a);
 
-    checkAlmostVectorUlps(x, 1.0, 1.0, 1.0); // Close to 1
-    checkAlmostVectorUlps(Z, 0.0, 0.0, 0.0); // Close to 0
+    ASSERT_THAT(x.data(), ElementsAre(1.0, 1.0, 1.0)); // Close to 1
+    ASSERT_THAT(Z.data(), ElementsAre(0.0, 0.0, 0.0)); // Close to 0
+}
+
+//--------------------------------------------------------------------------
+TEST(TestMatrices, testInverse)
+{
+    Matrix44g A =
+    {
+        -1.0,   0.0,   1.0,   1.0,
+         1.0,  -2.0,   1.0,  -1.0,
+         1.0,   0.0,  -1.0,   1.0,
+         1.0,   0.0,   1.0,  -1.0,
+    };
+
+    Matrix44g B = matrix::inverse(A);
+
+    ASSERT_THAT(B[0].data(), ElementsAre(0.0,  0.0, 0.5, 0.5));
+    ASSERT_THAT(B[1].data(), ElementsAre(0.0, -0.5, 0.0, 0.5));
+    ASSERT_THAT(B[2].data(), ElementsAre(0.5,  0.0, 0.0, 0.5));
+    ASSERT_THAT(B[3].data(), ElementsAre(0.5,  0.0, 0.5, 0.0));
 }

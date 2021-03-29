@@ -113,7 +113,7 @@ public:
     //--------------------------------------------------------------------------
     Vector<T, n> direction()
     {
-        Matrix<T, n + 1_z, n + 1_z> m = matrix();
+        Matrix<T, n + 1u, n + 1u> m = matrix();
         Vector<T, n> v(-m[0][2], -m[1][2], -m[2][2]);
         return vector::normalize(v);
     }
@@ -248,9 +248,9 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Return the translation matrix
     //--------------------------------------------------------------------------
-    Matrix<T, n + 1_z, n + 1_z> translation()
+    Matrix<T, n + 1u, n + 1u> translation()
     {
-        Matrix<T, n+1_z, n+1_z> I(matrix::Identity);
+        Matrix<T, n+1u, n+1u> I(matrix::Identity);
         m_transform = matrix::translate(I, m_position);
         return m_transform;
     }
@@ -310,7 +310,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Return the rotation matrix
     //--------------------------------------------------------------------------
-    inline Matrix<T, n + 1_z, n + 1_z> rotation() const
+    inline Matrix<T, n + 1u, n + 1u> rotation() const
     {
         return m_orientation.toMatrix();
     }
@@ -459,11 +459,11 @@ public:
     //!   Be careful of operation order: we apply scale first, then
     //!   the rotation then the translation.
     //--------------------------------------------------------------------------
-    Matrix<T, n + 1_z, n + 1_z> const& matrix() // FIXME should be const
+    Matrix<T, n + 1u, n + 1u> const& matrix() // FIXME should be const
     {
-        if (unlikely(m_transform_needs_update))
+        if (m_transform_needs_update)
         {
-            Matrix<T, n+1_z, n+1_z> I(matrix::Identity);
+            Matrix<T, n+1u, n+1u> I(matrix::Identity);
             m_transform = matrix::translate(I, m_position - m_origin);
             m_transform = matrix::rotate(m_transform, m_orientation.angle(), m_orientation.axis());
             m_transform = matrix::scale(m_transform, m_scale);
@@ -477,15 +477,11 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Return the 4x4 inverse transform matrix.
     //--------------------------------------------------------------------------
-    Matrix<T, n + 1_z, n + 1_z> const& invMatrix()
+    Matrix<T, n + 1u, n + 1u> const& invMatrix()
     {
-        if (unlikely(m_inverse_trans_needs_update))
+        if (m_inverse_trans_needs_update)
         {
-            if (unlikely(!matrix::inverse(matrix(), m_inverse_transform)))
-            {
-                //FIXME throw GL::Exception("Failed to inverse the matrix");
-                matrix::identity(m_inverse_transform);
-            }
+            m_inverse_transform = matrix::inverse(matrix());
             m_inverse_trans_needs_update = false;
         }
         return m_inverse_transform;
@@ -509,9 +505,9 @@ protected:
     //! \brief Scaling factors for the object.
     Vector<T, n> m_local_scaling;
     //! \brief Local transformation
-    Matrix<T, n + 1_z, n + 1_z> m_transform;
+    Matrix<T, n + 1u, n + 1u> m_transform;
     //! \brief Inversed transformation
-    Matrix<T, n + 1_z, n + 1_z> m_inverse_transform;
+    Matrix<T, n + 1u, n + 1u> m_inverse_transform;
     //! \brief Shall m_transform need to be computed ?
     bool m_transform_needs_update;
     //! \brief Shall m_inverse_transform need to be computed ?
