@@ -337,7 +337,7 @@ public:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
         struct { T x; T y; T z; };
-        struct { T r; T g; T b; };
+        struct { T r; T g; T b_; }; // FIXME why T b is not compiling ?
 #pragma GCC diagnostic pop
     };
 
@@ -384,8 +384,8 @@ public:
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::DUMMY(maths::nan<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ZERO(maths::zero<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ONE(maths::one<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::POSITIVE_INFINITY(maths::inf<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_INFINITY(-maths::inf<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::POSITIVE_INFINITY(maths::max<T>());
+template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_INFINITY(-maths::max<T>());
 
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_SCALE(maths::one<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_SCALE(-maths::one<T>());
@@ -417,6 +417,15 @@ public:
         x = v.x;
         y = v.y;
         z = v.z;
+        w = scalar_w;
+    }
+
+    //! \brief Constructor.
+    Vector(Vector<T, 2_z> const& v, const T scalar_w = maths::zero<T>())
+    {
+        x = v.x;
+        y = v.y;
+        z = scalar_w;
         w = scalar_w;
     }
 
@@ -458,7 +467,7 @@ public:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
         struct { T x; T y; T z; T w; };
-        struct { T r; T g; T b; T a; };
+        struct { T r; T g; T b_; T a_; }; // FIXME b_
 #pragma GCC diagnostic pop
     };
 

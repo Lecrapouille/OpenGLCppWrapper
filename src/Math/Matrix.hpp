@@ -575,12 +575,7 @@ namespace matrix
     void identity(Matrix<T, rows, cols> &a)
     {
         static_assert(rows == cols, "Can't construct identity for a non-square matrix");
-        a *= maths::zero<T>();
-        size_t i = rows;
-        while (i--)
-        {
-            a(i, i) = maths::one<T>();
-        }
+        a = Matrix<T, rows, cols>(matrix::Identity);
     }
 
     // *************************************************************************

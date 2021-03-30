@@ -28,46 +28,108 @@
 #undef protected
 #undef private
 
-static Vector3f v1;
-static Vector3f v2(1.0f, 2.0f, 3.0f);
-static Vector3f v3(1.0f, 2.0f);
-static Vector3f v4 = { 4.0f, 5.0f, 6.0f };
-static Vector3f v5(1, 2, 3);
-static Vector3f v6 = { -4, 5, -6 };
-static Vector3f v7(Vector2f(1, 2));
-static Vector3f v8(42);
-static Vector3f dummy = Vector3f::DUMMY;
-
-#define ASSERT_DOUBLES_EQUAL(a,b,c) ASSERT_EQ(true, maths::abs(a-b) < c)
+//--------------------------------------------------------------------------
+// Check union [0,1,2,3] and [x,y,z,w] and [r,g,b,a]
+#define ASSERT_NEAR_VECTOR4(vect, a, b, c, d, thresh)                        \
+    ASSERT_NEAR(vect[0], a, thresh);                                    \
+    ASSERT_NEAR(vect[1], b, thresh);                                    \
+    ASSERT_NEAR(vect[2], c, thresh);                                    \
+    ASSERT_NEAR(vect[3], d, thresh);                                    \
+    ASSERT_NEAR(vect.x, a, thresh);                                     \
+    ASSERT_NEAR(vect.y, b, thresh);                                     \
+    ASSERT_NEAR(vect.z, c, thresh);                                     \
+    ASSERT_NEAR(vect.w, d, thresh);                                     \
+    ASSERT_NEAR(vect.r, a, thresh);                                     \
+    ASSERT_NEAR(vect.g, b, thresh);                                     \
+    ASSERT_NEAR(vect.b_, c, thresh);                                     \
+    ASSERT_NEAR(vect.a_, d, thresh)
 
 //--------------------------------------------------------------------------
-static void CHECK_VECTOR3B(Vector3b const& v, const bool x, const bool y, const bool z)
-{
-    ASSERT_EQ(x, v.x);
-    ASSERT_EQ(y, v.y);
-    ASSERT_EQ(z, v.z);
-}
+#define ASSERT_VECTOR4_NAN(vect)                                        \
+    ASSERT_EQ(true, std::isnan(vect[0]));                               \
+    ASSERT_EQ(true, std::isnan(vect[1]));                               \
+    ASSERT_EQ(true, std::isnan(vect[2]));                               \
+    ASSERT_EQ(true, std::isnan(vect[3]));                               \
+    ASSERT_EQ(true, std::isnan(vect.x));                                \
+    ASSERT_EQ(true, std::isnan(vect.y));                                \
+    ASSERT_EQ(true, std::isnan(vect.z));                                \
+    ASSERT_EQ(true, std::isnan(vect.w));                                \
+    ASSERT_EQ(true, std::isnan(vect.r));                                \
+    ASSERT_EQ(true, std::isnan(vect.g));                                \
+    ASSERT_EQ(true, std::isnan(vect.b_));                               \
+    ASSERT_EQ(true, std::isnan(vect.a_))
 
 //--------------------------------------------------------------------------
-static void CHECK_VECTOR3F(Vector3f const& v, const float x, const float y, const float z)
-{
-    ASSERT_EQ(x, v.x);
-    ASSERT_EQ(y, v.y);
-    ASSERT_EQ(z, v.z);
-}
+// Check union [0,1,2] and [x,y,z] and [r,g,b]
+#define ASSERT_NEAR_VECTOR3(vect, a, b, c, thresh)                           \
+    ASSERT_NEAR(vect[0], a, thresh);                                    \
+    ASSERT_NEAR(vect[1], b, thresh);                                    \
+    ASSERT_NEAR(vect[2], c, thresh);                                    \
+    ASSERT_NEAR(vect.x, a, thresh);                                     \
+    ASSERT_NEAR(vect.y, b, thresh);                                     \
+    ASSERT_NEAR(vect.z, c, thresh);                                     \
+    ASSERT_NEAR(vect.r, a, thresh);                                     \
+    ASSERT_NEAR(vect.g, b, thresh);                                     \
+    ASSERT_NEAR(vect.b_, c, thresh)
 
 //--------------------------------------------------------------------------
-static void CHECK_NAN_VECTOR3F(Vector3f const& v)
-{
-    ASSERT_EQ(true, std::isnan(v.x));
-    ASSERT_EQ(true, std::isnan(v.y));
-    ASSERT_EQ(true, std::isnan(v.z));
-}
+#define ASSERT_THAT_VECTOR3(vect, a, b, c)                      \
+    ASSERT_THAT(vect[0], a);                                    \
+    ASSERT_THAT(vect[1], b);                                    \
+    ASSERT_THAT(vect[2], c);                                    \
+    ASSERT_THAT(vect.x, a);                                     \
+    ASSERT_THAT(vect.y, b);                                     \
+    ASSERT_THAT(vect.z, c);                                     \
+    ASSERT_THAT(vect.r, a);                                     \
+    ASSERT_THAT(vect.g, b);                                     \
+    ASSERT_THAT(vect.b_, c)
 
 //--------------------------------------------------------------------------
-TEST(TestVectors, testCreator)
+#define ASSERT_VECTOR3_NAN(vect)                                   \
+    ASSERT_EQ(true, std::isnan(vect[0]));                               \
+    ASSERT_EQ(true, std::isnan(vect[1]));                               \
+    ASSERT_EQ(true, std::isnan(vect[2]));                               \
+    ASSERT_EQ(true, std::isnan(vect.x));                                \
+    ASSERT_EQ(true, std::isnan(vect.y));                                \
+    ASSERT_EQ(true, std::isnan(vect.z));                                \
+    ASSERT_EQ(true, std::isnan(vect.r));                                \
+    ASSERT_EQ(true, std::isnan(vect.g));                                \
+    ASSERT_EQ(true, std::isnan(vect.b_))
+
+//--------------------------------------------------------------------------
+#define ASSERT_NEAR_VECTOR3_INF(vect)                                        \
+    ASSERT_EQ(true, std::isinf(vect[0]));                               \
+    ASSERT_EQ(true, std::isinf(vect[1]));                               \
+    ASSERT_EQ(true, std::isinf(vect[2]));                               \
+    ASSERT_EQ(true, std::isinf(vect.x));                                \
+    ASSERT_EQ(true, std::isinf(vect.y));                                \
+    ASSERT_EQ(true, std::isinf(vect.z));                                \
+    ASSERT_EQ(true, std::isinf(vect.r));                                \
+    ASSERT_EQ(true, std::isinf(vect.g));                                \
+    ASSERT_EQ(true, std::isinf(vect.b_))
+
+//--------------------------------------------------------------------------
+// Check union [0,1] and [x,y] and [u,v]
+#define ASSERT_NEAR_VECTOR2(vect, a, b, thresh)                              \
+    ASSERT_NEAR(vect[0], a, thresh);                                    \
+    ASSERT_NEAR(vect[1], b, thresh);                                    \
+    ASSERT_NEAR(vect.x, a, thresh);                                     \
+    ASSERT_NEAR(vect.y, b, thresh);                                     \
+    ASSERT_NEAR(vect.u, a, thresh);                                     \
+    ASSERT_NEAR(vect.v, b, thresh)
+
+//--------------------------------------------------------------------------
+#define ASSERT_VECTOR2_NAN(vect)                                        \
+    ASSERT_EQ(true, std::isnan(vect[0]));                               \
+    ASSERT_EQ(true, std::isnan(vect[1]));                               \
+    ASSERT_EQ(true, std::isnan(vect.x));                                \
+    ASSERT_EQ(true, std::isnan(vect.y));                                \
+    ASSERT_EQ(true, std::isnan(vect.u));                                \
+    ASSERT_EQ(true, std::isnan(vect.v))
+
+//--------------------------------------------------------------------------
+TEST(TestVectors, testSizeof)
 {
-    // Check sizeof
     ASSERT_EQ(2u * sizeof (float), sizeof (Vector2f));
     ASSERT_EQ(2u * sizeof (double), sizeof (Vector2g));
     ASSERT_EQ(2u * sizeof (int), sizeof (Vector2i));
@@ -79,6 +141,55 @@ TEST(TestVectors, testCreator)
     ASSERT_EQ(4u * sizeof (float), sizeof (Vector4f));
     ASSERT_EQ(4u * sizeof (double), sizeof (Vector4g));
     ASSERT_EQ(4u * sizeof (int), sizeof (Vector4i));
+}
+
+//--------------------------------------------------------------------------
+TEST(TestVectors, testConstructorVec4)
+{
+    Vector4f v1;
+    Vector4f v2(1.0f, 2.0f, 3.0f, 4.0f);
+    Vector4f v3(Vector3f(1.0f, 2.0f, 3.0f));
+    Vector4f v4 = { 4.0f, 5.0f, 6.0f, 7.0f };
+    Vector4f v5(1, 2, 3, 4);
+    Vector4f v6 = { -4, 5, -6 };
+    Vector4f v7(Vector2f(1, 2));
+    Vector4f v8(42);
+    Vector4f dummy = Vector4f::DUMMY;
+
+    // Check size
+    ASSERT_EQ(4_z, v1.size());
+    ASSERT_EQ(4_z, v2.size());
+    ASSERT_EQ(4_z, v3.size());
+    ASSERT_EQ(4_z, v4.size());
+    ASSERT_EQ(4_z, v5.size());
+    ASSERT_EQ(4_z, v6.size());
+    ASSERT_EQ(4_z, v7.size());
+    ASSERT_EQ(4_z, v8.size());
+    ASSERT_EQ(4_z, dummy.size());
+
+    // Check values passed to the constructor
+    ASSERT_NEAR_VECTOR4(v2, 1.0f, 2.0f, 3.0f, 4.0f,   0.001f);
+    ASSERT_NEAR_VECTOR4(v3, 1.0f, 2.0f, 3.0f, 0.0f,   0.001f);
+    ASSERT_NEAR_VECTOR4(v4, 4.0f, 5.0f, 6.0f, 7.0f,   0.001f);
+    ASSERT_NEAR_VECTOR4(v5, 1.0f, 2.0f, 3.0f, 4.0f,   0.001f);
+    ASSERT_NEAR_VECTOR4(v6, -4.0f, 5.0f, -6.0f, 0.0f, 0.001f);
+    ASSERT_NEAR_VECTOR4(v7, 1.0f, 2.0f, 0.0f, 0.0f,   0.001f);
+    ASSERT_NEAR_VECTOR4(v8, 42.0f, 42.0f, 42.0f, 42.0f, 0.001f);
+    ASSERT_VECTOR4_NAN(dummy);
+}
+
+//--------------------------------------------------------------------------
+TEST(TestVectors, testConstructorVec3)
+{
+    Vector3f v1;
+    Vector3f v2(1.0f, 2.0f, 3.0f);
+    Vector3f v3(1.0f, 2.0f);
+    Vector3f v4 = { 4.0f, 5.0f, 6.0f };
+    Vector3f v5(1, 2, 3);
+    Vector3f v6 = { -4, 5, -6 };
+    Vector3f v7(Vector2f(1, 2));
+    Vector3f v8(42);
+    Vector3f dummy = Vector3f::DUMMY;
 
     // Check size
     ASSERT_EQ(3_z, v1.size());
@@ -92,65 +203,123 @@ TEST(TestVectors, testCreator)
     ASSERT_EQ(3_z, dummy.size());
 
     // Check values passed to the constructor
-    CHECK_VECTOR3F(v2, 1.0f, 2.0f, 3.0f);
-    CHECK_VECTOR3F(v3, 1.0f, 2.0f, 0.0f);
-    CHECK_VECTOR3F(v4, 4.0f, 5.0f, 6.0f);
-    CHECK_VECTOR3F(v5, 1.0f, 2.0f, 3.0f);
-    CHECK_VECTOR3F(v6, -4.0f, 5.0f, -6.0f);
-    CHECK_VECTOR3F(v7, 1.0f, 2.0f, 0.0f);
-    CHECK_VECTOR3F(v8, 42.0f, 42.0f, 42.0f);
-    CHECK_NAN_VECTOR3F(dummy);
+    ASSERT_NEAR_VECTOR3(v2, 1.0f, 2.0f, 3.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(v3, 1.0f, 2.0f, 0.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(v4, 4.0f, 5.0f, 6.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(v5, 1.0f, 2.0f, 3.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(v6, -4.0f, 5.0f, -6.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(v7, 1.0f, 2.0f, 0.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(v8, 42.0f, 42.0f, 42.0f,  0.001f);
+    ASSERT_VECTOR3_NAN(dummy);
+}
 
-    // Check the union [x,y,z] == [r,g,b]
-    ASSERT_EQ(v1.r, v1.x);
-    ASSERT_EQ(v1.g, v1.y);
-    ASSERT_EQ(v1.b, v1.z);
-    CHECK_VECTOR3F(v2, v2[0], v2[1], v2[2]);
+//--------------------------------------------------------------------------
+TEST(TestVectors, testConstructorVec2)
+{
+    Vector2f v1;
+    Vector2f v2(1.0f, 2.0f);
+    Vector2f v3(1.0f);
+    Vector2f v4 = { 4.0f, 5.0f, 6.0f };
+    Vector2f v5(1, 2);
+    Vector2f v6 = { -4, 5, -6 };
+    Vector2f v7(Vector2f(1, 2));
+    Vector2f v8(42);
+    Vector2f dummy = Vector2f::DUMMY;
+
+    // Check size
+    ASSERT_EQ(2_z, v1.size());
+    ASSERT_EQ(2_z, v2.size());
+    ASSERT_EQ(2_z, v3.size());
+    ASSERT_EQ(2_z, v4.size());
+    ASSERT_EQ(2_z, v5.size());
+    ASSERT_EQ(2_z, v6.size());
+    ASSERT_EQ(2_z, v7.size());
+    ASSERT_EQ(2_z, v8.size());
+    ASSERT_EQ(2_z, dummy.size());
+
+    // Check values passed to the constructor
+    ASSERT_NEAR_VECTOR2(v2, 1.0f, 2.0f,  0.001f);
+    ASSERT_NEAR_VECTOR2(v3, 1.0f, 1.0f,  0.001f);
+    ASSERT_NEAR_VECTOR2(v4, 4.0f, 5.0f,  0.001f);
+    ASSERT_NEAR_VECTOR2(v5, 1.0f, 2.0f,  0.001f);
+    ASSERT_NEAR_VECTOR2(v6, -4.0f, 5.0f,  0.001f);
+    ASSERT_NEAR_VECTOR2(v7, 1.0f, 2.0f,  0.001f);
+    ASSERT_NEAR_VECTOR2(v8, 42.0f, 42.0f,  0.001f);
+    ASSERT_VECTOR2_NAN(dummy);
 }
 
 //--------------------------------------------------------------------------
 TEST(TestVectors, testPredefined)
 {
-    CHECK_NAN_VECTOR3F(Vector3f::DUMMY);
-    //CHECK_VECTOR3F(Vector3f::POSITIVE_INFINITY, maths::inf<float>(), maths::inf<float>(), maths::inf<float>());
-    //CHECK_VECTOR3F(Vector3f::NEGATIVE_INFINITY, -maths::inf<float>(), -maths::inf<float>(), -maths::inf<float>());
+    ASSERT_VECTOR3_NAN(Vector3f::DUMMY);
+    ASSERT_NEAR_VECTOR3(Vector3f::POSITIVE_INFINITY, maths::max<float>(), maths::max<float>(), maths::max<float>(), 0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::NEGATIVE_INFINITY, -maths::max<float>(), -maths::max<float>(), -maths::max<float>(), 0.001f);
 
-    CHECK_VECTOR3F(Vector3f::ZERO, 0.0f, 0.0f, 0.0f);
-    CHECK_VECTOR3F(Vector3f::ONE, 1.0f, 1.0f, 1.0f);
+    ASSERT_NEAR_VECTOR3(Vector3f::ZERO, 0.0f, 0.0f, 0.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::ONE, 1.0f, 1.0f, 1.0f,  0.001f);
 
-    CHECK_VECTOR3F(Vector3f::UNIT_SCALE, 1.0f, 1.0f, 1.0f);
-    CHECK_VECTOR3F(Vector3f::NEGATIVE_UNIT_SCALE, -1.0f, -1.0f, -1.0f);
-    CHECK_VECTOR3F(Vector3f::UNIT_X, 1.0f, 0.0f, 0.0f);
-    CHECK_VECTOR3F(Vector3f::UNIT_Y, 0.0f, 1.0f, 0.0f);
-    CHECK_VECTOR3F(Vector3f::UNIT_Z, 0.0f, 0.0f, 1.0f);
-    CHECK_VECTOR3F(Vector3f::NEGATIVE_UNIT_X, -1.0f, 0.0f, 0.0f);
-    CHECK_VECTOR3F(Vector3f::NEGATIVE_UNIT_Y, 0.0f, -1.0f, 0.0f);
-    CHECK_VECTOR3F(Vector3f::NEGATIVE_UNIT_Z, 0.0f, 0.0f, -1.0f);
+    ASSERT_NEAR_VECTOR3(Vector3f::UNIT_SCALE, 1.0f, 1.0f, 1.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::NEGATIVE_UNIT_SCALE, -1.0f, -1.0f, -1.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::UNIT_X, 1.0f, 0.0f, 0.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::UNIT_Y, 0.0f, 1.0f, 0.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::UNIT_Z, 0.0f, 0.0f, 1.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::NEGATIVE_UNIT_X, -1.0f, 0.0f, 0.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::NEGATIVE_UNIT_Y, 0.0f, -1.0f, 0.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::NEGATIVE_UNIT_Z, 0.0f, 0.0f, -1.0f,  0.001f);
 
-    CHECK_VECTOR3F(Vector3f::LEFT, -1.0f, 0.0f, 0.0f);
-    CHECK_VECTOR3F(Vector3f::RIGHT, 1.0f, 0.0f, 0.0f);
-    CHECK_VECTOR3F(Vector3f::BACK, 0.0f, 0.0f, -1.0f);
-    CHECK_VECTOR3F(Vector3f::FORWARD, 0.0f, 0.0f, 1.0f);
-    CHECK_VECTOR3F(Vector3f::DOWN, 0.0f, -1.0f, 0.0f);
-    CHECK_VECTOR3F(Vector3f::UP, 0.0f, 1.0f, 0.0f);
+    ASSERT_NEAR_VECTOR3(Vector3f::LEFT, -1.0f, 0.0f, 0.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::RIGHT, 1.0f, 0.0f, 0.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::BACK, 0.0f, 0.0f, -1.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::FORWARD, 0.0f, 0.0f, 1.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::DOWN, 0.0f, -1.0f, 0.0f,  0.001f);
+    ASSERT_NEAR_VECTOR3(Vector3f::UP, 0.0f, 1.0f, 0.0f,  0.001f);
+}
+
+//--------------------------------------------------------------------------
+TEST(TestVectors, testPrint)
+{
+    std::stringstream buffer;
+    std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
+    std::cout << Vector4f::ZERO << std::endl;
+    std::cout.rdbuf(old);
+
+    ASSERT_THAT(buffer.str().c_str(), HasSubstr("[0, 0, 0, 0]"));
 }
 
 //--------------------------------------------------------------------------
 TEST(TestVectors, testSwap)
 {
+    Vector3f v2(1.0f, 2.0f, 3.0f);
+    Vector3f v4 = { 4.0f, 5.0f, 6.0f };
+
     vector::swap(v2, v4);
-    CHECK_VECTOR3F(v2, 4.0f, 5.0f, 6.0f);
+    ASSERT_NEAR_VECTOR3(v2, 4.0f, 5.0f, 6.0f,  0.001f);
     vector::swap(v2, v4);
-    CHECK_VECTOR3F(v2, 1.0f, 2.0f, 3.0f);
+    ASSERT_NEAR_VECTOR3(v2, 1.0f, 2.0f, 3.0f,  0.001f);
     vector::swap(v4, v2);
-    CHECK_VECTOR3F(v2, 4.0f, 5.0f, 6.0f);
+    ASSERT_NEAR_VECTOR3(v2, 4.0f, 5.0f, 6.0f,  0.001f);
     vector::swap(v4, v2);
-    CHECK_VECTOR3F(v2, 1.0f, 2.0f, 3.0f);
+    ASSERT_NEAR_VECTOR3(v2, 1.0f, 2.0f, 3.0f,  0.001f);
 }
 
 //--------------------------------------------------------------------------
-TEST(TestVectors, testEquality)
+TEST(TestVectors, testComparaisons)
 {
+    Vector3f one(1.0f);
+    Vector3f two(2.0f);
+
+    // Operator <
+    {
+        Vector3b A = (one < two);
+        Vector3b B = (two < one);
+        Vector3b C = (one < one);
+
+        ASSERT_THAT_VECTOR3(A, true, true, true);
+        ASSERT_THAT_VECTOR3(B, false, false, false);
+        ASSERT_THAT_VECTOR3(C, false, false, false);
+    }
+    /*
+
     Vector3b v = (v3 == v7);
     CHECK_VECTOR3B(v, true, true, true);
     v = (v2 == v5);
@@ -174,7 +343,25 @@ TEST(TestVectors, testEquality)
     v = (Vector3f::NEGATIVE_UNIT_SCALE ==
          (Vector3f::NEGATIVE_UNIT_X + Vector3f::NEGATIVE_UNIT_Y + Vector3f::NEGATIVE_UNIT_Z));
     CHECK_VECTOR3B(v, true, true, true);
+    */
 }
+
+#if 0
+
+static Vector3f v1;
+static Vector3f v2(1.0f, 2.0f, 3.0f);
+static Vector3f v3(1.0f, 2.0f);
+static Vector3f v4 = { 4.0f, 5.0f, 6.0f };
+static Vector3f v5(1, 2, 3);
+static Vector3f v6 = { -4, 5, -6 };
+static Vector3f v7(Vector2f(1, 2));
+static Vector3f v8(42);
+static Vector3f dummy = Vector3f::DUMMY;
+
+#define ASSERT_DOUBLES_EQUAL(a,b,c) ASSERT_EQ(true, maths::abs(a-b) < c)
+
+
+
 
 //--------------------------------------------------------------------------
 TEST(TestVectors, testArithmetic)
@@ -183,74 +370,74 @@ TEST(TestVectors, testArithmetic)
     float scalar = -2.0f;
 
     // Addition, substraction
-    CHECK_VECTOR3F((v2 + v5 + v3), 3.0f, 6.0f, 6.0f);
-    CHECK_VECTOR3F(Vector3f::ZERO + 4.0f, 4.0f, 4.0f, 4.0f);
-    CHECK_VECTOR3F(Vector3f::UNIT_X - Vector3f::UNIT_X, 0.0f, 0.0f, 0.0f);
-    CHECK_VECTOR3F(-Vector3f::UNIT_X, -1.0f, 0.0f, 0.0f);
-    CHECK_VECTOR3F(+Vector3f::UNIT_X, +1.0f, 0.0f, 0.0f);
-    CHECK_VECTOR3F(-v2, -1.0f, -2.0f, -3.0f);
+    ASSERT_NEAR_VECTOR3((v2 + v5 + v3), 3.0f, 6.0f, 6.0f);
+    ASSERT_NEAR_VECTOR3(Vector3f::ZERO + 4.0f, 4.0f, 4.0f, 4.0f);
+    ASSERT_NEAR_VECTOR3(Vector3f::UNIT_X - Vector3f::UNIT_X, 0.0f, 0.0f, 0.0f);
+    ASSERT_NEAR_VECTOR3(-Vector3f::UNIT_X, -1.0f, 0.0f, 0.0f);
+    ASSERT_NEAR_VECTOR3(+Vector3f::UNIT_X, +1.0f, 0.0f, 0.0f);
+    ASSERT_NEAR_VECTOR3(-v2, -1.0f, -2.0f, -3.0f);
 
     // Multiplication
-    CHECK_VECTOR3F((v5 * 2.0f), 2.0f, 4.0f, 6.0f);
-    CHECK_VECTOR3F((v5 * -2.0f), -2.0f, -4.0f, -6.0f);
-    CHECK_VECTOR3F((-2.0f * v5), -2.0f, -4.0f, -6.0f);
-    CHECK_VECTOR3F((c_scalar * v5), -2.0f, -4.0f, -6.0f);
-    CHECK_VECTOR3F((-v5 * 2.0f), -2.0f, -4.0f, -6.0f);
-    CHECK_VECTOR3F((-v5 * c_scalar), 2.0f, 4.0f, 6.0f);
-    CHECK_VECTOR3F((-v5 * scalar), 2.0f, 4.0f, 6.0f);
+    ASSERT_NEAR_VECTOR3((v5 * 2.0f), 2.0f, 4.0f, 6.0f);
+    ASSERT_NEAR_VECTOR3((v5 * -2.0f), -2.0f, -4.0f, -6.0f);
+    ASSERT_NEAR_VECTOR3((-2.0f * v5), -2.0f, -4.0f, -6.0f);
+    ASSERT_NEAR_VECTOR3((c_scalar * v5), -2.0f, -4.0f, -6.0f);
+    ASSERT_NEAR_VECTOR3((-v5 * 2.0f), -2.0f, -4.0f, -6.0f);
+    ASSERT_NEAR_VECTOR3((-v5 * c_scalar), 2.0f, 4.0f, 6.0f);
+    ASSERT_NEAR_VECTOR3((-v5 * scalar), 2.0f, 4.0f, 6.0f);
 
     // Division
-    CHECK_VECTOR3F((v5 / 2.0f), 0.5f, 1.0f, 3.0f/2.0f);
-    CHECK_VECTOR3F((v5 / -2.0f), -0.5f, -1.0f, -3.0f/2.0f);
-    CHECK_VECTOR3F((-2.0f / v5), -2.0f, -1.0f, -2.0f/3.0f);
-    CHECK_VECTOR3F((c_scalar / v5), -2.0f, -1.0f, -2.0f/3.0f);
-    CHECK_VECTOR3F((scalar / v5), -2.0f, -1.0f, -2.0f/3.0f);
-    CHECK_VECTOR3F((-v5 / 2.0f), -0.5f, -1.0f, -3.0f/2.0f);
-    CHECK_VECTOR3F((-v5 / c_scalar), 0.5f, 1.0f, 3.0f/2.0f);
-    CHECK_VECTOR3F((-v5 / scalar), 0.5f, 1.0f, 3.0f/2.0f);
+    ASSERT_NEAR_VECTOR3((v5 / 2.0f), 0.5f, 1.0f, 3.0f/2.0f);
+    ASSERT_NEAR_VECTOR3((v5 / -2.0f), -0.5f, -1.0f, -3.0f/2.0f);
+    ASSERT_NEAR_VECTOR3((-2.0f / v5), -2.0f, -1.0f, -2.0f/3.0f);
+    ASSERT_NEAR_VECTOR3((c_scalar / v5), -2.0f, -1.0f, -2.0f/3.0f);
+    ASSERT_NEAR_VECTOR3((scalar / v5), -2.0f, -1.0f, -2.0f/3.0f);
+    ASSERT_NEAR_VECTOR3((-v5 / 2.0f), -0.5f, -1.0f, -3.0f/2.0f);
+    ASSERT_NEAR_VECTOR3((-v5 / c_scalar), 0.5f, 1.0f, 3.0f/2.0f);
+    ASSERT_NEAR_VECTOR3((-v5 / scalar), 0.5f, 1.0f, 3.0f/2.0f);
 
     //
     static Vector3f v(v2);
     v += 1.0f;
-    CHECK_VECTOR3F(v, 2.0f, 3.0f, 4.0f);
+    ASSERT_NEAR_VECTOR3(v, 2.0f, 3.0f, 4.0f);
     v += 1.0f;
-    CHECK_VECTOR3F(v, 3.0f, 4.0f, 5.0f);
+    ASSERT_NEAR_VECTOR3(v, 3.0f, 4.0f, 5.0f);
     v -= 2.0f;
-    CHECK_VECTOR3F(v, 1.0f, 2.0f, 3.0f);
+    ASSERT_NEAR_VECTOR3(v, 1.0f, 2.0f, 3.0f);
     v /= 2.0f;
-    CHECK_VECTOR3F(v, 1.0f / 2.0f, 1.0f, 3.0f / 2.0f);
+    ASSERT_NEAR_VECTOR3(v, 1.0f / 2.0f, 1.0f, 3.0f / 2.0f);
     v *= 2.0f;
-    CHECK_VECTOR3F(v, 1.0f, 2.0f, 3.0f);
+    ASSERT_NEAR_VECTOR3(v, 1.0f, 2.0f, 3.0f);
 }
 
 //--------------------------------------------------------------------------
 TEST(TestVectors, testCopy)
 {
     v1 = v5;
-    CHECK_VECTOR3F(v1, 1.0f, 2.0f, 3.0f);
+    ASSERT_NEAR_VECTOR3(v1, 1.0f, 2.0f, 3.0f);
     //v1 = 42.0f;
-    //CHECK_VECTOR3F(v1, 42.0f, 42.0f, 42.0f);
+    //ASSERT_NEAR_VECTOR(v1, 42.0f, 42.0f, 42.0f);
 }
 
 //--------------------------------------------------------------------------
 TEST(TestVectors, testOperations)
 {
     // Min, max, clamp, abs
-    CHECK_VECTOR3F(vector::abs(v6), 4.0f, 5.0f, 6.0f);
-    CHECK_VECTOR3F(vector::min(v2, dummy), v2.x, v2.y, v2.z);
-    CHECK_VECTOR3F(vector::max(v2, dummy), v2.x, v2.y, v2.z);
-    CHECK_VECTOR3F(vector::min(v2, Vector3f::UNIT_Z + 1.0f), 1.0f, 1.0f, 2.0f);
-    CHECK_VECTOR3F(vector::max(v2, Vector3f::UNIT_Y + 2.0f), 2.0f, 3.0f, 3.0f);
-    CHECK_VECTOR3F(vector::clamp(v6, -5.0f, 3.0f), -4.0f, 3.0f, -5.0f);
-    CHECK_VECTOR3F(vector::clamp(vector::abs(v6), -3.0f, 5.0f), 4.0f, 5.0f, 5.0f);
+    ASSERT_NEAR_VECTOR3(vector::abs(v6), 4.0f, 5.0f, 6.0f);
+    ASSERT_NEAR_VECTOR3(vector::min(v2, dummy), v2.x, v2.y, v2.z);
+    ASSERT_NEAR_VECTOR3(vector::max(v2, dummy), v2.x, v2.y, v2.z);
+    ASSERT_NEAR_VECTOR3(vector::min(v2, Vector3f::UNIT_Z + 1.0f), 1.0f, 1.0f, 2.0f);
+    ASSERT_NEAR_VECTOR3(vector::max(v2, Vector3f::UNIT_Y + 2.0f), 2.0f, 3.0f, 3.0f);
+    ASSERT_NEAR_VECTOR3(vector::clamp(v6, -5.0f, 3.0f), -4.0f, 3.0f, -5.0f);
+    ASSERT_NEAR_VECTOR3(vector::clamp(vector::abs(v6), -3.0f, 5.0f), 4.0f, 5.0f, 5.0f);
 
     // Middle Point
-    CHECK_VECTOR3F(vector::middle(Vector3f::ZERO, Vector3f::UNIT_Z), 0.0f, 0.0f, 0.5f);
-    CHECK_VECTOR3F(vector::middle(Vector3f::ZERO, Vector3f::UNIT_Y), 0.0f, 0.5f, 0.0f);
-    CHECK_VECTOR3F(vector::middle(Vector3f::ZERO, Vector3f::UNIT_X), 0.5f, 0.0f, 0.0f);
-    CHECK_VECTOR3F(vector::middle(Vector3f::UNIT_X, -Vector3f::UNIT_X), 0.0f, 0.0f, 0.0f);
-    CHECK_VECTOR3F(vector::middle(-Vector3f::UNIT_X, Vector3f::UNIT_X), 0.0f, 0.0f, 0.0f);
-    CHECK_VECTOR3F(-vector::middle(Vector3f::UNIT_X, Vector3f::UNIT_X), -1.0f, 0.0f, 0.0f);
+    ASSERT_NEAR_VECTOR3(vector::middle(Vector3f::ZERO, Vector3f::UNIT_Z), 0.0f, 0.0f, 0.5f);
+    ASSERT_NEAR_VECTOR3(vector::middle(Vector3f::ZERO, Vector3f::UNIT_Y), 0.0f, 0.5f, 0.0f);
+    ASSERT_NEAR_VECTOR3(vector::middle(Vector3f::ZERO, Vector3f::UNIT_X), 0.5f, 0.0f, 0.0f);
+    ASSERT_NEAR_VECTOR3(vector::middle(Vector3f::UNIT_X, -Vector3f::UNIT_X), 0.0f, 0.0f, 0.0f);
+    ASSERT_NEAR_VECTOR3(vector::middle(-Vector3f::UNIT_X, Vector3f::UNIT_X), 0.0f, 0.0f, 0.0f);
+    ASSERT_NEAR_VECTOR3(-vector::middle(Vector3f::UNIT_X, Vector3f::UNIT_X), -1.0f, 0.0f, 0.0f);
 
     // Add scaled
     v1 = Vector3f::UNIT_SCALE;
@@ -367,3 +554,4 @@ TEST(TestVectors, testDisplay)
     ASSERT_STREQ(buffer.str().c_str(), "[1, 2, 3]\n");
     std::cout.rdbuf(old);
 }
+#endif

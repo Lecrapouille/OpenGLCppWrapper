@@ -53,9 +53,14 @@ template<typename T> T one() { return T(1); }
 template<typename T> T zero() { return T(0); }
 
 //------------------------------------------------------------------------------
-//! \brief Return infinity number for float and double
+//! \brief Return the biggest number for float and double
 //------------------------------------------------------------------------------
-template<typename T> T inf() { return std::numeric_limits<T>::max(); }
+template<typename T> T max() { return std::numeric_limits<T>::max(); }
+
+//------------------------------------------------------------------------------
+//! \brief Return the smallest number for float and double
+//------------------------------------------------------------------------------
+template<typename T> T min() { return std::numeric_limits<T>::min(); }
 
 //------------------------------------------------------------------------------
 //! \brief Return Not A Number for float and double
