@@ -73,7 +73,6 @@ TEST(TestMatrices, testConstructor)
     ASSERT_THAT(A5[0].data(), ElementsAre(0.0f, 0.0f, 0.0f));
     ASSERT_THAT(A5[1].data(), ElementsAre(0.0f, 0.0f, 0.0f));
     ASSERT_THAT(A5[2].data(), ElementsAre(0.0f, 0.0f, 0.0f));
-    return ;
 
     Matrix44i A6(42);
     ASSERT_THAT(A6[0].data(), ElementsAre(42, 42, 42, 42));
