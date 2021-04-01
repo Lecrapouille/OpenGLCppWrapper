@@ -26,8 +26,9 @@
 // https://github.com/Reedbeta/reed-util
 // and http://www.reedbeta.com/blog/on-vector-math-libraries/
 // and http://www.ogre3d.org
-// and "Vectors in Julia" by Reese Pathak, David Zeng, Keegan Go, Stephen Boyd, Stanford University.
-// and the book: "Game Physics Engine Development" by Ian Millington
+// and "Vectors in Julia" by Reese Pathak, David Zeng, Keegan Go, Stephen Boyd,
+// Stanford University and the book: "Game Physics Engine Development" by Ian
+// Millington
 // *****************************************************************************
 
 #  include "Common/NonCppStd.hpp"
@@ -37,7 +38,7 @@
 #  include <fstream>
 
 // *****************************************************************************
-//! \brief Macro for building constructors
+//! \brief Macro for building constructors of any dimension (N).
 // *****************************************************************************
 #define VECTOR_DIM(N)                                                   \
     /*! \brief Empty constructor */                                     \
@@ -113,10 +114,14 @@
         }                                                               \
     }                                                                   \
                                                                         \
-    /*! \brief Vector product (aka cross product). */                   \
-    Vector<T,N>& operator%=(Vector<T,N> const& b)                       \
+                                                                        \
+    /*! \brief  */                                                      \
+    template <typename U>                                               \
+    Vector<T,N>& operator*=(U const& b)                                 \
     {                                                                   \
-        *this = cross(*this, b);                                        \
+        size_t i = N;                                                   \
+        while (i--)                                                     \
+            m_data[i] *= T(b);                                          \
         return *this;                                                   \
     }                                                                   \
                                                                         \
@@ -147,12 +152,13 @@ private:                                                                \
 operator bool()
 
 // *****************************************************************************
-//! \brief Generic mathematic vector for a given dimension. Note contrary to a
-//! mathematic point a view and currently purely for lazy reasons, the vector is
-//! not a column or a row vector and therefore dimensions are not matched on
-//! certain type of operations: so transpose() has not to be called but beware of
-//! errorneous results particularly because OpenGL uses transposed matrix vectors
-//! and positions shall be considered as column vector.
+//! \brief A mathematic element to represent coordinates in space. Note,
+//! contrary to a strict mathematic point of view, this class does not represent
+//! neither a column vector nor a row vector but one of them depending on the
+//! context. For example Matrix * vector the vector will be considered as column
+//! vector while vector * matrix the vector will be considered as row vector.
+//! This is mainly due to speed up computations for an OpenGL context. If
+//! dimension checks are needed use the class Matrix and set one dimension to 1.
 //!
 //! \tparam T the type of the vector (float, int).
 //! \tparam n the vector dimension.
@@ -160,18 +166,19 @@ operator bool()
 //! \warning be n small enough to be stored inside the stack of the program
 //!   without making a stack overflow. No checks are made again stack overflow.
 // *****************************************************************************
-// TODO: manage row and column vectors:
-// template <T, n, m> vector + check if n or m are 1.
-// => ColumnVecor<T, n> = Vector<T, n, 1>
-// => RowVecor<T, n> = Vector<T, 1, n>
 template <typename T, size_t n>
 class Vector
 {
 public:
 
+    //--------------------------------------------------------------------------
+    // Generic methods
+    //--------------------------------------------------------------------------
     VECTOR_DIM(n);
 
+    //--------------------------------------------------------------------------
     //! \brief Return the norm of this instance.
+    //--------------------------------------------------------------------------
     T norm() const
     {
         T l = maths::zero<T>();
@@ -182,8 +189,10 @@ public:
         return maths::sqrt(l);
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Make this instance be a unit vector.
     //! \note undefined behavior is the norm of the vector is 0.
+    //--------------------------------------------------------------------------
     void normalize()
     {
         T const l = maths::one<T>() / norm();
@@ -193,7 +202,9 @@ public:
             m_data[i] *= l;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Self linear interpolation
+    //--------------------------------------------------------------------------
     void lerp(Vector<T,n> const& uv, T const alpha)
     {
         size_t i = n;
@@ -204,9 +215,10 @@ public:
 
 protected:
 
+    //--------------------------------------------------------------------------
     //! \brief static array holdind values.
     //! \note be careful to not produce a stack overflow with a huge size.
-    //! \todo std::array to avoid segfaut in huge dimension ?
+    //--------------------------------------------------------------------------
     T m_data[n];
 };
 
@@ -218,23 +230,32 @@ class Vector<T, 2_z>
 {
 public:
 
+    //--------------------------------------------------------------------------
     //! \brief Constructor.
+    //--------------------------------------------------------------------------
     Vector(const T scalar_x, const T scalar_y)
     {
         x = scalar_x;
         y = scalar_y;
     }
 
+    //--------------------------------------------------------------------------
+    // Generic methods
+    //--------------------------------------------------------------------------
     VECTOR_DIM(2_z);
 
+    //--------------------------------------------------------------------------
     //! \brief Return the norm of this instance.
+    //--------------------------------------------------------------------------
     inline T norm() const
     {
         return maths::sqrt(x * x + y * y);
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Make this instance be a unit vector.
     //! \note undefined behavior is the norm of the vector is 0.
+    //--------------------------------------------------------------------------
     void normalize()
     {
         T const l = maths::one<T>() / norm();
@@ -244,7 +265,9 @@ public:
 
 public:
 
+    //--------------------------------------------------------------------------
     //! \brief static array holdind values.
+    //--------------------------------------------------------------------------
     union
     {
         //! \brief static array holdind values.
@@ -293,7 +316,9 @@ class Vector<T, 3_z>
 {
 public:
 
+    //--------------------------------------------------------------------------
     //! \brief Constructor.
+    //--------------------------------------------------------------------------
     Vector(Vector<T, 2_z> const& v, const T scalar_z = maths::zero<T>())
     {
         x = v.x;
@@ -301,7 +326,9 @@ public:
         z = scalar_z;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Constructor.
+    //--------------------------------------------------------------------------
     Vector(const T scalar_x, const T scalar_y, const T scalar_z = maths::zero<T>())
     {
         x = scalar_x;
@@ -309,16 +336,23 @@ public:
         z = scalar_z;
     }
 
+    //--------------------------------------------------------------------------
+    // Generic methods
+    //--------------------------------------------------------------------------
     VECTOR_DIM(3_z);
 
+    //--------------------------------------------------------------------------
     //! \brief Return the norm of this instance.
+    //--------------------------------------------------------------------------
     inline T norm() const
     {
         return maths::sqrt(x * x + y * y + z * z);
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Make this instance be a unit vector.
     //! \note undefined behavior is the norm of the vector is 0.
+    //--------------------------------------------------------------------------
     void normalize()
     {
         T const l = maths::one<T>() / norm();
@@ -327,9 +361,24 @@ public:
         z *= l;
     }
 
+    //--------------------------------------------------------------------------
+    //! brief Selft vector product (aka cross product).
+    //--------------------------------------------------------------------------
+    Vector<T,3_z>& operator%=(Vector<T,3_z> const& b)
+    {
+        *this = {
+            y * b.z - z * b.y,
+            z * b.x - x * b.z,
+            x * b.y - y * b.x,
+        };
+        return *this;
+    }
+
 public:
 
+    //--------------------------------------------------------------------------
     //! \brief static array holdind values.
+    //--------------------------------------------------------------------------
     union
     {
         T m_data[3_z];
@@ -340,6 +389,10 @@ public:
         struct { T r; T g; T b_; }; // FIXME why T b is not compiling ?
 #pragma GCC diagnostic pop
     };
+
+    //--------------------------------------------------------------------------
+    // Predefined vectors
+    //--------------------------------------------------------------------------
 
     //! \brief Create a vector filled with NaN (for float and double only).
     const static Vector<T, 3_z> DUMMY;
@@ -381,6 +434,10 @@ public:
     const static Vector<T, 3_z> UP;
 };
 
+//------------------------------------------------------------------------------
+// Predefined vectors
+//------------------------------------------------------------------------------
+
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::DUMMY(maths::nan<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ZERO(maths::zero<T>());
 template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ONE(maths::one<T>());
@@ -411,7 +468,9 @@ class Vector<T, 4_z>
 {
 public:
 
+    //--------------------------------------------------------------------------
     //! \brief Constructor.
+    //--------------------------------------------------------------------------
     Vector(Vector<T, 3_z> const& v, const T scalar_w = maths::zero<T>())
     {
         x = v.x;
@@ -420,7 +479,9 @@ public:
         w = scalar_w;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Constructor.
+    //--------------------------------------------------------------------------
     Vector(Vector<T, 2_z> const& v, const T scalar_w = maths::zero<T>())
     {
         x = v.x;
@@ -429,7 +490,9 @@ public:
         w = scalar_w;
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Constructor.
+    //--------------------------------------------------------------------------
     Vector(const T scalar_x, const T scalar_y, const T scalar_z, const T scalar_w)
     {
         x = scalar_x;
@@ -440,14 +503,18 @@ public:
 
     VECTOR_DIM(4_z);
 
+    //--------------------------------------------------------------------------
     //! \brief Return the norm of this instance.
+    //--------------------------------------------------------------------------
     inline T norm() const
     {
         return maths::sqrt(x * x + y * y + z * z + w * w);
     }
 
+    //--------------------------------------------------------------------------
     //! \brief Make this instance be a unit vector.
     //! \note undefined behavior is the norm of the vector is 0.
+    //--------------------------------------------------------------------------
     void normalize()
     {
         T const l = maths::one<T>() / norm();
@@ -459,7 +526,9 @@ public:
 
 public:
 
+    //--------------------------------------------------------------------------
     //! \brief static array holdind values.
+    //--------------------------------------------------------------------------
     union
     {
         T m_data[4_z];
@@ -470,6 +539,10 @@ public:
         struct { T r; T g; T b_; T a_; }; // FIXME b_
 #pragma GCC diagnostic pop
     };
+
+    //--------------------------------------------------------------------------
+    // Predefined vectors
+    //--------------------------------------------------------------------------
 
     //! \brief Create a vector filled with NaN (for float and double only).
     const static Vector<T, 4_z> DUMMY;
@@ -497,6 +570,10 @@ public:
     const static Vector<T, 4_z> NEGATIVE_UNIT_W;
 };
 
+//------------------------------------------------------------------------------
+// Predefined vectors
+//------------------------------------------------------------------------------
+
 template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::DUMMY(T(NAN));
 template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::ZERO(maths::zero<T>());
 template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_SCALE(maths::one<T>());
@@ -509,6 +586,25 @@ template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_X(-math
 template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>(), maths::zero<T>(), maths::zero<T>());
 template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_Z(maths::zero<T>(), maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
 template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths::zero<T>(), maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
+
+// *****************************************************************************
+// Typedefs for the most common types and dimensions
+// *****************************************************************************
+typedef Vector<bool, 2_z> Vector2b;
+typedef Vector<bool, 3_z> Vector3b;
+typedef Vector<bool, 4_z> Vector4b;
+
+typedef Vector<int32_t, 2_z> Vector2i;
+typedef Vector<int32_t, 3_z> Vector3i;
+typedef Vector<int32_t, 4_z> Vector4i;
+
+typedef Vector<float, 2_z> Vector2f;
+typedef Vector<float, 3_z> Vector3f;
+typedef Vector<float, 4_z> Vector4f;
+
+typedef Vector<double, 2_z> Vector2g;
+typedef Vector<double, 3_z> Vector3g;
+typedef Vector<double, 4_z> Vector4g;
 
 // *****************************************************************************
 // Overloaded math operators
@@ -660,7 +756,6 @@ DEFINE_UNARY_OPERATOR(~)
 
 DEFINE_INPLACE_OPERATORS(+=)
 DEFINE_INPLACE_OPERATORS(-=)
-DEFINE_INPLACE_OPERATORS(*=) // FIXME: now cross product
 DEFINE_INPLACE_OPERATORS(/=)
 
 DEFINE_RELATIONAL_OPERATORS(==)
@@ -670,7 +765,9 @@ DEFINE_RELATIONAL_OPERATORS(>)
 DEFINE_RELATIONAL_OPERATORS(<=)
 DEFINE_RELATIONAL_OPERATORS(>=)
 
-//! \brief Scalar-Vector op
+// *****************************************************************************
+//! \brief Scalar-Vector op. Example: 2 * [x y z]
+// *****************************************************************************
 template <typename T, size_t n>
 Vector<T, n> operator*(T const a, Vector<T, n> const& b)
 {
@@ -681,7 +778,9 @@ Vector<T, n> operator*(T const a, Vector<T, n> const& b)
     return result;
 }
 
-//! \brief Vector-scalar op
+// *****************************************************************************
+//! \brief Vector-scalar op. Example: [x y z] * 2
+// *****************************************************************************
 template <typename T, size_t n>
 Vector<T, n> operator*(Vector<T, n> const& a, T const b)
 {
@@ -692,414 +791,9 @@ Vector<T, n> operator*(Vector<T, n> const& a, T const b)
     return result;
 }
 
-namespace vector
-{
-//! \brief Calculates and returns a component-wise product of this vector with
-//! the given vector.
-template <typename T, size_t n>
-Vector<T, n> componentProduct(Vector<T, n> const& a, Vector<T, n> const& b)
-{
-    Vector<T, n> result;
-    size_t i = n;
-    while (i--)
-        result[i] = a[i] * b[i];
-    return result;
-}
-
-//! \brief Performs a component-wise product with the given vector and sets this
-//! vector to its result.
-template <typename T, size_t n>
-Vector<T, n> componentProductUpdate(Vector<T, n> const& a)
-{
-    Vector<T, n> result;
-    size_t i = n;
-    while (i--)
-        result[i] *= a[i];
-    return result;
-}
-
-DEFINE_FUN2_OPERATOR(min, std::min)
-DEFINE_FUN2_OPERATOR(max, std::max)
-DEFINE_FUN1_OPERATOR(abs, maths::abs)
-DEFINE_BOOL_OPERATOR(ge, >=)
-DEFINE_BOOL_OPERATOR(gt, >)
-DEFINE_BOOL_OPERATOR(le, <=)
-DEFINE_BOOL_OPERATOR(lt, <)
-
-//! \brief Compare the integer values for each elements of vectors.
-//! \note Do not confuse this function with operator==() or the
-//! function equivalent() which do not have the same behavior.
-//! \return true if all elements have the same value.
-template <typename T, size_t n>
-typename std::enable_if<std::numeric_limits<T>::is_integer, bool>::type
-eq(Vector<T, n> const& a, Vector<T, n> const& b)
-{
-    if (&a != &b)
-    {
-        size_t i = n;
-        while (i--)
-        {
-            if (a[i] != b[i])
-                return false;
-        }
-    }
-    return true;
-}
-
-//! \brief Compare the float values for each elements of vectors.
-//! \note Do not confuse this function with operator==() or the
-//! function equivalent() which do not have the same behavior.
-//! \return true if all elements have the same value.
-template <typename T, size_t n>
-typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-eq(Vector<T, n> const& a, Vector<T, n> const& b)
-{
-    if (&a != &b)
-    {
-        size_t i = n;
-        while (i--)
-        {
-            if (!maths::almostEqual(a[i], b[i]))
-                return false;
-        }
-    }
-    return true;
-}
-
-template <typename T, size_t n>
-bool ne(Vector<T, n> const& a, Vector<T, n> const& b)
-{
-    return !vector::eq(a, b);
-}
-
-template <typename T, size_t n>
-void swap(Vector<T, n> &a, Vector<T, n> &b)
-{
-    if (&a != &b)
-    {
-        size_t i = n;
-        while (i--)
-        {
-            std::swap(a[i], b[i]);
-        }
-    }
-}
-
-template <typename T, size_t n>
-Vector<T, n> lerp(Vector<T, n> const& a, Vector<T, n> const& b, float t)
-{
-   Vector<T, n> r;
-
-   size_t i = n;
-   while (i--)
-   {
-      r[i] = maths::lerp(a[i], b[i], t);
-   }
-
-   return r;
-}
-
-//! \brief Get the coeficient of collinearity (k) of two vectors (u and v).
-//!
-//! Two non-null vectors are collinear if and only it exists a
-//! scalar k != 0, where: u = k v (note: if u is a null vector, any
-//! vector v is collinear to u because k = 0).
-//!
-//! \return k if vectors are collinear, else return NaN if vectors are not
-//! collinear, else return 0 if zero vector.
-//!
-//! \note Use this function for T a familly of float and not for integers.
-template <typename T, size_t n>
-T collinearity(Vector<T, n> const& u, Vector<T, n> const& v)
-{
-    // Null vector ?
-    if (maths::almostZero(u[0]) || maths::almostZero(v[0]))
-        return maths::zero<T>();
-
-    const T k = u[0] / v[0];
-    for (size_t i = 1_z; i < n; ++i)
-    {
-        if (!maths::almostEqual(k * v[i], u[i]))
-            return T(NAN);
-    }
-    return k;
-}
-
-//! \brief Check if two vectors are parallels.
-//! \note Use this function for T a familly of float and not for integers.
-// http://www.educastream.com/vecteurs-colineaires-seconde
-template <typename T, size_t n>
-bool areCollinear(Vector<T, n> const& u, Vector<T, n> const& v)
-{
-    T k = collinearity(u, v);
-    return !std::isnan(k);
-}
-
-//! \brief Check if two vectors are mathematicaly equivalent: same
-//! norm (magnitude), same direction (parallel) and same sign.
-//! \note Use this function for T a familly of float and not for integers.
-template <typename T, size_t n>
-bool areEquivalent(Vector<T, n> const& u, Vector<T, n> const& v)
-{
-    T k = collinearity(u, v);
-    return maths::almostEqual(k, maths::one<T>());
-}
-
-//! \brief Check if three points A, B, C are aligned.
-//! \note Use this function for T a familly of float and not for integers.
-template <typename T, size_t n>
-bool arePointsAligned(Vector<T, n> const& a, Vector<T, n> const& b, Vector<T, n> const& c)
-{
-    return areCollinear(b - a, c - a);
-}
-
-//! \brief Constrain each element of the vector to lower and upper bounds.
-template <typename T, size_t n>
-Vector<T, n> clamp(Vector<T, n> const& a, T const lower, T const upper)
-{
-    Vector<T, n> result;
-    size_t i = n;
-
-    while (i--)
-        result[i] = maths::clamp(a[i], lower, upper);
-    return result;
-}
-
-//! \brief Vector product, aka for cross product (specialization for 2D vectors).
-template <typename T>
-T cross(Vector<T, 2_z> const& a, Vector<T, 2_z> const& b)
-{
-    return a.x * b.y - a.y * b.x;
-}
-
-//! \brief Vector product, aka for cross product (specialization for 3D vectors).
-template <typename T>
-Vector<T, 3_z> cross(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
-{
-    return
-            {
-                a.y * b.z - a.z * b.y,
-                a.z * b.x - a.x * b.z,
-                a.x * b.y - a.y * b.x,
-            };
-}
-
-//! \brief Dot product, aka scalar product (general algorithm).
-template <typename T, size_t n>
-T dot(Vector<T, n> const& a, Vector<T, n> const& b)
-{
-    T result = maths::zero<T>();
-    size_t i = n;
-
-    while (i--)
-        result += a[i] * b[i];
-    return result;
-}
-
-//! \brief Dot product, aka scalar product (specialization for 3D vectors).
-template <typename T, size_t n>
-T dot(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
-{
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-//! \brief Gets the squared magnitude of this vector.
-//! \note Alias for squaredNorm()
-template <typename T, size_t n>
-T squaredMagnitude(Vector<T, n> const& a)
-{
-    return dot(a, a);
-}
-
-//! \brief Gets the squared magnitude of this vector.
-//! \note Alias for squaredMagnitude()
-template <typename T, size_t n>
-T squaredNorm(Vector<T, n> const& a)
-{
-    return dot(a, a);
-}
-
-//! \brief Gets the magnitude of this vector.
-//! \note Alias for squaredNorm()
-template <typename T, size_t n>
-T magnitude(Vector<T, n> const& a)
-{
-    return T(maths::sqrt(dot(a, a)));
-}
-
-//! \brief Gets the magnitude of this vector.
-//! \note Alias for squaredMagnitude()
-template <typename T, size_t n>
-T norm(Vector<T, n> const& a)
-{
-    return T(maths::sqrt(dot(a, a)));
-}
-
-//! \brief Gets the squared magnitude of a - b.
-template <typename T, size_t n>
-T squaredDistance(Vector<T, n> const& a, Vector<T, n> const& b)
-{
-    return squaredNorm(a - b);
-}
-
-//! \brief Gets the magnitude of a - b.
-template <typename T, size_t n>
-T distance(Vector<T, n> const& a, Vector<T, n> const& b)
-{
-    return maths::sqrt(squaredDistance(a, b));
-}
-
-// FIXME: throw exception
-//! \brief Turns a non-zero vector into a vector of unit length.
-template <typename T, size_t n>
-Vector<T, n> normalize(Vector<T, n> const& a)
-{
-    return a / norm(a);
-}
-
-//! \brief Turns a non-zero vector into a vector of unit length.
-template <typename T, size_t n>
-Vector<T, n> normalise(Vector<T, n> const& a)
-{
-    return a / norm(a);
-}
-
-//! \brief Returns a vector at a point half way between the two
-//! given positions.
-template <typename T, size_t n>
-Vector<T, n> middle(Vector<T, n> const& a, Vector<T, n> const& b)
-{
-    Vector<T, n> result;
-    size_t i = n;
-
-    while (i--)
-        result[i] = (a[i] + b[i]) / T(2);
-    return result;
-}
-
-//! \brief Return the perpendicular vector (specialization for 2D vectors).
-template <typename T>
-Vector<T, 2_z> orthogonal(Vector<T, 2_z> const& a)
-{
-    return { -a.y, a.x };
-}
-
-//! \brief Return the perpendicular vector (specialization for 3D vectors).
-template <typename T>
-Vector<T, 3_z> orthogonal(Vector<T, 3_z> const& a)
-{
-    // Implementation due to Sam Hocevar - see blog post:
-    // http://lolengine.net/blog/2013/09/21/picking-orthogonal-Vector-combing-coconuts
-    if (maths::abs(a.x) > maths::abs(a.z))
-        return { -a.y, a.x, maths::zero<T>() };
-    else
-        return { maths::zero<T>(), -a.z, a.y };
-}
-
-//! \brief Check if the given two vectors are perpendicular between them.
-template <typename T, size_t n>
-typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-areOrthogonal(Vector<T, n> const& a, Vector<T, n> const& b)
-{
-    return maths::almostZero(dot(a, b));
-}
-
-//! \brief Gets the angle (in degrees) between 2 vectors.
-//! Compute: acos(dot(a,b) / (norm(a) * norm(b)))
-template <typename T, size_t n>
-T angleBetween(Vector<T, n> const& org, Vector<T, n> const& dest)
-{
-    T lenProduct = norm(org) * norm(dest);
-
-    // Divide by zero check
-    //if (lenProduct < 1e-6f)
-    //  lenProduct = 1e-6f;
-
-    T f = dot(org, dest) / lenProduct;
-    f = std::min(std::max(f, -maths::one<T>()), maths::one<T>());
-    return T(maths::toDegree(std::acos(f)));
-}
-
-//! \brief Calculates a reflection vector to the plane with the given normal.
-template <typename T, size_t n>
-Vector<T, n> reflect(Vector<T, n> const& v, Vector<T, n> const& normal)
-{
-    return v - (T(2) * dot(v, normal) * normal);
-}
-
-//! \brief Summation
-template <typename T, size_t n>
-T sum(Vector<T, n> const& v)
-{
-    T res = maths::zero<T>();
-    size_t i = n;
-    while (i--)
-    {
-        res += v[i];
-    }
-
-    return res;
-}
-
-//! \brief Mean (general algorithm)
-template <typename T, size_t n>
-T mean(Vector<T, n> const& v)
-{
-    return sum(v) / T(n);
-}
-
-//! \brief Mean (specialization for 2D vectors).
-template <typename T>
-T mean(Vector<T, 2_z> const& v)
-{
-    return (v[0] + v[1]) / T(2);
-}
-
-//! \brief Mean (specialization for 3D vectors).
-template <typename T>
-T mean(Vector<T, 3_z> const& v)
-{
-    return (v[0] + v[1] + v[2]) / T(3);
-}
-
-//! \brief Mean (specialization for 4D vectors).
-template <typename T>
-T mean(Vector<T, 4_z> const& v)
-{
-    return (v[0] + v[1] + v[2] + v[3]) / T(4);
-}
-
-//! \brief Root Mean Square
-template <typename T, size_t n>
-T rms(Vector<T, n> const& v)
-{
-    return norm(v) / maths::sqrt(v.size());
-}
-
-//! \brief Standard deviation
-template <typename T, size_t n>
-T std(Vector<T, n> const& v)
-{
-    return norm(v - vector::mean(v)) / maths::sqrt(v.size());
-}
-
-} // namespace vector
-
-//! \brief Scalar product (aka dot product).
-template <typename T, size_t n>
-T operator*(Vector<T, n> const& a, Vector<T, n> const& b)
-{
-    return vector::dot(a, b);
-}
-
-//! \brief Vector product (aka cross product).
-template <typename T, size_t n>
-Vector<T, n> operator%(Vector<T, n> const& a, Vector<T, n> const& b)
-{
-    return vector::cross(a, b);
-}
-
+// *****************************************************************************
 //! \brief Display a vector (global algorithm).
+// *****************************************************************************
 template <typename T, size_t n>
 std::ostream& operator<<(std::ostream& os, Vector<T, n> const& v)
 {
@@ -1111,46 +805,538 @@ std::ostream& operator<<(std::ostream& os, Vector<T, n> const& v)
     return os << ']';
 }
 
+// *****************************************************************************
 //! \brief Display a vector (specialization for 2D vectors).
+// *****************************************************************************
 template <typename T>
 std::ostream& operator<<(std::ostream& os, Vector<T, 2_z> const& v)
 {
     return os << "[" << v[0] << ", " << v[1] << ']';
 }
 
+// *****************************************************************************
 //! \brief Display a vector (specialization for 3D vectors).
+// *****************************************************************************
 template <typename T>
 std::ostream& operator<<(std::ostream& os, Vector<T, 3_z> const& v)
 {
     return os << "[" << v[0] << ", " << v[1] << ", " << v[2] << ']';
 }
 
+// *****************************************************************************
 //! \brief Display a vector (specialization for 4D vectors).
+// *****************************************************************************
 template <typename T>
 std::ostream& operator<<(std::ostream& os, Vector<T, 4_z> const& v)
 {
     return os << "[" << v[0] << ", " << v[1] << ", " << v[2]  << ", " << v[3] << ']';
 }
 
+namespace vector
+{
+
+    // *************************************************************************
+    //! \brief Compare the integer values for each elements of vectors.
+    //! \note Do not confuse this function with operator==() or the
+    //! function equivalent() which do not have the same behavior.
+    //! \return true if all elements have the same value.
+    // *************************************************************************
+    template <typename T, size_t n>
+    Vector<bool, n> compare(Vector<T, n> const& a, Vector<T, n> const& b,
+                            typename std::enable_if<std::is_integral<T>::value >::type* = 0)
+    {
+        Vector<bool, n> result;
+        size_t i = n;
+
+        while (i--)
+        {
+            result.m_data[i] = (a.m_data[i] == b.m_data[i]);
+        }
+
+        return result;
+    }
+
+    // *************************************************************************
+    //! \brief Compare the float values for each elements of vectors.
+    //! \note Do not confuse this function with operator==() or the
+    //! function equivalent() which do not have the same behavior.
+    //! \return true if all elements have the same value.
+    // *************************************************************************
+    template <typename T, size_t n>
+    Vector<bool, n> compare(Vector<T, n> const& a, Vector<T, n> const& b,
+                            typename std::enable_if<std::is_floating_point<T>::value >::type* = 0)
+    {
+        Vector<bool, n> result;
+        size_t i = n;
+
+        while (i--)
+        {
+            result.m_data[i] = maths::almostEqual(a.m_data[i], b.m_data[i]);
+        }
+
+        return result;
+    }
+
+    DEFINE_FUN2_OPERATOR(min, std::min)
+    DEFINE_FUN2_OPERATOR(max, std::max)
+    DEFINE_FUN1_OPERATOR(abs, maths::abs)
+    DEFINE_BOOL_OPERATOR(ge, >=)
+    DEFINE_BOOL_OPERATOR(gt, >)
+    DEFINE_BOOL_OPERATOR(le, <=)
+    DEFINE_BOOL_OPERATOR(lt, <)
+
+    // *************************************************************************
+    // *************************************************************************
+    template <typename T, size_t n>
+    void swap(Vector<T, n> &a, Vector<T, n> &b)
+    {
+        size_t i = n;
+        while (i--)
+        {
+            std::swap(a[i], b[i]);
+        }
+    }
+
+    // *************************************************************************
+    // *************************************************************************
+    template <typename T, size_t n>
+    Vector<T, n> lerp(Vector<T, n> const& a, Vector<T, n> const& b, float t)
+    {
+        Vector<T, n> r;
+
+        size_t i = n;
+        while (i--)
+        {
+            r[i] = maths::lerp(a[i], b[i], t);
+        }
+
+        return r;
+    }
+
+    // *************************************************************************
+    //! \brief Get the coeficient of collinearity (k) of two vectors (u and v).
+    //!
+    //! Two non-null vectors are collinear if and only it exists a
+    //! scalar k != 0, where: u = k v (note: if u is a null vector, any
+    //! vector v is collinear to u because k = 0).
+    //!
+    //! \return k if vectors are collinear, else return NaN if vectors are not
+    //! collinear, else return 0 if zero vector.
+    //!
+    //! \note Use this function for T a familly of float and not for integers.
+    // *************************************************************************
+    template <typename T, size_t n>
+    T collinearity(Vector<T, n> const& u, Vector<T, n> const& v)
+    {
+        // Null vector ?
+        if (maths::almostZero(u[0]) || maths::almostZero(v[0]))
+            return maths::zero<T>();
+
+        const T k = u[0] / v[0];
+        for (size_t i = 1_z; i < n; ++i)
+        {
+            if (!maths::almostEqual(k * v[i], u[i]))
+                return T(NAN);
+        }
+        return k;
+    }
+
+    // *************************************************************************
+    //! \brief Check if two vectors are parallels.
+    //! \note Use this function for T a familly of float and not for integers.
+    // http://www.educastream.com/vecteurs-colineaires-seconde
+    // *************************************************************************
+    template <typename T, size_t n>
+    bool areCollinear(Vector<T, n> const& u, Vector<T, n> const& v)
+    {
+        T k = collinearity(u, v);
+        return !std::isnan(k);
+    }
+
+    // *************************************************************************
+    //! \brief Check if two vectors are mathematicaly equivalent: same
+    //! norm (magnitude), same direction (parallel) and same sign.
+    //! \note Use this function for T a familly of float and not for integers.
+    // *************************************************************************
+    template <typename T, size_t n>
+    bool areEquivalent(Vector<T, n> const& u, Vector<T, n> const& v)
+    {
+        T k = collinearity(u, v);
+        return maths::almostEqual(k, maths::one<T>());
+    }
+
+    // *************************************************************************
+    //! \brief Check if three points A, B, C are aligned.
+    //! \note Use this function for T a familly of float and not for integers.
+    // *************************************************************************
+    template <typename T, size_t n>
+    bool arePointsAligned(Vector<T, n> const& a, Vector<T, n> const& b, Vector<T, n> const& c)
+    {
+        return areCollinear(b - a, c - a);
+    }
+
+    // *************************************************************************
+    //! \brief Constrain each element of the vector to lower and upper bounds.
+    // *************************************************************************
+    template <typename T, size_t n>
+    Vector<T, n> clamp(Vector<T, n> const& a, T const lower, T const upper)
+    {
+        Vector<T, n> result;
+        size_t i = n;
+
+        while (i--)
+            result[i] = maths::clamp(a[i], lower, upper);
+        return result;
+    }
+
+    // *************************************************************************
+    //! \brief Calculates and returns a component-wise product of this vector
+    //! with the given vector.
+    //! \return a ° b = transpose([a_x, a_y, a_z]) ° transpose([b_x, b_y, b_z]) =
+    //! transpose([a_x * b_x, a_y * b_y, a_z * b_z])
+    // *************************************************************************
+    template <typename T, size_t n>
+    Vector<T, n> componentProduct(Vector<T, n> const& a, Vector<T, n> const& b)
+    {
+        Vector<T, n> result;
+        size_t i = n;
+        while (i--)
+            result[i] = a[i] * b[i];
+        return result;
+    }
+
+    // *************************************************************************
+    //! \brief Performs a component-wise product with the given vector and sets
+    //! this vector to its result.
+    // *************************************************************************
+    template <typename T, size_t n>
+    Vector<T, n> componentProductUpdate(Vector<T, n> const& a)
+    {
+        Vector<T, n> result;
+        size_t i = n;
+        while (i--)
+            result[i] *= a[i];
+        return result;
+    }
+
+    // *************************************************************************
+    //! \brief Vector product, aka for cross product (specialization for 2D vectors).
+    //!
+    // *************************************************************************
+    template <typename T>
+    T cross(Vector<T, 2_z> const& a, Vector<T, 2_z> const& b)
+    {
+        return a.x * b.y - a.y * b.x;
+    }
+
+    // *************************************************************************
+    //! \brief Vector product, aka for cross product (specialization for 3D vectors).
+    // *************************************************************************
+    template <typename T>
+    Vector<T, 3_z> cross(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
+    {
+        return
+                {
+                    a.y * b.z - a.z * b.y,
+                    a.z * b.x - a.x * b.z,
+                    a.x * b.y - a.y * b.x,
+                };
+    }
+
+    // *************************************************************************
+    //! \brief Dot product, aka scalar product (general algorithm).
+    //! \return a . b = transpose([a_x a_y a_z ...]) . transpose([b_x b_y b_z ...])
+    // *************************************************************************
+    template <typename T, size_t n>
+    T dot(Vector<T, n> const& a, Vector<T, n> const& b)
+    {
+        T result = maths::zero<T>();
+        size_t i = n;
+
+        while (i--)
+            result += a[i] * b[i];
+        return result;
+    }
+
+    // *************************************************************************
+    //! \brief Dot product, aka scalar product (specialization for 3D vectors).
+    //! \return a . b = transpose([a_x a_y a_z]) . transpose([b_x b_y b_z])
+    // *************************************************************************
+    template <typename T, size_t n>
+    T dot(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
+    {
+        return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
+
+    // *************************************************************************
+    //! \brief Dot product, aka scalar product (specialization for 2D vectors).
+    //! \return a . b = transpose([a_x a_y]) . transpose([b_x b_y])
+    // *************************************************************************
+    template <typename T, size_t n>
+    T dot(Vector<T, 2_z> const& a, Vector<T, 2_z> const& b)
+    {
+        return a.x * b.x + a.y * b.y;
+    }
+
+    // *************************************************************************
+    //! \brief Gets the squared magnitude of this vector.
+    //! \note Alias for squaredNorm()
+    // *************************************************************************
+    template <typename T, size_t n>
+    T squaredMagnitude(Vector<T, n> const& a)
+    {
+        return dot(a, a);
+    }
+
+    // *************************************************************************
+    //! \brief Gets the squared magnitude of this vector.
+    //! \note Alias for squaredMagnitude()
+    // *************************************************************************
+    template <typename T, size_t n>
+    T squaredNorm(Vector<T, n> const& a)
+    {
+        return dot(a, a);
+    }
+
+    // *************************************************************************
+    //! \brief Gets the magnitude of this vector.
+    //! \note Alias for squaredNorm()
+    // *************************************************************************
+    template <typename T, size_t n>
+    T magnitude(Vector<T, n> const& a)
+    {
+        return T(maths::sqrt(dot(a, a)));
+    }
+
+    // *************************************************************************
+    //! \brief Gets the magnitude of this vector.
+    //! \note Alias for squaredMagnitude()
+    // *************************************************************************
+    template <typename T, size_t n>
+    T norm(Vector<T, n> const& a)
+    {
+        return T(maths::sqrt(dot(a, a)));
+    }
+
+    // *************************************************************************
+    //! \brief Gets the squared magnitude of a - b.
+    // *************************************************************************
+    template <typename T, size_t n>
+    T squaredDistance(Vector<T, n> const& a, Vector<T, n> const& b)
+    {
+        return squaredNorm(a - b);
+    }
+
+    // *************************************************************************
+    //! \brief Gets the magnitude of a - b.
+    // *************************************************************************
+    template <typename T, size_t n>
+    T distance(Vector<T, n> const& a, Vector<T, n> const& b)
+    {
+        return maths::sqrt(squaredDistance(a, b));
+    }
+
+    // *************************************************************************
+    // FIXME: throw exception
+    //! \brief Turns a non-zero vector into a vector of unit length.
+    // *************************************************************************
+    template <typename T, size_t n>
+    Vector<T, n> normalize(Vector<T, n> const& a)
+    {
+        return a / norm(a);
+    }
+
+    // *************************************************************************
+    //! \brief Turns a non-zero vector into a vector of unit length.
+    // *************************************************************************
+    template <typename T, size_t n>
+    Vector<T, n> normalise(Vector<T, n> const& a)
+    {
+        return a / norm(a);
+    }
+
+    // *************************************************************************
+    //! \brief Returns a vector at a point half way between the two
+    //! given positions.
+    // *************************************************************************
+    template <typename T, size_t n>
+    Vector<T, n> middle(Vector<T, n> const& a, Vector<T, n> const& b)
+    {
+        Vector<T, n> result;
+        size_t i = n;
+
+        while (i--)
+            result[i] = (a[i] + b[i]) / T(2);
+        return result;
+    }
+
+    // *************************************************************************
+    //! \brief Return the perpendicular vector (specialization for 2D vectors).
+    // *************************************************************************
+    template <typename T>
+    Vector<T, 2_z> orthogonal(Vector<T, 2_z> const& a)
+    {
+        return { -a.y, a.x };
+    }
+
+    // *************************************************************************
+    //! \brief Return the perpendicular vector (specialization for 3D vectors).
+    // *************************************************************************
+    template <typename T>
+    Vector<T, 3_z> orthogonal(Vector<T, 3_z> const& a)
+    {
+        // Implementation due to Sam Hocevar - see blog post:
+        // http://lolengine.net/blog/2013/09/21/picking-orthogonal-Vector-combing-coconuts
+        if (maths::abs(a.x) > maths::abs(a.z))
+            return { -a.y, a.x, maths::zero<T>() };
+        else
+            return { maths::zero<T>(), -a.z, a.y };
+    }
+
+    // *************************************************************************
+    //! \brief Check if the given two vectors are perpendicular between them.
+    // *************************************************************************
+    template <typename T, size_t n>
+    bool areOrthogonal(Vector<T, n> const& a, Vector<T, n> const& b,
+                            typename std::enable_if<std::is_floating_point<T>::value >::type* = 0)
+    {
+        return maths::almostZero(dot(a, b));
+    }
+
+    template <typename T, size_t n>
+    bool areOrthogonal(Vector<T, n> const& a, Vector<T, n> const& b,
+                       typename std::enable_if<std::is_integral<T>::value >::type* = 0)
+    {
+        return maths::zero<T>() == T(dot(a, b));
+    }
+
+    // *************************************************************************
+    //! \brief Gets the angle (in radiant) between 2 vectors.
+    //! Comes from the definition of scalar product:
+    //!   a . b = norm(a) * norm(b) cos(angle)
+    //! => angle = cos^-1(dot(a,b) / (norm(a) * norm(b)))
+    // *************************************************************************
+    template <typename T, size_t n>
+    units::angle::radian_t angleBetween(Vector<T, n> const& org, Vector<T, n> const& dest)
+    {
+        T lenProduct = norm(org) * norm(dest);
+
+        // Divide by zero check
+        //if (lenProduct < 1e-6f)
+        //  lenProduct = 1e-6f;
+
+        T f = dot(org, dest) / lenProduct;
+        f = std::min(std::max(f, -maths::one<T>()), maths::one<T>());
+        return units::angle::radian_t(std::acos(f));
+    }
+
+    // *************************************************************************
+    //! \brief Calculates a reflection vector to the plane with the given normal.
+    // *************************************************************************
+    template <typename T, size_t n>
+    Vector<T, n> reflect(Vector<T, n> const& v, Vector<T, n> const& normal)
+    {
+        return v - (T(2) * dot(v, normal) * normal);
+    }
+
+    // *************************************************************************
+    //! \brief Summation
+    // *************************************************************************
+    template <typename T, size_t n>
+    T sum(Vector<T, n> const& v)
+    {
+        T res = maths::zero<T>();
+        size_t i = n;
+        while (i--)
+        {
+            res += v[i];
+        }
+
+        return res;
+    }
+
+    // *************************************************************************
+    //! \brief Mean (general algorithm)
+    // *************************************************************************
+    template <typename T, size_t n>
+    T mean(Vector<T, n> const& v)
+    {
+        return sum(v) / T(n);
+    }
+
+    // *************************************************************************
+    //! \brief Mean (specialization for 2D vectors).
+    // *************************************************************************
+    template <typename T>
+    T mean(Vector<T, 2_z> const& v)
+    {
+        return (v[0] + v[1]) / T(2);
+    }
+
+    // *************************************************************************
+    //! \brief Mean (specialization for 3D vectors).
+    // *************************************************************************
+    template <typename T>
+    T mean(Vector<T, 3_z> const& v)
+    {
+        return (v[0] + v[1] + v[2]) / T(3);
+    }
+
+    // *************************************************************************
+    //! \brief Mean (specialization for 4D vectors).
+    // *************************************************************************
+    template <typename T>
+    T mean(Vector<T, 4_z> const& v)
+    {
+        return (v[0] + v[1] + v[2] + v[3]) / T(4);
+    }
+
+    // *************************************************************************
+    //! \brief Root Mean Square
+    // *************************************************************************
+    template <typename T, size_t n>
+    T rms(Vector<T, n> const& v)
+    {
+        return norm(v) / maths::sqrt(v.size());
+    }
+
+    // *************************************************************************
+    //! \brief Standard deviation
+    // *************************************************************************
+    template <typename T, size_t n>
+    T std(Vector<T, n> const& v)
+    {
+        return norm(v - vector::mean(v)) / maths::sqrt(v.size());
+    }
+
+} // namespace vector
+
 // *****************************************************************************
-// Typedefs for the most common types and dimensions
+//! \brief Scalar product (aka dot product).
 // *****************************************************************************
+template <typename T, size_t n>
+T operator*(Vector<T, n> const& a, Vector<T, n> const& b)
+{
+    return vector::dot(a, b);
+}
 
-typedef Vector<bool, 2_z> Vector2b;
-typedef Vector<bool, 3_z> Vector3b;
-typedef Vector<bool, 4_z> Vector4b;
+// *****************************************************************************
+//! \brief Vector product (aka cross product).
+// *****************************************************************************
+template <typename T>
+Vector<T, 3_z> operator%(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
+{
+    return vector::cross<T>(a, b);
+}
 
-typedef Vector<int32_t, 2_z> Vector2i;
-typedef Vector<int32_t, 3_z> Vector3i;
-typedef Vector<int32_t, 4_z> Vector4i;
-
-typedef Vector<float, 2_z> Vector2f;
-typedef Vector<float, 3_z> Vector3f;
-typedef Vector<float, 4_z> Vector4f;
-
-typedef Vector<double, 2_z> Vector2g;
-typedef Vector<double, 3_z> Vector3g;
-typedef Vector<double, 4_z> Vector4g;
+// *****************************************************************************
+//! \brief Vector product (aka cross product).
+// *****************************************************************************
+template <typename T>
+T operator%(Vector<T, 2_z> const& a, Vector<T, 2_z> const& b)
+{
+    return vector::cross<T>(a, b);
+}
 
 #  undef DEFINE_UNARY_OPERATOR
 #  undef DEFINE_BINARY_OPERATORS

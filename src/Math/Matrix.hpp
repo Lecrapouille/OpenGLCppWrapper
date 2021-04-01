@@ -145,7 +145,7 @@ public:
             i = cols;
             while (i--)
             {
-                m_data[cols * i + i] = maths::one<T>();
+                 m_data[cols * i + i] = maths::one<T>();
             }
             break;
         case matrix::Type::Zero:
@@ -487,9 +487,15 @@ Matrix<T, rows, cols> operator*(Matrix<T, rows, inner> const &a, Matrix<T, inner
 
 // *****************************************************************************
 //! \brief Matrix-Vector multiplication.
+//!
+//! Example:
+//! \code
+//!     |1 2|   |6|   |20|
+//! B = |3 4| * |7| = |46|
+//! \endcode
 //! \param[in] a the matrix (dimension MxN).
 //! \param[in] b the column vector (dimension N).
-//! \return a column vector (dimension N).
+//! \return a (column) vector (dimension N).
 // *****************************************************************************
 template <typename T, size_t rows, size_t cols>
 Vector<T, rows> operator*(Matrix<T, rows, cols> const &a, Vector<T, cols> const &b)
@@ -507,9 +513,15 @@ Vector<T, rows> operator*(Matrix<T, rows, cols> const &a, Vector<T, cols> const 
 
 // *****************************************************************************
 //! \brief Vector-Matrix multiplication.
+//!
+//! Example:
+//! \code
+//!             |1 2|
+//! C = |6 7| * |3 4| = |27 40|
+//! \endcode
 //! \param[in] a the row vector (dimension N).
 //! \param[in] b the matrix (dimension MxN).
-//! \return row vector (dimension N).
+//! \return a (row) vector (dimension N).
 // *****************************************************************************
 template <typename T, size_t rows, size_t cols>
 Vector<T, cols> operator*(Vector<T, rows> const &a, Matrix<T, rows, cols> const &b)
@@ -568,6 +580,36 @@ std::ostream& operator<<(std::ostream& os, Matrix<T, rows, cols> const& m)
 namespace matrix
 {
     // *************************************************************************
+    //! \brief Convert a generic vector to a row vector.
+    // *************************************************************************
+    template <typename T, size_t rows>
+    Matrix<T, rows, 1_z> castToRowVector(Vector<T, rows> const& v)
+    {
+        Matrix<T, rows, 1_z> result;
+
+        size_t i = rows;
+        while (i--)
+            result(0, i) = v[i];
+
+        return result;
+    }
+
+    // *************************************************************************
+    //! \brief Convert a generic vector to a column vector.
+    // *************************************************************************
+    template <typename T, size_t cols>
+    Matrix<T, 1_z, cols> castToColumnVector(Vector<T, cols> const& v)
+    {
+        Matrix<T, 1_z, cols> result;
+
+        size_t i = cols;
+        while (i--)
+            result(i, 0) = v[i];
+
+        return result;
+    }
+
+    // *************************************************************************
     //! \brief Clear the given square matrix and set it as identity matrix.
     //! \note The matrix shall be a squared matrix.
     // *************************************************************************
@@ -584,11 +626,7 @@ namespace matrix
     template <typename T, size_t rows, size_t cols>
     void zero(Matrix<T, rows, cols> &a)
     {
-        size_t i = rows;
-        while (i--)
-        {
-            a(i, i) = maths::zero<T>();
-        }
+        a = Matrix<T, rows, cols>(matrix::Zero);
     }
 
     // *************************************************************************
@@ -597,28 +635,50 @@ namespace matrix
     template <typename T, size_t rows, size_t cols>
     void one(Matrix<T, rows, cols> &a)
     {
-        size_t i = rows;
-        while (i--)
-        {
-            a(i, i) = maths::one<T>();
-        }
+        a = Matrix<T, rows, cols>(matrix::One);
     }
 
     // *************************************************************************
-    //! \brief Compare each elements of two matrices, check if they have the
-    //! same value +/- epsilon. Return the boolean matrix of the result.
+    //! \brief Compare each integer elements of two matrices, check if they have
+    //! the same value. Return the boolean matrix of the result.
     //! \return the boolean matrix containing the result of each element
     //! comparaison.
     // *************************************************************************
     template <typename T, size_t rows, size_t cols>
     Matrix<bool, rows, cols> compare(Matrix<T, rows, cols> const &a,
-                                     Matrix<T, rows, cols> const &b)
+                                     Matrix<T, rows, cols> const &b,
+                                     typename std::enable_if<std::is_integral<T>::value >::type* = 0)
     {
         Matrix<bool, rows, cols> result;
         size_t i = rows * cols;
 
         while (i--)
+        {
+            result.m_data[i] = (a.m_data[i] == b.m_data[i]);
+        }
+
+        return result;
+    }
+
+    // *************************************************************************
+    //! \brief Compare each float elements of two matrices, check if they have
+    //! the same value +/- epsilon. Return the boolean matrix of the result.
+    //! \return the boolean matrix containing the result of each element
+    //! comparaison.
+    // *************************************************************************
+    template <typename T, size_t rows, size_t cols>
+    Matrix<bool, rows, cols> compare(Matrix<T, rows, cols> const &a,
+                                     Matrix<T, rows, cols> const &b,
+                                     typename std::enable_if<std::is_floating_point<T>::value >::type* = 0)
+    {
+        Matrix<bool, rows, cols> result;
+        size_t i = rows * cols;
+
+        while (i--)
+        {
             result.m_data[i] = maths::almostEqual(a.m_data[i], b.m_data[i]);
+        }
+
         return result;
     }
 

@@ -347,29 +347,6 @@ TEST(TestMatrices, testComparaisons)
         ASSERT_THAT(C[3].data(), ElementsAre(true, true, true, true));
     }
 
-
-    // Operator ==
-    {
-        Matrix44b A = (one == two);
-        Matrix44b B = (two == one);
-        Matrix44b C = (one == one);
-
-        ASSERT_THAT(A[0].data(), ElementsAre(false, false, false, false));
-        ASSERT_THAT(A[1].data(), ElementsAre(false, false, false, false));
-        ASSERT_THAT(A[2].data(), ElementsAre(false, false, false, false));
-        ASSERT_THAT(A[3].data(), ElementsAre(false, false, false, false));
-
-        ASSERT_THAT(B[0].data(), ElementsAre(false, false, false, false));
-        ASSERT_THAT(B[1].data(), ElementsAre(false, false, false, false));
-        ASSERT_THAT(B[2].data(), ElementsAre(false, false, false, false));
-        ASSERT_THAT(B[3].data(), ElementsAre(false, false, false, false));
-
-        ASSERT_THAT(C[0].data(), ElementsAre(true, true, true, true));
-        ASSERT_THAT(C[1].data(), ElementsAre(true, true, true, true));
-        ASSERT_THAT(C[2].data(), ElementsAre(true, true, true, true));
-        ASSERT_THAT(C[3].data(), ElementsAre(true, true, true, true));
-    }
-
     // Operator !=
     {
         Matrix44b A = (one != two);
@@ -539,6 +516,27 @@ TEST(TestMatrices, testArithmetic)
     ASSERT_THAT(C5[3].data(), ElementsAre(126.0f,   0.0f,   0.0f,  150.0f));
 
     ASSERT_THAT(matrix::trace(C5), 552.0f);
+}
+
+//--------------------------------------------------------------------------
+TEST(TestMatrices, testWithVector)
+{
+    Matrix22f A = {1.0f, 2.0f, 3.0f, 4.0f};
+    Vector2f v = { 6.0f, 7.0f };
+
+    // V is considered as column vector:
+    //     |1 2|   |6|   |20|
+    // B = |3 4| * |7| = |46|
+    /*Matrix<float, 1_z, 2_z>*/ Vector2f B = A * v;
+    ASSERT_EQ(B.size(), 2_z);
+    ASSERT_THAT(B.data(), ElementsAre(20.0f, 46.0f));
+
+    // V is considered as row vector:
+    //             |1 2|
+    // C = |6 7| * |3 4| = |27 40|
+    /*Matrix<float, 2_z, 1_z>*/ Vector2f C = v * A;
+    ASSERT_EQ(C.size(), 2_z);
+    ASSERT_THAT(C.data(), ElementsAre(27.0f, 40.0f));
 }
 
 //--------------------------------------------------------------------------
