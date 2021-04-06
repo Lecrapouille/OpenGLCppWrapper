@@ -105,15 +105,15 @@ namespace matrix
     //!
     //! \param[in] M Input matrix multiplied by this rotation matrix.
     //! \param[in] angle Rotation angle expressed in radians.
-    //! \param[in] r Rotation axis, recommended to be normalized.
+    //! \param[in] r Rotation axis that will be normalized by this function.
     //! \return A transposed matrix.
     //!
     //! \code
     //! If \c M is the identity matrix, the output matrix O will be:
     //!
-    //!                | c+RxRx(1-c)      RxRy(1-c)-Rz.c   RxRy(1-c)+Ry.s   0 |
-    //!                | RyRx(1-c)+Rz.s   c+RyRy(1-c)      RyRz(1-c)-Rx.s   0 |
-    //! O = transpose( | RzRx(1-c)-Ry.s   RzRy(1-c)+Rx.s   c+RzRz(1-c)      0 | )
+    //!                | RxRx(1-c)+c      RxRy(1-c)-Rz.s   RxRz(1-c)+Ry.s   0 |
+    //!                | RyRx(1-c)+Rz.s   RyRy(1-c)+c      RyRz(1-c)-Rx.s   0 |
+    //! O = transpose( | RzRx(1-c)-Ry.s   RzRy(1-c)+Rx.s   RzRz(1-c)+c      0 | )
     //!                | 0                0                0                1 |
     //!
     //! Where: c = cosinus and s = sinus.
@@ -154,23 +154,36 @@ namespace matrix
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Return the orthogonal matrix.
+    //! \return the transposed orthogonal matrix.
     //--------------------------------------------------------------------------
     template<typename T>
     Matrix<T, 4_z, 4_z> ortho(T const left, T const right,
                               T const bottom, T const top,
                               T const near, T const far)
     {
-        Matrix<T, 4_z, 4_z> O(matrix::Identity);
-
-        O[0][0] = T(2) / (right - left);
-        O[1][1] = T(2) / (top - bottom);
-        O[2][2] = T(2) / (far - near);
-        O[3][0] = -(right + left) / (right - left);
-        O[3][1] = -(top + bottom) / (top - bottom);
-        O[3][2] = -(far + near) / (far - near);
-
-        return O;
+        return {
+            //
+            T(2) / (right - left),
+            maths::zero<T>(),
+            maths::zero<T>(),
+            maths::zero<T>(),
+            //
+            maths::zero<T>(),
+            T(2) / (top - bottom),
+            maths::zero<T>(),
+            maths::zero<T>(),
+            //
+            maths::zero<T>(),
+            maths::zero<T>(),
+            T(2) / (far - near),
+            maths::zero<T>(),
+            //
+            -(right + left) / (right - left),
+            -(top + bottom) / (top - bottom),
+            -(far + near) / (far - near),
+            maths::one<T>()
+        };
     }
 
     //--------------------------------------------------------------------------
@@ -179,22 +192,47 @@ namespace matrix
     //! \param[in] aspect Aspect ratio of the viewport.
     //! \param[in] zNear The near clipping distance.
     //! \param[in] zFar The far clipping distance.
+    //! \return the transposed perspective matrix.
     //--------------------------------------------------------------------------
     template<typename T>
-    Matrix<T, 4_z, 4_z> perspective(T const fovY, T const aspect, T const zNear, T const zFar)
+    Matrix<T, 4_z, 4_z> perspective(units::angle::radian_t const fovY,
+                                    T const aspect, T const zNear, T const zFar)
     {
         assert(maths::abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
 
-        T const tanHalfFovY = std::tan(fovY / T(2));
-        Matrix<T, 4_z, 4_z> O(0);
+        T const tanHalfFovY = std::tan(fovY.to<T>() / T(2));
 
-        O[0][0] = maths::one<T>() / (aspect * tanHalfFovY);
-        O[1][1] = maths::one<T>() / (tanHalfFovY);
-        O[2][3] = -maths::one<T>();
-        O[2][2] = -(zFar + zNear) / (zFar - zNear);
-        O[3][2] = -(T(2) * zFar * zNear) / (zFar - zNear);
+        return {
+            //
+            maths::one<T>() / (aspect * tanHalfFovY),
+            maths::zero<T>(),
+            maths::zero<T>(),
+            maths::zero<T>(),
 
-        return O;
+            //
+            maths::zero<T>(),
+            maths::one<T>() / (tanHalfFovY),
+            maths::zero<T>(),
+            maths::zero<T>(),
+
+            //
+            maths::zero<T>(),
+            maths::zero<T>(),
+            -(zFar + zNear) / (zFar - zNear),
+            -maths::one<T>(),
+
+            //
+            maths::zero<T>(),
+            maths::zero<T>(),
+            -(T(2) * zFar * zNear) / (zFar - zNear),
+            maths::zero<T>(),
+
+            //
+            maths::zero<T>(),
+            maths::zero<T>(),
+            maths::zero<T>(),
+            maths::one<T>()
+        };
     }
 
     //--------------------------------------------------------------------------
@@ -227,22 +265,32 @@ namespace matrix
         Vector<T, 3_z> const direction(vector::normalize(target - position));
         Vector<T, 3_z> const right(vector::normalize(vector::cross(direction, upwards)));
         Vector<T, 3_z> const up(vector::cross(right, direction));
-        Matrix<T, 4_z, 4_z> O(matrix::Identity);
 
-        O[0][0] = right.x;
-        O[1][0] = right.y;
-        O[2][0] = right.z;
-        O[0][1] = up.x;
-        O[1][1] = up.y;
-        O[2][1] = up.z;
-        O[0][2] = -direction.x;
-        O[1][2] = -direction.y;
-        O[2][2] = -direction.z;
-        O[3][0] = -(vector::dot(right, position));
-        O[3][1] = -(vector::dot(up, position));
-        O[3][2] = vector::dot(direction, position);
+        return {
+            //
+            right.x,
+            up.x,
+            -direction.x,
+             maths::zero<T>(),
 
-        return O;
+            //
+            right.y,
+            up.y,
+            -direction.y,
+             maths::zero<T>(),
+
+            //
+            right.z,
+            up.z,
+            -direction.z,
+             maths::zero<T>(),
+
+            //
+            -(vector::dot(right, position)),
+            -(vector::dot(up, position)),
+            vector::dot(direction, position),
+            maths::one<T>()
+        };
     }
 
     //--------------------------------------------------------------------------

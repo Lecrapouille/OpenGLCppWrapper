@@ -29,15 +29,18 @@
 //#undef private
 
 //--------------------------------------------------------------------------
-template <typename T, size_t r, size_t c>
-static void check_matrix(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
-{
-    for (size_t i = 0_z; i < r * c; ++i)
-    {
-std::cout << a.m_data[i] << " vs " << b.m_data[i] << std::endl;
-        ASSERT_EQ(true, std::abs(a.m_data[i] - b.m_data[i]) < 0.0001f);
+#define ASSERT_MATRIX_NEAR(expected, actual, thresh)                    \
+    for (size_t idx = 0; idx < 16u; ++idx)                              \
+    {                                                                   \
+        ASSERT_NEAR(expected.data()[idx], actual.data()[idx], thresh) << "at index: " << idx; \
     }
-}
+
+//--------------------------------------------------------------------------
+#define ASSERT_MATRIX(expected, actual)                                 \
+    for (size_t idx = 0; idx < 16u; ++idx)                              \
+    {                                                                   \
+        ASSERT_EQ(expected.data()[idx], actual.data()[idx]) << "at index: " << idx; \
+    }
 
 //--------------------------------------------------------------------------
 TEST(TestTransformation, testTranslate)
@@ -45,10 +48,10 @@ TEST(TestTransformation, testTranslate)
     Matrix44f I(matrix::Identity);
     Matrix44f M = matrix::translate(I, Vector3f(2.0f, 3.0f, 4.0f));
 
-    check_matrix(M, Matrix44f({1.0f, 0.0f, 0.0f, 0.0f,
-                               0.0f, 1.0f, 0.0f, 0.0f,
-                               0.0f, 0.0f, 1.0f, 0.0f,
-                               2.0f, 3.0f, 4.0f, 1.0f}));
+    ASSERT_MATRIX(M, Matrix44f({1.0f, 0.0f, 0.0f, 0.0f,
+                                0.0f, 1.0f, 0.0f, 0.0f,
+                                0.0f, 0.0f, 1.0f, 0.0f,
+                                2.0f, 3.0f, 4.0f, 1.0f}));
 }
 
 //--------------------------------------------------------------------------
@@ -57,66 +60,50 @@ TEST(TestTransformation, testScale)
     Matrix44f I(matrix::Identity);
     Matrix44f M = matrix::scale(I, Vector3f(2.0f, 3.0f, 4.0f));
 
-    check_matrix(M, Matrix44f({2.0f, 0.0f, 0.0f, 0.0f,
-                               0.0f, 3.0f, 0.0f, 0.0f,
-                               0.0f, 0.0f, 4.0f, 0.0f,
-                               0.0f, 0.0f, 0.0f, 1.0f}));
+    ASSERT_MATRIX(M, Matrix44f({2.0f, 0.0f, 0.0f, 0.0f,
+                                0.0f, 3.0f, 0.0f, 0.0f,
+                                0.0f, 0.0f, 4.0f, 0.0f,
+                                0.0f, 0.0f, 0.0f, 1.0f}));
 }
 
 //--------------------------------------------------------------------------
 TEST(TestTransformation, testRotation)
 {
-    const units::angle::degree_t angle(45.0f);
-    const float a = angle.to<float>();
-    const float c = cos(a);
-    const float s = cos(a);
-    const float Rz = 0.371391f;
-    const float Ry = 0.557086f;
-    const float Rx = 0.742781f;
-
+    const units::angle::radian_t angle(units::angle::degree_t(45.0f));
+    const float c = cos(angle.to<float>());
+    const float s = cos(angle.to<float>());
+    const float oc = 1.0f - c;
+    const Vector3f axis(0.371391f, 0.557086f, 0.742781f);
     Matrix44f I(matrix::Identity);
-    Matrix44f M = matrix::rotate(I, angle, Vector3f(Rx, Ry, Rz));
 
-Vector3f q(Rx, Ry, Rz);
-std::cout << vector::normalize(q) << std::endl;
-std::cout << "M: " << M << std::endl;
-std::cout << "QQ: " << Matrix44f({
-                //
-                Rx * Rx * (1.0f - c) + c,
-                Rx * Ry * (1.0f - c) + Rz * s,
-                Rx * Ry * (1.0f - c) - Ry * s,
-                0.0f,
-                //
-                Rx * Ry * (1.0f - c) - Rz * s,
-                Ry * Ry * (1.0f - c) + c,
-                Ry * Rz * (1.0f - c) + Rx * s,
-                0.0f,
-                //
-                Rx * Rz * (1.0f - c) + Ry * s,
-                Ry * Rz * (1.0f - c) - Rx * s,
-                Rz * Rz * (1.0f - c) + c,
-                0.0f,
-                //
-                0.0f, 0.0f, 0.0f, 1.0f}) << std::endl;
+    // Actual
+    Matrix44f A = matrix::rotate(I, angle, axis);
 
-    check_matrix(M, Matrix44f({
-                //
-                c + Rx * Rx * (1.0f - c),
-                Rx * Ry * (1.0f - c) - Rz * c,
-                Rx * Ry * (1.0f - c) + Ry * s,
-                0.0f,
-                //
-                Ry * Rx * (1.0f - c) + Rz * s,
-                c + Ry * Ry * (1.0f - c),
-                Ry * Rz * (1.0f - c) - Rx * s,
-                0.0f,
-                //
-                Rz * Rx * (1.0f - c) - Ry * s,
-                Rz * Ry * (1.0f - c) + Rx * s,
-                c + Rz * Rz * (1.0f - c),
-                0.0f,
-                //
-                0.0f, 0.0f, 0.0f, 1.0f}));
+    // Expected https://fr.wikipedia.org/wiki/Matrice_de_rotation
+    Matrix44f E = {
+        //
+        axis[0] * axis[0] * oc + c,
+        axis[0] * axis[1] * oc + axis[2] * s,
+        axis[0] * axis[2] * oc - axis[1] * s,
+        0.0f,
+
+        //
+        axis[0] * axis[1] * oc - axis[2] * s,
+        axis[1] * axis[1] * oc + c,
+        axis[1] * axis[2] * oc + axis[0] * s,
+        0.0f,
+
+        //
+        axis[0] * axis[2] * oc + axis[1] * s,
+        axis[1] * axis[2] * oc - axis[0] * s,
+        axis[2] * axis[2] * oc + c,
+        0.0f,
+
+        //
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    ASSERT_MATRIX_NEAR(A, E, 0.0001f);
 }
 
 //--------------------------------------------------------------------------
@@ -126,44 +113,72 @@ TEST(TestTransformation, testOrtho)
     const float bottom = 3.0f; const float top = 4.0f;
     const float near = 5.0f; const float far = 6.0f;
 
-    Matrix44f M = matrix::ortho(left, right, bottom, top, near, far);
+    // Actual
+    Matrix44f A = matrix::ortho(left, right, bottom, top, near, far);
 
-std::cout << "M: " << M << std::endl;
-std::cout << "QQ: " << Matrix44f({
-                //
-                2.0f / (right - left),
-                0.0f,
-                0.0f,
-                -(right + left) / (right - left),
-                //
-                0.0f,
-                2.0f / (top - bottom),
-                0.0f,
-                -(top + bottom) / (top - bottom),
-                //
-                0.0f,
-                0.0f,
-                2.0f / (far - near),
-                -(far + near) / (far - near),
-                //
-                0.0f, 0.0f, 0.0f, 1.0f}) << std::endl;
+    // Expected (glm)
+    Matrix44f E(matrix::Identity);
+    E[0][0] = 2.0f / (right - left);
+    E[1][1] = 2.0f / (top - bottom);
+    E[2][2] = 2.0f / (far - near);
+    E[3][0] = -(right + left) / (right - left);
+    E[3][1] = -(top + bottom) / (top - bottom);
+    E[3][2] = -(far + near) / (far - near);
 
-    check_matrix(M, Matrix44f({
-                //
-                2.0f / (right - left),
-                0.0f,
-                0.0f,
-                -(right + left) / (right - left),
-                //
-                0.0f,
-                2.0f / (top - bottom),
-                0.0f,
-                -(top + bottom) / (top - bottom),
-                //
-                0.0f,
-                0.0f,
-                2.0f / (far - near),
-                -(far + near) / (far - near),
-                //
-                0.0f, 0.0f, 0.0f, 1.0f}));
+    ASSERT_MATRIX_NEAR(A, E, 0.0001f);
+}
+
+//--------------------------------------------------------------------------
+TEST(TestTransformation, testPersp)
+{
+    units::angle::radian_t const fov(units::angle::degree_t(45.0f));
+    float const aspect = 800.0f / 600.0f;
+    float const near = 0.1f;
+    float const far = 100.0f;
+    float const tanHalfFovY = std::tan(fov.to<float>() / 2.0f);
+
+    // Actual
+    Matrix44f A = matrix::perspective(fov, aspect, near, far);
+
+    // Expected (glm)
+    Matrix44f E(0.0f);
+    E[0][0] = 1.0f / (aspect * tanHalfFovY);
+    E[1][1] = 1.0f / (tanHalfFovY);
+    E[2][3] = -1.0f;
+    E[2][2] = -(far + near) / (far - near);
+    E[3][2] = -(2.0f * far * near) / (far - near);
+
+    ASSERT_MATRIX_NEAR(A, E, 0.0001f);
+}
+
+//--------------------------------------------------------------------------
+TEST(TestTransformation, testLookAt)
+{
+    const Vector3f position(1.0f, 1.0f, 1.0f);
+    const Vector3f target(0.0f, 0.0f, 0.0f);
+    const Vector3f upwards(0.0f, 0.0f, 1.0f);
+
+    // Actual
+    Matrix44f A = matrix::lookAt(position, target, upwards);
+
+    // Expected
+    Matrix44f E(matrix::Identity);
+    Vector3f const direction(vector::normalize(target - position));
+    Vector3f const right(vector::normalize(vector::cross(direction, upwards)));
+    Vector3f const up(vector::cross(right, direction));
+
+    E[0][0] = right.x;
+    E[1][0] = right.y;
+    E[2][0] = right.z;
+    E[0][1] = up.x;
+    E[1][1] = up.y;
+    E[2][1] = up.z;
+    E[0][2] = -direction.x;
+    E[1][2] = -direction.y;
+    E[2][2] = -direction.z;
+    E[3][0] = -(vector::dot(right, position));
+    E[3][1] = -(vector::dot(up, position));
+    E[3][2] = vector::dot(direction, position);
+
+    ASSERT_MATRIX_NEAR(A, E, 0.0001f);
 }
