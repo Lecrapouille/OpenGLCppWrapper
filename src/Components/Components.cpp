@@ -19,3 +19,5 @@
 //=====================================================================
 
 #include "Components/Components.hpp"
+
+const std::size_t Component::Type = "Component"_hash;
