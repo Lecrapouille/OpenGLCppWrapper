@@ -60,11 +60,7 @@ protected:
 
 public:
 
-    //--------------------------------------------------------------------------
-    //! \brief Empty constructor with no pending data.
-    //--------------------------------------------------------------------------
-    Pending()
-    {}
+    Pending() = default;
 
     //--------------------------------------------------------------------------
     //! \brief Constructor with an already known number of dirty elements

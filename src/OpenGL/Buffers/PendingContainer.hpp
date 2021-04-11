@@ -21,6 +21,7 @@
 #ifndef OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP
 #  define OPENGLCPPWRAPPER_PENDING_CONTAINER_HPP
 
+#  include "Common/NonCppStd.hpp"
 #  include "Common/Pending.hpp"
 #  include "OpenGL/Buffers/GPUMemory.hpp"
 #  include <vector>
@@ -116,8 +117,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Constructor. Do nothing.
     //--------------------------------------------------------------------------
-    PendingContainer()
-    {}
+    PendingContainer() = default;
 
     //--------------------------------------------------------------------------
     //! \brief Constructor and reserve the correct amount of elements.
@@ -146,6 +146,7 @@ public:
     //! \brief
     //--------------------------------------------------------------------------
     explicit PendingContainer(PendingContainer<T> const& other)
+        : Pending()
     {
         // Copy container as well as the capacity
         m_container.reserve(other.capacity());

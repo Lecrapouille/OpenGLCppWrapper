@@ -18,129 +18,128 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
+#include "main.hpp"
 #define protected public
 #define private public
-#include "Common/PendingData.hpp"
+#include "Common/Pending.hpp"
 #undef protected
 #undef private
-#include <crpcut.hpp>
-#include <string>
 
-using namespace glwrap;
+static constexpr size_t npos = static_cast<size_t>(-1); // FIXME Pending::npos
 
-TESTSUITE(PendingDataTests)
+//--------------------------------------------------------------------------
+TEST(TestPending,TestEmptyConstructor)
 {
-  TEST(TestEmptyConstructor)
-    {
-      PendingData pd;
+    Pending pd;
 
-      ASSERT_EQ(PendingData::npos, pd.m_pending_start);
-      ASSERT_EQ(PendingData::npos, pd.m_pending_end);
-      ASSERT_EQ(false, pd.hasPendingData());
+    ASSERT_EQ(npos, pd.m_pending_start);
+    ASSERT_EQ(npos, pd.m_pending_end);
+    ASSERT_EQ(false, pd.isPending());
 
-      size_t pos_start;
-      size_t pos_end;
-      pd.getPendingData(pos_start, pos_end);
-      ASSERT_EQ(PendingData::npos, pos_start);
-      ASSERT_EQ(PendingData::npos, pos_end);
-      ASSERT_EQ(PendingData::npos, pd.getPendingData().first);
-      ASSERT_EQ(PendingData::npos, pd.getPendingData().second);
+    size_t pos_start;
+    size_t pos_end;
+    pd.getPending(pos_start, pos_end);
+    ASSERT_EQ(npos, pos_start);
+    ASSERT_EQ(npos, pos_end);
+    ASSERT_EQ(npos, pd.getPending().first);
+    ASSERT_EQ(npos, pd.getPending().second);
 
-      pd.clearPending();
-      ASSERT_EQ(false, pd.hasPendingData());
-      ASSERT_EQ(PendingData::npos, pd.m_pending_start);
-      ASSERT_EQ(PendingData::npos, pd.m_pending_end);
+    pd.clearPending();
+    ASSERT_EQ(false, pd.isPending());
+    ASSERT_EQ(npos, pd.m_pending_start);
+    ASSERT_EQ(npos, pd.m_pending_end);
 
-      pd.clearPending(0_z);
-      ASSERT_EQ(false, pd.hasPendingData());
-      ASSERT_EQ(PendingData::npos, pd.m_pending_start);
-      ASSERT_EQ(PendingData::npos, pd.m_pending_end);
+    pd.clearPending(0u);
+    ASSERT_EQ(false, pd.isPending());
+    ASSERT_EQ(npos, pd.m_pending_start);
+    ASSERT_EQ(npos, pd.m_pending_end);
 
-      pd.clearPending(10_z);
-      ASSERT_EQ(true, pd.hasPendingData());
-      ASSERT_EQ(0_z, pd.m_pending_start);
-      ASSERT_EQ(10_z, pd.m_pending_end);
-      ASSERT_EQ(0_z, pd.getPendingData().first);
-      ASSERT_EQ(10_z, pd.getPendingData().second);
-    }
+    pd.clearPending(10u);
+    ASSERT_EQ(true, pd.isPending());
+    ASSERT_EQ(0u, pd.m_pending_start);
+    ASSERT_EQ(10u, pd.m_pending_end);
+    ASSERT_EQ(0u, pd.getPending().first);
+    ASSERT_EQ(10u, pd.getPending().second);
+}
 
-  TEST(TestConstructor)
-    {
-      PendingData pd(10_z);
+//--------------------------------------------------------------------------
+TEST(TestPending,TestConstructor)
+{
+    Pending pd(10u);
 
-      ASSERT_EQ(0_z, pd.m_pending_start);
-      ASSERT_EQ(10_z, pd.m_pending_end);
-      ASSERT_EQ(true, pd.hasPendingData());
+    ASSERT_EQ(0u, pd.m_pending_start);
+    ASSERT_EQ(10u, pd.m_pending_end);
+    ASSERT_EQ(true, pd.isPending());
 
-      size_t pos_start;
-      size_t pos_end;
-      pd.getPendingData(pos_start, pos_end);
-      ASSERT_EQ(0_z, pos_start);
-      ASSERT_EQ(10_z, pos_end);
-      ASSERT_EQ(0_z, pd.getPendingData().first);
-      ASSERT_EQ(10_z, pd.getPendingData().second);
+    size_t pos_start;
+    size_t pos_end;
+    pd.getPending(pos_start, pos_end);
+    ASSERT_EQ(0u, pos_start);
+    ASSERT_EQ(10u, pos_end);
+    ASSERT_EQ(0u, pd.getPending().first);
+    ASSERT_EQ(10u, pd.getPending().second);
 
-      pd.clearPending();
-      ASSERT_EQ(false, pd.hasPendingData());
-      ASSERT_EQ(PendingData::npos, pd.m_pending_start);
-      ASSERT_EQ(PendingData::npos, pd.m_pending_end);
+    pd.clearPending();
+    ASSERT_EQ(false, pd.isPending());
+    ASSERT_EQ(npos, pd.m_pending_start);
+    ASSERT_EQ(npos, pd.m_pending_end);
 
-      pd.clearPending(0_z);
-      ASSERT_EQ(false, pd.hasPendingData());
-      ASSERT_EQ(PendingData::npos, pd.m_pending_start);
-      ASSERT_EQ(PendingData::npos, pd.m_pending_end);
+    pd.clearPending(0u);
+    ASSERT_EQ(false, pd.isPending());
+    ASSERT_EQ(npos, pd.m_pending_start);
+    ASSERT_EQ(npos, pd.m_pending_end);
 
-      pd.clearPending(10_z);
-      ASSERT_EQ(true, pd.hasPendingData());
-      ASSERT_EQ(0_z, pd.m_pending_start);
-      ASSERT_EQ(10_z, pd.m_pending_end);
-    }
+    pd.clearPending(10u);
+    ASSERT_EQ(true, pd.isPending());
+    ASSERT_EQ(0u, pd.m_pending_start);
+    ASSERT_EQ(10u, pd.m_pending_end);
+}
 
-    TEST(TestPending)
-    {
-      PendingData pd;
+//--------------------------------------------------------------------------
+TEST(TestPending,TestPending)
+{
+    Pending pd;
 
-      pd.tagAsPending(0_z);
-      ASSERT_EQ(true, pd.hasPendingData());
-      ASSERT_EQ(0_z, pd.m_pending_start);
-      ASSERT_EQ(0_z, pd.m_pending_end);
-      ASSERT_EQ(0_z, pd.getPendingData().first);
-      ASSERT_EQ(0_z, pd.getPendingData().second);
+    pd.setPending(0u);
+    ASSERT_EQ(true, pd.isPending());
+    ASSERT_EQ(0u, pd.m_pending_start);
+    ASSERT_EQ(0u, pd.m_pending_end);
+    ASSERT_EQ(0u, pd.getPending().first);
+    ASSERT_EQ(0u, pd.getPending().second);
 
-      pd.tagAsPending(1_z);
-      ASSERT_EQ(true, pd.hasPendingData());
-      ASSERT_EQ(0_z, pd.m_pending_start);
-      ASSERT_EQ(1_z, pd.m_pending_end);
-      ASSERT_EQ(0_z, pd.getPendingData().first);
-      ASSERT_EQ(1_z, pd.getPendingData().second);
+    pd.setPending(1u);
+    ASSERT_EQ(true, pd.isPending());
+    ASSERT_EQ(0u, pd.m_pending_start);
+    ASSERT_EQ(1u, pd.m_pending_end);
+    ASSERT_EQ(0u, pd.getPending().first);
+    ASSERT_EQ(1u, pd.getPending().second);
 
-      pd.clearPending();
-      pd.tagAsPending(3_z);
-      ASSERT_EQ(true, pd.hasPendingData());
-      ASSERT_EQ(3_z, pd.m_pending_start);
-      ASSERT_EQ(3_z, pd.m_pending_end);
-      ASSERT_EQ(3_z, pd.getPendingData().first);
-      ASSERT_EQ(3_z, pd.getPendingData().second);
+    pd.clearPending();
+    pd.setPending(3u);
+    ASSERT_EQ(true, pd.isPending());
+    ASSERT_EQ(3u, pd.m_pending_start);
+    ASSERT_EQ(3u, pd.m_pending_end);
+    ASSERT_EQ(3u, pd.getPending().first);
+    ASSERT_EQ(3u, pd.getPending().second);
 
-      pd.tagAsPending(1_z);
-      ASSERT_EQ(true, pd.hasPendingData());
-      ASSERT_EQ(1_z, pd.m_pending_start);
-      ASSERT_EQ(3_z, pd.m_pending_end);
-      ASSERT_EQ(1_z, pd.getPendingData().first);
-      ASSERT_EQ(3_z, pd.getPendingData().second);
+    pd.setPending(1u);
+    ASSERT_EQ(true, pd.isPending());
+    ASSERT_EQ(1u, pd.m_pending_start);
+    ASSERT_EQ(3u, pd.m_pending_end);
+    ASSERT_EQ(1u, pd.getPending().first);
+    ASSERT_EQ(3u, pd.getPending().second);
 
-      pd.tagAsPending(5_z);
-      ASSERT_EQ(true, pd.hasPendingData());
-      ASSERT_EQ(1_z, pd.m_pending_start);
-      ASSERT_EQ(5_z, pd.m_pending_end);
-      ASSERT_EQ(1_z, pd.getPendingData().first);
-      ASSERT_EQ(5_z, pd.getPendingData().second);
+    pd.setPending(5u);
+    ASSERT_EQ(true, pd.isPending());
+    ASSERT_EQ(1u, pd.m_pending_start);
+    ASSERT_EQ(5u, pd.m_pending_end);
+    ASSERT_EQ(1u, pd.getPending().first);
+    ASSERT_EQ(5u, pd.getPending().second);
 
-      pd.tagAsPending(0_z, 8_z);
-      ASSERT_EQ(true, pd.hasPendingData());
-      ASSERT_EQ(0_z, pd.m_pending_start);
-      ASSERT_EQ(8_z, pd.m_pending_end);
-      ASSERT_EQ(0_z, pd.getPendingData().first);
-      ASSERT_EQ(8_z, pd.getPendingData().second);
-    }
+    pd.setPending(0u, 8u);
+    ASSERT_EQ(true, pd.isPending());
+    ASSERT_EQ(0u, pd.m_pending_start);
+    ASSERT_EQ(8u, pd.m_pending_end);
+    ASSERT_EQ(0u, pd.getPending().first);
+    ASSERT_EQ(8u, pd.getPending().second);
 }

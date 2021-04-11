@@ -40,6 +40,7 @@ include $(P)/Makefile.common
 OBJS += VectorTests.o MatrixTests.o MaxPlusTests.o
 OBJS += QuaternionTests.o TransformationTests.o
 OBJS += ComponentTests.o
+OBJS += PendingDataTests.o PendingContainerTests.o
 OBJS += main.o
 # TransformableTests.o GLObjectTests.o GLProgramTests.o
 
