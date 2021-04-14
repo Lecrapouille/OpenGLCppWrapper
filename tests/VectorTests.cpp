@@ -569,9 +569,9 @@ TEST(TestVectors, testOperations)
 
     // Normalize
     {
-        Vector3f v1 = vector::normalize(Vector3f::UNIT_SCALE * 2.0f);
-        Vector3f v2 = Vector3f::UNIT_SCALE / maths::sqrt(3.0f);
-        Vector3b b = (v2 == v1);
+        Vector3f v3 = vector::normalize(Vector3f::UNIT_SCALE * 2.0f);
+        Vector3f v1 = Vector3f::UNIT_SCALE / maths::sqrt(3.0f);
+        Vector3b b = (v1 == v3);
         ASSERT_THAT_VECTOR3(b, true, true, true);
     }
 

@@ -29,85 +29,110 @@
 #undef private
 
 //--------------------------------------------------------------------------
-static void CHECK_VECTOR3F(Vector3f const& v, const float x, const float y, const float z)
-{
-    ASSERT_EQ(x, v.x);
-    ASSERT_EQ(y, v.y);
-    ASSERT_EQ(z, v.z);
-}
+#define ASSERT_NEAR_VECTOR3(vect, a, b, c, thresh)                      \
+    ASSERT_NEAR(vect[0], a, thresh);                                    \
+    ASSERT_NEAR(vect[1], b, thresh);                                    \
+    ASSERT_NEAR(vect[2], c, thresh)
 
 //--------------------------------------------------------------------------
-template <typename T, size_t r, size_t c>
-static void check_matrix(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
-{
-    for (size_t i = 0_z; i < r * c; ++i)
-    {
-        ASSERT_EQ(true, std::abs(a.m_data[i] - b.m_data[i]) < 0.0001f);
+#define ASSERT_EQ_VECTOR3(vect, a, b, c)                        \
+    ASSERT_EQ(vect[0], a);                                      \
+    ASSERT_EQ(vect[1], b);                                      \
+    ASSERT_EQ(vect[2], c)
+
+//--------------------------------------------------------------------------
+#define ASSERT_MATRIX_NEAR(expected, actual, thresh)                    \
+    for (size_t idx = 0; idx < 16u; ++idx)                              \
+    {                                                                   \
+        ASSERT_NEAR(expected.data()[idx], actual.data()[idx], thresh) << "at index: " << idx; \
     }
-}
+
+//--------------------------------------------------------------------------
+#define ASSERT_MATRIX(expected, actual)                                 \
+    for (size_t idx = 0; idx < 16u; ++idx)                              \
+    {                                                                   \
+        ASSERT_EQ(expected.data()[idx], actual.data()[idx]) << "at index: " << idx; \
+    }
 
 //--------------------------------------------------------------------------
 TEST(TestTransformable, testConstructor)
 {
-    Transformable3D tr;
+    Transformable3D M;
 
-    std::cout << "Constructor" << std::endl;
+    // Constructor
     {
-        CHECK_VECTOR3F(tr.m_origin, 0.0f, 0.0f, 0.0f);
-        CHECK_VECTOR3F(tr.m_position, 0.0f, 0.0f, 0.0f);
-        CHECK_VECTOR3F(tr.m_scale, 1.0f, 1.0f, 1.0f);
-        CHECK_VECTOR3F(tr.m_local_scaling, 1.0f, 1.0f, 1.0f);
-        check_matrix(Matrix44f(matrix::Identity), tr.m_transform);
-        check_matrix(Matrix44f(matrix::Identity), tr.m_inverse_transform);
-        ASSERT_EQ(false, tr.m_transform_needs_update);
-        ASSERT_EQ(false, tr.m_inverse_trans_needs_update);
+        ASSERT_EQ_VECTOR3(M.m_origin, 0.0f, 0.0f, 0.0f);
+        ASSERT_EQ_VECTOR3(M.m_position, 0.0f, 0.0f, 0.0f);
+        ASSERT_EQ_VECTOR3(M.m_scale, 1.0f, 1.0f, 1.0f);
+        ASSERT_EQ_VECTOR3(M.m_local_scaling, 1.0f, 1.0f, 1.0f);
+        ASSERT_MATRIX(Matrix44f(matrix::Identity), M.m_transform);
+        ASSERT_MATRIX(Matrix44f(matrix::Identity), M.m_inverse_transform);
+        ASSERT_EQ(false, M.m_transform_needs_update);
+        ASSERT_EQ(false, M.m_inverse_trans_needs_update);
 
-        CHECK_VECTOR3F(tr.origin(), 0.0f, 0.0f, 0.0f);
-        CHECK_VECTOR3F(tr.position(), 0.0f, 0.0f, 0.0f);
-        CHECK_VECTOR3F(tr.local_position(), 0.0f, 0.0f, 0.0f);
-        CHECK_VECTOR3F(tr.scaling(), 1.0f, 1.0f, 1.0f);
-        CHECK_VECTOR3F(tr.localScale(), 1.0f, 1.0f, 1.0f);
-        check_matrix(Matrix44f(matrix::Identity), tr.matrix());
-        check_matrix(Matrix44f(matrix::Identity), tr.invMatrix());
+        ASSERT_EQ_VECTOR3(M.origin(), 0.0f, 0.0f, 0.0f);
+        ASSERT_EQ_VECTOR3(M.position(), 0.0f, 0.0f, 0.0f);
+        ASSERT_EQ_VECTOR3(M.local_position(), 0.0f, 0.0f, 0.0f);
+        ASSERT_EQ_VECTOR3(M.scaling(), 1.0f, 1.0f, 1.0f);
+        ASSERT_EQ_VECTOR3(M.localScale(), 1.0f, 1.0f, 1.0f);
+        ASSERT_MATRIX(Matrix44f(matrix::Identity), M.matrix());
+        ASSERT_MATRIX(Matrix44f(matrix::Identity), M.invMatrix());
     }
 
-    std::cout << "Change" << std::endl;
+    // Change
     {
-        tr.m_origin = tr.m_position = Vector3f(1.0f);
-        tr.m_scale = tr.m_local_scaling = Vector3f(2.0f);
-        tr.m_transform *= 2.0f;
-        tr.m_inverse_transform *= 2.0f;
-        tr.m_transform_needs_update = tr.m_inverse_trans_needs_update = true;
+        M.m_origin = M.m_position = Vector3f(1.0f);
+        M.m_scale = M.m_local_scaling = Vector3f(2.0f);
+        M.m_transform *= 2.0f;
+        M.m_inverse_transform *= 2.0f;
+        M.m_transform_needs_update = M.m_inverse_trans_needs_update = true;
 
-        std::cout << "111" << std::endl;
-        CHECK_VECTOR3F(tr.origin(), 1.0f, 1.0f, 1.0f);
-        std::cout << "222" << std::endl;
-        CHECK_VECTOR3F(tr.position(), 1.0f, 1.0f, 1.0f);
-        std::cout << "333" << std::endl;
-        CHECK_VECTOR3F(tr.local_position(), 0.0f, 0.0f, 0.0f);
-        std::cout << "444" << std::endl;
-        CHECK_VECTOR3F(tr.scaling(), 2.0f, 2.0f, 2.0f);
-        CHECK_VECTOR3F(tr.localScale(), 2.0f, 2.0f, 2.0f);
-        std::cout << "555" << tr.matrix()<< std::endl;
-        check_matrix(Matrix44f({2.0f, 0.0f, 0.0f, 0.0f,
-                                0.0f, 2.0f, 0.0f, 0.0f,
-                                0.0f, 0.0f, 2.0f, 0.0f,
-                                0.0f, 0.0f, 0.0f, 2.0f}),
-            tr.matrix());
-        std::cout << "666" << std::endl;
-        check_matrix(Matrix44f(matrix::Identity), tr.invMatrix());
+        ASSERT_EQ_VECTOR3(M.origin(), 1.0f, 1.0f, 1.0f);
+        ASSERT_EQ_VECTOR3(M.position(), 1.0f, 1.0f, 1.0f);
+        ASSERT_EQ_VECTOR3(M.local_position(), 0.0f, 0.0f, 0.0f);
+        ASSERT_EQ_VECTOR3(M.scaling(), 2.0f, 2.0f, 2.0f);
+        ASSERT_EQ_VECTOR3(M.localScale(), 2.0f, 2.0f, 2.0f);
+        ASSERT_MATRIX(M.matrix(),
+                      Matrix44f({2.0f, 0.0f, 0.0f, 0.0f,
+                                 0.0f, 2.0f, 0.0f, 0.0f,
+                                 0.0f, 0.0f, 2.0f, 0.0f,
+                                 0.0f, 0.0f, 0.0f, 1.0f}));
+        ASSERT_MATRIX(M.invMatrix(),
+                      Matrix44f({0.5f, 0.0f, 0.0f, 0.0f,
+                                 0.0f, 0.5f, 0.0f, 0.0f,
+                                 0.0f, 0.0f, 0.5f, 0.0f,
+                                 0.0f, 0.0f, 0.0f, 1.0f}));
     }
 
-    std::cout << "reset" << std::endl;
+    // Reset
     {
-        tr.reset();
-        CHECK_VECTOR3F(tr.m_origin, 0.0f, 0.0f, 0.0f);
-        CHECK_VECTOR3F(tr.m_position, 0.0f, 0.0f, 0.0f);
-        CHECK_VECTOR3F(tr.m_scale, 1.0f, 1.0f, 1.0f);
-        CHECK_VECTOR3F(tr.m_local_scaling, 1.0f, 1.0f, 1.0f);
-        check_matrix(Matrix44f(matrix::Identity), tr.m_transform);
-        check_matrix(Matrix44f(matrix::Identity), tr.m_inverse_transform);
-        ASSERT_EQ(false, tr.m_transform_needs_update);
-        ASSERT_EQ(false, tr.m_inverse_trans_needs_update);
+        M.reset();
+        ASSERT_EQ_VECTOR3(M.m_origin, 0.0f, 0.0f, 0.0f);
+        ASSERT_EQ_VECTOR3(M.m_position, 0.0f, 0.0f, 0.0f);
+        ASSERT_EQ_VECTOR3(M.m_scale, 1.0f, 1.0f, 1.0f);
+        ASSERT_EQ_VECTOR3(M.m_local_scaling, 1.0f, 1.0f, 1.0f);
+        ASSERT_MATRIX(Matrix44f(matrix::Identity), M.m_transform);
+        ASSERT_MATRIX(Matrix44f(matrix::Identity), M.m_inverse_transform);
+        ASSERT_EQ(false, M.m_transform_needs_update);
+        ASSERT_EQ(false, M.m_inverse_trans_needs_update);
     }
+}
+
+//--------------------------------------------------------------------------
+TEST(TestTransformable, QQ)
+{
+    Transformable3D M;
+
+    std::cout << "Up: " << M.up() << std::endl;
+    std::cout << "Right: " << M.right() << std::endl;
+    std::cout << "Forward: " << M.forward() << std::endl;
+    std::cout << "Direction: " << M.direction() << std::endl;
+
+    std::cout << "Rotation: " << M.rotation() << std::endl;
+    M.rotate(units::angle::degree_t(45.0f), Vector3f(1,0,0));
+    std::cout << "Rotation: " << M.rotation() << std::endl;
+    M.position(Vector3f(1,2,3));
+    M.roll(units::angle::degree_t(45.0f));
+    std::cout << "Transform: " << M.matrix()
+              << std::endl << std::endl;
 }

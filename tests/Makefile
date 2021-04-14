@@ -38,11 +38,11 @@ include $(P)/Makefile.common
 # List of files to compile.
 #
 OBJS += VectorTests.o MatrixTests.o MaxPlusTests.o
-OBJS += QuaternionTests.o TransformationTests.o
+OBJS += QuaternionTests.o TransformationTests.o TransformableTests.o
 OBJS += ComponentTests.o
 OBJS += PendingDataTests.o PendingContainerTests.o
 OBJS += main.o
-# TransformableTests.o GLObjectTests.o GLProgramTests.o
+#  GLObjectTests.o GLProgramTests.o
 
 ###################################################
 # Project defines
