@@ -48,7 +48,8 @@ fi
 ### Library for creating GUI in OpenGL
 ### License: MIT
 print-clone imgui
-git clone https://github.com/ocornut/imgui.git --depth=1 > /dev/null 2> /dev/null
+git clone https://github.com/ocornut/imgui.git > /dev/null 2> /dev/null # --depth=1 > /dev/null 2> /dev/null
+(cd imgui && git reset --hard b898281e3c75d64ecc4e0f63aba0ec5e9182cce1) # FIXME until fixing broken API on latest versions
 
 ### Library for unit conversion library
 ### License: MIT
