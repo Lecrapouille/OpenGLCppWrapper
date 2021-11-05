@@ -18,11 +18,11 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "Scene/RigNode.hpp"
+#include "Scene/CameraRigNode.hpp"
 #include "UI/Window.hpp"
 
 //------------------------------------------------------------------------------
-RigNode::RigNode(std::string const& name, Camera& camera)
+CameraRigNode::CameraRigNode(std::string const& name, Camera& camera)
     : SceneObject(name)
 {
     m_fov = 0.785398f;
@@ -30,14 +30,14 @@ RigNode::RigNode(std::string const& name, Camera& camera)
 }
 
 //------------------------------------------------------------------------------
-void RigNode::control(Camera& camera)
+void CameraRigNode::control(Camera& camera)
 {
     m_camera = &camera;
     m_newTransform = camera.transform;
 }
 
 //------------------------------------------------------------------------------
-void RigNode::onUpdate(float const dt)
+void CameraRigNode::onUpdate(float const dt)
 {
     handleMouseInput();
     handleKeyBoardInput();
@@ -45,9 +45,9 @@ void RigNode::onUpdate(float const dt)
 }
 
 //------------------------------------------------------------------------------
-void RigNode::handleMouseInput()
+void CameraRigNode::handleMouseInput()
 {
-    float y = GLWindow::mouse().scroll.y;
+    float y = static_cast<float>(GLWindow::mouse().scroll.y);
     if (y != 0.0f)
     {
         m_newZoom += y * zoomAmount;
@@ -55,7 +55,7 @@ void RigNode::handleMouseInput()
 }
 
 //------------------------------------------------------------------------------
-void RigNode::handleKeyBoardInput()
+void CameraRigNode::handleKeyBoardInput()
 {
     float speed = GLWindow::isKeyDown(GLFW_KEY_LEFT_SHIFT) ? fastSpeed : normalSpeed;
 
@@ -91,7 +91,7 @@ void RigNode::handleKeyBoardInput()
 }
 
 //------------------------------------------------------------------------------
-void RigNode::handleMovementInput(float const dt)
+void CameraRigNode::handleMovementInput(float const dt)
 {
     /*  m_camera->transform.position(
         vector::lerp(m_camera->transform.position(),

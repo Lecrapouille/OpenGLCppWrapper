@@ -25,18 +25,17 @@
 #ifndef RIG_CAMERA_CONTROLLER_HPP
 #  define RIG_CAMERA_CONTROLLER_HPP
 
-#  include "Scene/RigNode.hpp"
 #  include "Scene/Camera/CameraNode.hpp"
 
 // *****************************************************************************
 //! \brief Camera rig reactive to keyboard IO for strategy games
 // *****************************************************************************
-class RigNode: public SceneObject
+class CameraRigNode: public SceneObject
 {
 public:
 
     //--------------------------------------------------------------------------
-    RigNode(std::string const& name, Camera& camera);
+    CameraRigNode(std::string const& name, Camera& camera);
 
     //--------------------------------------------------------------------------
     void control(Camera& camera);
