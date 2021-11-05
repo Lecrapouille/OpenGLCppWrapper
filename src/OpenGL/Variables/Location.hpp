@@ -35,15 +35,13 @@
 #  include "OpenGL/GLObject.hpp"
 
 // *****************************************************************************
-//! \class GLLocation Locations.hpp
-//! \ingroup OpenGL
-//!
 //! \brief This abstract class shall stay private and shall not be used directly
-//! by the developper. Indeed this class is only managed by \c GLProgram and they
-//! are created automatically when shader code is parsed. It serves as link
-//! between a shader variable and your C++ variable and therefore Locations are
-//! entry points in the shader that allow to upload CPU data to the GPU. There
-//! are mainly three types: uniforms, attributes and samplers.
+//! by the developper. Indeed GLLocation's derived class are created by
+//! GLProgram automatically when code of shaders are parsed and then only
+//! managed internally by GLProgram. GLLocation serves as link between a shader
+//! variable and your C++ variable and therefore Locations are entry points in
+//! the shader that allow to upload CPU data to the GPU. There are mainly three
+//! types: uniforms, attributes and samplers that are derived from this class.
 // *****************************************************************************
 class GLLocation: public GLObject<GLint>
 {

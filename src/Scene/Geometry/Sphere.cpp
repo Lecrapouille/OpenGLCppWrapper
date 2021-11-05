@@ -105,7 +105,7 @@ bool Sphere::generate(GLVertexBuffer<Vector3f>& vertices,
 //------------------------------------------------------------------------------
 bool Sphere::generate(GLVAO32& vao, const bool clear)
 {
-    if (!vao.has<Vector3f>(shaders::name::position))
+    if (!vao.hasVBO<Vector3f>(shaders::name::position))
     {
         std::cerr << "VBO for vertices is needed" << std::endl;
         return false;
@@ -116,10 +116,10 @@ bool Sphere::generate(GLVAO32& vao, const bool clear)
     GLVertexBuffer<Vector2f> tmp_uv;
 
     auto& positions = vao.vector3f(shaders::name::position);
-    auto& normals = vao.has<Vector3f>(shaders::name::normal)
+    auto& normals = vao.hasVBO<Vector3f>(shaders::name::normal)
                     ? vao.vector3f(shaders::name::normal)
                     : tmp_normals;
-    auto& UVs = vao.has<Vector2f>(shaders::name::uv)
+    auto& UVs = vao.hasVBO<Vector2f>(shaders::name::uv)
                 ? vao.vector2f(shaders::name::uv)
                 : tmp_uv;
 

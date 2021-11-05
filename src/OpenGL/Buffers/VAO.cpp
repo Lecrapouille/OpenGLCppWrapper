@@ -32,26 +32,24 @@
 bool GLVAO::checkVBOSizes()
 {
     if (likely(!m_need_update))
-    {
         return true;
-    }
 
-    if (unlikely(!isBound() || m_listBuffers.empty()))
+    if ((!isBound()) || m_vbos.empty())
     {
         std::cerr << "VAO " << name() << " is not yet bound to a GLProgram";
         return false;
     }
 
     bool consistent_vbo_sizes = true;
-    m_count = m_listBuffers.begin()->second->size();
-    for (auto& it: m_listBuffers)
+    m_count = m_vbos.begin()->second->size();
+    for (auto& it: m_vbos)
     {
-        if (unlikely(m_count != it.second->size()))
+        if (m_count != it.second->size())
         {
             std::cerr << "VAO " << name()
                       << " does not have all of its VBOs with the same size:"
                       << std::endl;
-            for (auto& itt: m_listBuffers)
+            for (auto& itt: m_vbos)
             {
                 std::cerr << "VBO " << itt.first
                           << " size is " << itt.second->size()
@@ -65,47 +63,60 @@ bool GLVAO::checkVBOSizes()
 }
 
 //----------------------------------------------------------------------------
+// TODO: manage integers
 void GLVAO::createVBOsFromAttribs(GLProgram::Attributes const& attributes)
 {
-    // TODO: manage integers
     for (auto const& it: attributes)
     {
         const char *name = it.first.c_str();
-        switch (it.second->size())
+        const GLint size = it.second->size(); // FIXME shall be unsigned
+        const GLenum gltype = it.second->target();
+        std::cout << name << std::endl;
+
+        if (gltype == GL_FLOAT)
         {
-        case 1:
-            if (!m_VBOs.has<std::shared_ptr<GLVertexBuffer<float>>>(name))
+            switch (size)
             {
-                auto ptr = std::make_shared<GLVertexBuffer<float>>(name, m_reserve, m_usage);
-                m_VBOs.add(name, ptr);
-                m_listBuffers[name] = ptr;
+            case 1u:
+                createVBO<float>(name);
+                break;
+            case 2u:
+                createVBO<Vector2f>(name);
+                break;
+            case 3u:
+                createVBO<Vector3f>(name);
+                break;
+            case 4u:
+                createVBO<Vector4f>(name);
+                break;
+            default:
+                throw GL::Exception("Attribute with dimension > 4 is not managed");
+                break;
             }
-            break;
-        case 2:
-            if (!m_VBOs.has<std::shared_ptr<GLVertexBuffer<Vector2f>>>(name))
+        }
+        else if (gltype == GL_INT)
+        {
+            switch (size)
             {
-                auto ptr = std::make_shared<GLVertexBuffer<Vector2f>>(name, m_reserve, m_usage);
-                m_VBOs.add(name, ptr);
-                m_listBuffers[name] = ptr;
+            case 1u:
+                createVBO<int>(name);
+                break;
+            case 2u:
+                createVBO<Vector2i>(name);
+                break;
+            case 3u:
+                createVBO<Vector3i>(name);
+                break;
+            case 4u:
+                createVBO<Vector4i>(name);
+                break;
+            default:
+                throw GL::Exception("Attribute with dimension > 4 is not managed");
+                break;
             }
-            break;
-        case 3:
-            if (!m_VBOs.has<std::shared_ptr<GLVertexBuffer<Vector3f>>>(name))
-            {
-                auto ptr = std::make_shared<GLVertexBuffer<Vector3f>>(name, m_reserve, m_usage);
-                m_VBOs.add(name, ptr);
-                m_listBuffers[name] = ptr;
-            }
-            break;
-        case 4:
-            if (!m_VBOs.has<std::shared_ptr<GLVertexBuffer<Vector4f>>>(name))
-            {
-                auto ptr = std::make_shared<GLVertexBuffer<Vector4f>>(name, m_reserve, m_usage);
-                m_VBOs.add(name, ptr);
-                m_listBuffers[name] = ptr;
-            }
-            break;
-        default:
+        }
+        else
+        {
             throw GL::Exception("Attribute with dimension > 4 is not managed");
         }
     }
@@ -118,35 +129,21 @@ void GLVAO::createTexturesFromSamplers(GLProgram::Samplers const& samplers)
     {
         const char *name = it.first.c_str();
         const GLenum gltype = it.second->target();
+        std::cout << name << std::endl;
+
         switch (gltype)
         {
         case GL_SAMPLER_1D:
-            {
-                std::shared_ptr<GLTexture1D> ptr = std::make_shared<GLTexture1D>(name);
-                m_textures.add(name, ptr);
-                m_listTextures[name] = ptr;
-            }
+            createTexture<GLTexture1D>(name);
             break;
         case GL_SAMPLER_2D: // TODO GLTextureDepth2D
-            {
-                std::shared_ptr<GLTexture2D> ptr = std::make_shared<GLTexture2D>(name);
-                m_textures.add(name, ptr);
-                m_listTextures[name] = ptr;
-            }
+            createTexture<GLTexture2D>(name);
             break;
         case GL_SAMPLER_3D:
-            {
-                std::shared_ptr<GLTexture3D> ptr = std::make_shared<GLTexture3D>(name);
-                m_textures.add(name, ptr);
-                m_listTextures[name] = ptr;
-            }
+            createTexture<GLTexture3D>(name);
             break;
         case GL_SAMPLER_CUBE:
-            {
-                std::shared_ptr<GLTextureCube> ptr = std::make_shared<GLTextureCube>(name);
-                m_textures.add(name, ptr);
-                m_listTextures[name] = ptr;
-            }
+            createTexture<GLTextureCube>(name);
             break;
         default:
             throw GL::Exception("This kind of sampler is not managed: "
@@ -163,11 +160,14 @@ bool GLVAO::draw(Mode const mode, size_t const first, size_t const count)
         m_program->begin();   //glCheck(glUseProgram(m_program->handle()));
         begin(); // Optim: glBindVertexArray(m_vao->handle());
 
+        // Activate textures
         for (auto& it: m_program->m_samplers)
         {
             it.second->begin();
-            m_listTextures[it.first]->begin();
+            m_textures[it.first]->begin();
         }
+
+        // Draw
         glCheck(glDrawArrays(static_cast<GLenum>(mode),
                              static_cast<GLint>(first),
                              static_cast<GLsizei>(count)));
@@ -183,7 +183,7 @@ bool GLVAO::draw(Mode const mode, size_t const first, size_t const count)
 
 //--------------------------------------------------------------------------
 bool GLVAO::onUpdate()
-{
+{std::cout << "GLVAO::onUpdate() " << name() << std::endl;
     if (!checkVBOSizes())
         return true;
 
@@ -197,7 +197,9 @@ bool GLVAO::onUpdate()
 
     for (auto& it: m_program->m_attributes)
     {
-        m_listBuffers[it.first]->begin();
+        std::cout << "vbo" << std::endl;
+        m_vbos[it.first]->begin();
+        std::cout << "attrib" << std::endl;
         it.second->begin();
     }
 
@@ -210,8 +212,8 @@ bool GLVAO::onUpdate()
 size_t GLVAO::getVBONames(std::vector<std::string> &list, bool const clear) const
 {
     if (clear) { list.clear(); }
-    list.reserve(m_listBuffers.size());
-    for (auto& it: m_listBuffers)
+    list.reserve(m_vbos.size());
+    for (auto& it: m_vbos)
     {
         list.push_back(it.second->name());
     }
@@ -222,8 +224,8 @@ size_t GLVAO::getVBONames(std::vector<std::string> &list, bool const clear) cons
 size_t GLVAO::getTexturesNames(std::vector<std::string>& list, bool const clear) const
 {
     if (clear) { list.clear(); }
-    list.reserve(m_listTextures.size());
-    for (auto& it: m_listTextures)
+    list.reserve(m_textures.size());
+    for (auto& it: m_textures)
     {
         list.push_back(it.second->name()); // FIXME filename
     }
@@ -234,8 +236,8 @@ size_t GLVAO::getTexturesNames(std::vector<std::string>& list, bool const clear)
 size_t GLVAO::getUnloadedTextures(std::vector<std::string>& list, bool const clear) const
 {
     if (clear) { list.clear(); }
-    list.reserve(m_listTextures.size());
-    for (auto& it: m_listTextures)
+    list.reserve(m_textures.size());
+    for (auto& it: m_textures)
     {
         if (!it.second->loaded())
         {

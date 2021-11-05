@@ -7,6 +7,7 @@
 #  include "Common/NonCppStd.hpp"
 #  include <algorithm> // find_if
 #  include <vector>
+#  include <stdexcept>
 
 // *****************************************************************************
 //! \brief Base class for Component

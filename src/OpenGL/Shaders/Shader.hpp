@@ -162,9 +162,9 @@ public:
     //! \brief Return if the shader has been compiled ?
     //! \return true if shader has been compiled, else return false.
     //--------------------------------------------------------------------------
-    bool compiled() const
+    inline bool compiled() const
     {
-        return !needSetup();
+        return !m_need_setup;
     }
 
 private:

@@ -31,7 +31,8 @@
 #  include "OpenGL/Variables/Attribute.hpp"
 #  include "OpenGL/Variables/Uniform.hpp"
 #  include "OpenGL/Variables/Samplers.hpp"
-#  include "Common/Any.hpp"
+#  include "OpenGL/Context/OpenGL.hpp"
+#  include <map>
 
 class GLVAO;
 
@@ -44,11 +45,10 @@ class GLProgram: public GLObject<GLenum>
 {
     friend class GLVAO;
 
-    using Shaders = std::vector<GLShader*>;
-    using Attributes = std::map<std::string, std::shared_ptr<GLAttribute>>;
-    using Samplers = std::map<std::string, std::shared_ptr<GLSampler>>;
-    using Uniforms = Any;
-    using UniformLocations = std::map<std::string, std::shared_ptr<GLLocation>>;
+    //! \brief Memorize GLAttributes, GLUniforms, GLSamplers.
+    using Attributes = std::map<std::string, std::unique_ptr<GLAttribute>>;
+    using Uniforms = std::map<std::string, std::unique_ptr<GLLocation>>;
+    using Samplers = std::map<std::string, std::unique_ptr<GLSampler>>;
 
 public:
 
@@ -67,10 +67,10 @@ public:
     virtual ~GLProgram() override;
 
     //--------------------------------------------------------------------------
-    //! \brief Compile a vertex shader and a fragment shader and populate list
+    //! \brief Compile a vertex shader and a fragment shader and populate lists
     //! of uniforms and attributes.
     //!
-    //! \note: this method is equivalent to the method GLObject::begin() but
+    //! \note: this method is equivalent to the method GLProgram::begin() but
     //! with a more explicit name and return the status of the compilation.
     //!
     //! \return true if the program has been successfully compiled, else return
@@ -94,15 +94,15 @@ public:
                  GLGeometryShader& geometry);
 
     //--------------------------------------------------------------------------
-    //! \brief Check if attached shaders (passed to attachShaders() methods) have
+    //! \brief Check if attached shaders (passed to attachShaders() method) have
     //! been compiled and linked with success.
     //!
     //! \return true if shaders have been compiled and linked successfuly, else
     //! return false.
     //--------------------------------------------------------------------------
-    bool compiled() const
+    inline bool compiled() const
     {
-        return !needSetup();
+        return !m_need_setup;
     }
 
     //--------------------------------------------------------------------------
@@ -212,21 +212,43 @@ public:
     size_t getSamplerNames(std::vector<std::string>& list, bool const clear = true) const;
 
     //--------------------------------------------------------------------------
-    //! \brief Check if program has a non empty list of shader attributes.
-    //! \return the number of attributes.
+    //! \brief Return the list of attributes. Only reachable by VAO class.
     //--------------------------------------------------------------------------
-    inline size_t hasAttributes() const
+    Attributes const& attributes() const
     {
-        return m_attributes.size();
+        return m_attributes;
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Check if program has a non empty list of uniform texture sampler.
-    //! \return the number of samplers.
+    //! \brief Check the presence of the GLAttribute<T>
     //--------------------------------------------------------------------------
-    inline size_t hasSamplers() const
+    bool hasAttribute(const char *name) const
     {
-        return m_samplers.size();
+        auto it = m_attributes.find(name);
+        if (it == m_attributes.end())
+            return false;
+        GLAttribute* attribute = dynamic_cast<GLAttribute*>(it->second.get());
+        return (attribute != nullptr);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief  Return the list of samplers. Only reachable by VAO class.
+    //--------------------------------------------------------------------------
+    Samplers const& samplers() const
+    {
+        return m_samplers;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Check the presence of the GLSampler<T>
+    //--------------------------------------------------------------------------
+    bool hasSampler(const char *name) const
+    {
+        auto it = m_samplers.find(name);
+        if (it == m_samplers.end())
+            return false;
+        GLSampler* sampler = dynamic_cast<GLSampler*>(it->second.get());
+        return (sampler != nullptr);
     }
 
     //--------------------------------------------------------------------------
@@ -234,9 +256,22 @@ public:
     //!
     //! \return the number of uniforms.
     //--------------------------------------------------------------------------
-    inline size_t hasUniforms() const
+    Uniforms const& uniforms() const
     {
-        return m_uniforms.size();
+        return m_uniforms;
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Check the presence of the uniform
+    //--------------------------------------------------------------------------
+    template<class T>
+    bool hasUniform(const char *name) const
+    {
+        auto it = m_uniforms.find(name);
+        if (it == m_uniforms.end())
+            return false;
+        GLUniform<T>* uniform = dynamic_cast<GLUniform<T>*>(it->second.get());
+        return (uniform != nullptr);
     }
 
     //--------------------------------------------------------------------------
@@ -347,6 +382,8 @@ public:
         return uniform<int>(name);
     }
 
+private:
+
     //--------------------------------------------------------------------------
     //! \brief Locate the uniform variable by its name and its type T.
     //! \return the uniform instance if found else throw an exception.
@@ -355,87 +392,40 @@ public:
     template<class T>
     GLUniform<T>& uniform(const char *name)
     {
-        if (unlikely(nullptr == name))
-            throw GL::Exception("nullptr passed to uniform");
+        assert(name != nullptr);
 
-        std::cout << "QQQQQQQQQQQQQQQQQQQQQQq 11" << std::endl;
-        if (unlikely(!compiled()))
+        if (compiled())
         {
-            std::cout << "QQQQQQQQQQQQQQQQQQQQQQq 22" << std::endl;
-            createUniform(getGLType<T>(), name, handle());
-        }
+            auto it = m_uniforms.find(name);
+            if (it != m_uniforms.end())
+            {
+                GLUniform<T> *uniform = dynamic_cast<GLUniform<T>*>(it->second.get());
+                if (uniform != nullptr)
+                    return *uniform;
 
-        try
-        {
-            std::cout << "QQQQQQQQQQQQQQQQQQQQQQq 33 "
-                      << m_uniforms.has<std::shared_ptr<GLUniform<T>>>(name)
-                      << std::endl;
-            std::cout << "QQQQQQQQQQQQQQQQQQQQQQq 33bis" << std::endl;
-            return *(m_uniforms.get<std::shared_ptr<GLUniform<T>>>(name));
-        }
-        catch (std::exception&)
-        {
-            std::cout << "QQQQQQQQQQQQQQQQQQQQQQq 44" << std::endl;
-            throw GL::Exception("GLUniform '" + std::string(name) + "' does not exist");
-        }
-    }
-
-    template<class T>
-    bool hasUniform(const char *name)
-    {
-        return m_uniforms.has<std::shared_ptr<GLUniform<T>>>(name);
-    }
-
-    bool hasAttribute(const char *name)
-    {
-        return m_attributes.find(name) != m_attributes.end();
-    }
-
-    GLAttribute& attribute(const char *name)
-    {
-        auto it = m_attributes.find(name);
-        if (it == m_attributes.end())
-            throw GL::Exception("GLAttribute '" + std::string(name) + "' does not exist");
-        return *(it->second);
-    }
-
-private:
-
-    template<class T>
-    void doCreateUniform(GLint dim, GLenum type, const char *name, const GLuint prog)
-    {
-        if (!m_uniforms.has<std::shared_ptr<GLUniform<T>>>(name))
-        {
-            auto ptr = std::make_shared<GLUniform<T>>(name, dim, type, prog);
-            m_uniforms.add(name, ptr);
-            m_uniformLocations[name] = ptr;
+                throw GL::Exception("GLUniform " + std::string(name) +
+                                    " exists but has wrong template type");
+            }
+            throw GL::Exception("GLUniform " + std::string(name) + " does not exist");
         }
         else
         {
-            m_uniforms.get<std::shared_ptr<GLUniform<T>>>(name)->m_program = prog;
+            // The API allows the user to define uniforms before compiling the
+            // GLProgram.
+            if (m_uniforms.find(name) == m_uniforms.end())
+                createUniform<T>(name);
+
+            GLUniform<T> *uniform = dynamic_cast<GLUniform<T>*>(m_uniforms[name].get());
+            return *uniform;
         }
     }
 
     //--------------------------------------------------------------------------
     //! \brief From C++ type return the OpenGL enum (ie float => GL_FLOAT).
     //--------------------------------------------------------------------------
-    template<class T> GLenum getGLType();
-
-    //--------------------------------------------------------------------------
-    //! \brief Return the list of attributes. Only reachable by VAO class.
-    //--------------------------------------------------------------------------
-    Attributes const& attributes() const
-    {
-        return m_attributes;
-    }
-
-    //--------------------------------------------------------------------------
-    //! \brief  Return the list of samplers. Only reachable by VAO class.
-    //--------------------------------------------------------------------------
-    Samplers const& samplers() const
-    {
-        return m_samplers;
-    }
+    template<class T> inline GLenum getGLAttributeType();
+    template<class T> inline GLenum getGLUniformType();
+    template<class T> inline GLint getGLDimension();
 
     //--------------------------------------------------------------------------
     //! \brief Do the shader compilation
@@ -502,48 +492,100 @@ private:
     //--------------------------------------------------------------------------
     //! \brief Create uniform, texture sampler and attribute lists.
     //--------------------------------------------------------------------------
-    void generateLocations();
+    void generateAttributesAndUniforms();
+
+    //--------------------------------------------------------------------------
+    //! \brief General method for creating uniform instances.
+    //--------------------------------------------------------------------------
+    void storeUniformOrSampler(GLenum type, const char *name);
+    void storeAttribute(GLenum type, const char *name);
+    bool storeUniform(GLenum type, const char *name);
+    bool storeSampler(GLenum type, const char *name);
+
+    //--------------------------------------------------------------------------
+    //! \brief Specific method for creating uniform instances.
+    //--------------------------------------------------------------------------
+    template<class T>
+    inline void createUniform(const char *name)
+    {
+        m_uniforms[name]
+                = std::make_unique<GLUniform<T>>
+                (name, getGLDimension<T>(), getGLUniformType<T>(), handle());
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Create texture sampler instances.
     //--------------------------------------------------------------------------
-    void createSampler(GLenum type, const char *name, const size_t count, const GLuint prog);
-
-    //--------------------------------------------------------------------------
-    //! \brief Create uniform instances.
-    //--------------------------------------------------------------------------
-    void createUniform(GLenum type, const char *name, const GLuint prog);
+    template<class T>
+    inline void createSampler(const char *name)
+    {
+        m_samplers[name]
+                = std::make_unique<T>(name, m_samplers.size(), handle());
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Create Attribute instances
     //--------------------------------------------------------------------------
-    void createAttribute(GLenum type, const char *name, const GLuint prog);
+    template<class T>
+    inline void createAttribute(const char *name)
+    {
+        m_attributes[name]
+                = std::make_unique<GLAttribute>
+                (name, getGLDimension<T>(), getGLAttributeType<T>(), handle());
+    }
 
 private:
 
-    Shaders    m_shaders;
+    //! \brief Hold temporary vertex, fragment, geometry shaders that need to be
+    //! compiled. Once compiled this list is erased to avoid refering to dead
+    //! external variables.
+    std::vector<GLShader*> m_shaders;
+    //! \brief Hold the localization of shader attributes.
     Attributes m_attributes;
-public:    Samplers   m_samplers; // FIXME private
-private:    Uniforms   m_uniforms;
-    UniformLocations m_uniformLocations;
+    //! \brief Hold the localization of shader uniforms.
+    Uniforms m_uniforms;
+    //! \brief Hold the localisation of uniform texture sampler.
+    Samplers m_samplers;
+    //! \brief
     std::vector<std::string> m_failedShaders;
+    //! \brief Memorize all errors
     std::string m_error;
 };
 
-template<> inline GLenum GLProgram::getGLType<float>() { return GL_FLOAT; }
-template<> inline GLenum GLProgram::getGLType<Vector2f>() { return GL_FLOAT_VEC2; }
-template<> inline GLenum GLProgram::getGLType<Vector3f>() { return GL_FLOAT_VEC3; }
-template<> inline GLenum GLProgram::getGLType<Vector4f>() { return GL_FLOAT_VEC4; }
-template<> inline GLenum GLProgram::getGLType<Matrix22f>() { return GL_FLOAT_MAT2; }
-template<> inline GLenum GLProgram::getGLType<Matrix33f>() { return GL_FLOAT_MAT3; }
-template<> inline GLenum GLProgram::getGLType<Matrix44f>() { return GL_FLOAT_MAT4; }
-template<> inline GLenum GLProgram::getGLType<int>() { return GL_INT; }
-template<> inline GLenum GLProgram::getGLType<Vector2i>() { return GL_INT_VEC2; }
-template<> inline GLenum GLProgram::getGLType<Vector3i>() { return GL_INT_VEC3; }
-template<> inline GLenum GLProgram::getGLType<Vector4i>() { return GL_INT_VEC4; }
-template<> inline GLenum GLProgram::getGLType<GLSampler1D>() { return GL_SAMPLER_1D; }
-template<> inline GLenum GLProgram::getGLType<GLSampler2D>() { return GL_SAMPLER_2D; }
-template<> inline GLenum GLProgram::getGLType<GLSampler3D>() { return GL_SAMPLER_3D; }
-template<> inline GLenum GLProgram::getGLType<GLSamplerCube>() { return GL_SAMPLER_CUBE; }
+template<> inline GLenum GLProgram::getGLAttributeType<float>() { return GL_FLOAT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Vector2f>() { return GL_FLOAT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Vector3f>() { return GL_FLOAT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Vector4f>() { return GL_FLOAT; }
+template<> inline GLenum GLProgram::getGLAttributeType<int>() { return GL_INT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Vector2i>() { return GL_INT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Vector3i>() { return GL_INT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Vector4i>() { return GL_INT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Matrix22f>() { return GL_FLOAT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Matrix33f>() { return GL_FLOAT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Matrix44f>() { return GL_FLOAT; }
+
+template<> inline GLenum GLProgram::getGLUniformType<float>() { return GL_FLOAT; }
+template<> inline GLenum GLProgram::getGLUniformType<Vector2f>() { return GL_FLOAT_VEC2; }
+template<> inline GLenum GLProgram::getGLUniformType<Vector3f>() { return GL_FLOAT_VEC3; }
+template<> inline GLenum GLProgram::getGLUniformType<Vector4f>() { return GL_FLOAT_VEC4; }
+template<> inline GLenum GLProgram::getGLUniformType<Matrix22f>() { return GL_FLOAT_MAT2; }
+template<> inline GLenum GLProgram::getGLUniformType<Matrix33f>() { return GL_FLOAT_MAT3; }
+template<> inline GLenum GLProgram::getGLUniformType<Matrix44f>() { return GL_FLOAT_MAT4; }
+template<> inline GLenum GLProgram::getGLUniformType<int>() { return GL_INT; }
+template<> inline GLenum GLProgram::getGLUniformType<Vector2i>() { return GL_INT_VEC2; }
+template<> inline GLenum GLProgram::getGLUniformType<Vector3i>() { return GL_INT_VEC3; }
+template<> inline GLenum GLProgram::getGLUniformType<Vector4i>() { return GL_INT_VEC4; }
+
+template<> inline GLint GLProgram::getGLDimension<float>() { return 1; }
+template<> inline GLint GLProgram::getGLDimension<Vector2f>() { return 2; }
+template<> inline GLint GLProgram::getGLDimension<Vector3f>() { return 3; }
+template<> inline GLint GLProgram::getGLDimension<Vector4f>() { return 4; }
+template<> inline GLint GLProgram::getGLDimension<Matrix22f>() { return 4; }
+template<> inline GLint GLProgram::getGLDimension<Matrix33f>() { return 9; }
+template<> inline GLint GLProgram::getGLDimension<Matrix44f>() { return 16; }
+template<> inline GLint GLProgram::getGLDimension<int>() { return 1; }
+template<> inline GLint GLProgram::getGLDimension<Vector2i>() { return 2; }
+template<> inline GLint GLProgram::getGLDimension<Vector3i>() { return 3; }
+template<> inline GLint GLProgram::getGLDimension<Vector4i>() { return 4; }
 
 #endif // OPENGLCPPWRAPPER_GLPROGRAM_HPP

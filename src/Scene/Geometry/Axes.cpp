@@ -23,7 +23,7 @@
 //------------------------------------------------------------------------------
 bool Axes::generate(GLVAO32& vao, const bool clear)
 {
-    if (!vao.has<Vector3f>(shaders::name::position))
+    if (!vao.hasVBO<Vector3f>(shaders::name::position))
     {
         std::cerr << "VBO for vertices is needed" << std::endl;
         return false;
@@ -39,7 +39,7 @@ bool Axes::generate(GLVAO32& vao, const bool clear)
         Vector3f(0.0f, 0.0f, 0.0f),  Vector3f(0.0f, 0.0f, config.size)
     };
 
-    if (vao.has<Vector4f>("colors"))
+    if (vao.hasVBO<Vector4f>("colors"))
     {
         auto& color = vao.vector4f("colors");
 

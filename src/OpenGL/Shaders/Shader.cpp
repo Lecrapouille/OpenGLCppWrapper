@@ -96,7 +96,7 @@ std::string GLShader::strerror()
 //--------------------------------------------------------------------------
 bool GLShader::compile()
 {
-    if (!needSetup())
+    if (compiled())
         return true;
 
     // TODO solveIncludes()
@@ -121,6 +121,7 @@ bool GLShader::onSetup()
 {
     bool compiled = false;
 
+    std::cout << "Compiling shader " << name() << " ..." << std::endl;
     if (!m_code.empty())
     {
         char const *source = m_code.c_str();
@@ -132,8 +133,8 @@ bool GLShader::onSetup()
     else
     {
         std::string msg =
-                "   Could not compile the shader named '" + name() +
-                "'. Reason was 'compilation errored'";
+                "   Could not compile the shader named " + name() +
+                ". Reason was 'compilation errored'";
         concatError(msg);
     }
 
@@ -182,7 +183,7 @@ bool GLShader::checkCompilationStatus(GLuint obj)
 //--------------------------------------------------------------------------
 void GLShader::throw_if_not_loaded()
 {
-    if (unlikely(m_code.empty()))
+    if (m_code.empty())
     {
         throw GL::Exception("No code attached to the shader");
     }
@@ -191,7 +192,7 @@ void GLShader::throw_if_not_loaded()
 //--------------------------------------------------------------------------
 void GLShader::throw_if_already_compiled()
 {
-    if (unlikely(!needSetup()))
+    if (compiled())
     {
         throw GL::Exception("Shader already compiled");
     }

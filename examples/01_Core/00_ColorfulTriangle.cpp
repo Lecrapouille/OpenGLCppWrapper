@@ -119,10 +119,10 @@ bool ColorfulTriangle::onSetup()
                    })GLSL";
 
     // Optional. For debug, shaders can be displayed with:
-    std::cout << "Shader program " << m_vertex_shader.name()
+    std::cout << "Shader program: " << m_vertex_shader.name()
               << ":" << std::endl;
     std::cout << m_vertex_shader << std::endl << std::endl;
-    std::cout << "Fragment program " << m_fragment_shader.name()
+    std::cout << "Fragment program: " << m_fragment_shader.name()
               << ":" << std::endl;
     std::cout << m_fragment_shader << std::endl << std::endl;
 

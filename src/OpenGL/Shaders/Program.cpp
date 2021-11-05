@@ -27,29 +27,28 @@
 #include "OpenGL/Shaders/Program.hpp"
 #include "OpenGL/Buffers/iVAO.hpp"
 
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 GLProgram::GLProgram(std::string const& name)
-    : GLObject(name)
+    : GLObject(name, 0)
 {}
 
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 GLProgram::~GLProgram()
 {
     release();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void GLProgram::onRelease()
 {
     glCheck(glDeleteProgram(m_handle));
     m_uniforms.clear();
-    m_uniformLocations.clear();
     m_samplers.clear();
     m_attributes.clear();
     m_error.clear();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void GLProgram::concatError(std::string const& msg)
 {
     if (!m_error.empty())
@@ -57,10 +56,10 @@ void GLProgram::concatError(std::string const& msg)
     m_error += msg;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GLProgram::bind(GLVAO& vao)
 {
-    std::cout << "bind GLProgram " << name() << " to VAO " << vao.name() << std::endl;
+    std::cout << "bind GLVAO " << vao.name() << " to GLProgram " << name() << std::endl;
 
     // First compile the GLProgram (compile shaders and load GLSL variables) if
     // this has not been done yet. Indeed GLProgram will populate the bound VAO
@@ -69,16 +68,19 @@ bool GLProgram::bind(GLVAO& vao)
     {
         if (!compile())
         {
-            std::string err("Tried to bind VAO "  + vao.name()
-                            + "' to a GLProgram " + name()
-                            + " that failed to compile");
+            std::string err("Tried to bind GLVAO "  + vao.name() +
+                            " to the GLProgram " + name() +
+                            " which has failed to compile");
             concatError(err);
             return false;
         }
     }
 
-    // Bind this instance of GLProgram to a never bound VAO. When binding a VAO
-    // for the first time: populate it with VBOs and textures.
+    // Bind this instance of GLProgram to a never bound VAO. When a VAO is bound
+    // for the first time, we create list of VBOs and textures. The list of VBOs
+    // depends on the list of shader attributes and the list of textures depends
+    // on the list of shader samplers. Shader attributes and samplers are the
+    // "variables" declared in the vertex, fragment shaders.
     if (unlikely(!vao.isBound()))
     {
         vao.m_program = this;
@@ -88,24 +90,27 @@ bool GLProgram::bind(GLVAO& vao)
         return true;
     }
 
-    // Check if VAO has been previously bound to this instance of GLProgram. If
-    // not, this probably an error of the developper trying to bind a VAO to an
-    // incompatible GLProgram.
+    // Check if the VAO was already bound to this instance of GLProgram. If not,
+    // this is probably an error made by the developper trying to bind a VAO to
+    // an incompatible GLProgram. If yes, nothing has to be done (since lists of
+    // VBO and textures have already been made during the first binding).
     else if (likely(vao.isBoundTo(m_handle)))
     {
-        vao.m_need_update = true; // TBD
+        vao.m_need_update = true; // FIXME TBD ?
         return true;
     }
     else
     {
-        std::string err("Tried to bind VAO " + vao.name()
-                        + " already bound to another GLProgram than " + name());
+        assert(vao.m_program != nullptr);
+        std::string err("You have tried to bind the GLVAO " + vao.name() +
+                        "to GLProgram " + name() + " but the GLVAO was previously"
+                        " bound to GLProgram " + vao.m_program->name());
         concatError(err);
         return false;
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 std::string GLProgram::strerror()
 {
     std::string msg;
@@ -133,7 +138,7 @@ std::string GLProgram::strerror()
     return msg;
 }
 
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GLProgram::compile(GLVertexShader& vertex, GLFragmentShader& fragment)
 {
     m_shaders.clear();
@@ -142,7 +147,7 @@ bool GLProgram::compile(GLVertexShader& vertex, GLFragmentShader& fragment)
     return compile();
 }
 
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GLProgram::compile(GLVertexShader& vertex, GLFragmentShader& fragment,
                         GLGeometryShader& geometry)
 {
@@ -153,28 +158,31 @@ bool GLProgram::compile(GLVertexShader& vertex, GLFragmentShader& fragment,
     return compile();
 }
 
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GLProgram::compile()
 {
     begin();
-    return !needSetup();
+    return compiled();
 }
 
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GLProgram::onCreate()
 {
     m_handle = glCheck(glCreateProgram());
     return false;
 }
 
-//--------------------------------------------------------------------------
-// FIXME glObject::begin() calls onActivate() before onSetup() but for GLProgram
+//------------------------------------------------------------------------------
+// GLObject::begin() calls onActivate() before onSetup() but for GLProgram
 // this should be the inversed.
 bool GLProgram::onSetup()
 {
     bool success = true;
+    std::cout << "Linking shaders into GLProgram named "
+              << name() << " ..." << std::endl;
 
-    // Compile shaders if they have not yet been compiled
+    // Compile shaders if they have not yet been compiled. Keep iterating even
+    // if one has failed in the aim to display the most errors.
     for (auto& it: m_shaders)
     {
         if (it->code().size() == 0u)
@@ -203,58 +211,70 @@ bool GLProgram::onSetup()
         glCheck(glLinkProgram(m_handle));
         success = checkLinkageStatus(m_handle);
 
-        // Create the list of attributes and uniforms
+        // Create the list of attributes, samplers and uniforms that will be
+        // used for populating list of VBOs (attibutes) and textures (samplers)
+        // when a VAO will be bind to the GLProgram.
         if (success)
         {
-            generateLocations();
+            std::cout << "Generating attributes and uniforms for GLProgram named "
+                      << name() << "..." << std::endl;
+            generateAttributesAndUniforms();
             m_error.clear();
+
+            // Force calling onActivate() without checks since GLObject::begin()
+            // calls onActivate() before onSetup() but for GLProgram this should
+            // be the inversed. So onActivate() was called before this method
+            // and has failed because this GLProgram was not yet compiled. So
+            // now, activate the GLProgram.
+            glCheck(glUseProgram(m_handle));
+
+            // Force calling onUpdate() allowing to update uniforms since the
+            // API allows the user to define uniforms before compiling the
+            // GLProgram. This allows for example to create 3d object with
+            // predefined materials before compiling shaders
+            m_need_update = true;
         }
     }
 
-    // Release shaders stored in GPU.
+    // Release shaders stored in GPU: they are no longer needed.
     detachAllShaders();
-    m_need_update = true;
-
-    // FIXME: ugly
-    // Activate now because the user may have created uniforms before creating
-    // the Program and the next method called after this method is onUpdate().
-    glCheck(glUseProgram(m_handle));
-
     return !success;
 }
 
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GLProgram::onUpdate()
 {
-    for (auto const& it: m_uniformLocations)
+    for (auto const& it: m_uniforms)
     {
         it.second->begin();
     }
 
+    // Always force calling GLProgram::onUpdate()
     return true;
 }
 
-//--------------------------------------------------------------------------
-// FIXME glObject::begin() calls onActivate() before onSetup() but for GLProgram
-// this should be the inversed so need the if(compiled())
+//------------------------------------------------------------------------------
+// GLObject::begin() calls onActivate() before onSetup() but for GLProgram this
+// should be the inversed so need the if(compiled())
 void GLProgram::onActivate()
 {
-    if (compiled()) {
+    if (compiled())
+    {
         glCheck(glUseProgram(m_handle));
     }
 }
 
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void GLProgram::onDeactivate()
 {
-    for (auto const& it: m_uniformLocations)
+    for (auto const& it: m_uniforms)
     {
         it.second->end();
     }
     glCheck(glUseProgram(0U));
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool GLProgram::checkLinkageStatus(GLuint handle)
 {
     GLint status;
@@ -276,7 +296,7 @@ bool GLProgram::checkLinkageStatus(GLuint handle)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void GLProgram::detachAllShaders()
 {
     m_failedShaders.clear();
@@ -294,8 +314,8 @@ void GLProgram::detachAllShaders()
     m_shaders.clear();
 }
 
-//----------------------------------------------------------------------------
-void GLProgram::generateLocations()
+//------------------------------------------------------------------------------
+void GLProgram::generateAttributesAndUniforms()
 {
     const GLsizei BUFFER_SIZE = 64;
     GLchar name[BUFFER_SIZE];
@@ -304,116 +324,160 @@ void GLProgram::generateLocations()
     GLuint location;
     GLenum type;
 
-    // Create the list of uniforms and samplers
+    // Create the list of uniforms and samplers. Uniforms are used to modify
+    // values of uniform variables in shaders. Samplers are for texture they act
+    // like uniform but are used to populate textures when a VAO is bound to the
+    // first time to this GLProgram.
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
     location = static_cast<GLuint>(count);
     while (location--)
     {
         glCheck(glGetActiveUniform(m_handle, location, BUFFER_SIZE, nullptr,
                                    &size, &type, name));
-        createUniform(type, name, handle());
+        storeUniformOrSampler(type, name);
     }
 
-    // Create the list of attributes
+    // Create the list of attributes. Attributes are used to populate VBOs when
+    // a VAO is bound to the first time to this GLProgram.
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_ATTRIBUTES, &count));
     location = static_cast<GLuint>(count);
     while (location--)
     {
         glCheck(glGetActiveAttrib(m_handle, location, BUFFER_SIZE, nullptr,
                                   &size, &type, name));
-        createAttribute(type, name, handle());
+        storeAttribute(type, name);
     }
 }
 
-//----------------------------------------------------------------------------
-void GLProgram::createAttribute(GLenum type, const char *name, const GLuint prog)
+//------------------------------------------------------------------------------
+void GLProgram::storeAttribute(GLenum type, const char *name)
 {
+    // TODO: kill unused uniforms ? Meaning uniforms created by the user but
+    // not used inside shaders.
+    auto it = m_attributes.find(name);
+    if (it != m_attributes.end())
+        return ;
+
     switch (type)
     {
+        // TODO: manage integers
     case GL_FLOAT:
-        // TODO if (!m_attributes.has<T>(name) {
-        m_attributes[name] = std::make_shared<GLAttribute>(name, 1, GL_FLOAT, prog);
-        break;
+        createAttribute<float>(name);
+        return;
     case GL_FLOAT_VEC2:
-        m_attributes[name] = std::make_shared<GLAttribute>(name, 2, GL_FLOAT, prog);
-        break;
+        createAttribute<Vector2f>(name);
+        return;
     case GL_FLOAT_VEC3:
-        m_attributes[name] = std::make_shared<GLAttribute>(name, 3, GL_FLOAT, prog);
-        break;
+        createAttribute<Vector3f>(name);
+        return;
     case GL_FLOAT_VEC4:
-        m_attributes[name] = std::make_shared<GLAttribute>(name, 4, GL_FLOAT, prog);
-        break;
+        createAttribute<Vector4f>(name);
+        return;
     default:
-        std::string msg = "The type of Attribute for " + std::string(name)
-                          + " is not managed";
+        std::string msg =
+                "The type of Attribute for " + std::string(name) +
+                " is not managed";
         throw GL::Exception(msg);
     }
 }
-
-//----------------------------------------------------------------------------
-void GLProgram::createUniform(GLenum type, const char *name, const GLuint prog)
+//------------------------------------------------------------------------------
+void GLProgram::storeUniformOrSampler(GLenum type, const char *name)
 {
-    // TODO: if uniform already bound => do nothing
+    if (!storeUniform(type, name))
+    {
+        if (!storeSampler(type, name))
+        {
+            std::string msg =
+                    "The type of Uniform for " + std::string(name) +
+                    " is not managed";
+            throw GL::Exception(msg);
+        }
+    }
+}
 
+//------------------------------------------------------------------------------
+bool GLProgram::storeUniform(GLenum type, const char *name)
+{
+    // The API allows the user to define uniforms before compiling the
+    // GLProgram. Avoid replacing the uniform to avoid loosing its value.
+    // TODO: kill unused uniforms ? Meaning uniforms created by the user but
+    // not used inside shaders.
+    auto it = m_uniforms.find(name);
+    if (it != m_uniforms.end())
+        return true;
+
+    // Store new uniform
     switch (type)
     {
     case GL_FLOAT:
-        doCreateUniform<float>(1, type, name, prog);
-        break;
+        createUniform<float>(name);
+        return true;
     case GL_FLOAT_VEC2:
-        doCreateUniform<Vector2f>(2, type, name, prog);
-        break;
+        createUniform<Vector2f>(name);
+        return true;
     case GL_FLOAT_VEC3:
-        doCreateUniform<Vector3f>(3, type, name, prog);
-        break;
+        createUniform<Vector3f>(name);
+        return true;
     case GL_FLOAT_VEC4:
-        doCreateUniform<Vector4f>(4, type, name, prog);
-        break;
+        createUniform<Vector4f>(name);
+        return true;
     case GL_INT:
-        doCreateUniform<int>(1, type, name, prog);
-        break;
+        createUniform<int>(name);
+        return true;
     case GL_INT_VEC2:
-        doCreateUniform<Vector2i>(2, type, name, prog);
-        break;
+        createUniform<Vector2i>(name);
+        return true;
     case GL_INT_VEC3:
-        doCreateUniform<Vector3i>(3, type, name, prog);
-        break;
+        createUniform<Vector3i>(name);
+        return true;
     case GL_INT_VEC4:
-        doCreateUniform<Vector4i>(4, type, name, prog);
-        break;
+        createUniform<Vector4i>(name);
+        return true;
     case GL_FLOAT_MAT2:
-        doCreateUniform<Matrix22f>(4, type, name, prog);
-        break;
+        createUniform<Matrix22f>(name);
+        return true;
     case GL_FLOAT_MAT3:
-        doCreateUniform<Matrix33f>(9, type, name, prog);
-        break;
+        createUniform<Matrix33f>(name);
+        return true;
     case GL_FLOAT_MAT4:
-        doCreateUniform<Matrix44f>(16, type, name, prog);
-        break;
-    case GL_SAMPLER_1D:
-        m_samplers[name]
-                = std::make_shared<GLSampler1D>(name, m_samplers.size(), prog);
-        break;
-    case GL_SAMPLER_2D:
-        m_samplers[name]
-                = std::make_shared<GLSampler2D>(name, m_samplers.size(), prog);
-        break;
-    case GL_SAMPLER_3D:
-        m_samplers[name]
-                = std::make_shared<GLSampler3D>(name, m_samplers.size(), prog);
-        break;
-    case GL_SAMPLER_CUBE:
-        m_samplers[name]
-                = std::make_shared<GLSamplerCube>(name, m_samplers.size(), prog);
-        break;
-    default:
-        std::string msg = "The type of Uniform for " + std::string(name)
-                          + " is not managed";
-        throw GL::Exception(msg);
+        createUniform<Matrix44f>(name);
+        return true;
     }
+
+    return false;
+}
+//------------------------------------------------------------------------------
+bool GLProgram::storeSampler(GLenum type, const char *name)
+{
+    // The API allows the user to define uniforms before compiling the
+    // GLProgram. Avoid replacing the uniform to avoid loosing its value.
+    // TODO: kill unused uniforms ? Meaning uniforms created by the user but
+    // not used inside shaders.
+    auto it = m_samplers.find(name);
+    if (it != m_samplers.end())
+        return true;
+
+    // Store new sampler
+    switch (type)
+    {
+    case GL_SAMPLER_1D:
+        createSampler<GLSampler1D>(name);
+        return true;
+    case GL_SAMPLER_2D:
+        createSampler<GLSampler2D>(name);
+        return true;
+    case GL_SAMPLER_3D:
+        createSampler<GLSampler3D>(name);
+        return true;
+    case GL_SAMPLER_CUBE:
+        createSampler<GLSamplerCube>(name);
+        return true;
+    }
+
+    return false;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 size_t GLProgram::getFailedShaders(std::vector<std::string>& list, bool const clear) const
 {
     if (clear) { list.clear(); }
@@ -421,17 +485,17 @@ size_t GLProgram::getFailedShaders(std::vector<std::string>& list, bool const cl
     return list.size();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 size_t GLProgram::getUniformNames(std::vector<std::string>& list, bool const clear) const
 {
     if (clear) { list.clear(); }
-    list.reserve(m_uniformLocations.size());
-    for (auto const& it: m_uniformLocations)
-        list.push_back(it.second->name());
+    list.reserve(m_uniforms.size());
+    for (auto const& it: m_uniforms)
+        list.push_back(it.first);
     return list.size();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 size_t GLProgram::getAttributeNames(std::vector<std::string>& list, bool const clear) const
 {
     if (clear) { list.clear(); }
@@ -441,7 +505,7 @@ size_t GLProgram::getAttributeNames(std::vector<std::string>& list, bool const c
     return list.size();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 size_t GLProgram::getSamplerNames(std::vector<std::string>& list, bool const clear) const
 {
     if (clear) { list.clear(); }

@@ -65,10 +65,10 @@ public:
             begin(); // Optim: glBindVertexArray(m_vao->handle());
             m_index.begin(); // FIXME should be stored inside the VAO
 
-            for (auto& it: m_program->m_samplers)
+            for (auto const& it: m_program->samplers())
             {
                 it.second->begin();
-                m_listTextures[it.first]->begin();
+                m_textures[it.first]->begin();
             }
 
             glCheck(glDrawElements(static_cast<GLenum>(mode),

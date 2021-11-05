@@ -36,7 +36,7 @@ class GLVertexShader: public GLShader
 {
 public:
 
-    GLVertexShader(std::string const& name = "VertexShader")
+    GLVertexShader(std::string const& name = "<embedded vertex shader>")
         : GLShader(name, GL_VERTEX_SHADER)
     {}
 };
@@ -48,7 +48,7 @@ class GLFragmentShader: public GLShader
 {
 public:
 
-    GLFragmentShader(std::string const& name = "FragmentShader")
+    GLFragmentShader(std::string const& name = "<embedded fragment shader>")
         : GLShader(name, GL_FRAGMENT_SHADER)
     {}
 };
@@ -60,7 +60,7 @@ class GLGeometryShader: public GLShader
 {
 public:
 
-    GLGeometryShader(std::string const& name = "GeometryShader")
+    GLGeometryShader(std::string const& name = "<embedded geometry shader>")
         : GLShader(name, GL_GEOMETRY_SHADER)
     {}
 };

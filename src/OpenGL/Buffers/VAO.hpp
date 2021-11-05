@@ -30,6 +30,7 @@
 #  include "OpenGL/Buffers/VBO.hpp"
 #  include "OpenGL/Textures/Textures.hpp"
 #  include "OpenGL/Shaders/Program.hpp"
+#  include <map>
 
 //--------------------------------------------------------------------------
 //! \brief Mode for drawing primitives (points, lines, triangles ...)
@@ -66,12 +67,12 @@ public:
     //!
     //! \param[in] name the name of the VAO instance.
     //! \param[in] usage for VBOs when they are created:
-    //!   - BufferUsage::STREAM_DRAW: The data store contents will be modified once and
-    //!     used at most a few times.
-    //!   - BufferUsage::STATIC_DRAW: The data store contents will be modified once and
-    //!     used many times.
-    //!   - BufferUsage::DYNAMIC_DRAW: The data store contents will be modified repeatedly
-    //!     and used many times.
+    //!   - BufferUsage::STREAM_DRAW: The data store contents will be modified
+    //!     once and used at most a few times.
+    //!   - BufferUsage::STATIC_DRAW: The data store contents will be modified
+    //!     once and used many times.
+    //!   - BufferUsage::DYNAMIC_DRAW: The data store contents will be modified
+    //!     repeatedly and used many times.
     //! \param[in] reserve the number of elements when creating VBOs.
     //--------------------------------------------------------------------------
     GLVAO(std::string const& name, BufferUsage const usage = BufferUsage::DYNAMIC_DRAW,
@@ -92,12 +93,12 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Set the usage for VBOs when they are created:
-    //!   - BufferUsage::STREAM_DRAW: The data store contents will be modified once and
-    //!     used at most a few times.
-    //!   - BufferUsage::STATIC_DRAW: The data store contents will be modified once and
-    //!     used many times.
-    //!   - BufferUsage::DYNAMIC_DRAW: The data store contents will be modified repeatedly
-    //!     and used many times.
+    //!   - BufferUsage::STREAM_DRAW: The data store contents will be modified
+    //!     once and used at most a few times.
+    //!   - BufferUsage::STATIC_DRAW: The data store contents will be modified
+    //!     once and used many times.
+    //!   - BufferUsage::DYNAMIC_DRAW: The data store contents will be modified
+    //!     repeatedly and used many times.
     //--------------------------------------------------------------------------
     void usage(BufferUsage const usage)
     {
@@ -114,6 +115,7 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Wrap the glDrawArrays() function
+    //! \brief \param[in] mode:
     //--------------------------------------------------------------------------
     bool draw(Mode const mode, size_t const first, size_t const count);
 
@@ -135,17 +137,25 @@ public:
     //--------------------------------------------------------------------------
     inline size_t hasVBOs() const
     {
-        return m_VBOs.size();
+        return m_vbos.size();
     }
 
     //--------------------------------------------------------------------------
+    //! \brief Check if this instance holds a VBO named with the name passed as
+    //! parameter.
+    //!
+    //! \return true if contains the named VBO, else return false.
+    //--------------------------------------------------------------------------
     template<class T>
-    bool has(const char *name)
+    bool hasVBO(const char *name)
     {
-        if (nullptr == name)
-            return false;
+        assert(name != nullptr);
 
-        return m_VBOs.has<std::shared_ptr<GLVertexBuffer<T>>>(name);
+        auto it = m_vbos.find(name);
+        if (it == m_vbos.end())
+            return false;
+        GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(it->second.get());
+        return (vbo != nullptr);
     }
 
     //--------------------------------------------------------------------------
@@ -160,6 +170,18 @@ public:
     inline size_t hasTextures() const
     {
         return m_textures.size();
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Check if this instance holds a sampler named with the name passed
+    //! as parameter.
+    //!
+    //! \return true if contains the named sampler, else return false.
+    //--------------------------------------------------------------------------
+    inline bool hasTexture(const char *name) const
+    {
+        assert(name != nullptr);
+        return m_textures.find(name) != m_textures.end();
     }
 
     //--------------------------------------------------------------------------
@@ -205,7 +227,7 @@ public:
     //!
     //! This method wraps the \a VBO() method hidding the misery of the template.
     //!
-    //! \throw OpenGLException if the VBO does not exist or does not have the
+    //! \throw GL::Exception if the VBO does not exist or does not have the
     //! correct type.
     //--------------------------------------------------------------------------
     inline GLVertexBuffer<Vector4f>& vector4f(const char *name)
@@ -219,7 +241,7 @@ public:
     //!
     //! This method wraps the \a VBO() method hidding the misery of the template.
     //!
-    //! \throw OpenGLException if the VBO does not exist or does not have the
+    //! \throw GL::Exception if the VBO does not exist or does not have the
     //! correct type.
     //--------------------------------------------------------------------------
     inline GLVertexBuffer<Vector3f>& vector3f(const char *name)
@@ -233,7 +255,7 @@ public:
     //!
     //! This method wraps the \a VBO() method hidding the misery of the template.
     //!
-    //! \throw OpenGLException if the VBO does not exist or does not have the
+    //! \throw GL::Exception if the VBO does not exist or does not have the
     //! correct type.
     //--------------------------------------------------------------------------
     inline GLVertexBuffer<Vector2f>& vector2f(const char *name)
@@ -246,7 +268,7 @@ public:
     //!
     //! This method wraps the \a VBO() method hidding the misery of the template.
     //!
-    //! \throw OpenGLException if the VBO does not exist or does not have the
+    //! \throw GL::Exception if the VBO does not exist or does not have the
     //! correct type.
     //--------------------------------------------------------------------------
     inline GLVertexBuffer<float>& scalarf(const char *name)
@@ -260,7 +282,7 @@ public:
     //! This method wraps the \a texture() method hidding the misery of the
     //! template.
     //!
-    //! \throw OpenGLException if the texture does not exist or does not have the
+    //! \throw GL::Exception if the texture does not exist or does not have the
     //! correct type.
     //--------------------------------------------------------------------------
     inline GLTexture1D& texture1D(const char *name)
@@ -274,7 +296,7 @@ public:
     //! This method wraps the \a texture() method hidding the misery of the
     //! template.
     //!
-    //! \throw OpenGLException if the texture does not exist or does not have the
+    //! \throw GL::Exception if the texture does not exist or does not have the
     //! correct type.
     //--------------------------------------------------------------------------
     inline GLTexture2D& texture2D(const char *name)
@@ -288,7 +310,7 @@ public:
     //! This method wraps the \a texture() method hidding the misery of the
     //! template.
     //!
-    //! \throw OpenGLException if the texture does not exist or does not have the
+    //! \throw GL::Exception if the texture does not exist or does not have the
     //! correct type.
     //--------------------------------------------------------------------------
     inline GLTexture3D& texture3D(const char *name)
@@ -302,7 +324,7 @@ public:
     //! This method wraps the \a texture() method hidding the misery of the
     //! template.
     //!
-    //! \throw OpenGLException if the texture does not exist or does not have the
+    //! \throw GL::Exception if the texture does not exist or does not have the
     //! correct type.
     //--------------------------------------------------------------------------
     inline GLTextureCube& textureCube(const char *name)
@@ -394,78 +416,147 @@ private:
     bool checkVBOSizes();
 
     //--------------------------------------------------------------------------
+    //! \brief Create a Vertex Buffer Object. Called by GLProgram when
+    //! populating the bound VAO with VBOs from attribute names used in shader
+    //! GLSL code.
+    //!
+    //! \param[in] name the attribute name for the VBO.
+    //! \note \a name duplicata is not managed because this case should never
+    //! happen (meaning two attribute names are used for different type which is
+    //! not allowed and detected by the GLSL compiler).
+    //! \return true if the VBO has been created, else return false.
+    //--------------------------------------------------------------------------
+    template<typename T>
+    void createVBO(const char *name)
+    {
+        assert(name != nullptr);
+
+        auto it = m_vbos.find(name);
+        if (it != m_vbos.end())
+            return ;
+
+        m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name, m_reserve, m_usage);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Create a texture. Called by GLProgram when populating the bound
+    //! VAO with textures frome sampler names used in shader GLSL code.
+    //!
+    //! \param[in] name the sampler name for the texture.
+    //! \tparam T GLTexture1D or GLTexture2D or GLTexture3D or GLTextureCube.
+    //!
+    //! \note name duplicata is not managed because this case should never
+    //! happen (meaning two attribute names are used for different type which is
+    //! not allowed and detected by the GLSL compiler).
+    //!
+    //! \return true if the texture has been created, else return false.
+    //--------------------------------------------------------------------------
+    template<typename T>
+    void createTexture(const char *name)
+    {
+        assert(name != nullptr);
+
+        auto it = m_textures.find(name);
+        if (it != m_textures.end())
+            return ;
+
+        m_textures[name] = std::make_unique<T>(name);
+    }
+
+    //--------------------------------------------------------------------------
     //! \brief Find and return a VBO. Create and store a VBO if and only if the
     //! VAO is not yet bound to a GLProgram.
     //--------------------------------------------------------------------------
     template<class T>
     GLVertexBuffer<T>& getVBO(const char *name)  // TODO const:  foo = getVBO(()
     {
-        if (unlikely(nullptr == name))
-            throw GL::Exception("nullptr passed to uniform");
+        assert(name != nullptr);
 
-        try
+        if (isBound())
         {
-            GLVertexBuffer<T>& vbo = *(m_VBOs.get<std::shared_ptr<GLVertexBuffer<T>>>(name));
-            m_need_update = true;// TODO const:  foo = getVBO()
-            //std::cout << "getVBO need update = true" << std::endl;
-
-            return vbo;
-        }
-        catch (std::exception&)
-        {
-            if (likely(!isBound()))
+            auto it = m_vbos.find(name);
+            if (it != m_vbos.end())
             {
-                auto vbo = std::make_shared<GLVertexBuffer<T>>(name, m_reserve, m_usage);
-                m_VBOs.add(name, vbo);
-                m_listBuffers[name] = vbo;
+                GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(it->second.get());
+                if (vbo != nullptr)
+                {
+                    m_need_update = true;// TODO const:  foo = getVBO()
+                    return *vbo;
+                }
 
-                return *vbo;
+                throw GL::Exception("GLVertexBuffer " + std::string(name) +
+                                    " exists but has wrong template type");
             }
+            throw GL::Exception("GLVertexBuffer " + std::string(name) + " does not exist");
+        }
+        else
+        {
+            // The API allows the user to define VBOs before compiling the
+            // GLProgram and bounding VAO to this program.
+            if (m_vbos.find(name) == m_vbos.end())
+                createVBO<T>(name);
 
-            throw GL::Exception("GLUniform '" + std::string(name) + "' does not exist");
+            GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(m_vbos[name].get());
+            m_need_update = true;
+            return *vbo;
         }
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief Locate and get the reference of ther texture refered by its type
+    //! T and by the given the sampler name used in GLSL code.
+    //! \fixme m_textures_verified is always changed to false but shall be only
+    //! bed modified when PendingContainer has been changed.
+    //! \note Do not confuse sampler name with texture filename.
+    //! param name is the GLSL sampler name.
+    //! \return the reference of the texture if it exists.
+    //! \throw GL::Exception if the texture is not in the list or if the type
+    //! T does not match or by a typo in the name of the sampler.
     //--------------------------------------------------------------------------
-    template<class T>
-    T& getTexture(const char *name) // TODO const:  foo = getTexture()
+    template<typename T>
+    T& getTexture(const char *name)
     {
-        if (unlikely(nullptr == name))
-            throw GL::Exception("nullptr passed to uniform");
+        assert(name != nullptr);
+        if (isBound())
+        {
+            auto it = m_textures.find(name);
+            if (m_textures.end() != it)
+            {
+                T* tex = dynamic_cast<T*>(it->second.get());
+                if (tex != nullptr)
+                {
+                    m_need_update = true; // TODO gerer foo = getTexture()
+                    return *tex;
+                }
 
-        if (likely(!isBound()))
-        {
-            m_textures.add(name, std::make_shared<T>(name));
+                throw GL::Exception("GLTexture '" + std::string(name) +
+                                    "' exists but has wrong template type");
+            }
+            throw GL::Exception("GLTexture '" + std::string(name) +
+                                "' does not exist");
         }
+        else
+        {
+            // The API allows the user to define textures before compiling the
+            // GLProgram.
+            if (m_textures.find(name) == m_textures.end())
+                createTexture<T>(name);
 
-        try
-        {
-            m_need_update = true; // TODO gerer foo = getTexture()
-            //std::cout << "getTexture need update = true" << std::endl;
-            return *(m_textures.get<std::shared_ptr<T>>(name));
-        }
-        catch (std::exception&)
-        {
-            throw GL::Exception("GLTexture '" + std::string(name) + "' does not exist");
+            T* tex = dynamic_cast<T*>(m_textures[name].get());
+            m_need_update = true;
+            return *tex;
         }
     }
 
 protected:
 
-    using VBOs = Any;
-    using Textures = Any;
-    using ListBuffers = std::map<std::string, std::shared_ptr<IGLBuffer>>;
-    using ListTextures = std::map<std::string, std::shared_ptr<GLTexture>>;
+    using VBOs = std::map<std::string, std::unique_ptr<IGLBuffer>>;
+    using Textures = std::map<std::string, std::unique_ptr<GLTexture>>;
 
-    VBOs         m_VBOs;
+    VBOs         m_vbos;
     Textures     m_textures;
-    ListBuffers  m_listBuffers;
-    ListTextures m_listTextures;
     GLProgram*   m_program = nullptr;
     size_t       m_count = 0u;
-
     BufferUsage  m_usage;
     size_t       m_reserve;
 };
