@@ -392,8 +392,6 @@ private:
     template<class T>
     GLUniform<T>& uniform(const char *name)
     {
-        assert(name != nullptr);
-
         if (compiled())
         {
             auto it = m_uniforms.find(name);

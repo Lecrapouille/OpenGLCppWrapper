@@ -169,8 +169,8 @@ bool GLShader::checkCompilationStatus(GLuint obj)
     {
         GLint length;
         glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &length));
-        std::vector<char> log(static_cast<size_t>(length));
-        glCheck(glGetShaderInfoLog(obj, length - 1, &length, &log[0U]));
+        std::vector<char> log(static_cast<size_t>(length + 1));
+        glCheck(glGetShaderInfoLog(obj, length, &length, &log[0U]));
         concatError(&log[0U]);
     }
     else

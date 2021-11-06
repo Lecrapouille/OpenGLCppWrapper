@@ -284,8 +284,8 @@ bool GLProgram::checkLinkageStatus(GLuint handle)
     {
         GLint length;
         glCheck(glGetProgramiv(handle, GL_INFO_LOG_LENGTH, &length));
-        std::vector<char> log(static_cast<size_t>(length));
-        glCheck(glGetProgramInfoLog(handle, length - 1, &length, &log[0U]));
+        std::vector<char> log(static_cast<size_t>(length + 1));
+        glCheck(glGetProgramInfoLog(handle, length, &length, &log[0U]));
         concatError(&log[0U]);
         return false;
     }

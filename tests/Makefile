@@ -41,8 +41,8 @@ OBJS += VectorTests.o MatrixTests.o MaxPlusTests.o
 OBJS += QuaternionTests.o TransformationTests.o TransformableTests.o
 OBJS += ComponentTests.o
 OBJS += PendingDataTests.o PendingContainerTests.o
+OBJS += GLObjectTests.o GLProgramTests.o
 OBJS += main.o
-#  GLObjectTests.o GLProgramTests.o
 
 ###################################################
 # Project defines

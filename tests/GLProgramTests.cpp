@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "main.hpp"
+#include "OpenGL/Context/OpenGL.hpp"
 #define protected public
 #define private public
 #  include "OpenGL/Shaders/Program.hpp"
@@ -26,91 +27,230 @@
 #undef protected
 #undef private
 
+#  include <GLFW/glfw3.h>
+#  include <GL/glew.h>
+
+class OpenGLContext
+{
+    typedef std::function<void()> Callback;
+
+public:
+
+    OpenGLContext(Callback const& cb)
+    {
+        if (!glfwInit())
+            throw GL::Exception("Failed to initialize GLFW");
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Mac OS X
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
+        m_context = glfwCreateWindow(1, 1, "", nullptr, nullptr);
+        glfwMakeContextCurrent(m_context);
+        glfwSwapInterval(1); // Enable vsync
+        GL::Context::setCreated();
+        glewExperimental = GL_TRUE;
+        if (glewInit() != GLEW_OK)
+            throw GL::Exception("Failed to initialize GLFW");
+        if (!GLEW_VERSION_3_3)
+            throw GL::Exception("OpenGL 3.3 API is not available!");
+        cb();
+    }
+
+    ~OpenGLContext()
+    {
+        glfwDestroyWindow(m_context);
+        glfwTerminate();
+        GL::Context::setCreated(false);
+    }
+
+private:
+
+    GLFWwindow* m_context = nullptr;
+};
+
 // Check initial states
 TEST(TestGLPrograms, TestCreators)
 {
-    std::vector<std::string> list;
+    OpenGLContext context([]()
+    {
+        std::vector<std::string> list;
 
-    GLProgram prog("prog");
+        GLProgram prog("prog");
 
-    ASSERT_STREQ("prog", prog.cname());
-    ASSERT_EQ(false, prog.compiled());
-    ASSERT_STREQ("", prog.strerror().c_str());
-    ASSERT_EQ(0_z, prog.getFailedShaders(list, true));
-    ASSERT_EQ(0_z, list.size());
-    ASSERT_EQ(0_z, prog.getUniformNames(list, true));
-    ASSERT_EQ(0_z, list.size());
-    ASSERT_EQ(0_z, prog.getAttributeNames(list, true));
-    ASSERT_EQ(0_z, list.size());
-    ASSERT_EQ(0_z, prog.getSamplerNames(list, true));
-    ASSERT_EQ(0_z, list.size());
-    ASSERT_EQ(false, prog.hasAttributes());
-    ASSERT_EQ(false, prog.hasUniforms());
-    ASSERT_EQ(false, prog.hasSamplers());
+        // Check GLObject states
+        ASSERT_STREQ("prog", prog.cname());
+        ASSERT_EQ(0, prog.m_handle);
+        ASSERT_EQ(0, prog.m_target);
+        ASSERT_EQ(true, prog.m_need_setup);
+        ASSERT_EQ(true, prog.m_need_create);
+        ASSERT_EQ(false, prog.m_need_update);
+
+        // Check GLProgram states
+        ASSERT_EQ(0_z, prog.m_shaders.size());
+        ASSERT_EQ(false, prog.compiled());
+        ASSERT_EQ(0_z, prog.getFailedShaders(list, true));
+        ASSERT_EQ(0_z, list.size());
+        ASSERT_EQ(0_z, prog.getUniformNames(list, true));
+        ASSERT_EQ(0_z, list.size());
+        ASSERT_EQ(0_z, prog.getAttributeNames(list, true));
+        ASSERT_EQ(0_z, list.size());
+        ASSERT_EQ(0_z, prog.getSamplerNames(list, true));
+        ASSERT_EQ(0_z, list.size());
+        ASSERT_EQ(0_z, prog.m_attributes.size());
+        ASSERT_EQ(0_z, prog.m_uniforms.size());
+        ASSERT_EQ(0_z, prog.m_samplers.size());
+        ASSERT_EQ(0_z, prog.attributes().size());
+        ASSERT_EQ(0_z, prog.uniforms().size());
+        ASSERT_EQ(0_z, prog.samplers().size());
+        ASSERT_EQ(0_z, prog.m_failedShaders.size());
+        ASSERT_STREQ("", prog.m_error.c_str());
+        ASSERT_STREQ("", prog.strerror().c_str());
+    });
+}
+
+// Test we cannot compile directly
+TEST(TestGLPrograms, TestFakeCompilation)
+{
+    // No OpenGL context
+    {
+        std::vector<std::string> list;
+
+        GLProgram prog("prog");
+        prog.begin(); // GLObject::begin()
+
+        ASSERT_EQ(false, prog.compiled());
+        ASSERT_EQ(0, prog.m_handle);
+        ASSERT_EQ(0, prog.m_target);
+        ASSERT_EQ(true, prog.m_need_setup);
+        ASSERT_EQ(true, prog.m_need_create);
+        ASSERT_EQ(false, prog.m_need_update);
+        ASSERT_EQ(0_z, prog.getFailedShaders(list, true));
+        ASSERT_EQ(0_z, list.size());
+    }
+
+    // With OpenGL context
+    OpenGLContext context([]()
+    {
+        std::vector<std::string> list;
+
+        GLProgram prog("prog");
+        prog.begin(); // GLObject::begin()
+
+        ASSERT_EQ(false, prog.compiled());
+        ASSERT_EQ(1, prog.m_handle);
+        ASSERT_EQ(0, prog.m_target);
+        ASSERT_EQ(true, prog.m_need_setup);
+        ASSERT_EQ(false, prog.m_need_create);
+        ASSERT_EQ(false, prog.m_need_update);
+        ASSERT_EQ(0_z, prog.getFailedShaders(list, true));
+        ASSERT_EQ(0_z, list.size());
+    });
+}
+
+// Test that we cannot compile dummy shader codes
+TEST(TestGLPrograms, TestCompilationDummyShaders)
+{
+    OpenGLContext context([]()
+    {
+        std::vector<std::string> list;
+
+        // Empty shader code
+        GLVertexShader vertex("vs");
+        GLFragmentShader fragment("fs");
+
+        GLProgram prog("prog");
+        ASSERT_EQ(false, prog.compile(vertex, fragment));
+        ASSERT_EQ(false, prog.compiled());
+        ASSERT_EQ(1, prog.m_handle); // onCreated() was called
+        ASSERT_EQ(0, prog.m_target);
+        ASSERT_EQ(true, prog.m_need_setup);
+        ASSERT_EQ(false, prog.m_need_create); // onCreated() was called
+        ASSERT_EQ(false, prog.m_need_update);
+        ASSERT_EQ(2_z, prog.getFailedShaders(list, true));
+        ASSERT_EQ(2_z, list.size());
+        ASSERT_STREQ("vs", list[0].c_str());
+        ASSERT_STREQ("fs", list[1].c_str());
+        ASSERT_EQ(false, prog.strerror().empty()); // errored
+    });
 }
 
 // Test we can create uniform if the prog is not compiled
 TEST(TestGLPrograms, TestCreatUniformProgNotCompiled)
 {
-    std::vector<std::string> list;
+    OpenGLContext context([]()
+    {
+        std::vector<std::string> list;
 
-    GLProgram prog("prog");
+        GLProgram prog("prog");
 
-    // Check uniforms creation
-    prog.createUniform(GL_FLOAT, "u1", 42u);
-    prog.createUniform(GL_FLOAT_VEC2, "u1", 42u); // double name with dif type
-    prog.createUniform(GL_FLOAT_VEC2, "u2", 42u);
-    prog.createUniform(GL_FLOAT_VEC3, "u3", 42u);
-    prog.createUniform(GL_FLOAT_VEC4, "u4", 42u);
-    ASSERT_EQ(4_z, prog.getUniformNames(list, true)); // instead of 5
-    ASSERT_EQ(list.size(), 4u);
-    ASSERT_THAT(list, ElementsAre("u1", "u2", "u3", "u4")); // "u1" not in double
-    ASSERT_EQ(true, prog.hasUniform<float>("u1"));
-    ASSERT_EQ(true, prog.hasUniform<Vector2f>("u1"));
-    ASSERT_EQ(true, prog.hasUniform<Vector2f>("u2"));
-    ASSERT_EQ(true, prog.hasUniform<Vector3f>("u3"));
-    ASSERT_EQ(true, prog.hasUniform<Vector4f>("u4"));
+        // Check uniforms creation
+        prog.createUniform<float>("u1");
+        prog.createUniform<Vector2f>("u1"); // double name with dif type
+        prog.createUniform<Vector2f>("u2");
+        prog.createUniform<Vector3f>("u3");
+        prog.createUniform<Vector4f>("u4");
+        ASSERT_EQ(4_z, prog.getUniformNames(list, true)); // instead of 5
+        ASSERT_EQ(list.size(), 4u);
+        ASSERT_THAT(list, ElementsAre("u1", "u2", "u3", "u4")); // "u1" not in double
+        ASSERT_EQ(false, prog.hasUniform<float>("u1"));
+        ASSERT_EQ(true, prog.hasUniform<Vector2f>("u1"));
+        ASSERT_EQ(true, prog.hasUniform<Vector2f>("u1"));
+        ASSERT_EQ(true, prog.hasUniform<Vector2f>("u2"));
+        ASSERT_EQ(true, prog.hasUniform<Vector3f>("u3"));
+        ASSERT_EQ(true, prog.hasUniform<Vector4f>("u4"));
 
-    // Check bad accessor
-    try {
-        prog.uniform<int>(nullptr);
-        FAIL() << "Exception should have occured";
-    } catch(...) { }
+        // Check bad accessor
+        try {
+            prog.uniform<int>(nullptr);
+            FAIL() << "Exception should have occured";
+        } catch(...) { }
 
-    // Check accessor with known names and correct type
-    try { prog.uniform<float>("u1"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.uniform<Vector2f>("u1"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.uniform<Vector2f>("u2"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.uniform<Vector3f>("u3"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.uniform<Vector4f>("u4"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
+        // Check accessor with known names and correct type
+        try { prog.uniform<float>("u1"); }
+        catch(...) { FAIL() << "Exception should not have occured"; }
+        try { prog.uniform<Vector2f>("u1"); }
+        catch(...) { FAIL() << "Exception should not have occured"; }
+        try { prog.uniform<Vector2f>("u2"); }
+        catch(...) { FAIL() << "Exception should not have occured"; }
+        try { prog.uniform<Vector3f>("u3"); }
+        catch(...) { FAIL() << "Exception should not have occured"; }
+        try { prog.uniform<Vector4f>("u4"); }
+        catch(...) { FAIL() << "Exception should not have occured"; }
 
-    // Check accessor with unknown names are inserted
-    // FIXME should be inserted ?
-    try { prog.uniform<int>(""); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    ASSERT_EQ(true, prog.hasUniform<int>(""));
-    try { prog.uniform<int>("aaa"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    ASSERT_EQ(true, prog.hasUniform<int>("aaa"));
-    ASSERT_EQ(6_z, prog.getUniformNames(list, true));
-    ASSERT_EQ(list.size(), 6u);
-    ASSERT_THAT(list, ElementsAre("", "aaa", "u1", "u2", "u3", "u4"));
+        // Program not yet compiled: accessing to unknown uniforms
+        // make create them.
+        try { prog.uniform<int>("u5"); }
+        catch(...) { FAIL() << "Exception should not have occured"; }
+        ASSERT_EQ(5_z, prog.getUniformNames(list, true));
+        ASSERT_EQ(list.size(), 5u);
+        ASSERT_THAT(list, ElementsAre("u1", "u2", "u3", "u4", "u5"));
 
-    // Check accessor with known names but wrong type
-    // FIXME should be inserted ?
-    try { prog.uniform<Vector3f>("u2"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    ASSERT_EQ(true, prog.hasUniform<Vector2f>("u2"));
-    ASSERT_EQ(true, prog.hasUniform<Vector3f>("u2"));
-    ASSERT_EQ(6_z, prog.getUniformNames(list, true));
-    ASSERT_EQ(list.size(), 6u);
-    ASSERT_THAT(list, ElementsAre("", "aaa", "u1", "u2", "u3", "u4"));
+        // Collision name
+        try { prog.uniform<float>("u5"); }
+        catch(...) { FAIL() << "Exception should not have occured"; }
+        ASSERT_EQ(5_z, prog.getUniformNames(list, true));
+        ASSERT_EQ(list.size(), 5u);
+        ASSERT_THAT(list, ElementsAre("u1", "u2", "u3", "u4", "u5"));
+
+        // Program compiled: accessing to unknown uniforms is no
+        // longer allowed
+        ASSERT_EQ(false, prog.compiled());
+        prog.m_need_setup = false;
+        ASSERT_EQ(true, prog.compiled());
+
+        // Check accessor with known names but wrong type
+        try {
+            prog.uniform<int>("u4");
+            FAIL() << "Exception should have occured";
+        } catch(...) { }
+        ASSERT_EQ(5_z, prog.getUniformNames(list, true));
+        ASSERT_EQ(list.size(), 5u);
+        ASSERT_THAT(list, ElementsAre("u1", "u2", "u3", "u4", "u5"));
+    });
 }
+
+#if 0
 
 // Test we cannot create uniform if the prog is compiled
 TEST(TestGLPrograms, TestCreatUniformProgCompiled)
@@ -124,11 +264,11 @@ TEST(TestGLPrograms, TestCreatUniformProgCompiled)
     std::cout << "-------------------------------" << std::endl;
 
     // Unknown name: not added
-    try { prog.uniform<float>("u1");  FAIL() << "Exception should have occured"; }
+    try { prog.uniform<float>("u1"); FAIL() << "Exception should have occured"; }
     catch(...) { }
 
-    try { prog.attribute("u1");  FAIL() << "Exception should have occured"; }
-    catch(...) { }
+    //try { prog.attribute<float>("u1"); FAIL() << "Exception should have occured"; }
+    //catch(...) { }
 }
 
 
@@ -140,11 +280,11 @@ TEST(TestGLPrograms, TestCreatAttributeProgNotCompiled)
     GLProgram prog("prog");
 
     // Check attributes creation
-    prog.createAttribute(GL_FLOAT, "u1", 42u);
-    prog.createAttribute(GL_FLOAT_VEC2, "u1", 42u); // double name with dif type
-    prog.createAttribute(GL_FLOAT_VEC2, "u2", 42u);
-    prog.createAttribute(GL_FLOAT_VEC3, "u3", 42u);
-    prog.createAttribute(GL_FLOAT_VEC4, "u4", 42u);
+    prog.createAttribute<float>("u1");
+    prog.createAttribute<Vector2f>("u1"); // double name with dif type
+    prog.createAttribute<Vector2f>("u2");
+    prog.createAttribute<Vector3f>("u3");
+    prog.createAttribute<Vector4f>("u4");
     ASSERT_EQ(4_z, prog.getAttributeNames(list, true)); // instead of 5
     ASSERT_EQ(list.size(), 4u);
     ASSERT_THAT(list, ElementsAre("u1", "u2", "u3", "u4")); // "u1" not in double
@@ -156,40 +296,41 @@ TEST(TestGLPrograms, TestCreatAttributeProgNotCompiled)
 
     // Check bad accessor
     try {
-        prog.attribute(nullptr);
+        prog.attribute<float>(nullptr);
         FAIL() << "Exception should have occured";
     } catch(...) { }
 
     // Check accessor with known names and correct type
-    try { prog.attribute("u1"); }
+    try { prog.attribute<float>("u1"); }
     catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.attribute("u1"); }
+    try { prog.attribute<Vector2f>("u1"); }
     catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.attribute("u2"); }
+    try { prog.attribute<Vector2f>("u2"); }
     catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.attribute("u3"); }
+    try { prog.attribute<Vector3f>("u3"); }
     catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.attribute("u4"); }
+    try { prog.attribute<Vector4f>("u4"); }
     catch(...) { FAIL() << "Exception should not have occured"; }
 
     // Check accessor with unknown names are inserted
     // FIXME should be inserted ?
-    try { prog.attribute(""); }
+    try { prog.attribute<float>(""); }
     catch(...) { FAIL() << "Exception should not have occured"; }
     ASSERT_EQ(true, prog.hasAttribute(""));
-    try { prog.attribute("aaa"); }
+    try { prog.attribute<float>("aaa"); }
     catch(...) { FAIL() << "Exception should not have occured"; }
-    ASSERT_EQ(true, prog.hasAttribute("aaa"));
+    ASSERT_EQ(true, prog.hasAttribute<float>("aaa"));
     ASSERT_EQ(6_z, prog.getAttributeNames(list, true));
     ASSERT_EQ(list.size(), 6u);
     ASSERT_THAT(list, ElementsAre("", "aaa", "u1", "u2", "u3", "u4"));
 
     // Check accessor with known names but wrong type
     // FIXME should be inserted ?
-    try { prog.attribute("u2"); }
+    try { prog.attribute<float>("u2"); }
     catch(...) { FAIL() << "Exception should not have occured"; }
     ASSERT_EQ(true, prog.hasAttribute("u2"));
-    ASSERT_EQ(true, prog.hasAttribute("u2"));
+    try { prog.attribute<float>("u2"); }
+    catch(...) { FAIL() << "Exception should not have occured"; }
     ASSERT_EQ(6_z, prog.getAttributeNames(list, true));
     ASSERT_EQ(list.size(), 6u);
     ASSERT_THAT(list, ElementsAre("", "aaa", "u1", "u2", "u3", "u4"));
@@ -241,7 +382,6 @@ TEST(TestGLPrograms, TestVAObind)
     ASSERT_EQ(true, vao.has<Vector4f>("a4"));
 }
 
-#if 0
 TEST(TestGLPrograms, bindVAOtoWrongGLProg)
 {
     GLProgram prog1("prog1");

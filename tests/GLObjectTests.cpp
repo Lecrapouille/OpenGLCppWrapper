@@ -30,7 +30,7 @@ class FakeObject : public GLObject<GLint>
 public:
 
     FakeObject()
-        : GLObject<GLint>("FakeObject")
+        : GLObject<GLint>("FakeObject", 42)
     {
         reset();
     }
@@ -113,8 +113,8 @@ TEST(TestGLObject, TestGLObjectNoOpenGLContext)
     ASSERT_STREQ(obj.m_name.c_str(), "FakeObject");
     ASSERT_EQ(obj.m_handle, -1);
     ASSERT_EQ(obj.handle(), -1);
-    ASSERT_EQ(obj.m_target, 0U);
-    ASSERT_EQ(obj.target(), 0U);
+    ASSERT_EQ(obj.m_target, 42);
+    ASSERT_EQ(obj.target(), 42);
     ASSERT_EQ(obj.m_need_setup, true);
     ASSERT_EQ(obj.m_need_create, true);
     ASSERT_EQ(obj.m_need_update, false);
@@ -142,8 +142,8 @@ TEST(TestGLObject, TestGLObjectWithOpenGLContext)
     ASSERT_STREQ(obj.m_name.c_str(), "FakeObject");
     ASSERT_EQ(obj.m_handle, -1);
     ASSERT_EQ(obj.handle(), -1);
-    ASSERT_EQ(obj.m_target, 0U);
-    ASSERT_EQ(obj.target(), 0U);
+    ASSERT_EQ(obj.m_target, 42);
+    ASSERT_EQ(obj.target(), 42);
     ASSERT_EQ(obj.m_need_setup, true);
     ASSERT_EQ(obj.m_need_create, true);
     ASSERT_EQ(obj.m_need_update, false);
@@ -159,7 +159,7 @@ TEST(TestGLObject, TestGLObjectWithOpenGLContext)
     obj.begin();
     ASSERT_EQ(obj.m_handle, 0);
     ASSERT_EQ(obj.handle(), 0);
-    ASSERT_EQ(obj.m_target, 0U);
+    ASSERT_EQ(obj.m_target, 42);
     ASSERT_EQ(obj.m_need_setup, false);
     ASSERT_EQ(obj.m_need_create, false);
     ASSERT_EQ(obj.m_need_update, false);
@@ -174,7 +174,7 @@ TEST(TestGLObject, TestGLObjectWithOpenGLContext)
     // --- glEnd(FakeObject)
     obj.end();
     ASSERT_EQ(obj.m_handle, 0);
-    ASSERT_EQ(obj.m_target, 0U);
+    ASSERT_EQ(obj.m_target, 42);
     ASSERT_EQ(obj.m_need_setup, false);
     ASSERT_EQ(obj.m_need_create, false);
     ASSERT_EQ(obj.m_need_update, false);
@@ -189,7 +189,7 @@ TEST(TestGLObject, TestGLObjectWithOpenGLContext)
     // --- Force update fake object
     obj.m_need_update = true;
     ASSERT_EQ(obj.m_handle, 0);
-    ASSERT_EQ(obj.m_target, 0U);
+    ASSERT_EQ(obj.m_target, 42);
     ASSERT_EQ(obj.m_need_setup, false);
     ASSERT_EQ(obj.m_need_create, false);
     ASSERT_EQ(obj.m_need_update, true);
@@ -214,7 +214,8 @@ TEST(TestGLObject, TestGLObjectWithOpenGLContext)
     obj.release();
     ASSERT_STREQ(obj.m_name.c_str(), "FakeObject");
     ASSERT_EQ(obj.m_handle, -1);
-    ASSERT_EQ(obj.m_target, 0U);
+    ASSERT_EQ(obj.m_target, 0);
+    ASSERT_EQ(obj.target(), 0);
     ASSERT_EQ(obj.m_need_setup, true);
     ASSERT_EQ(obj.m_need_create, true);
     ASSERT_EQ(obj.m_need_update, false);
