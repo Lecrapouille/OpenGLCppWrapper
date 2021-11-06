@@ -21,24 +21,64 @@
 #ifndef OPENGLCPPWRAPPER_PENDING_DATA_HPP
 #  define OPENGLCPPWRAPPER_PENDING_DATA_HPP
 
-// *****************************************************************************
-//! \file Define an interface class keeping track of the smallest contiguous
-//! area having been changed (dirty) and needing to be uploaded. This class
-//! cannot be use alone but for inheritance.
-// *****************************************************************************
-
 #  include <algorithm>
 
-// ***************************************************************************
-//! \class Pending Pending.hpp
+// *****************************************************************************
+//! \brief Class tracking the smallest block of contiguous elements that have
+//! been modified (aka dirty) inside a container. A dirty block is defined by
+//! the index of its first and its last dirty element. This class is used in
+//! this project for knowing dirty CPU memory block that needs to be updated
+//! into the GPU. This class cannot be used alone and shall be used be the
+//! parent of another class.
 //!
-//! \brief Define class tracks the smallest contiguous area in a container
-//! having been modified (aka updated aka dirty). This class cannot be use
-//! alone. Use it with inheritance.
+//! Example: let suppose a non dirty initial block of memory (ie array):
+//! \code
+//! |---|---|---|---|---|---|---|---|---|-----------|
+//! | 0 | 0 | 0 | 1 | 1 | 1 | 2 | 2 | 2 | dirty={,} |
+//! |---|---|---|---|---|---|---|---|---|-----------|
+//! \endcode
 //!
-//! This class is used in this API for knowing dirty CPU data that needs to be
-//! updated to the GPU.
-// ***************************************************************************
+//! Let change the 1st element with the value 42 which is now "dirty":
+//! \code
+//! |---|----|---|---|---|----|---|---|---|------------|
+//! | 0 | 42 | 0 | 1 | 1 | 1 | 2 | 2 | 2 | dirty={1,1} |
+//! |---|----|---|---|---|---|---|---|---|-------------|
+//! \endcode
+//!
+//! Pending data is now referring to this first element of the array. Now let
+//! change the 5th element with the value 43 which is now "dirty":
+//! \code
+//! |---|----|---|---|---|----|---|---|---|-------------|
+//! | 0 | 42 | 0 | 1 | 1 | 43 | 2 | 2 | 2 | dirty={1,5} |
+//! |---|----|---|---|---|----|---|---|---|-------------|
+//! \endcode
+//!
+//! Now all data from position 1 to 5 are considered as dirty. Pending data is
+//! now referring to the first and fifth position of the array.  Now let change
+//! the 0th element with the value 44 which is now "dirty":
+//! \code
+//! |----|----|---|---|---|----|---|---|---|-------------|
+//! | 44 | 42 | 0 | 1 | 1 | 43 | 2 | 2 | 2 | dirty={0,5} |
+//! |----|----|---|---|---|----|---|---|---|-------------|
+//! \endcode
+//!
+//! Now, all data from index 0 to 5 are considered as dirty. Pending data is now
+//! referring to the zeroth and fifth position of the array. Let suppose that
+//! VBO::update() is now called. All dirty data (position 0 to 5) are flushed to
+//! the GPU, there is no more dirty data and pending data indices are cleared.
+//! \code
+//! |----|----|---|---|---|----|---|---|---|-----------|
+//! | 44 | 42 | 0 | 1 | 1 | 43 | 2 | 2 | 2 | dirty={,} |
+//! |----|----|---|---|---|----|---|---|---|-----------|
+//! \endcode
+//!
+//! Flushing bulk of data, with in our case, with some data not set as dirty,
+//! seems not an optimized way of doing things. This is true but this allows to
+//! reduce the number of OpenGL routines to call. In addition, we can imagine a
+//! more sophisticated method in the case where order of element is not
+//! important: in this case you can simply swap position of the dirty element
+//! with the first non dirty element.
+// *****************************************************************************
 class Pending
 {
 public:
@@ -56,11 +96,9 @@ protected:
     //! \brief Make this class abstract to forbid to use it as standalone.
     //! Derivate this class to use it.
     //--------------------------------------------------------------------------
-    virtual ~Pending() {};
+    Pending() = default;
 
 public:
-
-    Pending() = default;
 
     //--------------------------------------------------------------------------
     //! \brief Constructor with an already known number of dirty elements

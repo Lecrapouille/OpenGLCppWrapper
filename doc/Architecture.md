@@ -164,37 +164,43 @@ developer desire to change its behavior).
 The main idea of GLumpy, that is API also uses is to allow the
 developer to modify data located in the CPU. Modified data are set as
 "dirty" and set in "pending" attempt to be transferred to the GPU for
-their display. This is the role of the update() method. Pending data
-are particularly useful for VBOs, textures and uniforms.
+their display (which is the role of the update() method). Pending data
+are particularly useful for VBOs, textures and uniforms. A dirty block
+is defined by the index of its first and its last dirty element.
 
 As a consequence you can work with a not ready OpenGL context. VBOs
 are an array of data. CPU side, the API maintains for these object
 index of the contiguous portion of dirty data. These data are send at
-the very last moment to GPU through the update(); method.
+the very last moment to GPU through the update() method.
 
 Let suppose the following VBO array storing three consecutive 3D
 position (x,y,z). Let suppose there is no current pending data.
 
+|---|---|---|---|---|---|---|---|---|-----------------|
 | 0 | 0 | 0 | 1 | 1 | 1 | 2 | 2 | 2 | PendingData={,} |
 |---|---|---|---|---|---|---|---|---|-----------------|
 
-Let change the y position of the 1st position with the value 42 which is now "dirty".
+Let change the 1st element with the value 42 which is now "dirty".
 
+|---|----|---|---|---|---|---|---|---|-------------------|
 | 0 | 42 | 0 | 1 | 1 | 1 | 2 | 2 | 2 | PendingData={1,1} |
 |---|----|---|---|---|---|---|---|---|-------------------|
 
 Pending data is now referring to the first position of the array.
 
-Now let change the z position of the 2nd position with the value 43 which is now "dirty".
+Now Let change the 1st element with the value 42 which is now "dirty".
+let change the 5th element with the value 43 which is now "dirty".
 
+|---|----|---|---|---|----|---|---|---|-------------------|
 | 0 | 42 | 0 | 1 | 1 | 43 | 2 | 2 | 2 | PendingData={1,5} |
 |---|----|---|---|---|----|---|---|---|-------------------|
 
 Now all data from position 1 to 5 are considered as dirty. Pending
 data is now referring to the first and fifth position of the array.
 
-Now let change the x position of the 1st position with the value 44 which is now "dirty".
+Now let 0th element with the value 44 which is now "dirty".
 
+|----|----|---|---|---|----|---|---|---|-------------------|
 | 44 | 42 | 0 | 1 | 1 | 43 | 2 | 2 | 2 | PendingData={0,5} |
 |----|----|---|---|---|----|---|---|---|-------------------|
 
@@ -205,6 +211,7 @@ Let suppose that VBO::update() is now called. All dirty data (position
 0 to 5) are flushed to the GPU, there is no more dirty data and
 pending data indices are cleared.
 
+|----|----|---|---|---|----|---|---|---|-----------------|
 | 44 | 42 | 0 | 1 | 1 | 43 | 2 | 2 | 2 | PendingData={,} |
 |----|----|---|---|---|----|---|---|---|-----------------|
 
