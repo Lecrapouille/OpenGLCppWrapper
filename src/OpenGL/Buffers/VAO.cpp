@@ -183,7 +183,7 @@ bool GLVAO::draw(Mode const mode, size_t const first, size_t const count)
 
 //--------------------------------------------------------------------------
 bool GLVAO::onUpdate()
-{std::cout << "GLVAO::onUpdate() " << name() << std::endl;
+{
     if (!checkVBOSizes())
         return true;
 
@@ -197,9 +197,7 @@ bool GLVAO::onUpdate()
 
     for (auto& it: m_program->m_attributes)
     {
-        std::cout << "vbo" << std::endl;
         m_vbos[it.first]->begin();
-        std::cout << "attrib" << std::endl;
         it.second->begin();
     }
 

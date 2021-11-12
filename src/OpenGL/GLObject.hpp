@@ -115,7 +115,7 @@ public:
     //! onUpdate() ... which have to be implemented in derived classes.
     //--------------------------------------------------------------------------
     void begin()
-    {std::cout << name() << " begin:" << std::endl;
+    {
         if (m_need_create)
         {
             // OpenGL context shall be present
@@ -123,18 +123,15 @@ public:
                 return ;
 
             // Usually call glCreateXXX()
-            std::cout << name() << " create()" << std::endl;
             m_need_create = onCreate();
         }
 
         // Usually call glBindXXX()
-        std::cout << name() << " activate()" << std::endl;
         onActivate();
 
         // Configure (shaders, textures, VBOs ...)
         if (m_need_setup)
         {
-            std::cout << name() << " setup()" << std::endl;
             m_need_setup = onSetup();
             if (m_need_setup)
             {
@@ -145,7 +142,6 @@ public:
         // Transfer CPU data to GPU data (texture, VBOs ...)
         if (needUpdate())
         {
-            std::cout << name() << " update()" << std::endl;
             m_need_update = onUpdate();
         }
     }

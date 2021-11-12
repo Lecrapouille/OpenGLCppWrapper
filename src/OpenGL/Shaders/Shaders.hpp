@@ -36,9 +36,12 @@ class GLVertexShader: public GLShader
 {
 public:
 
-    GLVertexShader(std::string const& name = "<embedded vertex shader>")
+    GLVertexShader(std::string const& name = "embedded_vertex_shader")
         : GLShader(name, GL_VERTEX_SHADER)
     {}
+
+    // https://stackoverflow.com/questions/64633899/no-inheritance-found-with-operator-and-initializer-list
+    using GLShader::operator=;
 };
 
 // *****************************************************************************
@@ -48,9 +51,11 @@ class GLFragmentShader: public GLShader
 {
 public:
 
-    GLFragmentShader(std::string const& name = "<embedded fragment shader>")
+    GLFragmentShader(std::string const& name = "embedded_fragment_shader")
         : GLShader(name, GL_FRAGMENT_SHADER)
     {}
+
+    using GLShader::operator=;
 };
 
 // *****************************************************************************
@@ -60,9 +65,11 @@ class GLGeometryShader: public GLShader
 {
 public:
 
-    GLGeometryShader(std::string const& name = "<embedded geometry shader>")
+    GLGeometryShader(std::string const& name = "embedded_geometry_shader")
         : GLShader(name, GL_GEOMETRY_SHADER)
     {}
+
+    using GLShader::operator=;
 };
 
 #endif // OPENGLCPPWRAPPER_GLSHADERS_HPP
