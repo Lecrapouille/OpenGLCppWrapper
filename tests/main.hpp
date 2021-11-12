@@ -24,6 +24,49 @@
 #  include <gmock/gmock.h>
 #  include <gtest/gtest.h>
 
+#  include "OpenGL/Context/OpenGL.hpp"
+#  include <GL/glew.h>
+#  include <GLFW/glfw3.h>
+
 using namespace ::testing;
+
+class OpenGLContext
+{
+    typedef std::function<void()> Callback;
+
+public:
+
+    OpenGLContext(Callback const& cb)
+    {
+        if (!glfwInit())
+            throw GL::Exception("Failed to initialize GLFW");
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Mac OS X
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
+        m_context = glfwCreateWindow(1, 1, "", nullptr, nullptr);
+        glfwMakeContextCurrent(m_context);
+        glfwSwapInterval(1); // Enable vsync
+        GL::Context::setCreated();
+        glewExperimental = GL_TRUE;
+        if (glewInit() != GLEW_OK)
+            throw GL::Exception("Failed to initialize GLFW");
+        if (!GLEW_VERSION_3_3)
+            throw GL::Exception("OpenGL 3.3 API is not available!");
+        cb();
+    }
+
+    ~OpenGLContext()
+    {
+        glfwDestroyWindow(m_context);
+        glfwTerminate();
+        GL::Context::setCreated(false);
+    }
+
+private:
+
+    GLFWwindow* m_context = nullptr;
+};
 
 #endif // MAIN_HPP

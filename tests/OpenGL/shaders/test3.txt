@@ -1,0 +1,3 @@
+#include include/file2.txt fooo bar
+
+hello

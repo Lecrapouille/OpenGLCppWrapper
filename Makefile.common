@@ -87,7 +87,7 @@ else
 OBJ_OPENGL_TEXTURES = $(abspath $(THIRDPART)/SOIL/obj/*.o)
 endif
 
-OBJ_COMMON = Exception.o
+OBJ_COMMON = Exception.o File.o Path.o
 OBJ_OPENGL_CONTEXT = OpenGL.o
 OBJ_OPENGL_VARIABLES = Variables.o
 OBJ_OPENGL_BUFFERS = EBO.o VBO.o VAO.o

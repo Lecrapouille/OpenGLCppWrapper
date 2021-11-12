@@ -1,0 +1,3 @@
+uniform vec3 offsetA;
+uniform vec3 offsetB;
+uniform vec3 offsetC;
