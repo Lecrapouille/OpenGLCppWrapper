@@ -398,49 +398,41 @@ void GLProgram::storeUniformOrSampler(GLenum type, const char *name)
 //------------------------------------------------------------------------------
 bool GLProgram::storeUniform(GLenum type, const char *name)
 {
-    // The API allows the user to define uniforms before compiling the
-    // GLProgram. Avoid replacing the uniform to avoid loosing its value.
-    // TODO: kill unused uniforms ? Meaning uniforms created by the user but
-    // not used inside shaders.
-    auto it = m_uniforms.find(name);
-    if (it != m_uniforms.end())
-        return true;
-
     // Store new uniform
     switch (type)
     {
     case GL_FLOAT:
-        createUniform<float>(name);
+        updateOrCreateUniform<float>(name);
         return true;
     case GL_FLOAT_VEC2:
-        createUniform<Vector2f>(name);
+        updateOrCreateUniform<Vector2f>(name);
         return true;
     case GL_FLOAT_VEC3:
-        createUniform<Vector3f>(name);
+        updateOrCreateUniform<Vector3f>(name);
         return true;
     case GL_FLOAT_VEC4:
-        createUniform<Vector4f>(name);
+        updateOrCreateUniform<Vector4f>(name);
         return true;
     case GL_INT:
-        createUniform<int>(name);
+        updateOrCreateUniform<int>(name);
         return true;
     case GL_INT_VEC2:
-        createUniform<Vector2i>(name);
+        updateOrCreateUniform<Vector2i>(name);
         return true;
     case GL_INT_VEC3:
-        createUniform<Vector3i>(name);
+        updateOrCreateUniform<Vector3i>(name);
         return true;
     case GL_INT_VEC4:
-        createUniform<Vector4i>(name);
+        updateOrCreateUniform<Vector4i>(name);
         return true;
     case GL_FLOAT_MAT2:
-        createUniform<Matrix22f>(name);
+        updateOrCreateUniform<Matrix22f>(name);
         return true;
     case GL_FLOAT_MAT3:
-        createUniform<Matrix33f>(name);
+        updateOrCreateUniform<Matrix33f>(name);
         return true;
     case GL_FLOAT_MAT4:
-        createUniform<Matrix44f>(name);
+        updateOrCreateUniform<Matrix44f>(name);
         return true;
     }
 

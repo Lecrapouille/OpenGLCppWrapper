@@ -28,6 +28,8 @@
 
 using namespace glwrap;
 
+// TODO tester release()
+
 TEST(TestGLShaders, TestCreatorsNoName)
 {
     // No OpenGL context
@@ -138,12 +140,12 @@ TEST(TestGLShaders, TestConstructCode)
     shader.clear();
     ASSERT_STREQ("", shader.code().c_str());
     ASSERT_EQ(false, shader.loaded());
-    
+
     try {
         shader.throw_if_not_loaded();
         ASSERT_TRUE("Exception should have occured");
     } catch(...) { }
-       
+
     try {
         shader.throw_if_already_compiled();
         ASSERT_TRUE("Exception should have occured");
@@ -272,14 +274,14 @@ TEST(TestGLShaders, testCompilation)
 
         shader.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
                         "OpenGL/shaders:OpenGL/shaders/include");
-        ASSERT_EQ(true, shader.read("test4.txt"));
+        ASSERT_EQ(true, shader.read("test4.vs"));
         ASSERT_EQ(true, shader.compile());
         ASSERT_EQ(true, shader.compiled());
         ASSERT_EQ(true, shader.loaded());
-        ASSERT_STREQ("#version 330 core\n"
+        ASSERT_STREQ("#version 330 core\n\n"
                      "in vec2 position;\n"
-                     "in vec3 color;\n"
-                     "out struct v2f_s { vec3 color; } v2f;\n"
+                     "in vec3 color;\n\n"
+                     "out struct v2f_s { vec3 color; } v2f;\n\n"
                      "void main() {\n"
                      "  v2f.color = color;\n"
                      "  gl_Position = vec4(position, 0.0, 1.0);\n"
@@ -328,14 +330,14 @@ TEST(TestGLShaders, testFailedCompilation1)
         ASSERT_EQ(false, shader.m_need_create);
         ASSERT_EQ(false, shader.m_need_update);
    });
-} 
+}
 
 TEST(TestGLShaders, testFailedCompilation2)
 {
     OpenGLContext context([]()
     {
         GLVertexShader shader;
-      
+
         ASSERT_EQ(false, shader.compile());
         ASSERT_EQ(false, shader.compiled());
         ASSERT_EQ(false, shader.loaded());

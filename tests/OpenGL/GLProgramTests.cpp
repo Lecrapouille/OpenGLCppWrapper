@@ -29,6 +29,43 @@
 // Check initial states
 TEST(TestGLPrograms, TestCreators)
 {
+    // No OpenGL context
+    {
+        std::vector<std::string> list;
+
+        GLProgram prog("prog");
+
+        // Check GLObject states
+        ASSERT_STREQ("prog", prog.cname());
+        ASSERT_EQ(0, prog.m_handle);
+        ASSERT_EQ(0, prog.m_target);
+        ASSERT_EQ(true, prog.m_need_setup);
+        ASSERT_EQ(true, prog.m_need_create);
+        ASSERT_EQ(false, prog.m_need_update);
+
+        // Check GLProgram states
+        ASSERT_EQ(0_z, prog.m_shaders.size());
+        ASSERT_EQ(false, prog.compiled());
+        ASSERT_EQ(0_z, prog.getFailedShaders(list, true));
+        ASSERT_EQ(0_z, list.size());
+        ASSERT_EQ(0_z, prog.getUniformNames(list, true));
+        ASSERT_EQ(0_z, list.size());
+        ASSERT_EQ(0_z, prog.getAttributeNames(list, true));
+        ASSERT_EQ(0_z, list.size());
+        ASSERT_EQ(0_z, prog.getSamplerNames(list, true));
+        ASSERT_EQ(0_z, list.size());
+        ASSERT_EQ(0_z, prog.m_attributes.size());
+        ASSERT_EQ(0_z, prog.m_uniforms.size());
+        ASSERT_EQ(0_z, prog.m_samplers.size());
+        ASSERT_EQ(0_z, prog.attributes().size());
+        ASSERT_EQ(0_z, prog.uniforms().size());
+        ASSERT_EQ(0_z, prog.samplers().size());
+        ASSERT_EQ(0_z, prog.m_failedShaders.size());
+        ASSERT_STREQ("", prog.m_error.c_str());
+        ASSERT_STREQ("", prog.strerror().c_str());
+    }
+
+    // With OpenGL context
     OpenGLContext context([]()
     {
         std::vector<std::string> list;
@@ -66,8 +103,8 @@ TEST(TestGLPrograms, TestCreators)
     });
 }
 
-// Test we cannot compile directly
-TEST(TestGLPrograms, TestFakeCompilation)
+// Test we cannot compile dummy code
+TEST(TestGLPrograms, TestDummyShaderCompilation)
 {
     // No OpenGL context
     {
@@ -116,6 +153,13 @@ TEST(TestGLPrograms, TestCompilationDummyShaders)
         GLVertexShader vertex("vs");
         GLFragmentShader fragment("fs");
 
+        // Check dummy GLSL code
+        ASSERT_STREQ("", vertex.m_code.c_str());
+        ASSERT_EQ(false, vertex.loaded());
+        ASSERT_STREQ("", fragment.m_code.c_str());
+        ASSERT_EQ(false, fragment.loaded());
+
+        // Compile shaders
         GLProgram prog("prog");
         ASSERT_EQ(false, prog.compile(vertex, fragment));
         ASSERT_EQ(false, prog.compiled());
@@ -206,6 +250,274 @@ TEST(TestGLPrograms, TestCreatUniformProgNotCompiled)
         ASSERT_THAT(list, ElementsAre("u1", "u2", "u3", "u4", "u5"));
     });
 }
+
+// Test nominal compilation of shaders
+TEST(TestGLPrograms, testSuccessCompilation1)
+{
+    OpenGLContext context([]()
+    {
+        std::vector<std::string> names;
+        size_t count;
+
+        GLVertexShader vs;
+        GLFragmentShader fs;
+        GLProgram prog("prog");
+
+        // Pathes for finding shaders
+        vs.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
+                    "OpenGL/shaders:OpenGL/shaders/include");
+        fs.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
+                    "OpenGL/shaders:OpenGL/shaders/include");
+
+        // Load GLSL codes
+        ASSERT_EQ(true, vs.read("test4.vs"));
+        ASSERT_EQ(true, fs.read("test4.fs"));
+
+        // Compile and check compilation done with success
+        ASSERT_EQ(true, prog.compile(vs, fs));
+        ASSERT_EQ(true, vs.compiled());
+        ASSERT_STREQ("", vs.strerror().c_str());
+        ASSERT_EQ(true, fs.compiled());
+        ASSERT_STREQ("", vs.strerror().c_str());
+        ASSERT_STREQ("", prog.strerror().c_str());
+        ASSERT_EQ(true, prog.compiled());
+
+        // Check that shaders have been removed
+        count = prog.m_shaders.size();
+        ASSERT_EQ(0_z, count);
+
+        // Check getter of failed compiled shader is empty
+        count = prog.getFailedShaders(names);
+        ASSERT_EQ(0_z, count);
+        ASSERT_EQ(0_z, names.size());
+        ASSERT_EQ(0_z, prog.m_failedShaders.size());
+
+        // Get sampler variable names. Here none are used.
+        count = prog.getSamplerNames(names);
+        ASSERT_EQ(0_z, count);
+        ASSERT_EQ(0_z, names.size());
+        ASSERT_EQ(0_z, prog.m_samplers.size());
+
+        // Get attribute variable names. Here none are used.
+        count = prog.getAttributeNames(names);
+        ASSERT_EQ(2_z, count);
+        ASSERT_EQ(2_z, names.size());
+        EXPECT_THAT(names, UnorderedElementsAre("position", "color"));
+        ASSERT_EQ(2_z, prog.m_attributes.size());
+        names.clear();
+        for (auto const& it: prog.m_attributes)
+            names.push_back(it.first);
+        EXPECT_THAT(names, UnorderedElementsAre("position", "color"));
+
+        // Get uniform variable names. Here none are used.
+        count = prog.getUniformNames(names);
+        ASSERT_EQ(0_z, count);
+        ASSERT_EQ(0_z, names.size());
+        ASSERT_EQ(0_z, prog.uniforms().size());
+
+        // Check GLObject states
+        ASSERT_STREQ("prog", prog.cname());
+        ASSERT_EQ(1, prog.m_handle);
+        ASSERT_EQ(0, prog.m_target);
+        ASSERT_EQ(false, prog.m_need_setup);
+        ASSERT_EQ(false, prog.m_need_create);
+        ASSERT_EQ(true, prog.m_need_update);
+
+        // Check attributes states
+        GLAttribute& pos = *(prog.m_attributes["position"]);
+        ASSERT_STREQ("position", pos.cname());
+        ASSERT_EQ(-1, pos.m_handle);
+        ASSERT_EQ(GL_FLOAT, pos.m_target);
+        ASSERT_EQ(2, pos.m_size);
+        ASSERT_EQ(prog.m_handle, pos.m_program);
+        ASSERT_EQ(0, pos.m_index);
+        ASSERT_EQ(0, pos.m_stride);
+        ASSERT_EQ(0, pos.m_offset);
+        ASSERT_EQ(true, pos.m_need_setup);
+        ASSERT_EQ(true, pos.m_need_create);
+        ASSERT_EQ(false, pos.m_need_update);
+
+        GLAttribute& color = *(prog.m_attributes["color"]);
+        ASSERT_STREQ("color", color.cname());
+        ASSERT_EQ(-1, color.m_handle);
+        ASSERT_EQ(GL_FLOAT, color.m_target);
+        ASSERT_EQ(3, color.m_size);
+        ASSERT_EQ(prog.m_handle, color.m_program);
+        ASSERT_EQ(0, color.m_index);
+        ASSERT_EQ(0, color.m_stride);
+        ASSERT_EQ(0, color.m_offset);
+        ASSERT_EQ(true, color.m_need_setup);
+        ASSERT_EQ(true, color.m_need_create);
+        ASSERT_EQ(false, color.m_need_update);
+    });
+}
+
+// Test nominal compilation of shaders
+TEST(TestGLPrograms, testSuccessCompilation2)
+{
+    OpenGLContext context([]()
+    {
+        std::vector<std::string> names;
+        size_t count;
+
+        GLVertexShader vs;
+        GLFragmentShader fs;
+        GLProgram prog("prog");
+
+        // Pathes for finding shaders
+        vs.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
+                    "OpenGL/shaders:OpenGL/shaders/include");
+        fs.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
+                    "OpenGL/shaders:OpenGL/shaders/include");
+
+        // Load GLSL codes
+        ASSERT_EQ(true, vs.read("test5.vs"));
+        ASSERT_EQ(true, fs.read("test5.fs"));
+
+        // Compile and check compilation done with success
+        ASSERT_EQ(true, prog.compile(vs, fs));
+        ASSERT_EQ(true, vs.compiled());
+        ASSERT_STREQ("", vs.strerror().c_str());
+        ASSERT_EQ(true, fs.compiled());
+        ASSERT_STREQ("", vs.strerror().c_str());
+        ASSERT_STREQ("", prog.strerror().c_str());
+        ASSERT_EQ(true, prog.compiled());
+
+        // Check that shaders have been removed
+        count = prog.m_shaders.size();
+        //ASSERT_EQ(0_z, count);
+
+        // Check getter of failed compiled shader is empty
+        count = prog.getFailedShaders(names);
+        ASSERT_EQ(0_z, count);
+        ASSERT_EQ(0_z, names.size());
+        ASSERT_EQ(0_z, prog.m_failedShaders.size());
+
+        // Get sampler variable names. Here none are used.
+        count = prog.getSamplerNames(names);
+        ASSERT_EQ(0_z, count);
+        ASSERT_EQ(0_z, names.size());
+        ASSERT_EQ(0_z, prog.m_samplers.size());
+
+        // Get attribute variable names. Here none are used.
+        count = prog.getAttributeNames(names);
+        ASSERT_EQ(1_z, count);
+        ASSERT_EQ(1_z, names.size());
+        EXPECT_THAT(names, UnorderedElementsAre("aPos"));
+        ASSERT_EQ(1_z, prog.m_attributes.size());
+        names.clear();
+        for (auto const& it: prog.m_attributes)
+            names.push_back(it.first);
+        EXPECT_THAT(names, UnorderedElementsAre("aPos"));
+
+        // Get uniform variable names. Here none are used.
+        count = prog.getUniformNames(names);
+        ASSERT_EQ(1_z, count);
+        ASSERT_EQ(1_z, names.size());
+        EXPECT_THAT(names, UnorderedElementsAre("ourColor"));
+        ASSERT_EQ(1_z, prog.m_uniforms.size());
+        names.clear();
+        for (auto const& it: prog.m_uniforms)
+            names.push_back(it.first);
+        EXPECT_THAT(names, UnorderedElementsAre("ourColor"));
+
+        // Check GLObject states
+        ASSERT_STREQ("prog", prog.cname());
+        ASSERT_EQ(1, prog.m_handle);
+        ASSERT_EQ(0, prog.m_target);
+        ASSERT_EQ(false, prog.m_need_setup);
+        ASSERT_EQ(false, prog.m_need_create);
+        ASSERT_EQ(true, prog.m_need_update);
+
+        // Check attributes states
+        GLAttribute& pos = *(prog.m_attributes["aPos"]);
+        ASSERT_STREQ("aPos", pos.cname());
+        ASSERT_EQ(-1, pos.m_handle);
+        ASSERT_EQ(GL_FLOAT, pos.m_target);
+        ASSERT_EQ(3, pos.m_size);
+        ASSERT_EQ(prog.m_handle, pos.m_program);
+        ASSERT_EQ(0, pos.m_index);
+        ASSERT_EQ(0, pos.m_stride);
+        ASSERT_EQ(0, pos.m_offset);
+        ASSERT_EQ(true, pos.m_need_setup);
+        ASSERT_EQ(true, pos.m_need_create);
+        ASSERT_EQ(false, pos.m_need_update);
+
+        GLUniform<Vector4f>& color = prog.uniform<Vector4f>("ourColor");
+        ASSERT_STREQ("ourColor", color.cname());
+        ASSERT_EQ(0, color.m_handle);
+        ASSERT_EQ(GL_FLOAT_VEC4, color.m_target);
+        ASSERT_EQ(4, color.m_size);
+        ASSERT_EQ(prog.m_handle, color.m_program);
+        //ASSERT_FLOAT_EQ(0.0f, color.m_data.x);
+        //ASSERT_FLOAT_EQ(0.0f, color.m_data.y);
+        //ASSERT_FLOAT_EQ(0.0f, color.m_data.z);
+        //ASSERT_FLOAT_EQ(0.0f, color.m_data.w);
+        ASSERT_EQ(false, color.m_need_setup);
+        ASSERT_EQ(false, color.m_need_create);
+        ASSERT_EQ(false, color.m_need_update);
+    });
+}
+
+// Test we cannot create uniform when the prog is already compiled
+TEST(TestGLPrograms, testCreateUniformBeforeCompilation)
+{
+    OpenGLContext context([]()
+    {
+        GLVertexShader vs;
+        GLFragmentShader fs;
+        GLProgram prog("prog");
+
+        // Add uniform before compiling
+        prog.uniform<Vector4f>("ourColor") = Vector4f(1.0f, 2.0f, 3.0f, 4.0f);
+        GLUniform<Vector4f>& color1 = prog.uniform<Vector4f>("ourColor");
+        ASSERT_STREQ("ourColor", color1.cname());
+        ASSERT_EQ(-1, color1.m_handle);
+        ASSERT_EQ(GL_FLOAT_VEC4, color1.m_target);
+        ASSERT_EQ(4, color1.m_size);
+        ASSERT_EQ(prog.m_handle, color1.m_program);
+        ASSERT_FLOAT_EQ(1.0f, color1.m_data.x);
+        ASSERT_FLOAT_EQ(2.0f, color1.m_data.y);
+        ASSERT_FLOAT_EQ(3.0f, color1.m_data.z);
+        ASSERT_FLOAT_EQ(4.0f, color1.m_data.w);
+        ASSERT_EQ(true, color1.m_need_setup);
+        ASSERT_EQ(true, color1.m_need_create);
+        ASSERT_EQ(true, color1.m_need_update);
+
+        std::cout << "444444444" << std::endl;
+
+        // Pathes for finding shaders
+        vs.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
+                    "OpenGL/shaders:OpenGL/shaders/include");
+        fs.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
+                    "OpenGL/shaders:OpenGL/shaders/include");
+
+        // Load GLSL codes
+        ASSERT_EQ(true, vs.read("test5.vs"));
+        ASSERT_EQ(true, fs.read("test5.fs"));
+
+        ASSERT_EQ(true, prog.compile(vs, fs));
+        ASSERT_EQ(true, prog.compiled());
+
+        // Check states for the uniform
+        GLUniform<Vector4f>& color2 = prog.uniform<Vector4f>("ourColor");
+        ASSERT_STREQ("ourColor", color2.cname());
+        ASSERT_EQ(0, color2.m_handle);
+        ASSERT_EQ(GL_FLOAT_VEC4, color2.m_target);
+        ASSERT_EQ(4, color2.m_size);
+        ASSERT_EQ(prog.m_handle, color2.m_program);
+        ASSERT_FLOAT_EQ(1.0f, color2.m_data.x);
+        ASSERT_FLOAT_EQ(2.0f, color2.m_data.y);
+        ASSERT_FLOAT_EQ(3.0f, color2.m_data.z);
+        ASSERT_FLOAT_EQ(4.0f, color2.m_data.w);
+        ASSERT_EQ(false, color2.m_need_setup);
+        ASSERT_EQ(false, color2.m_need_create);
+        ASSERT_EQ(false, color2.m_need_update);
+    });
+}
+
+// TODO tester release()
+
 
 #if 0
 
@@ -307,7 +619,7 @@ TEST(TestGLPrograms, TestCreatAttributeProgCompiled)
     catch(...) { }
 
     ASSERT_EQ(0_z, prog.getAttributeNames(list, true));
-    ASSERT_EQ(list.size(), 0u);
+    ASSERT_EQ(list.size(), 0_z);
 }
 
 // Test binding a VAO to a GLProgram

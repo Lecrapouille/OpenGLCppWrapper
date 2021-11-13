@@ -512,6 +512,40 @@ private:
     }
 
     //--------------------------------------------------------------------------
+    //! \brief Specific method for creating uniform instances.
+    //--------------------------------------------------------------------------
+    template<class T>
+    inline void updateOrCreateUniform(const char *name)
+    {
+        // Try to insert new GLUniform
+        auto const& it = m_uniforms.insert(
+            std::make_pair(name, std::make_unique<GLUniform<T>>
+                           (name, getGLDimension<T>(), getGLUniformType<T>(),
+                           handle())));
+
+        // Already stored ? This is fine since the API allows creating uniform
+        // before compiling the shader.
+        if (!it.second)
+        {
+            // Well typed ?
+            GLUniform<T> *uniform = dynamic_cast<GLUniform<T>*>(it.first->second.get());
+            if (uniform != nullptr)
+            {
+                uniform->m_size = getGLDimension<T>();
+                uniform->m_target = getGLUniformType<T>();
+                uniform->m_program = handle();
+            }
+            else
+            {
+                // Wrong type ?
+                GL::Exception("GLUniform " + std::string(name) + " mismatch type:"
+                              " shader type is different from the one you have"
+                              " created before compiling the shader code");
+            }
+        }
+    }
+
+    //--------------------------------------------------------------------------
     //! \brief Create texture sampler instances.
     //--------------------------------------------------------------------------
     template<class T>
