@@ -490,15 +490,13 @@ private:
     //--------------------------------------------------------------------------
     //! \brief Create uniform, texture sampler and attribute lists.
     //--------------------------------------------------------------------------
-    void generateAttributesAndUniforms();
+    bool generateAttributesAndUniforms();
 
     //--------------------------------------------------------------------------
     //! \brief General method for creating uniform instances.
     //--------------------------------------------------------------------------
-    void storeUniformOrSampler(GLenum type, const char *name);
+    bool storeUniformOrSampler(GLenum type, const char *name);
     void storeAttribute(GLenum type, const char *name);
-    bool storeUniform(GLenum type, const char *name);
-    bool storeSampler(GLenum type, const char *name);
 
     //--------------------------------------------------------------------------
     //! \brief Specific method for creating uniform instances.
@@ -515,7 +513,7 @@ private:
     //! \brief Specific method for creating uniform instances.
     //--------------------------------------------------------------------------
     template<class T>
-    inline void updateOrCreateUniform(const char *name)
+    inline bool updateOrCreateUniform(const char *name)
     {
         // Try to insert new GLUniform
         auto const& it = m_uniforms.insert(
@@ -538,11 +536,15 @@ private:
             else
             {
                 // Wrong type ?
-                GL::Exception("GLUniform " + std::string(name) + " mismatch type:"
-                              " shader type is different from the one you have"
-                              " created before compiling the shader code");
+                std::string msg = "GLUniform " + std::string(name) + " mismatch type:"
+                                  " shader type is different from the one you have"
+                                  " created before compiling the shader code";
+                concatError(msg);
+                return false;
             }
         }
+
+        return true;
     }
 
     //--------------------------------------------------------------------------

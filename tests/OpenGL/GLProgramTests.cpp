@@ -459,7 +459,7 @@ TEST(TestGLPrograms, testSuccessCompilation2)
     });
 }
 
-// Test we cannot create uniform when the prog is already compiled
+// Test we cannot create uniform before the prog is compiled
 TEST(TestGLPrograms, testCreateUniformBeforeCompilation)
 {
     OpenGLContext context([]()
@@ -483,8 +483,6 @@ TEST(TestGLPrograms, testCreateUniformBeforeCompilation)
         ASSERT_EQ(true, color1.m_need_setup);
         ASSERT_EQ(true, color1.m_need_create);
         ASSERT_EQ(true, color1.m_need_update);
-
-        std::cout << "444444444" << std::endl;
 
         // Pathes for finding shaders
         vs.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
@@ -516,161 +514,78 @@ TEST(TestGLPrograms, testCreateUniformBeforeCompilation)
     });
 }
 
+// Test we cannot create uniform with wrong typr before the prog is compiled
+TEST(TestGLPrograms, testCreateUniformBeforeCompilationWrongType)
+{
+    OpenGLContext context([]()
+    {
+        GLVertexShader vs;
+        GLFragmentShader fs;
+        GLProgram prog("prog");
+
+        // Add uniform with wrong type before compiling
+        prog.uniform<float>("ourColor") = 42.0f;
+        GLUniform<float>& color1 = prog.uniform<float>("ourColor");
+        ASSERT_STREQ("ourColor", color1.cname());
+        ASSERT_EQ(-1, color1.m_handle);
+        ASSERT_EQ(GL_FLOAT, color1.m_target);
+        ASSERT_EQ(1, color1.m_size);
+        ASSERT_EQ(prog.m_handle, color1.m_program);
+        ASSERT_FLOAT_EQ(42.0f, color1.m_data);
+        ASSERT_EQ(true, color1.m_need_setup);
+        ASSERT_EQ(true, color1.m_need_create);
+        ASSERT_EQ(true, color1.m_need_update);
+
+        // Pathes for finding shaders
+        vs.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
+                    "OpenGL/shaders:OpenGL/shaders/include");
+        fs.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
+                    "OpenGL/shaders:OpenGL/shaders/include");
+
+        // Load GLSL codes. ourColor is vec4 not float!
+        ASSERT_EQ(true, vs.read("test5.vs"));
+        ASSERT_EQ(true, fs.read("test5.fs"));
+        ASSERT_EQ(false, prog.compile(vs, fs));
+        ASSERT_EQ(false, prog.compiled());
+        EXPECT_THAT(prog.strerror().c_str(), HasSubstr("mismatch type"));
+        std::vector<std::string> list;
+        ASSERT_EQ(0_z, prog.getFailedShaders(list, true));
+        ASSERT_EQ(0_z, list.size()); // Shaders are not faulty but the developper
+        ASSERT_EQ(0_z, prog.m_shaders.size());
+    });
+}
+
+// Test we cannot create uniform when the prog is already compiled
+TEST(TestGLPrograms, testCreateUniformAfterCompilation)
+{
+    OpenGLContext context([]()
+    {
+        GLVertexShader vs;
+        GLFragmentShader fs;
+        GLProgram prog("prog");
+
+        // Pathes for finding shaders
+        vs.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
+                    "OpenGL/shaders:OpenGL/shaders/include");
+        fs.path.add("tests/OpenGL/shaders:tests/OpenGL/shaders/include:"
+                    "OpenGL/shaders:OpenGL/shaders/include");
+
+        // Load GLSL codes
+        ASSERT_EQ(true, vs.read("test5.vs"));
+        ASSERT_EQ(true, fs.read("test5.fs"));
+        ASSERT_EQ(true, prog.compile(vs, fs));
+        ASSERT_EQ(true, prog.compiled());
+
+        try {
+            prog.uniform<float>("ourColor") = 42.0f;
+            ASSERT_TRUE("Exception should have occured");
+        } catch(...) { }
+
+        try {
+            prog.uniform<float>("foobar") = 42.0f;
+            ASSERT_TRUE("Exception should have occured");
+        } catch(...) { }
+    });
+}
+
 // TODO tester release()
-
-
-#if 0
-
-// Test we cannot create uniform if the prog is compiled
-TEST(TestGLPrograms, TestCreatUniformProgCompiled)
-{
-    std::vector<std::string> list;
-
-    GLProgram prog("prog");
-    prog.m_need_setup = false;
-    ASSERT_EQ(true, prog.compiled());
-
-    std::cout << "-------------------------------" << std::endl;
-
-    // Unknown name: not added
-    try { prog.uniform<float>("u1"); FAIL() << "Exception should have occured"; }
-    catch(...) { }
-
-    //try { prog.attribute<float>("u1"); FAIL() << "Exception should have occured"; }
-    //catch(...) { }
-}
-
-
-
-// Test we can create attribute if the prog is not compiled
-TEST(TestGLPrograms, TestCreatAttributeProgNotCompiled)
-{
-    std::vector<std::string> list;
-    GLProgram prog("prog");
-
-    // Check attributes creation
-    prog.createAttribute<float>("u1");
-    prog.createAttribute<Vector2f>("u1"); // double name with dif type
-    prog.createAttribute<Vector2f>("u2");
-    prog.createAttribute<Vector3f>("u3");
-    prog.createAttribute<Vector4f>("u4");
-    ASSERT_EQ(4_z, prog.getAttributeNames(list, true)); // instead of 5
-    ASSERT_EQ(list.size(), 4u);
-    ASSERT_THAT(list, ElementsAre("u1", "u2", "u3", "u4")); // "u1" not in double
-    ASSERT_EQ(true, prog.hasAttribute("u1"));
-    ASSERT_EQ(true, prog.hasAttribute("u1"));
-    ASSERT_EQ(true, prog.hasAttribute("u2"));
-    ASSERT_EQ(true, prog.hasAttribute("u3"));
-    ASSERT_EQ(true, prog.hasAttribute("u4"));
-
-    // Check bad accessor
-    try {
-        prog.attribute<float>(nullptr);
-        FAIL() << "Exception should have occured";
-    } catch(...) { }
-
-    // Check accessor with known names and correct type
-    try { prog.attribute<float>("u1"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.attribute<Vector2f>("u1"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.attribute<Vector2f>("u2"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.attribute<Vector3f>("u3"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    try { prog.attribute<Vector4f>("u4"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-
-    // Check accessor with unknown names are inserted
-    // FIXME should be inserted ?
-    try { prog.attribute<float>(""); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    ASSERT_EQ(true, prog.hasAttribute(""));
-    try { prog.attribute<float>("aaa"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    ASSERT_EQ(true, prog.hasAttribute<float>("aaa"));
-    ASSERT_EQ(6_z, prog.getAttributeNames(list, true));
-    ASSERT_EQ(list.size(), 6u);
-    ASSERT_THAT(list, ElementsAre("", "aaa", "u1", "u2", "u3", "u4"));
-
-    // Check accessor with known names but wrong type
-    // FIXME should be inserted ?
-    try { prog.attribute<float>("u2"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    ASSERT_EQ(true, prog.hasAttribute("u2"));
-    try { prog.attribute<float>("u2"); }
-    catch(...) { FAIL() << "Exception should not have occured"; }
-    ASSERT_EQ(6_z, prog.getAttributeNames(list, true));
-    ASSERT_EQ(list.size(), 6u);
-    ASSERT_THAT(list, ElementsAre("", "aaa", "u1", "u2", "u3", "u4"));
-}
-
-// Test we cannot create attribute if the prog is compiled
-TEST(TestGLPrograms, TestCreatAttributeProgCompiled)
-{
-    std::vector<std::string> list;
-
-    GLProgram prog("prog");
-    prog.m_need_setup = true;
-    ASSERT_EQ(true, prog.compiled());
-
-    // Unknown name: not added
-    try { prog.attribute("u1");  FAIL() << "Exception should have occured"; }
-    catch(...) { }
-
-    ASSERT_EQ(0_z, prog.getAttributeNames(list, true));
-    ASSERT_EQ(list.size(), 0_z);
-}
-
-// Test binding a VAO to a GLProgram
-TEST(TestGLPrograms, TestVAObind)
-{
-    std::vector<std::string> list;
-
-    GLProgram prog("prog");
-    prog.m_handle = 42;
-    prog.uniform<float>("u1");
-    prog.uniform<Vector2f>("u2");
-    prog.uniform<Vector3f>("u3");
-    prog.attribute("a1");
-    prog.attribute("a2");
-    prog.attribute("a3");
-
-    GLVAO vao("VAO");
-    ASSERT_EQ(nullptr, vao.m_program);
-    ASSERT_EQ(false, vao.isBound());
-
-    ASSERT_EQ(true, prog.bind(vao));
-    ASSERT_EQ(true, vao.isBound());
-    ASSERT_EQ(&prog, vao.m_program);
-    ASSERT_EQ(42, vao.m_program->handle());
-    ASSERT_EQ(true, vao.hasVBOs());
-    ASSERT_EQ(true, vao.has<float>("a1"));
-    ASSERT_EQ(true, vao.has<Vector2f>("a2"));
-    ASSERT_EQ(true, vao.has<Vector3f>("a3"));
-    ASSERT_EQ(true, vao.has<Vector4f>("a4"));
-}
-
-TEST(TestGLPrograms, bindVAOtoWrongGLProg)
-{
-    GLProgram prog1("prog1");
-    prog1.m_handle = 42;
-    prog1.m_compiled = true;
-    GLProgram prog2("prog2");
-    prog2.m_handle = 43;
-    prog2.m_compiled = true;
-    GLVAO vao1("VAO1");
-    GLVAO vao2("VAO2");
-
-    ASSERT_EQ(0, vao1.m_program);
-    ASSERT_EQ(0, vao2.m_program);
-    ASSERT_EQ(true, prog1.bind(vao1));
-    ASSERT_EQ(true, prog2.bind(vao2));
-    ASSERT_EQ(42, vao1.m_program);
-    ASSERT_EQ(43, vao2.m_program);
-    // Try binding VAO to the wrong GLProg
-    ASSERT_EQ(false, prog1.bind(vao2));
-    ASSERT_EQ(false, prog2.bind(vao1));
-}
-
-#endif

@@ -218,21 +218,25 @@ bool GLProgram::onSetup()
         {
             std::cout << "Generating attributes and uniforms for GLProgram named "
                       << name() << "..." << std::endl;
-            generateAttributesAndUniforms();
-            m_error.clear();
 
-            // Force calling onActivate() without checks since GLObject::begin()
-            // calls onActivate() before onSetup() but for GLProgram this should
-            // be the inversed. So onActivate() was called before this method
-            // and has failed because this GLProgram was not yet compiled. So
-            // now, activate the GLProgram.
-            glCheck(glUseProgram(m_handle));
+            success = generateAttributesAndUniforms();
+            if (success)
+            {
+                m_error.clear();
 
-            // Force calling onUpdate() allowing to update uniforms since the
-            // API allows the user to define uniforms before compiling the
-            // GLProgram. This allows for example to create 3d object with
-            // predefined materials before compiling shaders
-            m_need_update = true;
+                // Force calling onActivate() without checks since GLObject::begin()
+                // ca                return true;lls onActivate() before onSetup() but for GLProgram this should
+                // be the inversed. So onActivate() was called before this method
+                // and has failed because this GLProgram was not yet compiled. So
+                // now, activate the GLProgram.
+                glCheck(glUseProgram(m_handle));
+
+                // Force calling onUpdate() allowing to update uniforms since the
+                // API allows the user to define uniforms before compiling the
+                // GLProgram. This allows for example to create 3d object with
+                // predefined materials before compiling shaders
+                m_need_update = true;
+            }
         }
     }
 
@@ -315,7 +319,7 @@ void GLProgram::detachAllShaders()
 }
 
 //------------------------------------------------------------------------------
-void GLProgram::generateAttributesAndUniforms()
+bool GLProgram::generateAttributesAndUniforms()
 {
     const GLsizei BUFFER_SIZE = 64;
     GLchar name[BUFFER_SIZE];
@@ -334,7 +338,8 @@ void GLProgram::generateAttributesAndUniforms()
     {
         glCheck(glGetActiveUniform(m_handle, location, BUFFER_SIZE, nullptr,
                                    &size, &type, name));
-        storeUniformOrSampler(type, name);
+        if (!storeUniformOrSampler(type, name))
+            return false;
     }
 
     // Create the list of attributes. Attributes are used to populate VBOs when
@@ -347,17 +352,13 @@ void GLProgram::generateAttributesAndUniforms()
                                   &size, &type, name));
         storeAttribute(type, name);
     }
+
+    return true;
 }
 
 //------------------------------------------------------------------------------
 void GLProgram::storeAttribute(GLenum type, const char *name)
 {
-    // TODO: kill unused uniforms ? Meaning uniforms created by the user but
-    // not used inside shaders.
-    auto it = m_attributes.find(name);
-    if (it != m_attributes.end())
-        return ;
-
     switch (type)
     {
         // TODO: manage integers
@@ -376,82 +377,42 @@ void GLProgram::storeAttribute(GLenum type, const char *name)
     default:
         std::string msg =
                 "The type of Attribute for " + std::string(name) +
-                " is not managed";
+                " is not managed. Please report this bug to developpers!";
         throw GL::Exception(msg);
     }
 }
 //------------------------------------------------------------------------------
-void GLProgram::storeUniformOrSampler(GLenum type, const char *name)
+bool GLProgram::storeUniformOrSampler(GLenum type, const char *name)
 {
-    if (!storeUniform(type, name))
-    {
-        if (!storeSampler(type, name))
-        {
-            std::string msg =
-                    "The type of Uniform for " + std::string(name) +
-                    " is not managed";
-            throw GL::Exception(msg);
-        }
-    }
-}
-
-//------------------------------------------------------------------------------
-bool GLProgram::storeUniform(GLenum type, const char *name)
-{
-    // Store new uniform
     switch (type)
     {
+        // Store new uniform
+
     case GL_FLOAT:
-        updateOrCreateUniform<float>(name);
-        return true;
+        return updateOrCreateUniform<float>(name);
     case GL_FLOAT_VEC2:
-        updateOrCreateUniform<Vector2f>(name);
-        return true;
+        return updateOrCreateUniform<Vector2f>(name);
     case GL_FLOAT_VEC3:
-        updateOrCreateUniform<Vector3f>(name);
-        return true;
+        return updateOrCreateUniform<Vector3f>(name);
     case GL_FLOAT_VEC4:
-        updateOrCreateUniform<Vector4f>(name);
-        return true;
+        return updateOrCreateUniform<Vector4f>(name);
     case GL_INT:
-        updateOrCreateUniform<int>(name);
-        return true;
+        return updateOrCreateUniform<int>(name);
     case GL_INT_VEC2:
-        updateOrCreateUniform<Vector2i>(name);
-        return true;
+        return updateOrCreateUniform<Vector2i>(name);
     case GL_INT_VEC3:
-        updateOrCreateUniform<Vector3i>(name);
-        return true;
+        return updateOrCreateUniform<Vector3i>(name);
     case GL_INT_VEC4:
-        updateOrCreateUniform<Vector4i>(name);
-        return true;
+        return updateOrCreateUniform<Vector4i>(name);
     case GL_FLOAT_MAT2:
-        updateOrCreateUniform<Matrix22f>(name);
-        return true;
+        return updateOrCreateUniform<Matrix22f>(name);
     case GL_FLOAT_MAT3:
-        updateOrCreateUniform<Matrix33f>(name);
-        return true;
+        return updateOrCreateUniform<Matrix33f>(name);
     case GL_FLOAT_MAT4:
-        updateOrCreateUniform<Matrix44f>(name);
-        return true;
-    }
+        return updateOrCreateUniform<Matrix44f>(name);
 
-    return false;
-}
-//------------------------------------------------------------------------------
-bool GLProgram::storeSampler(GLenum type, const char *name)
-{
-    // The API allows the user to define uniforms before compiling the
-    // GLProgram. Avoid replacing the uniform to avoid loosing its value.
-    // TODO: kill unused uniforms ? Meaning uniforms created by the user but
-    // not used inside shaders.
-    auto it = m_samplers.find(name);
-    if (it != m_samplers.end())
-        return true;
+        // Store new sampler
 
-    // Store new sampler
-    switch (type)
-    {
     case GL_SAMPLER_1D:
         createSampler<GLSampler1D>(name);
         return true;
@@ -464,6 +425,12 @@ bool GLProgram::storeSampler(GLenum type, const char *name)
     case GL_SAMPLER_CUBE:
         createSampler<GLSamplerCube>(name);
         return true;
+    default:
+        std::string msg =
+                "The type of Uniform for " + std::string(name) +
+                " is not managed. Please report this bug to developpers!";
+        throw GL::Exception(msg);
+        return false;
     }
 
     return false;
