@@ -41,7 +41,7 @@ OBJS += VectorTests.o MatrixTests.o
 OBJS += QuaternionTests.o TransformationTests.o TransformableTests.o
 OBJS += ComponentTests.o
 OBJS += PendingDataTests.o PendingContainerTests.o
-OBJS += GLObjectTests.o GLShadersTests.o GLProgramTests.o
+OBJS += GLObjectTests.o GLShadersTests.o GLProgramTests.o GLVAOTests.o
 OBJS += main.o
 
 VPATH += $(P)/tests $(P)/tests/Components $(P)/tests/Common $(P)/tests/Math $(P)/tests/OpenGL
