@@ -25,6 +25,7 @@
 
 #include "UI/DearImGui.hpp"
 
+/*
 #  pragma GCC diagnostic push
 #    pragma GCC diagnostic ignored "-Wold-style-cast"
 #    pragma GCC diagnostic ignored "-Wstrict-overflow"
@@ -39,11 +40,12 @@
 #    pragma GCC diagnostic ignored "-Wunused-function"
 #    pragma GCC diagnostic ignored "-Wunused-variable"
 
+#      include "external/imgui/imgui.cpp"
+#      include "external/imgui/imgui_draw.cpp"
+#      include "external/imgui/imgui_tables.cpp"
+#      include "external/imgui/imgui_widgets.cpp"
 #      include "external/imgui/backends/imgui_impl_glfw.cpp"
 #      include "external/imgui/backends/imgui_impl_opengl3.cpp"
-#      include "external/imgui/imgui_draw.cpp"
-#      include "external/imgui/imgui_widgets.cpp"
-#      include "external/imgui/imgui_tables.cpp"
-#      include "external/imgui/imgui.cpp"
 
 #   pragma GCC diagnostic pop
+*/

@@ -26,7 +26,7 @@ function print-clone
 ### is needed but some libraries are needed (libdw-dev, binutils-dev, ...).
 ### License: MIT
 print-clone backward-cpp
-git clone https://github.com/Lecrapouille/backward-cpp.git --depth=1 > /dev/null 2> /dev/null
+git clone https://github.com/bombela/backward-cpp.git --depth=1 > /dev/null 2> /dev/null
 
 ### Library SOIL for opening pictures files (jpeg, png ...)
 print-clone SOIL
@@ -42,14 +42,12 @@ else
     # License: public domain
     git clone https://github.com/kbranigan/Simple-OpenGL-Image-Library.git --depth=1 > /dev/null 2> /dev/null
     mv Simple-OpenGL-Image-Library SOIL
-
 fi
 
 ### Library for creating GUI in OpenGL
 ### License: MIT
 print-clone imgui
-git clone https://github.com/ocornut/imgui.git > /dev/null 2> /dev/null # --depth=1 > /dev/null 2> /dev/null
-(cd imgui && git reset --hard b898281e3c75d64ecc4e0f63aba0ec5e9182cce1) # FIXME until fixing broken API on latest versions
+git clone https://github.com/ocornut/imgui.git --depth=1 > /dev/null 2> /dev/null
 
 ### Library for unit conversion library
 ### License: MIT
