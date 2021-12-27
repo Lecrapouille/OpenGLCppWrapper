@@ -116,7 +116,7 @@ public:
     //! \brief Enable reactions to window events (ie mouse boutton, mouse
     //! scroll, mouse motion, keyboard).
     //--------------------------------------------------------------------------
-    void makeReactOn(GLWindow::Event const events = GLWindow::Event::All);
+    void reactTo(GLWindow::Event const events = GLWindow::Event::All);
 
     //--------------------------------------------------------------------------
     //! \brief Graphics setup. This method will call onSetup() on success or
@@ -131,12 +131,6 @@ public:
     //! \return true on success, false on failure.
     //--------------------------------------------------------------------------
     bool update();
-
-    //--------------------------------------------------------------------------
-    //! \brief Condition for halting the window loop. By default when the ESC
-    //! key has been pressed or when the user has clicked on the X button.
-    //--------------------------------------------------------------------------
-    virtual bool shouldHalt();
 
     //--------------------------------------------------------------------------
     //! \brief Hide and grab the mouse cursor.
@@ -194,7 +188,7 @@ public:
     //! \brief Is the window is on full screen or not.
     //! \return true if the windows is in full screen, return false else.
     //--------------------------------------------------------------------------
-    inline bool isFullscreen() const
+    inline bool isFullScreen() const
     {
         return (m_context != nullptr) &&
                 (glfwGetWindowMonitor(m_context) != nullptr);
@@ -253,6 +247,12 @@ private:
     //! that needs to be implemented on derived class.
     //--------------------------------------------------------------------------
     void monitorGPUMemory();
+
+    //--------------------------------------------------------------------------
+    //! \brief Condition for halting the window loop. By default when the ESC
+    //! key has been pressed or when the user has clicked on the X button.
+    //--------------------------------------------------------------------------
+    virtual bool shouldHalt();
 
     //--------------------------------------------------------------------------
     //! \brief Callback when the GPU received new data. Default behavior

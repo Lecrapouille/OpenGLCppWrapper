@@ -134,8 +134,8 @@ void BasicWindowIOEvents::onGPUMemoryChanged(size_t size)
 bool BasicWindowIOEvents::onSetup()
 {
     // Enable IO callbacks. Without this method: no events are triggered.
-    makeReactOn(Event::MouseMove | Event::MouseScroll |
-                Event::MouseButton | Event::Keyboard);
+    reactTo(Event::MouseMove | Event::MouseScroll |
+            Event::MouseButton | Event::Keyboard);
 
     // Do not show the mouse cursor.
     hideCursor();

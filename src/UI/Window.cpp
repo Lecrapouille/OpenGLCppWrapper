@@ -51,7 +51,7 @@ GLWindow::GLWindow(uint32_t const width, uint32_t const height, const char *titl
 //------------------------------------------------------------------------------
 GLWindow::~GLWindow()
 {
-    GLApplication::makeContextCurrent(this);
+    GLApplication::application().setCurrentWindow(*this);
     glfwDestroyWindow(m_context);
 }
 
@@ -130,7 +130,7 @@ static GLWindow::Event operator&(GLWindow::Event lhs, GLWindow::Event rhs)
 // Else, if using static function, we could not reach private methods.
 // \fixme callbacksOn(Event::All) + callbacksOn(Event::None) => callbacks are
 // not removed.
-void GLWindow::makeReactOn(GLWindow::Event const events)
+void GLWindow::reactTo(GLWindow::Event const events)
 {
     // Note I use lambda functions instead of static functions to access to
     // private methods.
@@ -148,8 +148,8 @@ void GLWindow::makeReactOn(GLWindow::Event const events)
             GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
 
             // Save context.
-            GLWindow* previous_context = GLApplication::window();
-            GLApplication::makeContextCurrent(window);
+            GLWindow& previous_context = GLApplication::application().getCurrentWindow();
+            GLApplication::application().setCurrentWindow(*window);
 
             // Update mouse states
             window->m_mouse.position.x = xpos;
@@ -169,7 +169,7 @@ void GLWindow::makeReactOn(GLWindow::Event const events)
             window->m_mouse.displacement.y = 0.0;
 
             // Restore context.
-            GLApplication::makeContextCurrent(previous_context);
+            GLApplication::application().setCurrentWindow(previous_context);
         });
     }
 
@@ -183,8 +183,8 @@ void GLWindow::makeReactOn(GLWindow::Event const events)
             GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
 
             // Save context.
-            GLWindow* previous_context = GLApplication::window();
-            GLApplication::makeContextCurrent(window);
+            GLWindow& previous_context = GLApplication::application().getCurrentWindow();
+            GLApplication::application().setCurrentWindow(*window);
 
             // Update mouse states
             window->m_mouse.scroll.x = xoffset;
@@ -198,7 +198,7 @@ void GLWindow::makeReactOn(GLWindow::Event const events)
             window->m_mouse.scroll.y = 0.0;
 
             // Restore context.
-            GLApplication::makeContextCurrent(previous_context);
+            GLApplication::application().setCurrentWindow(previous_context);
         });
     }
 
@@ -212,8 +212,8 @@ void GLWindow::makeReactOn(GLWindow::Event const events)
             GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
 
             // Save context.
-            GLWindow* previous_context = GLApplication::window();
-            GLApplication::makeContextCurrent(window);
+            GLWindow& previous_context = GLApplication::application().getCurrentWindow();
+            GLApplication::application().setCurrentWindow(*window);
 
             // Update mouse states
             window->m_mouse.button = static_cast<GLWindow::Mouse::Button>(button);
@@ -227,7 +227,7 @@ void GLWindow::makeReactOn(GLWindow::Event const events)
             window->m_mouse.pressed = false;
 
             // Restore context.
-            GLApplication::makeContextCurrent(previous_context);
+            GLApplication::application().setCurrentWindow(previous_context);
         });
     }
 
@@ -241,8 +241,8 @@ void GLWindow::makeReactOn(GLWindow::Event const events)
             GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
 
             // Save context.
-            GLWindow* previous_context = GLApplication::window();
-            GLApplication::makeContextCurrent(window);
+            GLWindow& previous_context = GLApplication::application().getCurrentWindow();
+            GLApplication::application().setCurrentWindow(*window);
 
             // Update keyboard states
             {
@@ -252,7 +252,7 @@ void GLWindow::makeReactOn(GLWindow::Event const events)
             }
 
             // Restore context.
-            GLApplication::makeContextCurrent(previous_context);
+            GLApplication::application().setCurrentWindow(previous_context);
         });
     }
 }
@@ -261,7 +261,7 @@ void GLWindow::makeReactOn(GLWindow::Event const events)
 bool GLWindow::setup()
 {
     // Set this window as active context
-    GLApplication::makeContextCurrent(this);
+    GLApplication::application().setCurrentWindow(*this);
 
     // Save the context address: it will be passed as parameter in glfw callbacks
     glfwSetWindowUserPointer(m_context, this);
@@ -275,8 +275,8 @@ bool GLWindow::setup()
         GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
 
         // Save context.
-        GLWindow* previous_context = GLApplication::window();
-        GLApplication::makeContextCurrent(window);
+        GLWindow& previous_context = GLApplication::application().getCurrentWindow();
+        GLApplication::application().setCurrentWindow(*window);
 
         // Call the GLWindow callback that has to be implemented by the derived
         // class.
@@ -285,7 +285,7 @@ bool GLWindow::setup()
         window->onWindowResized();
 
         // Restore context.
-        GLApplication::makeContextCurrent(previous_context);
+        GLApplication::application().setCurrentWindow(previous_context);
     });
 
     // Ensure we can capture keyboard being pressed below.
@@ -336,7 +336,7 @@ bool GLWindow::setup()
 bool GLWindow::update()
 {
     // Set this window as active context
-    GLApplication::makeContextCurrent(this);
+    GLApplication::application().setCurrentWindow(*this);
 
     computeFPS();
     monitorGPUMemory();

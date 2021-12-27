@@ -20,8 +20,9 @@
 
 #include "Application.hpp"
 
-std::list<std::unique_ptr<GLWindow>> GLApplication::m_windows;
-GLWindow* GLApplication::m_window = nullptr;
+//std::list<std::unique_ptr<GLWindow>> GLApplication::m_windows;
+//GLWindow* GLApplication::m_window = nullptr;
+GLApplication* GLApplication::m_application = nullptr;
 
 //------------------------------------------------------------------------------
 //! \brief Callback triggered when GLFW failed.
@@ -35,6 +36,9 @@ static void on_GLFW_error(int /*errorCode*/, const char* msg)
 //------------------------------------------------------------------------------
 GLApplication::GLApplication()
 {
+    assert(m_application == nullptr && "Only one GLApplication");
+    m_application = this;
+
     // Initialise GLFW
     glfwSetErrorCallback(on_GLFW_error);
 
@@ -51,6 +55,7 @@ GLApplication::GLApplication()
 //------------------------------------------------------------------------------
 GLApplication::~GLApplication()
 {
+    // Force calling destructors before ending glfw
     m_windows.clear();
     glfwTerminate();
 }
@@ -58,6 +63,13 @@ GLApplication::~GLApplication()
 //------------------------------------------------------------------------------
 bool GLApplication::start()
 {
+    if (m_windows.size() == 0u)
+    {
+        std::cerr << "GLApplication has no windows. Abort!" << std::endl;
+        return false;
+    }
+
+    // TODO use threads ?
     for (auto& window : m_windows)
     {
         if (!window->setup())
@@ -70,10 +82,11 @@ bool GLApplication::start()
         {
             // TODO if one of the window is full screen, do not update other
             // windows ?
+            // TODO use threads ?
             if (!window->update())
                 return false;
             if (window->shouldHalt())
-                return true;
+                return false;
         }
     }
 

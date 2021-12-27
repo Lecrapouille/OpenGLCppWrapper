@@ -150,8 +150,7 @@ SGMatAndShape::SGMatAndShape(uint32_t const width, uint32_t const height,
       m_camera("camera"),
       m_imgui(*this)
 {
-    makeReactOn(Event::MouseMove | Event::MouseScroll |
-                Event::MouseButton | Event::Keyboard);
+    reactTo(Event::MouseMove | Event::MouseScroll | Event::MouseButton | Event::Keyboard);
 
     m_camera.transform.position(Vector3f(10,0,5));
     m_camera.transform.lookAt(Vector3f(0,0,0));
