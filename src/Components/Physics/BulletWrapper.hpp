@@ -22,6 +22,9 @@
 #  define BULLETWRAPPER_HPP
 
 #    pragma GCC diagnostic push
+#      pragma GCC diagnostic ignored "-Wreorder-ctor"
+#      pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#      pragma GCC diagnostic ignored "-Wignored-qualifiers"
 #      pragma GCC diagnostic ignored "-Wsign-conversion"
 #      pragma GCC diagnostic ignored "-Wold-style-cast"
 #      pragma GCC diagnostic ignored "-Wfloat-equal"
