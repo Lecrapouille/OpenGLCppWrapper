@@ -18,10 +18,17 @@
 ## along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
+NPROC=
+if [[ "`uname -s`" == "Darwin" ]]; then
+    NPROC=`sysctl -n hw.logicalcpu`
+else
+    NPROC=`nproc`
+fi
+
 # Compil the lib
 make download-external-libs
 make compile-external-libs
-make -j8
+make -j$NPROC
 
 # Compil Examples
-(cd examples && make -j8)
+(cd examples && make -j$NPROC)

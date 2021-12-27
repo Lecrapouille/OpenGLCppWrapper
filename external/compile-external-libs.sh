@@ -21,13 +21,21 @@ function print-compile
     echo -e "\033[35m*** Compiling:\033[00m \033[36m$TARGET\033[00m <= \033[33m$1\033[00m"
 }
 
+### Number of CPU cores
+NPROC=
+if [[ "$ARCHI" == "Darwin" ]]; then
+    NPROC=`sysctl -n hw.logicalcpu`
+else
+    NPROC=`nproc`
+fi
+
 ### Library SOIL for opening pictures files (jpeg, png ...)
 print-compile SOIL
 if [ -e SOIL ];
 then
     (
         cd SOIL
-        make -j4 CXXFLAGS="-fPIC -O2 -s" >/dev/null 2>/dev/null
+        make -j$NPROC CXXFLAGS="-fPIC -O2 -s"
         if [ "$ARCHI" == "Linux" ];
         then
             # Move header and static lib in the same location to be indentical than SOIL for Darwin
@@ -52,7 +60,7 @@ then
                 -DBT_USE_EGL=OFF -DUSE_OPENVR=OFF -DBUILD_PYBULLET=OFF -DBUILD_PYBULLET_NUMPY=OFF \
                 -DBUILD_ENET=OFF -DBUILD_CLSOCKET=OFF -DUSE_GRAPHICAL_BENCHMARK=OFF -DBUILD_CPU_DEMOS=OFF \
                 -DBUILD_BULLET2_DEMOS=OFF -DBUILD_UNIT_TESTS=OFF .. &&
-          make -j $(command nproc 2>/dev/null || echo 4) &&
+          make -j$NPROC &&
           make install DESTDIR=..
         )
     )
