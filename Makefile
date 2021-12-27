@@ -34,6 +34,7 @@ include $(P)/Makefile.common
 
 ###################################################
 # Compile static and shared libraries
+.PHONY: all
 all: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
 
 ###################################################
