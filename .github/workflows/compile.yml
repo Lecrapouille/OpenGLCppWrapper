@@ -1,0 +1,37 @@
+name: Compil OpenGLCppWrapper
+
+on:
+  push:
+    branches:
+      - dev-refacto-opengl
+      - develop
+      - master
+
+jobs:
+  build-linux:
+    name: Linux Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install libglew-dev libglfw3-dev libbz2-dev libdw-dev
+
+      - name: Download Repository
+        uses: actions/checkout@v2.3.1
+        with:
+          submodules: true
+
+      - name: Download and compile third parts
+        run: |
+          make download-external-libs
+          make compile-external-libs
+
+      - name: Compile the project
+        run: make -j`nproc`
+
+      - name: Compile examples
+        run: (cd examples && make -j`nproc`)
+
+      - name: Run unitary test
+        run: (cd tests && make -j`nproc`)
