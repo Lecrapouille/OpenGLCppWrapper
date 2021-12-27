@@ -122,7 +122,7 @@ public:
 
         //! \brief The matrix transform to apply on the child. Transformations
         //! are relative to the parent node.
-        Matrix44f m_world_transform = Identity44f;
+        Matrix44f m_world_transform{matrix::Identity};
     };
 
     //--------------------------------------------------------------------------

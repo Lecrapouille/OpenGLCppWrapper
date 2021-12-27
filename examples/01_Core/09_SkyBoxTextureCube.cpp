@@ -42,7 +42,7 @@ void SkyBoxTextureCube::onWindowResized()
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
     m_prog.matrix44f("projection") =
-            matrix::perspective(maths::toRadian(60.0f),
+            matrix::perspective(60.0_deg,
                                 width<float>() / height<float>(),
                                 0.1f,
                                 100.0f);

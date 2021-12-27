@@ -43,7 +43,7 @@ void TerrainTexture3D::onWindowResized()
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
     m_prog.matrix44f("projection") =
-            matrix::perspective(maths::toRadian(60.0f),
+            matrix::perspective(60.0_deg,
                                 width<float>() / height<float>(),
                                 0.1f,
                                 10.0f);
@@ -67,7 +67,7 @@ bool TerrainTexture3D::onSetup()
 
     // Init Model-View matrices (shader uniforms). Note that projection matrix
     // is init inside onWindowResized() which is called just after this method.
-    m_prog.matrix44f("model") = Identity44f;
+    m_prog.matrix44f("model") = Matrix44f(matrix::Identity);
     m_prog.matrix44f("view") =
             matrix::lookAt(Vector3f(0.75, -0.75, 0.75),
                            Vector3f(0.0, 0.0, 0.0),

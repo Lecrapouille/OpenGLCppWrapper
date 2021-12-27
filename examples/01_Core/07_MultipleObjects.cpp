@@ -45,7 +45,7 @@ void MultipleObjects::onWindowResized()
     float ratio = width<float>() / height<float>();
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
     m_prog.matrix44f("projection") =
-            matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 100.0f);
+            matrix::perspective(60.0_deg, ratio, 0.1f, 100.0f);
 }
 
 //------------------------------------------------------------------------------
@@ -140,7 +140,7 @@ bool MultipleObjects::onSetup()
 
     // Init shader uniforms
     m_prog.scalarf("scale") = 1.0f;
-    m_prog.matrix44f("model") = Identity44f;
+    m_prog.matrix44f("model") = Matrix44f(matrix::Identity);
     m_prog.matrix44f("view") = matrix::lookAt(Vector3f(3,3,3),
                                               Vector3f(0,0,0),
                                               Vector3f(0,1,0));

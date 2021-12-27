@@ -46,7 +46,7 @@ void RotatingQuad::onWindowResized()
 
     // Init the projection matrix (shader uniforms).
     m_prog.matrix44f("projection") =
-            matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10.0f);
+            matrix::perspective(60.0_deg, ratio, 0.1f, 10.0f);
 }
 
 //------------------------------------------------------------------------------

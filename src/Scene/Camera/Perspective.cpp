@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "Scene/Camera/Perspective.hpp"
+#include "Math/Transformation.hpp"
 
 //------------------------------------------------------------------------------
 Perspective::Perspective(units::angle::radian_t const fov, float const near, float const far)
@@ -32,7 +33,7 @@ Matrix44f const& Perspective::matrix()
 {
     if (m_dirty)
     {
-        m_projection = matrix::perspective(m_fov.to<float>(), m_aspect, m_near, m_far);
+        m_projection = matrix::perspective(m_fov, m_aspect, m_near, m_far);
         m_dirty = false;
     }
 

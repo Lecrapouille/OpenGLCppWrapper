@@ -43,7 +43,7 @@ void IndexedSphere::onWindowResized()
     float ratio = width<float>() / height<float>();
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
     m_prog.matrix44f("projection") =
-            matrix::perspective(maths::toRadian(60.0f), ratio, 0.1f, 10.0f);
+            matrix::perspective(60.0_deg, ratio, 0.1f, 10.0f);
 }
 
 //------------------------------------------------------------------------------

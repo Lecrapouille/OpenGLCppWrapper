@@ -47,7 +47,7 @@ void PostProdFrameBuffer::onWindowResized()
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
     m_prog_scene.matrix44f("projection") =
-            matrix::perspective(maths::toRadian(50.0f),
+            matrix::perspective(50.0_deg,
                                 width<float>() / height<float>(),
                                 0.1f, 10.0f);
     m_prog_screen.scalarf("screen_width") = width<float>();
@@ -110,8 +110,8 @@ bool PostProdFrameBuffer::firstProgram()
     // Init Model-View-Project matrices (shader uniforms)
     float ratio = width<float>() / height<float>();
     m_prog_scene.matrix44f("projection") =
-            matrix::perspective(maths::toRadian(50.0f), ratio, 0.1f, 10.0f);
-    m_prog_scene.matrix44f("model") = Identity44f;
+            matrix::perspective(50.0_deg, ratio, 0.1f, 10.0f);
+    m_prog_scene.matrix44f("model") = Matrix44f(matrix::Identity);
     m_prog_scene.matrix44f("view") =
             matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
 

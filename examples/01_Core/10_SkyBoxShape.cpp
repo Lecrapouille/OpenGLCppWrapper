@@ -44,7 +44,7 @@ void SkyBoxShape::onWindowResized()
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
     Matrix44f const& proj =
-            matrix::perspective(maths::toRadian(60.0f),
+            matrix::perspective(60.0_deg,
                                 width<float>() / height<float>(),
                                 0.1f,
                                 100.0f);

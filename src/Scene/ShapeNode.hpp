@@ -100,7 +100,7 @@ public:
         projectionMatrix() = camera.projection();
     }
 
-    virtual bool onDraw(Matrix44f const& model_matrix = Identity44f) override
+    virtual bool onDraw(Matrix44f const& model_matrix = Matrix44f(matrix::Identity)) override
     {
         modelMatrix() = model_matrix;
         return m_vao.draw(m_drawMode);
@@ -134,7 +134,7 @@ public:
     //! world's origin.
     //!
     //! V_clip = M_proj * M_view * M_model * V_local
-    Matrix44f& modelMatrix()
+    virtual Matrix44f& modelMatrix() override
     {
         return material.program.matrix44f("modelMatrix");
     }
@@ -144,7 +144,7 @@ public:
     //! from the camera or viewer's point of view.
     //!
     //! V_clip = M_proj * M_view * M_model * V_local
-    Matrix44f& viewMatrix()
+    virtual Matrix44f& viewMatrix() override
     {
         return material.program.matrix44f("viewMatrix");
     }
@@ -155,7 +155,7 @@ public:
     //! screen.
     //!
     //! V_clip = M_proj * M_view * M_model * V_local
-    Matrix44f& projectionMatrix()
+    virtual Matrix44f& projectionMatrix() override
     {
         return material.program.matrix44f("projectionMatrix");
     }

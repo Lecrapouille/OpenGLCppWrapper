@@ -46,7 +46,7 @@ void BasicLighting::onWindowResized()
     glCheck(glViewport(0, 0, width<int>(), height<int>()));
 
     Matrix44f const& proj =
-            matrix::perspective(maths::toRadian(60.0f),
+            matrix::perspective(60.0_deg,
                                 width<float>() / height<float>(),
                                 0.1f, 100.0f);
     m_prog_cube.matrix44f("projection") = proj;
@@ -87,7 +87,7 @@ bool BasicLighting::createLamp()
     Transformable<float, 3U> transform;
     transform.reset();
     transform.position(lightPos);
-    transform.scale(Vector3f(0.05f)); // a smaller cube
+    //transform.scale(Vector3f(0.05f)); // a smaller cube
     m_prog_lamp.matrix44f("model") = transform.matrix();
     m_prog_lamp.matrix44f("view") = view;
 
