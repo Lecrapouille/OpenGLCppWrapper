@@ -64,7 +64,7 @@ LINKER_FLAGS += -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
 ###################################################
 # Inform Makefile where to find header files for third parts
 #
-INCLUDES += -I$(P)/include -I$(P)/. -I$(P)/src -I$(P)/src/Loaders/3D
+INCLUDES += -I$(P)/include -I$(P)/src -I$(P)/src/Loaders/3D
 INCLUDES += -I$(THIRDPART)
 INCLUDES += -I$(THIRDPART)/imgui
 INCLUDES += -I$(THIRDPART)/units/include

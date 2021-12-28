@@ -22,7 +22,7 @@
 #  define OPENGLCPPWRAPPER_SOIL_TEXTURES_LOADER_HPP
 
 #  include "Loaders/TextureLoader.hpp"
-#  include "external/SOIL/SOIL.h"
+#  include "SOIL/SOIL.h"
 #  include <iostream>
 
 // *****************************************************************************

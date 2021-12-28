@@ -40,9 +40,9 @@
 #    pragma GCC diagnostic ignored "-Wsign-conversion"
 #    pragma GCC diagnostic ignored "-Wconversion"
 
-#      include "external/imgui/imgui.h"
-#      include "external/imgui/backends/imgui_impl_glfw.h"
-#      include "external/imgui/backends/imgui_impl_opengl3.h"
+#      include "imgui/imgui.h"
+#      include "imgui/backends/imgui_impl_glfw.h"
+#      include "imgui/backends/imgui_impl_opengl3.h"
 
 #   pragma GCC diagnostic pop
 
