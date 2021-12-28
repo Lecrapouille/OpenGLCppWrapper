@@ -43,6 +43,8 @@ THIRDPART_LIBS +=
 # Set Libraries. For knowing which libraries
 # is needed please read the external/README.md file.
 #
+
+# OpenGL (3D rendering)
 ifeq ($(ARCHI),Darwin)
 INCLUDES += -I/usr/local/include -I/opt/local/include
 LINKER_FLAGS += -framework OpenGL -framework Cocoa
@@ -55,16 +57,18 @@ else
 $(error Unknown architecture)
 endif
 
-PKG_LIBS += bullet
-#LINKER_FLAGS += -L$(THIRDPART)/bullet3/usr/local/lib -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
+# bullet3 (3d physics)
+LINKER_FLAGS += -L$(THIRDPART)/bullet3/usr/local/lib
+LINKER_FLAGS += -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
 
 ###################################################
-# Inform Makefile where to find header files
+# Inform Makefile where to find header files for third parts
 #
-INCLUDES += -I$(P)/include -I$(P)/. -I$(P)/src -I$(THIRDPART)
-INCLUDES += -I$(THIRDPART)/imgui -I$(P)/src/Loaders/3D
+INCLUDES += -I$(P)/include -I$(P)/. -I$(P)/src -I$(P)/src/Loaders/3D
+INCLUDES += -I$(THIRDPART)
+INCLUDES += -I$(THIRDPART)/imgui
 INCLUDES += -I$(THIRDPART)/units/include
-INCLUDES += -I$(THIRDPART)/bullet3/usr/local/include -I$(THIRDPART)/bullet3/usr/local/include/bullet
+INCLUDES += -I$(THIRDPART)/bullet3/usr/local/include/bullet
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
