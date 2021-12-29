@@ -15,7 +15,15 @@ jobs:
       - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install libglew-dev libglfw3-dev libbz2-dev libdw-dev
+          sudo apt-get install libglew-dev libglfw3-dev libbz2-dev libdw-dev wget
+
+      - name: Install googletest manually
+        run: |
+          wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz
+          tar xf release-1.10.0.tar.gz
+          (cd googletest-release-1.10.0 &&
+          cmake -DBUILD_SHARED_LIBS=ON . &&
+          sudo make install)
 
       - name: Download Repository
         uses: actions/checkout@v2.3.1
@@ -41,7 +49,15 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Install system packages
-        run: brew install glfw glew
+        run: brew install glfw glew wget
+
+      - name: Install googletest manually
+        run: |
+          wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz
+          tar xf release-1.10.0.tar.gz
+          (cd googletest-release-1.10.0 &&
+          cmake -DBUILD_SHARED_LIBS=ON . &&
+          sudo make install)
 
       - name: Download Repository
         uses: actions/checkout@v2.3.1
