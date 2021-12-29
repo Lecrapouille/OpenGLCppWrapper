@@ -35,3 +35,29 @@ jobs:
 
       - name: Run unitary test
         run: (cd tests && make -j`nproc`)
+
+  build-macosx:
+    name: MacOS X Build
+    runs-on: macos-latest
+    steps:
+      - name: Install system packages
+        run: brew install glfw glew
+
+      - name: Download Repository
+        uses: actions/checkout@v2.3.1
+        with:
+          submodules: true
+
+      - name: Download and compile third parts
+        run: |
+          make download-external-libs
+          make compile-external-libs
+
+      - name: Compile the project
+        run: make -j`sysctl -n hw.logicalcpu`
+
+      - name: Compile examples
+        run: (cd examples && make -j`sysctl -n hw.logicalcpu`)
+
+      - name: Run unitary test
+        run: (cd tests && make -j`sysctl -n hw.logicalcpu`)
