@@ -27,7 +27,6 @@
 
 #  include "OpenGL/Context/OpenGL.hpp"
 #  include "Math/Vector.hpp"
-#  include <GLFW/glfw3.h>
 #  include <mutex>
 
 // ***************************************************************************
@@ -103,7 +102,7 @@ public:
     };
 
     //--------------------------------------------------------------------------
-    //! \brief Create a glfw3 window.
+    //! \brief Create a glfw3 window with given initial size and title.
     //--------------------------------------------------------------------------
     GLWindow(uint32_t const width, uint32_t const height, const char *title);
 
@@ -113,24 +112,16 @@ public:
     virtual ~GLWindow();
 
     //--------------------------------------------------------------------------
-    //! \brief Enable reactions to window events (ie mouse boutton, mouse
-    //! scroll, mouse motion, keyboard).
+    //! \brief Start the inifinite loop running the window calling the setup()
+    //! method and the update() method at the given FPS (TODO).
+    //--------------------------------------------------------------------------
+    bool run();
+
+    //--------------------------------------------------------------------------
+    //! \brief Enable event reactions from mouse boutton, mouse scroll, mouse
+    //! motion, keyboard key pressed or released).
     //--------------------------------------------------------------------------
     void reactTo(GLWindow::Event const events = GLWindow::Event::All);
-
-    //--------------------------------------------------------------------------
-    //! \brief Graphics setup. This method will call onSetup() on success or
-    //! call onSetupFailed() on failure.
-    //! \return true on success, false on failure.
-    //--------------------------------------------------------------------------
-    bool setup();
-
-    //--------------------------------------------------------------------------
-    //! \brief Paint, manage window events. This method will call
-    //! onPaintFailed() on failure.
-    //! \return true on success, false on failure.
-    //--------------------------------------------------------------------------
-    bool update();
 
     //--------------------------------------------------------------------------
     //! \brief Hide and grab the mouse cursor.
@@ -143,7 +134,7 @@ public:
     void showCursor();
 
     //--------------------------------------------------------------------------
-    //! \brief Return the delta time (in ms) from the previous update() call.
+    //! \brief Return the delta time (in s) from the previous update() call.
     //--------------------------------------------------------------------------
     inline float dt() const { return m_deltaTime; }
 
@@ -154,9 +145,13 @@ public:
     inline uint32_t fps() const { return m_fps; }
 
     //--------------------------------------------------------------------------
-    //! \brief Return the address of the GLFW window.
+    //! \brief Return the OpenGL context linked to this window.
     //--------------------------------------------------------------------------
-    inline GLFWwindow& context() { return *m_context; }
+    inline GL::Context::Window& context()
+    {
+        assert(m_context != nullptr && "Context has not been created");
+        return *m_context;
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Return the structure holding mouse states. To be used from
@@ -249,12 +244,6 @@ private:
     void monitorGPUMemory();
 
     //--------------------------------------------------------------------------
-    //! \brief Condition for halting the window loop. By default when the ESC
-    //! key has been pressed or when the user has clicked on the X button.
-    //--------------------------------------------------------------------------
-    virtual bool shouldHalt();
-
-    //--------------------------------------------------------------------------
     //! \brief Callback when the GPU received new data. Default behavior
     //! is to do nothing.
     //--------------------------------------------------------------------------
@@ -300,6 +289,13 @@ private:
     {}
 
     //--------------------------------------------------------------------------
+    //! \brief Graphics setup. This method will call onSetup() on success or
+    //! call onSetupFailed() on failure.
+    //! \return true on success, false on failure.
+    //--------------------------------------------------------------------------
+    bool setup();
+
+    //--------------------------------------------------------------------------
     //! \brief Add here all stuffs concerning the init of your 3D game.
     //! \return false for aborting start(), else true for continuing.
     //--------------------------------------------------------------------------
@@ -310,6 +306,19 @@ private:
     //! method does nothing.
     //--------------------------------------------------------------------------
     virtual void onSetupFailed(std::string const& reason) = 0;
+
+    //--------------------------------------------------------------------------
+    //! \brief Paint, manage window events. This method will call
+    //! onPaintFailed() on failure.
+    //! \return true on success, false on failure.
+    //--------------------------------------------------------------------------
+    bool update();
+
+    //--------------------------------------------------------------------------
+    //! \brief Condition for halting the window loop. By default when the ESC
+    //! key has been pressed or when the user has clicked on the X button.
+    //--------------------------------------------------------------------------
+    virtual bool shouldHalt();
 
     //--------------------------------------------------------------------------
     //! \brief Add here all stuffs painting your 3D world to be
@@ -326,14 +335,16 @@ private:
 
 private:
 
-    //! \brief Windows current height
+    //! \brief Windows current height. This method is only used to avoid using
+    //! directly static member variable which need to init on the cpp file.
     static uint32_t& staticHeight()
     {
         static uint32_t h;
         return h;
     }
 
-    //! \brief Windows current width
+    //! \brief Windows current width. This method is only used to avoid using
+    //! directly static member variable which need to init on the cpp file.
     static uint32_t& staticWidth()
     {
         static uint32_t w;
@@ -342,33 +353,36 @@ private:
 
 private:
 
+    //
     static bool const KEY_PRESS = true;
     static bool const KEY_RELEASE = false;
 
-    //! \brief GLF window context
-    GLFWwindow* m_context = nullptr;
-    //! \brief Windows title
+    //! \brief OpenGL context associated to this window.
+    GL::Context::Window* m_context = nullptr;
+    //! \brief Windows title.
     const char *m_title = nullptr;
-    //! \brief
+    //! \brief Used for computing m_deltaTime.
     double m_lastTime = 0.0;
-    //! \brief
+    //! \brief Used for computing m_deltaTime.
     double m_lastFrameTime = 0.0;
-    //! \brief Frames Per Seconds
-    uint32_t m_fps = 0;
-    //! \brief
-    float m_deltaTime = 0.0f;
-    //! \brief GLWindow::Mouse states
-    static GLWindow::Mouse m_mouse;
-    //! \brief Previous keyboard map
-    static std::vector<char> m_lastKeys;
-    //! \brief Current keyboard map
-    static std::vector<char> m_currentKeys;
-    //! \brief
-    size_t previous_gpu_mem = 0_z;
-    //! \brief
+    //! \brief  Used for computing m_fps.
     uint32_t nbFrames = 0u;
-    //! \brief
-    mutable std::mutex m_mutex;
+    //! \brief Frames Per Seconds.
+    uint32_t m_fps = 0;
+    //! \brief The time (in seconds) spent from the previous call of update()
+    //! method.
+    float m_deltaTime = 0.0f;
+    //! \brief GLWindow::Mouse states.
+    static GLWindow::Mouse m_mouse;
+    //! \brief Previous keyboard map.
+    static std::vector<char> m_lastKeys;
+    //! \brief Current keyboard map.
+    static std::vector<char> m_currentKeys;
+    //! \brief Memorize the GPU consumption to call onGPUMemoryChanged() only
+    //! when the memory changed.
+    size_t previous_gpu_mem = 0_z;
+    //! \brief Protect the keyboard against concurrent accesses.
+    mutable std::mutex m_mutex_keyboard;
 };
 
 //--------------------------------------------------------------------------

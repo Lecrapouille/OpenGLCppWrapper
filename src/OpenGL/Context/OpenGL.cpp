@@ -28,50 +28,18 @@ namespace GL {
 //! This macro will generate code for members.
 IMPLEMENT_EXCEPTION(Exception, BaseException, "OpenGL Exception")
 
-namespace Context {
-
-//----------------------------------------------------------------------------
-//! \brief Return if the OpenGL has been created or has not been
-//! created or has failed creating.
-//! \defgroup OpenGL OpenGL wrapper
-//!
-//! \return true if the OpenGL context has been created
-//! else return false (not yet created or failed during
-//! its creation).
-//----------------------------------------------------------------------------
-static std::atomic<bool> created{false};
-
-//----------------------------------------------------------------------------
-bool isCreated()
+void GL::Context::makeCurrentContext(GL::Context::Window* context)
 {
-    static bool singleton = false;
-
-    if (!created)
-    {
-        if (!singleton)
-        {
-            std::cerr << "OpenGL context is not created" << std::endl;
-            singleton = true;
-        }
-    }
-    else
-    {
-        singleton = false;
-    }
-    return created;
+    glfwMakeContextCurrent(context);
 }
 
-//----------------------------------------------------------------------------
-void setCreated(bool const v)
+GL::Context::Window* GL::Context::getCurrentContext()
 {
-    created.store(v);
+    return glfwGetCurrentContext();
 }
-
-} // namespace Context
 
 #  ifdef CHECK_OPENGL
-//----------------------------------------------------------------------------
-void checkError(const char* filename, const uint32_t line, const char* expression)
+void GL::Context::checkError(const char* filename, const uint32_t line, const char* expression)
 {
     GLenum id;
     const char* error;

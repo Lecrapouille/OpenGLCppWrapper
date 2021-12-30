@@ -43,10 +43,35 @@
 #include <iostream>
 #include <stdlib.h>
 #include <limits.h>
+#include <thread>
 
 #define MAX_EXAMPLES 27
 #define WIDTH 800
 #define HEIGHT 600
+
+//------------------------------------------------------------------------------
+enum class Examples
+{
+    BasicWindow,
+    BasicWindowIOEvents,
+    BasicWindowImGui,
+    ColorfulTriangle,
+    DynamicTriangle,
+    TexturedTriangle,
+    MultiTexturedSquare,
+    IndexedQuad,
+    RotatingQuad,
+    IndexedSphere,
+    MultipleObjects,
+    TerrainTexture3D,
+    SkyBoxTextureCube,
+    SkyBoxShape,
+    ComplexShader,
+    BasicLighting,
+    PostProdFrameBuffer,
+    SGBase,
+    SGMatAndShape,
+};
 
 //------------------------------------------------------------------------------
 __attribute__((__noreturn__))
@@ -56,27 +81,27 @@ static void usage(char *argv[])
               << "  " << argv[0] << " <integer>" << std::endl;
     std::cout << "Where: <integer> is the example id (0 .. " << MAX_EXAMPLES << "): " << std::endl;
     std::cout << "Window API:" << std::endl;
-    std::cout << "  0: " << BasicWindow::info() << std::endl;
-    std::cout << "  1: " << BasicWindowIOEvents::info() << std::endl;
-    std::cout << "  2: " << BasicWindowImGui::info() << std::endl;
+    std::cout << "  " << int(Examples::BasicWindow) << ": " << BasicWindow::info() << std::endl;
+    std::cout << "  " << int(Examples::BasicWindowIOEvents) << ": " << BasicWindowIOEvents::info() << std::endl;
+    std::cout << "  " << int(Examples::BasicWindowImGui) << ": " << BasicWindowImGui::info() << std::endl;
     std::cout << "OpenGL wrapper API:" << std::endl;
-    std::cout << "  3: " << ColorfulTriangle::info() << std::endl;
-    std::cout << "  4: " << DynamicTriangle::info() << std::endl;
-    std::cout << "  5: " << TexturedTriangle::info() << std::endl;
-    std::cout << "  6: " << MultiTexturedSquare::info() << std::endl;
-    std::cout << "  7: " << IndexedQuad::info() << std::endl;
-    std::cout << "  8: " << RotatingQuad::info() << std::endl;
-    std::cout << "  9: " << IndexedSphere::info() << std::endl;
-    std::cout << " 10: " << MultipleObjects::info() << std::endl;
-    std::cout << " 11: " << TerrainTexture3D::info() << std::endl;
-    std::cout << " 12: " << SkyBoxTextureCube::info() << std::endl;
-    std::cout << " 13: " << SkyBoxShape::info() << std::endl;
-    std::cout << " 14: " << ComplexShader::info() << std::endl;
-    std::cout << " 15: " << BasicLighting::info() << std::endl;
-    std::cout << " 16: " << PostProdFrameBuffer::info() << std::endl;
+    std::cout << "  " << int(Examples::ColorfulTriangle) << ": " << ColorfulTriangle::info() << std::endl;
+    std::cout << "  " << int(Examples::DynamicTriangle) << ": " << DynamicTriangle::info() << std::endl;
+    std::cout << "  " << int(Examples::TexturedTriangle) << ": " << TexturedTriangle::info() << std::endl;
+    std::cout << "  " << int(Examples::MultiTexturedSquare) << ": " << MultiTexturedSquare::info() << std::endl;
+    std::cout << "  " << int(Examples::IndexedQuad) << ": " << IndexedQuad::info() << std::endl;
+    std::cout << "  " << int(Examples::RotatingQuad) << ": " << RotatingQuad::info() << std::endl;
+    std::cout << "  " << int(Examples::IndexedSphere) << ": " << IndexedSphere::info() << std::endl;
+    std::cout << "  " << int(Examples::MultipleObjects) << ": " << MultipleObjects::info() << std::endl;
+    std::cout << "  " << int(Examples::TerrainTexture3D) << ": " << TerrainTexture3D::info() << std::endl;
+    std::cout << "  " << int(Examples::SkyBoxTextureCube) << ": " << SkyBoxTextureCube::info() << std::endl;
+    std::cout << "  " << int(Examples::SkyBoxShape) << ": " << SkyBoxShape::info() << std::endl;
+    std::cout << "  " << int(Examples::ComplexShader) << ": " << ComplexShader::info() << std::endl;
+    std::cout << "  " << int(Examples::BasicLighting) << ": " << BasicLighting::info() << std::endl;
+    std::cout << "  " << int(Examples::PostProdFrameBuffer) << ": " << PostProdFrameBuffer::info() << std::endl;
     std::cout << "SceneGraph API:" << std::endl;
-    std::cout << " 17: " << SGBase::info() << std::endl;
-    std::cout << " 18: " << SGMatAndShape::info() << std::endl;
+    std::cout << "  " << int(Examples::SGBase) << ": " << SGBase::info() << std::endl;
+    std::cout << "  " << int(Examples::SGMatAndShape) << ": " << SGMatAndShape::info() << std::endl;
     exit(EXIT_FAILURE);
 }
 
@@ -100,67 +125,67 @@ int main(int argc, char *argv[])
         usage(argv);
     }
 
-    GLApplication app;
+    std::unique_ptr<GLWindow> app = nullptr;
     try
     {
-        switch (id)
+        switch (Examples(id))
         {
-        case 0:
-            app.create<BasicWindow>(WIDTH, HEIGHT, "BasicWindow");
+        case Examples::BasicWindow:
+            app = std::make_unique<BasicWindow>(WIDTH, HEIGHT, "BasicWindow");
             break;
-        case 1:
-            app.create<BasicWindowIOEvents>(WIDTH, HEIGHT, "IO events");
+        case Examples::BasicWindowIOEvents:
+            app = std::make_unique<BasicWindowIOEvents>(WIDTH, HEIGHT, "IO events");
             break;
-        case 2:
-            app.create<BasicWindowImGui>(WIDTH, HEIGHT, "DearImGui");
+        case Examples::BasicWindowImGui:
+            app = std::make_unique<BasicWindowImGui>(WIDTH, HEIGHT, "DearImGui");
             break;
-        case 3:
-            app.create<ColorfulTriangle>(WIDTH, HEIGHT, "Colorful Triangle");
+        case Examples::ColorfulTriangle:
+            app = std::make_unique<ColorfulTriangle>(WIDTH, HEIGHT, "Colorful Triangle");
             break;
-        case 4:
-            app.create<DynamicTriangle>(WIDTH, HEIGHT, "Dynamic Triangle");
+        case Examples::DynamicTriangle:
+            app = std::make_unique<DynamicTriangle>(WIDTH, HEIGHT, "Dynamic Triangle");
             break;
-        case 5:
-            app.create<TexturedTriangle>(WIDTH, HEIGHT, "Textured Triangle");
+        case Examples::TexturedTriangle:
+            app = std::make_unique<TexturedTriangle>(WIDTH, HEIGHT, "Textured Triangle");
             break;
-        case 6:
-            app.create<MultiTexturedSquare>(WIDTH, HEIGHT, "Multi Textured Triangle");
+        case Examples::MultiTexturedSquare:
+            app = std::make_unique<MultiTexturedSquare>(WIDTH, HEIGHT, "Multi Textured Triangle");
             break;
-        case 7:
-            app.create<IndexedQuad>(WIDTH, HEIGHT, "EBO Quad");
+        case Examples::IndexedQuad:
+            app = std::make_unique<IndexedQuad>(WIDTH, HEIGHT, "EBO Quad");
             break;
-        case 8:
-            app.create<RotatingQuad>(WIDTH, HEIGHT, "Rotating Quad");
+        case Examples::RotatingQuad:
+            app = std::make_unique<RotatingQuad>(WIDTH, HEIGHT, "Rotating Quad");
             break;
-        case 9:
-            app.create<IndexedSphere>(WIDTH, HEIGHT, "EBO Sphere");
+        case Examples::IndexedSphere:
+            app = std::make_unique<IndexedSphere>(WIDTH, HEIGHT, "EBO Sphere");
             break;
-        case 10:
-            app.create<MultipleObjects>(WIDTH, HEIGHT, "Multiple Objects");
+        case Examples::MultipleObjects:
+            app = std::make_unique<MultipleObjects>(WIDTH, HEIGHT, "Multiple Objects");
             break;
-        case 11:
-            app.create<TerrainTexture3D>(WIDTH, HEIGHT, "Terrain 3D Texture");
+        case Examples::TerrainTexture3D:
+            app = std::make_unique<TerrainTexture3D>(WIDTH, HEIGHT, "Terrain 3D Texture");
             break;
-        case 12:
-            app.create<SkyBoxTextureCube>(WIDTH, HEIGHT, "SkyBox Cube Texture");
+        case Examples::SkyBoxTextureCube:
+            app = std::make_unique<SkyBoxTextureCube>(WIDTH, HEIGHT, "SkyBox Cube Texture");
             break;
-        case 13:
-            app.create<SkyBoxShape>(WIDTH, HEIGHT, "Shape inside a skybox");
+        case Examples::SkyBoxShape:
+            app = std::make_unique<SkyBoxShape>(WIDTH, HEIGHT, "Shape inside a skybox");
             break;
-        case 14:
-            app.create<ComplexShader>(WIDTH, HEIGHT, "Complex Shader");
+        case Examples::ComplexShader:
+            app = std::make_unique<ComplexShader>(WIDTH, HEIGHT, "Complex Shader");
             break;
-        case 15:
-            app.create<BasicLighting>(WIDTH, HEIGHT, "Basic Lighting");
+        case Examples::BasicLighting:
+            app = std::make_unique<BasicLighting>(WIDTH, HEIGHT, "Basic Lighting");
             break;
-        case 16:
-            app.create<PostProdFrameBuffer>(WIDTH, HEIGHT, "PostProd FrameBuffer");
+        case Examples::PostProdFrameBuffer:
+            app = std::make_unique<PostProdFrameBuffer>(WIDTH, HEIGHT, "PostProd FrameBuffer");
             break;
-        case 17:
-            app.create<SGBase>(WIDTH, HEIGHT, "Base of Scene Graph");
+        case Examples::SGBase:
+            app = std::make_unique<SGBase>(WIDTH, HEIGHT, "Base of Scene Graph");
             break;
-        case 18:
-            app.create<SGMatAndShape>(WIDTH, HEIGHT, "Scene Graph of Shapes and Meterials");
+        case Examples::SGMatAndShape:
+            app = std::make_unique<SGMatAndShape>(WIDTH, HEIGHT, "Scene Graph of Shapes and Meterials");
             break;
         default:
             std::cerr << "Incorrect example id !" << std::endl;
@@ -168,11 +193,14 @@ int main(int argc, char *argv[])
             usage(argv);
             return EXIT_FAILURE;
         }
-        return app.start() ? EXIT_SUCCESS : EXIT_FAILURE;
+
+        return app->run() ? EXIT_SUCCESS : EXIT_FAILURE;
     }
     catch (const GL::Exception& e)
     {
         std::cerr << "Caught exception from constructors: " << e.message() << std::endl;
         return EXIT_FAILURE;
     }
+
+    return 0;
 }

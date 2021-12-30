@@ -51,7 +51,7 @@ sudo apt-get update && apt-get install crpcut crpcut-dev
 To download the project, its external libraries and compile the API with its examples:
 ```sh
 git clone --recurse-submodules https://github.com/Lecrapouille/OpenGLCppWrapper.git --depth=1
-cd cd OpenGLCppWrapper
+cd OpenGLCppWrapper
 make download-external-libs
 make compile-external-libs
 make
@@ -81,9 +81,12 @@ If, after that, you want to modify code source, just do `make`. You can type
 
 To compile API examples:
 ```sh
-cd examples/00_Core
+cd examples
 make
 ```
+
+**note:** you can add `-j4` or `-j8` for faster the compiler where 4 or 8
+depends on the number of core your CPU have.
 
 A `build/` folder shall have been created containing the compiled and runnable
 files. Run examples:
@@ -91,8 +94,14 @@ files. Run examples:
 ./build/OpenGLExamples
 ```
 
-Will display the list of possible examples. Type `./build/OpenGLExamples 1` for
+Will display the list of possible examples. Type `./build/OpenGLExamples 0` for
 example for running the 1st example.
+
+**note:** You may need indicate where are shared libraries. For example on Mac OS X (for Linux define instead ):
+
+```sh
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/your/parth/OpenGLCppWrapper/external/bullet3/usr/local/lib/
+```
 
 ## Installation
 
@@ -135,8 +144,8 @@ In debug mode, you can use the following macros:
 * `-DENABLE_DEBUG` for activating console logs for debugging.
 
 Compile using the pkg-config tool to add compilation flags to GCC or clang:
-* `CFLAGS=\`pkg-config openglcppwrapper --cflags\``
-* `LDFLAGS=\`pkg-config openglcppwrapper --libs\``
+* `CFLAGS=`pkg-config openglcppwrapper --cflags``
+* `LDFLAGS=`pkg-config openglcppwrapper --libs``
 * Note: in pkg-config instead of `openglcppwrapper` which refers to the last installed version,
 you can specify your desired version (for example: `openglcppwrapper-0.6`).
 

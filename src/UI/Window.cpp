@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "UI/Window.hpp"
-#include "UI/Application.hpp"
 #include "OpenGL/Buffers/GPUMemory.hpp"
 #include <stdexcept>
 #include <iostream>
@@ -30,15 +29,88 @@ GLWindow::Mouse GLWindow::m_mouse;
 std::vector<char> GLWindow::m_lastKeys;
 std::vector<char> GLWindow::m_currentKeys;
 
+//--------------------------------------------------------------------------
+//! \brief static method initializing Glew context
+//--------------------------------------------------------------------------
+static void initGlew()
+{
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK)
+        throw GL::Exception("Failed to initialize GLFW");
+
+    // Print out some info about the graphics drivers
+    std::cout << std::endl;
+    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+    std::cout << std::endl;
+
+#  pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wold-style-cast"
+
+    // Make sure OpenGL version 3.3 API is available
+    if (!GLEW_VERSION_3_3)
+        throw GL::Exception("OpenGL 3.3 API is not available!");
+
+#   pragma GCC diagnostic pop
+}
+
+
+class Glfw3 : private NonCopyable
+{
+public:
+
+    static Glfw3& instance()
+    {
+        static Glfw3 instance;
+        return instance;
+    }
+
+protected:
+
+    Glfw3()
+    {
+        std::cout << "Glfw3()" << std::endl;
+
+        // Callback triggered when GLFW failed.
+        glfwSetErrorCallback([](int /*errorCode*/, const char* msg)
+        {
+            throw GL::Exception(msg);
+        });
+
+        if (!glfwInit())
+        {
+            throw GL::Exception("Failed to initialize GLFW");
+        }
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Mac OS X
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
+    }
+
+    ~Glfw3()
+    {
+        std::cout << "~Glfw3()" << std::endl;
+        glfwTerminate();
+    }
+};
+
 //------------------------------------------------------------------------------
 GLWindow::GLWindow(uint32_t const width, uint32_t const height, const char *title)
     : m_title(title)
 {
+    Glfw3::instance();
+
     m_lastKeys.resize(GLFW_KEY_LAST + 1);
     m_currentKeys.resize(GLFW_KEY_LAST + 1);
 
     staticWidth() = width;
     staticHeight() = height;
+
+    GL::Context::Window* current = GL::Context::getCurrentContext();
     m_context = glfwCreateWindow(static_cast<int>(width),
                                  static_cast<int>(height),
                                  m_title,
@@ -46,13 +118,20 @@ GLWindow::GLWindow(uint32_t const width, uint32_t const height, const char *titl
                                  nullptr);
     if (m_context == nullptr)
         throw GL::Exception("Failed to open GLFW window");
+
+    GL::Context::makeCurrentContext(m_context);
+    glfwSwapInterval(1); // Enable vsync
+    initGlew();
+    GL::Context::makeCurrentContext(current);
 }
 
 //------------------------------------------------------------------------------
 GLWindow::~GLWindow()
 {
-    GLApplication::application().setCurrentWindow(*this);
+    GL::Context::Window* current = GL::Context::getCurrentContext();
+    GL::Context::makeCurrentContext(m_context);
     glfwDestroyWindow(m_context);
+    GL::Context::makeCurrentContext(current);
 }
 
 //------------------------------------------------------------------------------
@@ -72,8 +151,8 @@ void GLWindow::showCursor()
 //------------------------------------------------------------------------------
 void GLWindow::resize(uint32_t const width, uint32_t const height)
 {
-    staticWidth() = std::max(16u, width);
-    staticHeight() = std::max(16u, height);
+    staticWidth() = std::max(1u, width);
+    staticHeight() = std::max(1u, height);
 
     // Callback to be implemented by the derived class
     onWindowResized();
@@ -148,8 +227,8 @@ void GLWindow::reactTo(GLWindow::Event const events)
             GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
 
             // Save context.
-            GLWindow& previous_context = GLApplication::application().getCurrentWindow();
-            GLApplication::application().setCurrentWindow(*window);
+            GL::Context::Window* current = GL::Context::getCurrentContext();
+            GL::Context::makeCurrentContext(window->m_context);
 
             // Update mouse states
             window->m_mouse.position.x = xpos;
@@ -169,7 +248,7 @@ void GLWindow::reactTo(GLWindow::Event const events)
             window->m_mouse.displacement.y = 0.0;
 
             // Restore context.
-            GLApplication::application().setCurrentWindow(previous_context);
+            GL::Context::makeCurrentContext(current);
         });
     }
 
@@ -183,8 +262,8 @@ void GLWindow::reactTo(GLWindow::Event const events)
             GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
 
             // Save context.
-            GLWindow& previous_context = GLApplication::application().getCurrentWindow();
-            GLApplication::application().setCurrentWindow(*window);
+            GL::Context::Window* current = GL::Context::getCurrentContext();
+            GL::Context::makeCurrentContext(window->m_context);
 
             // Update mouse states
             window->m_mouse.scroll.x = xoffset;
@@ -198,7 +277,7 @@ void GLWindow::reactTo(GLWindow::Event const events)
             window->m_mouse.scroll.y = 0.0;
 
             // Restore context.
-            GLApplication::application().setCurrentWindow(previous_context);
+            GL::Context::makeCurrentContext(current);
         });
     }
 
@@ -212,8 +291,8 @@ void GLWindow::reactTo(GLWindow::Event const events)
             GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
 
             // Save context.
-            GLWindow& previous_context = GLApplication::application().getCurrentWindow();
-            GLApplication::application().setCurrentWindow(*window);
+            GL::Context::Window* current = GL::Context::getCurrentContext();
+            GL::Context::makeCurrentContext(window->m_context);
 
             // Update mouse states
             window->m_mouse.button = static_cast<GLWindow::Mouse::Button>(button);
@@ -227,7 +306,7 @@ void GLWindow::reactTo(GLWindow::Event const events)
             window->m_mouse.pressed = false;
 
             // Restore context.
-            GLApplication::application().setCurrentWindow(previous_context);
+            GL::Context::makeCurrentContext(current);
         });
     }
 
@@ -241,18 +320,18 @@ void GLWindow::reactTo(GLWindow::Event const events)
             GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
 
             // Save context.
-            GLWindow& previous_context = GLApplication::application().getCurrentWindow();
-            GLApplication::application().setCurrentWindow(*window);
+            GL::Context::Window* current = GL::Context::getCurrentContext();
+            GL::Context::makeCurrentContext(window->m_context);
 
             // Update keyboard states
             {
-                const std::lock_guard<std::mutex> lock(window->m_mutex);
+                const std::lock_guard<std::mutex> lock(window->m_mutex_keyboard);
                 window->m_currentKeys[static_cast<size_t>(key)] =
                         (action == GLFW_PRESS) ? GLWindow::KEY_PRESS : GLWindow::KEY_RELEASE;
             }
 
             // Restore context.
-            GLApplication::application().setCurrentWindow(previous_context);
+            GL::Context::makeCurrentContext(current);
         });
     }
 }
@@ -261,7 +340,7 @@ void GLWindow::reactTo(GLWindow::Event const events)
 bool GLWindow::setup()
 {
     // Set this window as active context
-    GLApplication::application().setCurrentWindow(*this);
+    GL::Context::makeCurrentContext(m_context);
 
     // Save the context address: it will be passed as parameter in glfw callbacks
     glfwSetWindowUserPointer(m_context, this);
@@ -275,23 +354,23 @@ bool GLWindow::setup()
         GLWindow* window = static_cast<GLWindow*>(glfwGetWindowUserPointer(obj));
 
         // Save context.
-        GLWindow& previous_context = GLApplication::application().getCurrentWindow();
-        GLApplication::application().setCurrentWindow(*window);
+        GL::Context::Window* current = GL::Context::getCurrentContext();
+        GL::Context::makeCurrentContext(window->m_context);
 
         // Call the GLWindow callback that has to be implemented by the derived
         // class.
-        window->staticWidth() = std::max(16u, static_cast<uint32_t>(width));
-        window->staticHeight() = std::max(16u, static_cast<uint32_t>(height));
+        window->staticWidth() = std::max(1u, static_cast<uint32_t>(width));
+        window->staticHeight() = std::max(1u, static_cast<uint32_t>(height));
         window->onWindowResized();
 
         // Restore context.
-        GLApplication::application().setCurrentWindow(previous_context);
+        GL::Context::makeCurrentContext(current);
     });
 
     // Ensure we can capture keyboard being pressed below.
     glfwSetInputMode(m_context, GLFW_STICKY_KEYS, GL_TRUE);
     {
-        const std::lock_guard<std::mutex> lock(m_mutex);
+        const std::lock_guard<std::mutex> lock(m_mutex_keyboard);
         for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
         {
             m_lastKeys[i] = m_currentKeys[i] = GLWindow::KEY_RELEASE;
@@ -336,7 +415,7 @@ bool GLWindow::setup()
 bool GLWindow::update()
 {
     // Set this window as active context
-    GLApplication::application().setCurrentWindow(*this);
+    GL::Context::makeCurrentContext(m_context);
 
     computeFPS();
     monitorGPUMemory();
@@ -362,7 +441,7 @@ bool GLWindow::update()
     // Update window events (input etc)
     glfwPollEvents();
     {
-        const std::lock_guard<std::mutex> lock(m_mutex);
+        const std::lock_guard<std::mutex> lock(m_mutex_keyboard);
         onKeyboardEvent();
         for (size_t i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i)
             m_lastKeys[i] = m_currentKeys[i];
@@ -379,4 +458,24 @@ bool GLWindow::shouldHalt()
     // no longer can halt the window.
     return (GLFW_PRESS == glfwGetKey(m_context, GLFW_KEY_ESCAPE)) ||
             (glfwWindowShouldClose(m_context));
+}
+
+
+//------------------------------------------------------------------------------
+bool GLWindow::run()
+{
+    if (!setup())
+    {
+        return false;
+    }
+
+    while (!shouldHalt())
+    {
+        if (!update())
+        {
+            return false;
+        }
+    }
+
+    return true;
 }

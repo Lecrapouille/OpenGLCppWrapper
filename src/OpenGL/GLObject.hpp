@@ -28,8 +28,7 @@
 #  define OPENGLCPPWRAPPER_GLOBJECT_HPP
 
 #  include "OpenGL/Context/OpenGL.hpp"
-
-#include <iostream> // FIXME
+#  include <cassert>
 
 // ***************************************************************************
 //! \class GLObject GLObject.hpp
@@ -118,13 +117,22 @@ public:
     {
         if (m_need_create)
         {
+#  ifdef CHECK_OPENGL
             // OpenGL context shall be present
-            if (!GL::Context::isCreated())
+            m_context = GL::Context::getCurrentContext();
+            if (m_context == nullptr)
                 return ;
+#  endif
 
             // Usually call glCreateXXX()
             m_need_create = onCreate();
         }
+
+#  ifdef CHECK_OPENGL
+        assert(m_context == GL::Context::getCurrentContext() &&
+               "You are trying to manipulate an OpenGL object "
+               "that has been created in a different context");
+#  endif
 
         // Usually call glBindXXX()
         onActivate();
@@ -151,6 +159,12 @@ public:
     //--------------------------------------------------------------------------
     inline void end()
     {
+#  ifdef CHECK_OPENGL
+        assert(m_context == GL::Context::getCurrentContext() &&
+               "You are trying to manipulate an OpenGL object "
+               "that has been created in a different context");
+#  endif
+
         if (likely(m_handle > initialHandleValue()))
         {
             onDeactivate();
@@ -165,13 +179,18 @@ public:
     //--------------------------------------------------------------------------
     void release()
     {
-        if (likely(GL::Context::isCreated()))
+#  ifdef CHECK_OPENGL
+        assert(((m_context == GL::Context::getCurrentContext()) ||
+                (m_context == nullptr)) &&
+               "You are trying to manipulate an OpenGL object "
+               "that has been created in a different context");
+        m_context = nullptr;
+#  endif
+
+        if (likely(m_handle > initialHandleValue()))
         {
-            if (likely(m_handle > initialHandleValue()))
-            {
-                onDeactivate();
-                onRelease();
-            }
+            onDeactivate();
+            onRelease();
         }
 
         m_handle = initialHandleValue();
@@ -251,6 +270,13 @@ private:
     }
 
 protected:
+
+#  ifdef CHECK_OPENGL
+    //! \brief Memorize the OpenGL context (meaning in which windows the object
+    //! has been created). To check if the OpenGL is always access by the same
+    //! context.
+    GL::Context::Window* m_context = nullptr;
+#  endif
 
     //! \brief Object name used as the same time as a key for lookup tables and
     //! for debuging (logs, ...)
