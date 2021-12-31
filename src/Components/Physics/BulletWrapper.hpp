@@ -22,6 +22,8 @@
 #  define BULLETWRAPPER_HPP
 
 #    pragma GCC diagnostic push
+#      pragma GCC diagnostic ignored "-Wpragmas"
+#      pragma GCC diagnostic ignored "-Wreorder"
 #      pragma GCC diagnostic ignored "-Wreorder-ctor"
 #      pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #      pragma GCC diagnostic ignored "-Wignored-qualifiers"

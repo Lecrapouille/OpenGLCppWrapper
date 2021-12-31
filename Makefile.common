@@ -58,6 +58,9 @@ THIRDPART_OBJS += imgui_impl_glfw.o imgui_impl_opengl3.o
 INCLUDES += -I$(THIRDPART)/imgui
 VPATH += $(THIRDPART)/imgui $(THIRDPART)/imgui/backends
 
+# FIXME: temporary
+DEFINES += -Wno-old-style-cast -Wno-conversion -Wno-float-equal -Wno-sign-conversion -Wno-cast-qual
+
 ###################################################
 # Bullet3 (3d physics)
 
