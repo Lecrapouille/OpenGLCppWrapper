@@ -18,6 +18,4 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "Components/Components.hpp"
-
-const std::size_t Component::Type = "Component"_hash;
+#include "Components.hpp"

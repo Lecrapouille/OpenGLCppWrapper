@@ -42,11 +42,11 @@ public:
           m_name(name)
     {}
 
-    GameObject(std::string const& name, std::string const& tag)
+    GameObject(std::string const& name, std::string const& tag_)
         : m_id(UniqueID<GameObject>::getID()),
           m_name(name)
     {
-        this->tag = tag;
+        tag = tag_;
     }
 
     //--------------------------------------------------------------------------

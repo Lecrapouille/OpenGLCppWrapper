@@ -92,6 +92,7 @@ public:
         m_usage = static_cast<GLenum>(usage);
     }
 
+    // FIXME: can be removed ?
     explicit GLBuffer()
         : IGLBuffer("", GL_ARRAY_BUFFER)
     {

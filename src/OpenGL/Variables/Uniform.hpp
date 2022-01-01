@@ -27,18 +27,34 @@
 #ifndef OPENGLCPPWRAPPER_GLUNIFORM_HPP
 #  define OPENGLCPPWRAPPER_GLUNIFORM_HPP
 
-// *****************************************************************************
-//! \file Uniform.hpp file implements:
-//!   - GLUniform:
-// *****************************************************************************
-
 #  include "OpenGL/Variables/Location.hpp"
 #  include "Math/Matrix.hpp"
 
 // *****************************************************************************
-//! \brief GLUniform represents a program uniform variable.
-//! \tparam T float or int or VectorXf or VectorXi or MatrixXXf with X = [2 .. 4]
-//! or GLSamplerXD with X = [1 .. 3] or GLSamplerCube.
+
+//! \brief Represent an uniform variable used in a GLSL shader program (refered
+//! by \c uniform keyword). Example:
+
+//! \code
+//!   uniform mat4 projection;
+//!   uniform vec4 color;
+//! \endcode
+
+//!
+
+//! Uniforms are used as links between shader variables and your C++ variable
+//! and therefore are entry points to the shader pipeline by allowing you to
+//! upload CPU data to the GPU. Uniforms are used for modifying the value
+//! dynamically but shall not be used directly by the user but internaly private
+//! instances by GLProgram.  and therefore shall be acceeded through the
+//! GLProgram API (GLProgram::uniform<T>(name))
+
+
+//!
+//! \tparam T float or int for scalars or VectorXf or VectorXi for vector or
+//! MatrixXXf with X = [2 .. 4] for matrices or GLSamplerXD with X = [1 .. 3]
+//! (and GLSamplerCube) for textures.
+
 // *****************************************************************************
 template<class T>
 class GLUniform: public GLLocation
@@ -46,7 +62,14 @@ class GLUniform: public GLLocation
 public:
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief See GLLocation constructor.
+    //! \param[in] name Give a name to the instance. The name shall be in accordance to
+    //! the uniform variable in the GLSL shader. GLProgram uses these names as internal hash key.
+    //! \param[in] size set the dimension of variable (1 for scalar, 2 .. 4 depending on the
+    //! dimension of the vector).
+    //! \param[in] gltype set the OpenGL type of data (GL_FLOAT, GL_INT ...)
+    //! \param[in] prog the handle of the GLProgram (which is the owner of this
+    //! instance).
     //--------------------------------------------------------------------------
     GLUniform(const char *name, const GLint dim, const GLint gltype, const GLuint prog)
         : GLLocation(name, dim, static_cast<GLenum>(gltype), prog)
@@ -61,7 +84,8 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Change the CPU data. It will be automatically transfered to the GPU.
+    //! \brief Setter in the C# propety style. Modify the CPU data. The new value
+    //! will be transfered to GPU memory on the next GLObject::begin() call.
     //--------------------------------------------------------------------------
     template<class U>
     GLUniform<T>& operator=(const U& val)
@@ -72,7 +96,8 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Getter. Return the reference of the CPU data in read only mode.
+    //! \brief Getter in the C# propety style. Return the reference of the CPU
+    //! data in read only mode.
     //--------------------------------------------------------------------------
     inline operator const T&() const
     {
@@ -94,6 +119,7 @@ private:
 
     //--------------------------------------------------------------------------
     //! \brief Create a new OpenGL Uniform.
+    //! \return always false (success).
     //--------------------------------------------------------------------------
     virtual bool onCreate() override
     {
@@ -111,6 +137,7 @@ private:
     //--------------------------------------------------------------------------
     //! \brief Setup the behavior of the instance. This is a dummy
     //! method. No action is made.
+    //! \return always false (success).
     //--------------------------------------------------------------------------
     virtual bool onSetup() override
     {
@@ -119,6 +146,7 @@ private:
 
     //--------------------------------------------------------------------------
     //! \brief Transfer the CPU data to the GPU data.
+    //! \return always false (success).
     //--------------------------------------------------------------------------
     virtual bool onUpdate() override
     {
@@ -138,9 +166,7 @@ private:
     //! action is made.
     //--------------------------------------------------------------------------
     virtual void onRelease() override
-    {
-        //GLLocation::onRelease();
-    }
+    {}
 
     //--------------------------------------------------------------------------
     //! \brief Transfer the CPU data to the GPU data.

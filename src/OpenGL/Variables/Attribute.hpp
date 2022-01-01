@@ -31,15 +31,17 @@
 #  include <cassert>
 
 // *****************************************************************************
-//! \class GLAttribute Attribute.hpp
-//! \ingroup OpenGL
+//! \brief Represent an attribute variable used in a GLSL shader program (refered
+//! by \c in and \c out keywords) and used for creating the associated VBO when a
+//! VAO is bound to a GLProgram. Example:
+//! \code
+//!   in vec3 position;
+//! \endcode
 //!
-//! \brief Represent an attribute variable used in a GLSL shader program.
-//!
-//! This class only stores information about the attribute variable (dimension,
-//! type). These information are used by GLProgam when a VAO is bind to it for
-//! creating GLVBO inside the VAO. GLAttribute should be used directly by the
-//! user, it is an internal class for GLProgram.
+//! This class only stores informations about the attribute variable (dimension,
+//! type) but does not hold any value. These information are then used by GLProgam
+//! when a VAO is bind to it for creating VBO inside the VAO. GLAttribute should
+//! not be used directly by the user but internaly private instances by GLProgram.
 // *****************************************************************************
 class GLAttribute: public GLLocation
 {
@@ -47,11 +49,11 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief See GLLocation constructor.
-    //! \param[in] name Give a name to the instance. GLProgram uses these names
-    //! in their internal hash table.
-    //! \param[in] size set the dimension of variable (1 for scalar else the
-    //! dimension for vector)
-    //! \param[in] gltype set the OpenGL type of data (GL_FLOAT ...)
+    //! \param[in] name Give a name to the instance. The name shall be in accordance to
+    //! the attibute variable in the GLSL shader. The GLProgram uses these names as internal hash key.
+    //! \param[in] size set the dimension of variable (1 for scalar, 2 .. 4 depending on the
+    //! dimension of the vector).
+    //! \param[in] gltype set the OpenGL type of data (GL_FLOAT, GL_INT, GL_FLOAT_VEC4 ...)
     //! \param[in] prog the handle of the GLProgram (which is the owner of this
     //! instance).
     //--------------------------------------------------------------------------
@@ -72,7 +74,8 @@ public:
 private:
 
     //--------------------------------------------------------------------------
-    //! \brief Create a new OpenGL Attribute.
+    //! \brief Create a new OpenGL attribute location.
+    //! \return always false (success).
     //--------------------------------------------------------------------------
     virtual bool onCreate() override
     {
@@ -82,7 +85,7 @@ private:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Bind the OpenGL Attribute.
+    //! \brief Bind the OpenGL attribute location.
     //--------------------------------------------------------------------------
     virtual void onActivate() override
     {
@@ -98,6 +101,7 @@ private:
     //--------------------------------------------------------------------------
     //! \brief Setup the behavior of the instance. This is a dummy
     //! method. No action is made.
+    //! \return always false (success).
     //--------------------------------------------------------------------------
     virtual bool onSetup() override
     {
@@ -106,6 +110,7 @@ private:
 
     //--------------------------------------------------------------------------
     //! \brief This is a dummy method. No action is made.
+    //! \return always false (success).
     //--------------------------------------------------------------------------
     virtual bool onUpdate() override
     {
@@ -113,7 +118,7 @@ private:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Unbind the OpenGL Attribute.
+    //! \brief Unbind the OpenGL attribute location.
     //--------------------------------------------------------------------------
     virtual void onDeactivate() override
     {
@@ -121,12 +126,11 @@ private:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Destroy the OpenGL Attribute. This is a dummy method. No
-    //! action is made.
+    //! \brief Reset internal states. No memory release is made here.
     //--------------------------------------------------------------------------
     virtual void onRelease() override
     {
-        //GLLocation::onRelease();
+        // TODO: UT Check GLLocation::onRelease(); is called
         m_index = 0;
         m_stride = 0;
         m_offset = 0;

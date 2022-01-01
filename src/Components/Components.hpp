@@ -6,8 +6,8 @@
 
 #  include "Common/NonCppStd.hpp"
 #  include <algorithm> // find_if
+#  include <stdexcept> // std::out_of_range
 #  include <vector>
-#  include <stdexcept>
 
 // *****************************************************************************
 //! \brief Base class for Component
@@ -29,7 +29,7 @@ public:
 
 public:
 
-    static const std::size_t Type;
+    static constexpr std::size_t Type = "Component"_hash;
 };
 
 // *****************************************************************************

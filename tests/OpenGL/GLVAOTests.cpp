@@ -171,6 +171,8 @@ TEST(TestGLVAO, TestNominalBind)
         ASSERT_EQ(false, pos.m_need_update);
         ASSERT_EQ(GL_DYNAMIC_DRAW, pos.m_usage);
         ASSERT_EQ(0_z, pos.m_container.size());
+        ASSERT_EQ(0_z, pos.size());
+        ASSERT_EQ(false, pos.isPending());
         ASSERT_EQ(static_cast<size_t>(-1), pos.m_pending_start); // FIXME Pending::npos
         ASSERT_EQ(static_cast<size_t>(-1), pos.m_pending_end);
 
@@ -184,6 +186,8 @@ TEST(TestGLVAO, TestNominalBind)
         ASSERT_EQ(false, color.m_need_update);
         ASSERT_EQ(GL_DYNAMIC_DRAW, color.m_usage);
         ASSERT_EQ(0_z, color.m_container.size());
+        ASSERT_EQ(0_z, color.size());
+        ASSERT_EQ(false, color.isPending());
         ASSERT_EQ(static_cast<size_t>(-1), color.m_pending_start); // FIXME Pending::ncolor
         ASSERT_EQ(static_cast<size_t>(-1), color.m_pending_end);
 
@@ -191,21 +195,27 @@ TEST(TestGLVAO, TestNominalBind)
         pos = { Vector2f(1.0f, 2.0f), Vector2f(2.0f, 3.0f), Vector2f(4.0f, 5.0f) };
         ASSERT_EQ(true, pos.m_need_setup);
         ASSERT_EQ(true, pos.m_need_create);
-        ASSERT_EQ(true, pos.m_need_update);
+        std::cout << "QQQQBuffer::needUpdate() " << std::endl;
+        ASSERT_EQ(true, pos.needUpdate());
+        ASSERT_EQ(true, pos.m_need_update); // FIXME: virer needUpdate()
         ASSERT_EQ(GL_DYNAMIC_DRAW, pos.m_usage);
-        ASSERT_EQ(5_z, pos.m_container.size());
+        ASSERT_EQ(3_z, pos.m_container.size());
+        ASSERT_EQ(3_z, pos.size());
+        ASSERT_EQ(true, pos.isPending());
         ASSERT_EQ(0_z, pos.m_pending_start); // FIXME Pending::npos
-        ASSERT_EQ(0_z, pos.m_pending_end);
+        ASSERT_EQ(3_z, pos.m_pending_end);
 
         // Set values to VBOs
         color = { Vector3f(1.0f, 2.0f, 3.0f) };
         ASSERT_EQ(true, color.m_need_setup);
         ASSERT_EQ(true, color.m_need_create);
-        ASSERT_EQ(true, color.m_need_update);
+        //ASSERT_EQ(true, color.m_need_update);
         ASSERT_EQ(GL_DYNAMIC_DRAW, color.m_usage);
         ASSERT_EQ(1_z, color.m_container.size());
+        ASSERT_EQ(1_z, color.size());
+        ASSERT_EQ(true, pos.isPending());
         ASSERT_EQ(0_z, color.m_pending_start); // FIXME Pending::ncolor
-        ASSERT_EQ(0_z, color.m_pending_end);
+        ASSERT_EQ(1_z, color.m_pending_end);
     });
 }
 

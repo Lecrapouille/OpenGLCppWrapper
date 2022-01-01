@@ -27,21 +27,36 @@
 #ifndef OPENGLCPPWRAPPER_GLLOCATION_HPP
 #  define OPENGLCPPWRAPPER_GLLOCATION_HPP
 
-// *****************************************************************************
-//! \file Location.hpp manages shader variables (Uniforms, Samplers and
-//! Attributes).
-// *****************************************************************************
-
 #  include "OpenGL/GLObject.hpp"
 
 // *****************************************************************************
-//! \brief This abstract class shall stay private and shall not be used directly
-//! by the developper. Indeed GLLocation's derived class are created by
-//! GLProgram automatically when code of shaders are parsed and then only
-//! managed internally by GLProgram. GLLocation serves as link between a shader
-//! variable and your C++ variable and therefore Locations are entry points in
-//! the shader that allow to upload CPU data to the GPU. There are mainly three
-//! types: uniforms, attributes and samplers that are derived from this class.
+//! \brief Base class representing either an attribute variable or an uniform
+//! variable used in a GLSL shader program and refered by one of the following
+//! keywords: \c in or \c out or \c uniform. For example:
+//! \code
+//!   in vec3 position;
+//!   uniform sampler2D texID;
+//! \endcode
+//!
+
+//! A GLLocation serve as a link between a shader variable and your C++ variable
+//! and therefore it is an entry point in the shader to allow uploading CPU
+//! data to the GPU. There are mainly three types: uniforms, attributes and
+//! samplers and it exist derived classes from GLLocation to wrap them.
+
+//! This base class only stores informations about the attribute variable
+//! (dimension, type) but does not hold any value. These informations are
+//! managed privately by GLProgam and therefore shall not be used directly by
+//! the user. Indeed
+
+
+//! Locations, depending on their type and used for creating the associated VBO
+//! for attributes, textures for samplers when a VAO is bound to a GLProgram or
+//! modifiying shader states for uniforms when a VAO is bound to a GLProgram.
+
+//this class is only managed by \c GLProgram and they are
+//! created automatically when shader code is parsed.
+
 // *****************************************************************************
 class GLLocation: public GLObject<GLint>
 {
@@ -54,7 +69,7 @@ public:
     //! \brief Constructor. This constructor makes no other actions.
     //!
     //! \param[in] name Give a name to the instance. GLProgram uses these names
-    //! in their internal hash table.
+    //! in their internal hash table and shall reference to a real variable name insde the GLSL shader code.
     //! \param[in] dim set the dimension of variable (1 for scalar else the
     //! dimension of vector: 2, 3, 4 or dimension of matrices ...)
     //! \param[in] type set the OpenGL type of data (GL_FLOAT, GL_INT ...)
@@ -100,6 +115,9 @@ public:
 
 private:
 
+    //--------------------------------------------------------------------------
+    //! \brief Reset internal states. No memory release is made here.
+    //--------------------------------------------------------------------------
     virtual void onRelease() override
     {
         m_size = 0;
