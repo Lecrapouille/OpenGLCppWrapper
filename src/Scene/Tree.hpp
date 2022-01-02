@@ -52,8 +52,7 @@ public:
     template<class X, typename ...ArgsT>
     static std::unique_ptr<X> create(ArgsT&&... args)
     {
-        std::unique_ptr<X> obj = std::make_unique<X>(std::forward<ArgsT>(args)...);
-        return std::move(obj);
+        return std::make_unique<X>(std::forward<ArgsT>(args)...);
     }
 
 public:
