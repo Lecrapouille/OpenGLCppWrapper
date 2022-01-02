@@ -58,29 +58,23 @@ private:
     //! widgets.
     //! \note this class can be place outside \c BasicWindowImGui
     //--------------------------------------------------------------------------
-    class GUI: public DearImGui
+    class GUI: public DearImGuiLayer
     {
     public:
 
         GUI(BasicWindowImGui& window)
-            : m_window(window)
+            : DearImGuiLayer(window, "DearIMGUI")
         {}
-
-    protected:
-
-        virtual bool render() override;
 
     private:
 
-        BasicWindowImGui& m_window;
+        virtual bool onImGuiRender() override;
     };
 
 private:
 
     // \brief Background color changed through DearImGui buttons
     static float color[4];
-    //! \brief DearImGui gui
-    GUI m_imgui;
 };
 
 #endif // EXAMPLE_02_EMPTY_WINDOW_WITH_DEAR_IMGUI_HPP

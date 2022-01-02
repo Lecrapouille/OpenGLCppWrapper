@@ -18,17 +18,17 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_DEARIMGUI_HPP
-#  define OPENGLCPPWRAPPER_DEARIMGUI_HPP
+#ifndef OPENGLCPPWRAPPER_UI_DEARIMGUI_HPP
+#  define OPENGLCPPWRAPPER_UI_DEARIMGUI_HPP
 
 // ********************************************************************************************
 //! \file GLImGUI.hpp wraps function calls of the ImGUI project.
 // ********************************************************************************************
 
-#  define IMGUI_IMPL_OPENGL_LOADER_GLEW
-
 #  include "UI/Window.hpp"
+#  include "UI/Layer.hpp"
 
+#  define IMGUI_IMPL_OPENGL_LOADER_GLEW
 #  pragma GCC diagnostic push
 #    pragma GCC diagnostic ignored "-Wold-style-cast"
 #    pragma GCC diagnostic ignored "-Wstrict-overflow"
@@ -39,11 +39,8 @@
 #    pragma GCC diagnostic ignored "-Wfloat-equal"
 #    pragma GCC diagnostic ignored "-Wsign-conversion"
 #    pragma GCC diagnostic ignored "-Wconversion"
-
-#      include "imgui/imgui.h"
 #      include "imgui/backends/imgui_impl_glfw.h"
 #      include "imgui/backends/imgui_impl_opengl3.h"
-
 #   pragma GCC diagnostic pop
 
 #include <iostream> // TODO temporary
@@ -53,60 +50,48 @@
 //! mode (im) graphical user interface (GUI) for OpenGL.
 //! https://github.com/ocornut/imgui
 // *****************************************************************************
-class DearImGui
+class DearImGuiLayer: public Layer
 {
 public:
+
+    enum class Theme
+    {
+        Classic, Dark
+    };
+
+    DearImGuiLayer(GLWindow &window, std::string const& name)
+        : Layer(window, name)
+    {}
 
     //--------------------------------------------------------------------------
     //! \brief Release Dear imgui allocated resources.
     //--------------------------------------------------------------------------
-    virtual ~DearImGui()
+    ~DearImGuiLayer()
     {
-        if (m_init)
-        {
-            ImGui_ImplGlfw_Shutdown();
-            ImGui::DestroyContext();
-        }
+        onRelease();
     }
+
+    void setFont();
+    void theme(Theme const style);
+    void reactTo(GLWindow::Event const events);
+
+private:
 
     //--------------------------------------------------------------------------
     //! \brief Start Dear imgui context. Use glfw routines.
     //! \param window the OpenGL window
     //--------------------------------------------------------------------------
-    bool setup(GLWindow &window)
-    {
-        ImGui::CreateContext();
-        ImGui_ImplGlfw_InitForOpenGL(&window.context(), true);
-        ImGui_ImplOpenGL3_Init(NULL);
-        ImGui::StyleColorsDark();
-        m_init = true;
-
-        return true;
-    }
+    virtual bool onSetup() override;
+    virtual bool onRelease() override;
 
     //--------------------------------------------------------------------------
     //! \brief Prepare the Dear imgui to draw the HMI. This will call the
     //! render() pure virtual method.
     //--------------------------------------------------------------------------
-    bool draw()
-    {
-        if (unlikely(!m_init))
-        {
-            std::cerr << "It seems that bool setup(GLWindow &window) has never been called." << std::endl;
-            return false;
-        }
+    virtual bool onPaint() override;
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        bool res = render();
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        return res;
-    }
-
-private:
+    void begin();
+    void end();
 
     //--------------------------------------------------------------------------
     //! \brief Method for drawing the HMI. This has to be implemented by
@@ -116,12 +101,7 @@ private:
     //! this will prevent GLWindow calling draw() which can react to
     //! this problem.
     //--------------------------------------------------------------------------
-    virtual bool render() = 0;
-
-private:
-
-    //! \brief Check if setup() has been called
-    bool m_init = false;
+    virtual bool onImGuiRender() = 0;
 };
 
-#endif // OPENGLCPPWRAPPER_DEARIMGUI_HPP
+#endif // OPENGLCPPWRAPPER_UI_DEARIMGUI_HPP

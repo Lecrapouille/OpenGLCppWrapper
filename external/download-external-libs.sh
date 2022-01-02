@@ -11,7 +11,7 @@ if [ "$1" == "" ]; then
   exit 1
 fi
 ARCHI="$1"
-TARGET=OpenGLCppWrapper
+TARGET="$2"
 
 ### Delete all previous directories to be sure to have and compile
 ### fresh code source.
@@ -47,7 +47,7 @@ fi
 ### Library for creating GUI in OpenGL
 ### License: MIT
 print-clone imgui
-git clone https://github.com/ocornut/imgui.git --depth=1 > /dev/null 2> /dev/null
+git clone https://github.com/ocornut/imgui.git -b docking --depth=1 > /dev/null 2> /dev/null
 
 ### Library for unit conversion library
 ### License: MIT

@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLCPPWRAPPER_GLWINDOW_HPP
-#  define OPENGLCPPWRAPPER_GLWINDOW_HPP
+#ifndef OPENGLCPPWRAPPER_UI_WINDOW_HPP
+#  define OPENGLCPPWRAPPER_UI_WINDOW_HPP
 
 // *****************************************************************************
 //! \file GLWindow.hpp manages a window and its i/o for drawing OpenGL scenes.
@@ -28,6 +28,8 @@
 #  include "OpenGL/Context/OpenGL.hpp"
 #  include "Math/Vector.hpp"
 #  include <mutex>
+
+class Layer;
 
 // ***************************************************************************
 //! \class GLWindow Window.hpp
@@ -46,8 +48,6 @@
 // ***************************************************************************
 class GLWindow
 {
-    friend class GLApplication;
-
 public:
 
     //--------------------------------------------------------------------------
@@ -84,6 +84,7 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Define window events that you can enable. Default is None.
+    //! \note these flags have operators | and &.
     //--------------------------------------------------------------------------
     enum class Event : unsigned
     {
@@ -333,8 +334,6 @@ private:
     //--------------------------------------------------------------------------
     virtual void onPaintFailed(std::string const& reason) = 0;
 
-private:
-
     //! \brief Windows current height. This method is only used to avoid using
     //! directly static member variable which need to init on the cpp file.
     static uint32_t& staticHeight()
@@ -350,6 +349,11 @@ private:
         static uint32_t w;
         return w;
     }
+
+protected:
+
+    //! \brief
+    std::vector<std::unique_ptr<Layer>> m_layers;
 
 private:
 
@@ -396,4 +400,17 @@ constexpr GLWindow::Event operator|(GLWindow::Event lhs, GLWindow::Event rhs)
         static_cast<std::underlying_type<GLWindow::Event>::type>(rhs));
 }
 
-#endif // OPENGLCPPWRAPPER_GLWINDOW_HPP
+constexpr GLWindow::Event operator&(GLWindow::Event lhs, GLWindow::Event rhs)
+{
+    return static_cast<GLWindow::Event>(
+        static_cast<std::underlying_type<GLWindow::Event>::type>(lhs) &
+        static_cast<std::underlying_type<GLWindow::Event>::type>(rhs));
+}
+
+constexpr bool operator==(GLWindow::Event lhs, GLWindow::Event rhs)
+{
+    return static_cast<std::underlying_type<GLWindow::Event>::type>(lhs) ==
+            static_cast<std::underlying_type<GLWindow::Event>::type>(rhs);
+}
+
+#endif // OPENGLCPPWRAPPER_UI_WINDOW_HPP

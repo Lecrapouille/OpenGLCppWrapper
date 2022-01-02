@@ -26,8 +26,7 @@ float BasicWindowImGui::color[4] = { 0.5f, 0.5f, 1.0f, 1.0f };
 //------------------------------------------------------------------------------
 BasicWindowImGui::BasicWindowImGui(uint32_t const width, uint32_t const height,
                          const char *title)
-    : GLWindow(width, height, title),
-      m_imgui(*this)
+    : GLWindow(width, height, title)
 {
     std::cout << "Hello BasicWindowImGui: " << info() << std::endl;
 }
@@ -41,7 +40,8 @@ BasicWindowImGui::~BasicWindowImGui()
 //------------------------------------------------------------------
 bool BasicWindowImGui::onSetup()
 {
-    return m_imgui.setup(*this);
+    m_layers.push_back(std::make_unique<BasicWindowImGui::GUI>(*this));
+    return true;
 }
 
 //------------------------------------------------------------------
@@ -53,23 +53,25 @@ bool BasicWindowImGui::onPaint()
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
     glCheck(glClearColor(color[0], color[1], color[2], color[3]));
 
-    // Then DearImGui
-    return m_imgui.draw();
+    // Success
+    return true;
 }
 
 //------------------------------------------------------------------
 //! \brief Paint some DearImGui widgets. In this example change the
 //! background color.
 //------------------------------------------------------------------
-bool BasicWindowImGui::GUI::render()
+bool BasicWindowImGui::GUI::onImGuiRender()
 {
+    BasicWindowImGui& win = owner<BasicWindowImGui>();
+
     ImGui::Begin("Hello, world!");
-    ImGui::TextColored(ImVec4(m_window.color[0],
-                              m_window.color[1],
-                              m_window.color[2],
-                              m_window.color[3]),
+    ImGui::TextColored(ImVec4(win.color[0],
+                              win.color[1],
+                              win.color[2],
+                              win.color[3]),
                        "%s", "Change the background color");
-    ImGui::ColorEdit3("color", m_window.color);
+    ImGui::ColorEdit3("color", win.color);
     ImGui::End();
 
     // Success

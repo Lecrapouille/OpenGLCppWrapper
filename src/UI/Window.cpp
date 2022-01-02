@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "UI/Window.hpp"
+#include "UI/Layer.hpp"
 #include "OpenGL/Buffers/GPUMemory.hpp"
 #include <stdexcept>
 #include <iostream>
@@ -130,6 +131,13 @@ GLWindow::~GLWindow()
 {
     GL::Context::Window* current = GL::Context::getCurrentContext();
     GL::Context::makeCurrentContext(m_context);
+
+    // Layers
+    //for (auto& it: m_layers)
+    //{
+    //    it->onRelease();
+    //}
+
     glfwDestroyWindow(m_context);
     GL::Context::makeCurrentContext(current);
 }
@@ -191,17 +199,6 @@ void GLWindow::monitorGPUMemory()
         previous_gpu_mem = current_gpu_mem;
         onGPUMemoryChanged(current_gpu_mem);
     }
-}
-
-//------------------------------------------------------------------------------
-//! \brief Allow to do AND operations on Events to separate several GLWindow
-//! events.
-//------------------------------------------------------------------------------
-static GLWindow::Event operator&(GLWindow::Event lhs, GLWindow::Event rhs)
-{
-    return static_cast<GLWindow::Event>(
-        static_cast<std::underlying_type<GLWindow::Event>::type>(lhs) &
-        static_cast<std::underlying_type<GLWindow::Event>::type>(rhs));
 }
 
 //------------------------------------------------------------------------------
@@ -392,6 +389,17 @@ bool GLWindow::setup()
             return false;
         }
 
+        // Layers
+        for (auto& it: m_layers)
+        {
+            if (unlikely(!it->onSetup()))
+            {
+                // Aborted explicitely by the developper
+                onSetupFailed("Layer " + it->name() + " has returned false");
+                return false;
+            }
+        }
+
         // Force refreshing computation made when window changed
         onWindowResized();
         glfwSwapBuffers(m_context);
@@ -422,11 +430,22 @@ bool GLWindow::update()
 
     try
     {
-        // Render the scene
+        // Render the background scene
         if (likely(false == onPaint()))
         {
             onPaintFailed("Has returned false");
             return false;
+        }
+
+        // Render Layers
+        for (auto& it: m_layers)
+        {
+            if (unlikely(!it->onPaint()))
+            {
+                // Aborted explicitely by the developper
+                onPaintFailed("Layer " + it->name() + " has returned false");
+                return false;
+            }
         }
     }
     catch (const GL::Exception& e)

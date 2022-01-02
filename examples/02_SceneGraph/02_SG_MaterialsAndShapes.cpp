@@ -147,8 +147,7 @@ template<> void MyShape<BasicMaterial>::initMaterial()
 SGMatAndShape::SGMatAndShape(uint32_t const width, uint32_t const height,
                              const char *title)
     : GLWindow(width, height, title),
-      m_camera("camera"),
-      m_imgui(*this)
+      m_camera("camera")
 {
     reactTo(Event::MouseMove | Event::MouseScroll | Event::MouseButton | Event::Keyboard);
 
@@ -174,6 +173,8 @@ void SGMatAndShape::onWindowResized()
 //------------------------------------------------------------------------------
 bool SGMatAndShape::onSetup()
 {
+    m_layers.push_back(std::make_unique<SGMatAndShape::GUI>(*this));
+
     glCheck(glEnable(GL_DEPTH_TEST));
     glCheck(glDepthFunc(GL_LESS));
     glCheck(glEnable(GL_BLEND));
@@ -214,14 +215,15 @@ bool SGMatAndShape::onSetup()
     m_physics.attach(wg.body);
 
     //m_scene.debug();
-    //return false;
-    return m_imgui.setup(*this);
+
+    // Success
+    return true;
 }
 
 //------------------------------------------------------------------
 //! \brief Paint some DearImGui widgets.
 //------------------------------------------------------------------
-bool SGMatAndShape::GUI::render()
+bool SGMatAndShape::GUI::onImGuiRender()
 {
     static float new_near = 3.0f;
     static float previous_near = 0.0f;
@@ -234,11 +236,13 @@ bool SGMatAndShape::GUI::render()
     ImGui::SliderFloat("far ", &new_far, 0.01f, 15.0f);
     ImGui::End();
 
+    SGMatAndShape& win = owner<SGMatAndShape>();
+
     // Apply new depth near value to the shape
     if (abs(new_near - previous_near) > 0.001f)
     {
         previous_near = new_near;
-        m_window.m_scene.root->traverse([](SceneObject* node, float const near_)
+        win.m_scene.root->traverse([](SceneObject* node, float const near_)
         {
             auto n = dynamic_cast<MyShape<DepthMaterial>*>(node);
             if (n != nullptr)
@@ -252,7 +256,7 @@ bool SGMatAndShape::GUI::render()
     if (abs(new_far - previous_far) > 0.001f)
     {
         previous_far = new_far;
-        m_window.m_scene.root->traverse([](SceneObject* node, float const far_)
+        win.m_scene.root->traverse([](SceneObject* node, float const far_)
         {
             auto n = dynamic_cast<MyShape<DepthMaterial>*>(node);
             if (n != nullptr)
@@ -300,8 +304,8 @@ bool SGMatAndShape::onPaint()
     m_camera.setViewPort(0.5f, 0.5f, 0.5f, 0.5f);
     m_scene.draw(m_camera);
 
-    // DearImGui
-    return m_imgui.draw();
+    // Success
+    return true;
 }
 
 //------------------------------------------------------------------------------

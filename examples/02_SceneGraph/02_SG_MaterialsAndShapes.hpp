@@ -53,27 +53,22 @@ private:
     //! \brief Sub class managing Dear ImGui context and allowing to draw
     //! widgets.  \note this class can be place outside \c SGMatAndShape
     //--------------------------------------------------------------------------
-    class GUI: public DearImGui
+    class GUI: public DearImGuiLayer
     {
     public:
 
         GUI(SGMatAndShape& window)
-            : m_window(window)
+            :  DearImGuiLayer(window, "DearIMGUI")
         {}
 
     protected:
 
-        virtual bool render() override;
-
-    private:
-
-        SGMatAndShape& m_window;
+        virtual bool onImGuiRender() override;
     };
 
     Camera m_camera;
     SceneTree m_scene;
     PhysicsManager m_physics;
-    GUI m_imgui;
 };
 
 #endif // EXAMPLE_02_SG_MATERIALS_AND_SHAPES_HPP
