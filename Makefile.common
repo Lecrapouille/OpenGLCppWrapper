@@ -64,10 +64,9 @@ DEFINES += -Wno-old-style-cast -Wno-conversion -Wno-float-equal -Wno-sign-conver
 ###################################################
 # Bullet3 (3d physics)
 
-#THIRDPART_LIBS += libBulletSoftBody.$(SO) libBulletDynamics.$(SO) libBulletCollision.$(SO) libLinearMath.$(SO)
-THIRDPART_LIBS += $(abspath $(THIRDPART)/bullet3/usr/local/lib/libBulletDynamics.$(SO))
-THIRDPART_LIBS += $(abspath $(THIRDPART)/bullet3/usr/local/lib/libBulletCollision.$(SO))
-THIRDPART_LIBS += $(abspath $(THIRDPART)/bullet3/usr/local/lib/libLinearMath.$(SO))
+THIRDPART_LIBS += $(abspath $(THIRDPART)/bullet3/usr/local/lib/libBulletDynamics.a)
+THIRDPART_LIBS += $(abspath $(THIRDPART)/bullet3/usr/local/lib/libBulletCollision.a)
+THIRDPART_LIBS += $(abspath $(THIRDPART)/bullet3/usr/local/lib/libLinearMath.a)
 
 LINKER_FLAGS += -L$(THIRDPART)/bullet3/usr/local/lib
 INCLUDES += -I$(THIRDPART)/bullet3/usr/local/include

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 ### This script will git clone some libraries that OpenGLCppWrapper needs and
 ### compile them. To avoid pollution, they are not installed into your
@@ -49,20 +49,20 @@ fi
 
 ### Library Bullet3
 print-compile bullet3
-if [ -e bullet3 ];
-then
-    (
-        cd bullet3
-        rm -fr build usr 2> /dev/null
-        mkdir -p build &&
-        ( cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_EXTRAS=OFF -DUSE_DOUBLE_PRECISION=OFF -DUSE_GLUT=OFF \
-                -DBT_USE_EGL=OFF -DUSE_OPENVR=OFF -DBUILD_PYBULLET=OFF -DBUILD_PYBULLET_NUMPY=OFF \
-                -DBUILD_ENET=OFF -DBUILD_CLSOCKET=OFF -DUSE_GRAPHICAL_BENCHMARK=OFF -DBUILD_CPU_DEMOS=OFF \
-                -DBUILD_BULLET2_DEMOS=OFF -DBUILD_UNIT_TESTS=OFF .. &&
-          make -j$NPROC &&
-          make install DESTDIR=..
-        )
+if [ -e bullet3 ]; then
+    (cd bullet3
+     rm -fr build usr 2> /dev/null
+     mkdir -p build
+     cd build
+     cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
+	   -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_EXTRAS=OFF \
+	   -DUSE_DOUBLE_PRECISION=OFF -DUSE_GLUT=OFF -DBT_USE_EGL=OFF \
+	   -DUSE_OPENVR=OFF -DBUILD_PYBULLET=OFF -DBUILD_PYBULLET_NUMPY=OFF \
+	   -DBUILD_ENET=OFF -DBUILD_CLSOCKET=OFF -DUSE_GRAPHICAL_BENCHMARK=OFF \
+	   -DBUILD_CPU_DEMOS=OFF -DBUILD_BULLET2_DEMOS=OFF \
+	   -DBUILD_UNIT_TESTS=OFF ..
+     make -j$NPROC
+     make install DESTDIR=..
     )
 else
     echo "Failed compiling external/bullet3: directory does not exist"
