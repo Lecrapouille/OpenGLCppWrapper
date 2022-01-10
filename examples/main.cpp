@@ -21,6 +21,7 @@
 #include "00_Window/00_BasicWindow.hpp"
 #include "00_Window/01_BasicWindowIOEvents.hpp"
 #include "00_Window/02_BasicWindowImGui.hpp"
+#include "00_Window/03_BasicWindowImGuiEditor.hpp"
 
 #include "01_Core/00_ColorfulTriangle.hpp"
 #include "01_Core/01_DynamicTriangle.hpp"
@@ -55,6 +56,7 @@ enum class Examples
     BasicWindow,
     BasicWindowIOEvents,
     BasicWindowImGui,
+    BasicWindowImGuiEditor,
     ColorfulTriangle,
     DynamicTriangle,
     TexturedTriangle,
@@ -84,6 +86,7 @@ static void usage(char *argv[])
     std::cout << "  " << int(Examples::BasicWindow) << ": " << BasicWindow::info() << std::endl;
     std::cout << "  " << int(Examples::BasicWindowIOEvents) << ": " << BasicWindowIOEvents::info() << std::endl;
     std::cout << "  " << int(Examples::BasicWindowImGui) << ": " << BasicWindowImGui::info() << std::endl;
+    std::cout << "  " << int(Examples::BasicWindowImGuiEditor) << ": " << BasicWindowImGuiEditor::info() << std::endl;
     std::cout << "OpenGL wrapper API:" << std::endl;
     std::cout << "  " << int(Examples::ColorfulTriangle) << ": " << ColorfulTriangle::info() << std::endl;
     std::cout << "  " << int(Examples::DynamicTriangle) << ": " << DynamicTriangle::info() << std::endl;
@@ -138,6 +141,9 @@ int main(int argc, char *argv[])
             break;
         case Examples::BasicWindowImGui:
             app = std::make_unique<BasicWindowImGui>(WIDTH, HEIGHT, "DearImGui");
+            break;
+        case Examples::BasicWindowImGuiEditor:
+            app = std::make_unique<BasicWindowImGuiEditor>(WIDTH, HEIGHT, "DearImGuiEditor");
             break;
         case Examples::ColorfulTriangle:
             app = std::make_unique<ColorfulTriangle>(WIDTH, HEIGHT, "Colorful Triangle");

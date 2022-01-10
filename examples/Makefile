@@ -39,7 +39,8 @@ include $(P)/Makefile.common
 OBJS_WINDOW = \
   00_BasicWindow.o \
   01_BasicWindowIOEvents.o \
-  02_BasicWindowImGui.o
+  02_BasicWindowImGui.o \
+  03_BasicWindowImGuiEditor.o
 
 OBJS_CORE = \
   00_ColorfulTriangle.o \
