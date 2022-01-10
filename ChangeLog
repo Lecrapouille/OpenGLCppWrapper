@@ -1,3 +1,9 @@
+version 0.9.3:
+
+    Merge dev-refacto-opengl into dev branch dating from ~1 year.
+    Mainly refactorize src/OpenGL wrappers.
+    Lot of WIP (SceneGraph, Material, Physics ...)
+
 version 0.9.2:
 
     Allow accessing shader uniforms before their creation (when GLProgram is compiled).
