@@ -185,13 +185,13 @@ bool SGMatAndShape::onSetup()
     //RigNode& rig = m_scene.root->attach<RigNode>("Rig", m_camera);
 
     WorldGround& wg = m_scene.root->attach<WorldGround>("WorldGround", Vector3f(10.0f, 1.0f, 10.0f));
-    //MyShape<BasicMaterial>& t0 = m_scene.root->attach<MyShape<BasicMaterial>>("Tree0", "textures/tree.obj");
-    MyShape<DepthMaterial>& t1 = m_scene.root->attach<MyShape<DepthMaterial>>("Tree1", "textures/tree.obj");
-    //MyShape<NormalsMaterial>& t2 = m_scene.root->attach<MyShape<NormalsMaterial>>("Tree2", "textures/tree.obj");
+    //MyShape<BasicMaterial>& t0 = m_scene.root->attach<MyShape<BasicMaterial>>("Tree0", "external/assets/tree.obj");
+    MyShape<DepthMaterial>& t1 = m_scene.root->attach<MyShape<DepthMaterial>>("Tree1", "external/assets/tree.obj");
+    //MyShape<NormalsMaterial>& t2 = m_scene.root->attach<MyShape<NormalsMaterial>>("Tree2", "external/assets/tree.obj");
     MySphere& t2 = m_scene.root->attach<MySphere>("Tree2", 1.0f);
     MyBox& t3 = m_scene.root->attach<MyBox>("Tree2", Vector3f(1,1,3));
-    //MyShape<DepthMaterial>& t3 = t1.attach<MyShape<DepthMaterial>>("Tree1.0", "textures/tree.obj");
-    //MyShape<BasicMaterial>& t4 = t1.attach<MyShape<BasicMaterial>>("Tree1.1", "textures/tree.obj");
+    //MyShape<DepthMaterial>& t3 = t1.attach<MyShape<DepthMaterial>>("Tree1.0", "external/assets/tree.obj");
+    //MyShape<BasicMaterial>& t4 = t1.attach<MyShape<BasicMaterial>>("Tree1.1", "external/assets/tree.obj");
 
     //      Y
     //     |

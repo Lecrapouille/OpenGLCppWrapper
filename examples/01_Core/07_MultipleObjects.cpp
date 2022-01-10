@@ -146,9 +146,9 @@ bool MultipleObjects::onSetup()
                                               Vector3f(0,1,0));
 
     // Create 2 VAOs from the same shader program: one cube and one plane.
-    bool res = initFloor(m_floor, "textures/wooden-crate.jpg") &&
-               initCube(m_cube1, "textures/hazard.png") &&
-               initCube(m_cube2, "textures/path.png");
+    bool res = initFloor(m_floor, "external/assets/wooden-crate.jpg") &&
+               initCube(m_cube1, "external/assets/hazard.png") &&
+               initCube(m_cube2, "external/assets/path.png");
 
     // Helper for debugging states of your program
     debug(m_vertex_shader, m_fragment_shader);

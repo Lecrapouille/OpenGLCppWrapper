@@ -102,9 +102,9 @@ bool PostProdFrameBuffer::firstProgram()
     };
 
     // Apply textures
-    if (!m_cube.texture2D("texID").load("textures/wooden-crate.jpg"))
+    if (!m_cube.texture2D("texID").load("external/assets/wooden-crate.jpg"))
         return false;
-    if (!m_floor.texture2D("texID").load("textures/path.png"))
+    if (!m_floor.texture2D("texID").load("external/assets/path.png"))
         return false;
 
     // Init Model-View-Project matrices (shader uniforms)

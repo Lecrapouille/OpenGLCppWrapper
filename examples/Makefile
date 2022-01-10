@@ -84,11 +84,11 @@ INCLUDES += \
   -I00_Window -I01_Core -I02_Scene -I03_ThreeJs
 
 ###################################################
-# Downoad textures
-RESOURCES_DONE=textures/resources.downloaded
+# Downoad assets
+RESOURCES_DONE=external/assets/resources.downloaded
 
 define DOWNLOAD_RESOURCES
-	@git clone https://github.com/Lecrapouille/OpenGLCppWrapper-data.git --depth=1 textures > /dev/null 2> /dev/null; touch $(RESOURCES_DONE)
+	@git clone https://github.com/Lecrapouille/OpenGLCppWrapper-data.git --depth=1 external/assets > /dev/null 2> /dev/null; touch $(RESOURCES_DONE)
 endef
 
 ###################################################
@@ -105,14 +105,14 @@ all: $(THIRDPART_LIBS) $(TARGET) $(RESOURCES_DONE)
 
 ###################################################
 # Be sure the main project have been compiled
-# and textures downloaded
+# and assets downloaded
 $(OBJS): | $(THIRDPART_LIBS)
 $(THIRDPART_LIBS):
 	@$(call print-to,"Compiling","$(THIRDPART_LIBS)","$@","$(VERSION)")
 	@cd $(P) && $(MAKE)
 
 ###################################################
-# Download textures and other resources needed by examples
+# Download assets and other resources needed by examples
 .PHONY: download-resources
 download-resources: | $(BUILD)
 	@$(call DOWNLOAD_RESOURCES)

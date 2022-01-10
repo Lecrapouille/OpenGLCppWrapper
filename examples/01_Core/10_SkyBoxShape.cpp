@@ -82,12 +82,12 @@ bool SkyBoxShape::createSkyBox()
     };
 
     // Add 6 textures to the sky box
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_X, "textures/right.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_X, "textures/left.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_Y, "textures/top.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_Y, "textures/bottom.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_Z, "textures/front.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_Z, "textures/back.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_X, "external/assets/right.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_X, "external/assets/left.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_Y, "external/assets/top.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_Y, "external/assets/bottom.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_Z, "external/assets/front.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_Z, "external/assets/back.jpg")) return false;
 
     return true;
 }
@@ -133,7 +133,7 @@ bool SkyBoxShape::createShape()
     texture.interpolation(GLTexture::Minification::LINEAR,
                           GLTexture::Magnification::LINEAR);
     texture.wrap(GLTexture::Wrap::MIRRORED_REPEAT);
-    return texture.load("textures/wooden-crate.jpg");
+    return texture.load("external/assets/wooden-crate.jpg");
 }
 
 //------------------------------------------------------------------------------

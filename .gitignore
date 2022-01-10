@@ -41,7 +41,7 @@ doc/coverage
 doc/html
 examples/build
 examples/imgui.ini
-examples/textures
+examples/external
 external/SOIL
 external/imgui
 external/units

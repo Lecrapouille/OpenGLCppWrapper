@@ -108,12 +108,12 @@ bool TerrainTexture3D::createTerrain()
     m_vao.texture3D("tex3d").wrap(GLTexture::Wrap::CLAMP_TO_BORDER);
     if (!m_vao.texture3D("tex3d").load(
         {
-            "textures/deep_water.png",
-            "textures/shallow_water.png",
-            "textures/shore.png",
-            "textures/fields.png",
-            "textures/rocks.png",
-            "textures/snow.png",
+            "external/assets/deep_water.png",
+            "external/assets/shallow_water.png",
+            "external/assets/shore.png",
+            "external/assets/fields.png",
+            "external/assets/rocks.png",
+            "external/assets/snow.png",
         }))
     {
         return false;
