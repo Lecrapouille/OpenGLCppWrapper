@@ -336,6 +336,8 @@ void GLWindow::reactTo(GLWindow::Event const events)
 //------------------------------------------------------------------------------
 bool GLWindow::setup()
 {
+    m_should_halt = false;
+
     // Set this window as active context
     GL::Context::makeCurrentContext(m_context);
 
@@ -470,7 +472,7 @@ bool GLWindow::update()
 }
 
 //------------------------------------------------------------------------------
-bool GLWindow::shouldHalt()
+bool GLWindow::haltCondition()
 {
     // Check if the ESC key was pressed or the window was closed
     // Note: use keyPressed() not isKeyDown() because if Event::Keyboard is not we
@@ -478,7 +480,6 @@ bool GLWindow::shouldHalt()
     return (GLFW_PRESS == glfwGetKey(m_context, GLFW_KEY_ESCAPE)) ||
             (glfwWindowShouldClose(m_context));
 }
-
 
 //------------------------------------------------------------------------------
 bool GLWindow::run()
@@ -488,13 +489,17 @@ bool GLWindow::run()
         return false;
     }
 
-    while (!shouldHalt())
+    do
     {
         if (!update())
         {
+            // This will call onPaintFailed()
             return false;
         }
+
+        m_should_halt |= haltCondition();
     }
+    while (!m_should_halt);
 
     return true;
 }

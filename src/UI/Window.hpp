@@ -119,6 +119,12 @@ public:
     bool run();
 
     //--------------------------------------------------------------------------
+    //! \brief Start the inifinite loop running the window calling the setup()
+    //! method and the update() method at the given FPS (TODO).
+    //--------------------------------------------------------------------------
+    inline void halt() { m_should_halt = true; }
+
+    //--------------------------------------------------------------------------
     //! \brief Enable event reactions from mouse boutton, mouse scroll, mouse
     //! motion, keyboard key pressed or released).
     //--------------------------------------------------------------------------
@@ -316,10 +322,13 @@ private:
     bool update();
 
     //--------------------------------------------------------------------------
-    //! \brief Condition for halting the window loop. By default when the ESC
-    //! key has been pressed or when the user has clicked on the X button.
+    //! \brief Condition for halting the window loop started by run(). By default
+    //! when the ESC key has been pressed or when the user has clicked on the X
+    //! button. Override this function to change the defalut behavior.
+    //! \return true when the application shall halt the run() method.. Return
+    //! false to continue the run() method.
     //--------------------------------------------------------------------------
-    virtual bool shouldHalt();
+    virtual bool haltCondition();
 
     //--------------------------------------------------------------------------
     //! \brief Add here all stuffs painting your 3D world to be
@@ -352,6 +361,8 @@ private:
 
 protected:
 
+    //! \brief
+    bool m_should_halt = false;
     //! \brief
     std::vector<std::unique_ptr<Layer>> m_layers;
 
