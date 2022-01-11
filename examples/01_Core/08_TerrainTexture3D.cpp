@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "08_TerrainTexture3D.hpp"
+#include "Loaders/Textures/SOIL.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
@@ -106,7 +107,7 @@ bool TerrainTexture3D::createTerrain()
 
     // Load all 2D textures into a single big 3D texture
     m_vao.texture3D("tex3d").wrap(GLTexture::Wrap::CLAMP_TO_BORDER);
-    if (!m_vao.texture3D("tex3d").load(
+    if (!m_vao.texture3D("tex3d").load<SOIL>(
         {
             "external/assets/deep_water.png",
             "external/assets/shallow_water.png",

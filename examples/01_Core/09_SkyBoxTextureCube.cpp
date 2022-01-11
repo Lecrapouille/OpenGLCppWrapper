@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "09_SkyBoxTextureCube.hpp"
+#include "Loaders/Textures/SOIL.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
@@ -76,12 +77,12 @@ bool SkyBoxTextureCube::createSkyBox()
     };
 
     // Add 6 textures to the sky box
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_X, "external/assets/right.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_X, "external/assets/left.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_Y, "external/assets/top.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_Y, "external/assets/bottom.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_Z, "external/assets/front.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_Z, "external/assets/back.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::POSITIVE_X, "external/assets/right.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::NEGATIVE_X, "external/assets/left.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::POSITIVE_Y, "external/assets/top.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::NEGATIVE_Y, "external/assets/bottom.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::POSITIVE_Z, "external/assets/front.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::NEGATIVE_Z, "external/assets/back.jpg")) return false;
 
     return true;
 }

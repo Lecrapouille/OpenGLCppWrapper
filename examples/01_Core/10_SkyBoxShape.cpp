@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "10_SkyBoxShape.hpp"
+#include "Loaders/Textures/SOIL.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
@@ -82,12 +83,12 @@ bool SkyBoxShape::createSkyBox()
     };
 
     // Add 6 textures to the sky box
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_X, "external/assets/right.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_X, "external/assets/left.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_Y, "external/assets/top.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_Y, "external/assets/bottom.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::POSITIVE_Z, "external/assets/front.jpg")) return false;
-    if (!m_skybox.textureCube("skybox").load(GLTextureCube::Map::NEGATIVE_Z, "external/assets/back.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::POSITIVE_X, "external/assets/right.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::NEGATIVE_X, "external/assets/left.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::POSITIVE_Y, "external/assets/top.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::NEGATIVE_Y, "external/assets/bottom.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::POSITIVE_Z, "external/assets/front.jpg")) return false;
+    if (!m_skybox.textureCube("skybox").load<SOIL>(GLTextureCube::Map::NEGATIVE_Z, "external/assets/back.jpg")) return false;
 
     return true;
 }
@@ -133,7 +134,7 @@ bool SkyBoxShape::createShape()
     texture.interpolation(GLTexture::Minification::LINEAR,
                           GLTexture::Magnification::LINEAR);
     texture.wrap(GLTexture::Wrap::MIRRORED_REPEAT);
-    return texture.load("external/assets/wooden-crate.jpg");
+    return texture.load<SOIL>("external/assets/wooden-crate.jpg");
 }
 
 //------------------------------------------------------------------------------

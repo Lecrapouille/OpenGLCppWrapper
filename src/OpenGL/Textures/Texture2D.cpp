@@ -19,16 +19,3 @@
 //=====================================================================
 
 #include "OpenGL/Textures/Texture2D.hpp"
-#include "Loaders/Textures/SOIL.hpp"
-
-bool GLTexture2D::load(const char *const filename)
-{
-    SOIL soil;
-    return load(filename, soil);
-}
-
-bool GLTexture2D::save(const char *const filename)
-{
-    SOIL soil;
-    return save(filename, soil);
-}

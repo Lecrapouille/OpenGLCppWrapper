@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "02_TexturedTriangle.hpp"
+#include "Loaders/Textures/SOIL.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
@@ -59,7 +60,7 @@ bool TexturedTriangle::loadTextures()
     // Read the png file and load data on the texture (CPU side). Dirty data
     // will be automaticaly transfered to the GPU. Note that the loader is by
     // default SOIL but you can pass it your own load as 2nd parameter.
-    return texture.load("external/assets/hazard.png");
+    return texture.load<SOIL>("external/assets/hazard.png");
 }
 
 //------------------------------------------------------------------------------

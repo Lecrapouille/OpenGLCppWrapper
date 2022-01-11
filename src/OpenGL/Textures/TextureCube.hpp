@@ -93,15 +93,17 @@ public:
     //!
     //! \param target select one of the 6 faces of the cube.
     //! \param filename the path of a jpeg or bmp or png file.
+    //! \tparam L: class deriving from TextureLoader (ie SOIL).
     //!
     //! \return false if the texture failed to be loaded.
     //--------------------------------------------------------------------------
+    template<class L>
     bool load(Map const target, const char *const filename)
     {
         const size_t index = static_cast<size_t>(target) -
                              static_cast<size_t>(GL_TEXTURE_CUBE_MAP_POSITIVE_X);
 
-        return m_textures[index]->load(filename);
+        return m_textures[index]->load<L>(filename);
     }
 
 private:

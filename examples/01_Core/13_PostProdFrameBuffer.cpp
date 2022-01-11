@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "13_PostProdFrameBuffer.hpp"
+#include "Loaders/Textures/SOIL.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
@@ -102,9 +103,9 @@ bool PostProdFrameBuffer::firstProgram()
     };
 
     // Apply textures
-    if (!m_cube.texture2D("texID").load("external/assets/wooden-crate.jpg"))
+    if (!m_cube.texture2D("texID").load<SOIL>("external/assets/wooden-crate.jpg"))
         return false;
-    if (!m_floor.texture2D("texID").load("external/assets/path.png"))
+    if (!m_floor.texture2D("texID").load<SOIL>("external/assets/path.png"))
         return false;
 
     // Init Model-View-Project matrices (shader uniforms)

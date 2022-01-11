@@ -109,12 +109,17 @@ public:
     //! \param rename if set to true then the name of this instance (set
     //! in the constructor) takes the name of the file. Else, the
     //! instance name is not mdified.
+    //! \tparam L: class deriving from TextureLoader (ie SOIL).
     //!
     //! \return true if texture data have been loaded.
     //--------------------------------------------------------------------------
+    template<class L>
     inline bool load(std::string const& filename) // TODO hold the filename. name == filename
     {
-        return load(filename.c_str());
+        static_assert(std::is_base_of<TextureLoader, L>::value,
+                      "Template L is not derived class from TextureLoader");
+        L loader;
+        return doload(loader, filename.c_str());
     }
 
     //--------------------------------------------------------------------------
@@ -124,43 +129,54 @@ public:
     //! \param rename if set to true then the name of this instance (set
     //! in the constructor) takes the name of the file. Else, the
     //! instance name is not mdified.
+    //! \tparam L: class deriving from TextureLoader (ie SOIL).
     //!
     //! \return true if texture data have been loaded.
     //--------------------------------------------------------------------------
-    bool load(const char *const filename, TextureLoader& loader)
+    template<class L>
+    inline bool load(const char *const filename) // TODO hold the filename. name == filename
     {
-        if (!loader.setPixelFormat(m_cpuPixelFormat))
-            return false;
-
-        m_cpuPixelCount = loader.getPixelCount();
-        m_cpuPixelType = loader.getPixelType();
-        m_gpuPixelFormat = CPU2GPUFormat(GLenum(m_cpuPixelFormat), GLenum(m_cpuPixelType));
-        if (m_gpuPixelFormat < 0)
-            return false;
-
-        m_buffer.clear();
-        m_width = m_height = 0;
-        return loader.load(filename, m_buffer, m_width, m_height);
+        static_assert(std::is_base_of<TextureLoader, L>::value,
+                      "Template L is not derived class from TextureLoader");
+        L loader;
+        return doload(loader, filename);
     }
-
-    bool load(const char *const filename);
 
     //--------------------------------------------------------------------------
     //! \brief Save the texture into a picture file depending on the file extension
     //! on filename.
     //! \note Beware loaders may not manage all picture format. For example
     //! SOIL only manages BMP, TGA and DDS.
+    //! \tparam L: class deriving from TextureLoader (ie SOIL).
     //!
     //! \return true if texture data have been writen in the file, else false.
     //--------------------------------------------------------------------------
-    bool save(const char *const filename, TextureLoader& loader)
+    template<class L>
+    inline bool save(std::string const& filename)
     {
-        if (loader.setPixelFormat(m_cpuPixelFormat))
-            return loader.save(filename, m_buffer, m_width, m_height);
-        return false;
+        static_assert(std::is_base_of<TextureLoader, L>::value,
+                      "Template L is not derived class from TextureLoader");
+        L loader;
+        return dosave(loader, filename.c_str());
     }
 
-    bool save(const char *const filename);
+    //--------------------------------------------------------------------------
+    //! \brief Save the texture into a picture file depending on the file extension
+    //! on filename.
+    //! \note Beware loaders may not manage all picture format. For example
+    //! SOIL only manages BMP, TGA and DDS.
+    //! \tparam L: class deriving from TextureLoader (ie SOIL).
+    //!
+    //! \return true if texture data have been writen in the file, else false.
+    //--------------------------------------------------------------------------
+    template<class L>
+    bool save(const char *const filename)
+    {
+        static_assert(std::is_base_of<TextureLoader, L>::value,
+                      "Template L is not derived class from TextureLoader");
+        L loader;
+        return dosave(loader, filename);
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Set to the nth byte of the texture (write access).
@@ -200,6 +216,47 @@ public:
     }
 
 private:
+
+    //--------------------------------------------------------------------------
+    //! \brief Load a jpeg, png, bmp ... file as texture.
+    //!
+    //! \param filename the path of the jpeg, png, bmp file.
+    //! \param rename if set to true then the name of this instance (set
+    //! in the constructor) takes the name of the file. Else, the
+    //! instance name is not mdified.
+    //!
+    //! \return true if texture data have been loaded.
+    //--------------------------------------------------------------------------
+    bool doload(TextureLoader& loader, const char *const filename)
+    {
+        if (!loader.setPixelFormat(m_cpuPixelFormat))
+            return false;
+
+        m_cpuPixelCount = loader.getPixelCount();
+        m_cpuPixelType = loader.getPixelType();
+        m_gpuPixelFormat = CPU2GPUFormat(GLenum(m_cpuPixelFormat), GLenum(m_cpuPixelType));
+        if (m_gpuPixelFormat < 0)
+            return false;
+
+        m_buffer.clear();
+        m_width = m_height = 0;
+        return loader.load(filename, m_buffer, m_width, m_height);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Save the texture into a picture file depending on the file extension
+    //! on filename.
+    //! \note Beware loaders may not manage all picture format. For example
+    //! SOIL only manages BMP, TGA and DDS.
+    //!
+    //! \return true if texture data have been writen in the file, else false.
+    //--------------------------------------------------------------------------
+    bool dosave(TextureLoader& loader, const char *const filename)
+    {
+        if (loader.setPixelFormat(m_cpuPixelFormat))
+            return loader.save(filename, m_buffer, m_width, m_height);
+        return false;
+    }
 
     //--------------------------------------------------------------------------
     //! \brief Specify to OpenGL a two-dimensional texture image.

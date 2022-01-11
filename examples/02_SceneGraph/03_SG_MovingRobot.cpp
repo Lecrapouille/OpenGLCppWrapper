@@ -66,7 +66,7 @@ MyCube::MyCube(const char *name)
       m_vao.texture2D("texID").interpolation(TextureMinFilter::LINEAR,
                                              TextureMagFilter::LINEAR);
       m_vao.texture2D("texID").wrap(TextureWrap::CLAMP_TO_EDGE);
-      m_vao.texture2D("texID").load("external/assets/wooden-crate.jpg");
+      m_vao.texture2D("texID").load<SOIL>("external/assets/wooden-crate.jpg");
 
       float ratio = 1024.0f/728.0f; // FIXME width<float>() / height<float>();
       m_prog.matrix44f("projection") =

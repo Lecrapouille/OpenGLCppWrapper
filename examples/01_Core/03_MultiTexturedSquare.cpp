@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "03_MultiTexturedSquare.hpp"
+#include "Loaders/Textures/SOIL.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
@@ -46,15 +47,15 @@ void MultiTexturedSquare::onWindowResized()
 //------------------------------------------------------------------------------
 bool MultiTexturedSquare::loadTextures()
 {
-    if (!m_square.texture2D("blendMap").load("external/assets/blendMap.png"))
+    if (!m_square.texture2D("blendMap").load<SOIL>("external/assets/blendMap.png"))
         return false;
-    if (!m_square.texture2D("backgroundTexture").load("external/assets/grassy2.png"))
+    if (!m_square.texture2D("backgroundTexture").load<SOIL>("external/assets/grassy2.png"))
         return false;
-    if (!m_square.texture2D("rTexture").load("external/assets/mud.png"))
+    if (!m_square.texture2D("rTexture").load<SOIL>("external/assets/mud.png"))
         return false;
-    if (!m_square.texture2D("gTexture").load("external/assets/grassFlowers.png"))
+    if (!m_square.texture2D("gTexture").load<SOIL>("external/assets/grassFlowers.png"))
         return false;
-    if (!m_square.texture2D("bTexture").load("external/assets/path.png"))
+    if (!m_square.texture2D("bTexture").load<SOIL>("external/assets/path.png"))
         return false;
 
     return true;

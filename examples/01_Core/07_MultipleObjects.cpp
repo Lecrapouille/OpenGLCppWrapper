@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "07_MultipleObjects.hpp"
+#include "Loaders/Textures/SOIL.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
@@ -82,7 +83,7 @@ bool MultipleObjects::initCube(Shape& cube, const char* texture_path)
                               GLTexture::Magnification::NEAREST);
         texture.wrap(GLTexture::Wrap::MIRRORED_REPEAT);
     }
-    return texture.load(texture_path);
+    return texture.load<SOIL>(texture_path);
 }
 
 //------------------------------------------------------------------------------
@@ -112,7 +113,7 @@ bool MultipleObjects::initFloor(Shape& floor, const char* texture_path)
     texture.interpolation(GLTexture::Minification::LINEAR,
                           GLTexture::Magnification::LINEAR);
     texture.wrap(GLTexture::Wrap::MIRRORED_REPEAT);
-    return texture.load(texture_path);
+    return texture.load<SOIL>(texture_path);
 }
 
 //------------------------------------------------------------------------------

@@ -19,10 +19,3 @@
 //=====================================================================
 
 #include "OpenGL/Textures/Texture3D.hpp"
-#include "Loaders/Textures/SOIL.hpp"
-
-bool GLTexture3D::load(std::vector<std::string> const& filenames)
-{
-    SOIL soil;
-    return load(filenames, soil);
-}

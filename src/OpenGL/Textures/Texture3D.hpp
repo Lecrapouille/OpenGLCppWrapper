@@ -52,13 +52,13 @@ public:
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
-    bool load(std::vector<std::string> const& filenames);
-
-    //--------------------------------------------------------------------------
-    //! \brief
-    //--------------------------------------------------------------------------
-    bool load(std::vector<std::string> const& filenames, TextureLoader& loader)
+    template<class L>
+    bool load(std::vector<std::string> const& filenames)
     {
+        static_assert(std::is_base_of<TextureLoader, L>::value,
+                      "Template l is not derived class from TextureLoader");
+        L loader;
+
         m_width = m_height = m_depth = 0u;
         size_t prevWidth = 0;
         size_t prevHeight = 0;

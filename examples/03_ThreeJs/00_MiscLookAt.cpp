@@ -103,13 +103,13 @@ bool MiscLookAt::setup()
                              maths::random<float>() * 4.0f + 2.0f,
                              maths::random<float>() * 4.0f + 2.0f));
       // FIXME: to be remove
-      cone->texture().load("external/assets/wooden-crate.jpg");
+      cone->texture().load<SOIL>("external/assets/wooden-crate.jpg");
 
       m_scene->attach(cone);
     }
 
 // FIXME: to be remove
-  m_cube->texture().load("external/assets/wooden-crate.jpg");
+  m_cube->texture().load<SOIL>("external/assets/wooden-crate.jpg");
 
   return true;
 }
