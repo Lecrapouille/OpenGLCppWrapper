@@ -74,6 +74,7 @@ private:
 private:
 
     // \brief Background color changed through DearImGui buttons
+    GLTexture2D texture;
     static float color[4];
 };
 

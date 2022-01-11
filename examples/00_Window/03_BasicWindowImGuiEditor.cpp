@@ -19,14 +19,15 @@
 //=====================================================================
 
 #include "03_BasicWindowImGuiEditor.hpp"
+#include "Loaders/Textures/SOIL.hpp"
 #include <iostream>
 
 float BasicWindowImGuiEditor::color[4] = { 0.5f, 0.5f, 1.0f, 1.0f };
 
 //------------------------------------------------------------------------------
 BasicWindowImGuiEditor::BasicWindowImGuiEditor(uint32_t const width, uint32_t const height,
-                         const char *title)
-    : GLWindow(width, height, title)
+                                               const char *title)
+    : GLWindow(width, height, title), texture("texture")
 {
     std::cout << "Hello BasicWindowImGuiEditor: " << info() << std::endl;
 }
@@ -41,6 +42,12 @@ BasicWindowImGuiEditor::~BasicWindowImGuiEditor()
 bool BasicWindowImGuiEditor::onSetup()
 {
     m_layers.push_back(std::make_unique<BasicWindowImGuiEditor::GUI>(*this));
+    if (!texture.load<SOIL>("external/assets/hazard.png"))
+    {
+        std::cerr << "Failed loading texture" << std::endl;
+        return false;
+    }
+    texture.begin();
     return true;
 }
 
@@ -137,6 +144,10 @@ bool BasicWindowImGuiEditor::GUI::onImGuiRender()
                               win.color[3]),
                        "%s", "Change the background color");
     ImGui::ColorEdit3("color", win.color);
+    
+    // https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
+    
+    ImGui::Image((void*)win.texture.handle(), ImVec2(128, 128));
     ImGui::End();
 
 
