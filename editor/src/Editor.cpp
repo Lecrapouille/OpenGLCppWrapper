@@ -18,43 +18,52 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "03_BasicWindowImGuiEditor.hpp"
+#include "Editor.hpp"
 #include "Loaders/Textures/SOIL.hpp"
 #include <iostream>
 
-float BasicWindowImGuiEditor::color[4] = { 0.5f, 0.5f, 1.0f, 1.0f };
-
-//------------------------------------------------------------------------------
-BasicWindowImGuiEditor::BasicWindowImGuiEditor(uint32_t const width, uint32_t const height,
-                                               const char *title)
-    : GLWindow(width, height, title), texture("texture")
-{
-    std::cout << "Hello BasicWindowImGuiEditor: " << info() << std::endl;
-}
-
-//------------------------------------------------------------------------------
-BasicWindowImGuiEditor::~BasicWindowImGuiEditor()
-{
-    std::cout << "Bye BasicWindowImGuiEditor" << std::endl;
-}
+float Editor::color[4] = { 0.5f, 0.5f, 1.0f, 1.0f };
 
 //------------------------------------------------------------------
-bool BasicWindowImGuiEditor::onSetup()
+static bool loadTexture(GLTexture2D& texture, std::string const& path)
 {
-    m_layers.push_back(std::make_unique<BasicWindowImGuiEditor::GUI>(*this));
-    if (!texture.load<SOIL>("external/assets/hazard.png"))
+    if (!texture.load<SOIL>(path))
     {
-        std::cerr << "Failed loading texture" << std::endl;
+        std::cerr << "Failed loading texture: " << path << std::endl;
         return false;
     }
     texture.begin();
     return true;
 }
 
+
+//------------------------------------------------------------------------------
+Editor::Editor(uint32_t const width, uint32_t const height, const char *title)
+    : GLWindow(width, height, title), m_texture("texture")
+{
+    std::cout << "Hello Editor" << std::endl;
+}
+
+//------------------------------------------------------------------------------
+Editor::~Editor()
+{
+    std::cout << "Bye Editor" << std::endl;
+}
+
+//------------------------------------------------------------------
+bool Editor::onSetup()
+{
+    if (!loadTexture(m_texture, "../examples/external/assets/hazard.png"))
+        return false;
+
+    m_layers.push_back(std::make_unique<Editor::GUI>(*this));
+    return true;
+}
+
 //------------------------------------------------------------------
 //! \brief Paint our scene. Here we are using the delta time to
 //------------------------------------------------------------------
-bool BasicWindowImGuiEditor::onPaint()
+bool Editor::onPaint()
 {
     // First draw your OpenGL scene
     glCheck(glClear(GL_COLOR_BUFFER_BIT));
@@ -68,9 +77,9 @@ bool BasicWindowImGuiEditor::onPaint()
 //! \brief Paint some DearImGui widgets. In this example change the
 //! background color.
 //------------------------------------------------------------------
-bool BasicWindowImGuiEditor::GUI::onImGuiRender()
+bool Editor::GUI::onImGuiRender()
 {
-    BasicWindowImGuiEditor& win = owner<BasicWindowImGuiEditor>();
+    Editor& win = owner<Editor>();
 
     static bool dockspace_open = true;
     static bool opt_fullscreen = true;
@@ -144,10 +153,10 @@ bool BasicWindowImGuiEditor::GUI::onImGuiRender()
                               win.color[3]),
                        "%s", "Change the background color");
     ImGui::ColorEdit3("color", win.color);
-    
+
     // https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
-    
-    ImGui::Image((void*)win.texture.handle(), ImVec2(128, 128));
+
+    ImGui::Image((void*)win.m_texture.handle(), ImVec2(128, 128));
     ImGui::End();
 
 
@@ -158,13 +167,13 @@ bool BasicWindowImGuiEditor::GUI::onImGuiRender()
 }
 
 //------------------------------------------------------------------------------
-void BasicWindowImGuiEditor::onSetupFailed(std::string const& reason)
+void Editor::onSetupFailed(std::string const& reason)
 {
     std::cerr << "Failure during the setup. Reason: " << reason << std::endl;
 }
 
 //------------------------------------------------------------------------------
-void BasicWindowImGuiEditor::onPaintFailed(std::string const& reason)
+void Editor::onPaintFailed(std::string const& reason)
 {
     std::cerr << "Failure during rendering. Reason: " << reason << std::endl;
 }

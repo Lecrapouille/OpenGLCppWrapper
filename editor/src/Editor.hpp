@@ -18,8 +18,8 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_03_WINDOW_WITH_DEAR_IMGUI_EDITOR_HPP
-#  define EXAMPLE_03_WINDOW_WITH_DEAR_IMGUI_EDITOR_HPP
+#ifndef OPENGLCPPWRAPPER_EDITOR_HPP
+#  define OPENGLCPPWRAPPER_EDITOR_HPP
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
@@ -27,43 +27,32 @@
 //! \brief This example shows how to add and use Dear ImGui widgets.
 //! For more information see: https://github.com/ocornut/imgui
 //------------------------------------------------------------------------------
-class BasicWindowImGuiEditor: public GLWindow
+class Editor: public GLWindow
 {
 public:
 
-    BasicWindowImGuiEditor(uint32_t const width, uint32_t const height,
-                const char *title);
-    ~BasicWindowImGuiEditor();
-
-    static std::string info()
-    {
-        return "Window using Dear ImGui editor";
-    }
+    Editor(uint32_t const width, uint32_t const height, const char *title);
+    ~Editor();
 
 private:
-
-    // Same from the initial example:
 
     virtual bool onSetup() override;
     virtual bool onPaint() override;
     virtual void onSetupFailed(std::string const& reason) override;
     virtual void onPaintFailed(std::string const& reason) override;
 
-    // Added to this new example:
-
 private:
 
     //--------------------------------------------------------------------------
     //! \brief Sub class managing Dear ImGui context and allowing to draw
     //! widgets.
-    //! \note this class can be place outside \c BasicWindowImGuiEditor
+    //! \note this class can be place outside \c Editor
     //--------------------------------------------------------------------------
     class GUI: public DearImGuiLayer
     {
     public:
 
-        GUI(BasicWindowImGuiEditor& window)
-            : DearImGuiLayer(window, "DearIMGUI")
+        GUI(Editor& window) : DearImGuiLayer(window, "GUI")
         {}
 
     private:
@@ -74,8 +63,8 @@ private:
 private:
 
     // \brief Background color changed through DearImGui buttons
-    GLTexture2D texture;
+    GLTexture2D m_texture;
     static float color[4];
 };
 
-#endif // EXAMPLE_03_WINDOW_WITH_DEAR_IMGUI_EDITOR_HPP
+#endif // OPENGLCPPWRAPPER_EDITOR_HPP

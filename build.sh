@@ -1,3 +1,4 @@
+#!/bin/bash -e
 ##=====================================================================
 ## OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
 ## Copyright 2019 Quentin Quadrat <lecrapouille@gmail.com>
@@ -18,6 +19,7 @@
 ## along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
+# Get the number of CPU cores
 NPROC=
 if [[ "`uname -s`" == "Darwin" ]]; then
     NPROC=`sysctl -n hw.logicalcpu`
@@ -25,10 +27,16 @@ else
     NPROC=`nproc`
 fi
 
-# Compil the lib
+# Compile the libOpenGLCppWrapper
 make download-external-libs
 make compile-external-libs
 make -j$NPROC
 
-# Compil Examples
+# Compile the OpenGLCppWrapper editor
+(cd editor && make -j$NPROC)
+
+# Compile Examples
 (cd examples && make -j$NPROC)
+
+# Compile unit test (if desired)
+# (cd tests && make coverage -j$NPROC)

@@ -27,8 +27,8 @@ M=$(P)/.makefile
 ###################################################
 # Project definition
 #
-TARGET = OpenGLExamples
-DESCRIPTION = Unit tests for $(PROJECT)
+TARGET = OpenGLCppWrapperEditor
+DESCRIPTION = Unity-like editor for $(PROJECT)
 BUILD_TYPE = debug
 
 include $(P)/Makefile.common
@@ -36,60 +36,9 @@ include $(P)/Makefile.common
 ###################################################
 # List of files to compile.
 #
-OBJS_WINDOW = \
-  00_BasicWindow.o \
-  01_BasicWindowIOEvents.o \
-  02_BasicWindowImGui.o \
-  03_BasicWindowImGuiEditor.o
-
-OBJS_CORE = \
-  00_ColorfulTriangle.o \
-  01_DynamicTriangle.o \
-  02_TexturedTriangle.o \
-  03_MultiTexturedSquare.o \
-  04_IndexedQuad.o \
-  05_RotatingQuad.o \
-  06_IndexedSphere.o \
-  07_MultipleObjects.o \
-  08_TerrainTexture3D.o \
-  09_SkyBoxTextureCube.o \
-  10_SkyBoxShape.o \
-  11_ComplexShader.o \
-  12_BasicLighting.o \
-  13_PostProdFrameBuffer.o
-
-OBJS_SCENE = \
-  00_SG_Base.o \
-  02_SG_MaterialsAndShapes.o \
-
-#  01_BasicMaterial.o \
-#  02_NormalsMaterial.o \
-#  03_SceneNodes.o \
-#  04_SceneGraph.o \
-#  05_SceneFog.o \
-#  07_AlphaTest.o
-
-#OBJS_THREE = \
-#  00_MiscLookAt.o
-
-#  06_SceneLighting.o \
-
-OBJS += \
-  $(OBJS_WINDOW) $(OBJS_CORE) $(OBJS_SCENE) $(OBJS_THREE) debug.o main.o
-
-VPATH += \
-  00_Window 01_Core 02_SceneGraph 03_ThreeJs
-
-INCLUDES += \
-  -I00_Window -I01_Core -I02_Scene -I03_ThreeJs
-
-###################################################
-# Download assets
-RESOURCES_DONE=external/assets/resources.downloaded
-
-define DOWNLOAD_RESOURCES
-	@git clone https://github.com/Lecrapouille/OpenGLCppWrapper-data.git --depth=1 external/assets > /dev/null 2> /dev/null; touch $(RESOURCES_DONE)
-endef
+OBJS += Editor.o main.o
+VPATH += src
+INCLUDES += -Isrc
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
@@ -110,15 +59,6 @@ $(OBJS): | $(THIRDPART_LIBS)
 $(THIRDPART_LIBS):
 	@$(call print-to,"Compiling","$(THIRDPART_LIBS)","$@","$(VERSION)")
 	@cd $(P) && $(MAKE)
-
-###################################################
-# Download assets and other resources needed by examples
-.PHONY: download-resources
-download-resources: | $(BUILD)
-	@$(call DOWNLOAD_RESOURCES)
-
-$(RESOURCES_DONE): | $(BUILD)
-	@$(call DOWNLOAD_RESOURCES)
 
 ###################################################
 # Sharable informations between all Makefiles

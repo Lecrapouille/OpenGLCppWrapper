@@ -74,6 +74,7 @@ veryclean: clean
 	@rm -fr cov-int $(PROJECT).tgz *.log foo 2> /dev/null
 	@(cd tests && $(MAKE) -s clean)
 	@(cd examples/ && $(MAKE) -s clean)
+	@(cd editor/ && $(MAKE) -s clean)
 	@$(call print-simple,"Cleaning","$(PWD)/doc/html")
 	@rm -fr $(THIRDPART)/*/ doc/html 2> /dev/null
 
