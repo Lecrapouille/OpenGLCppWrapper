@@ -43,3 +43,7 @@ complexity and staying generic.
 * [Examples](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/Examples.md)
 * [Code Architecture](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Architecture.md)
 * [Credits](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Credits.md)
+
+### Gerrit as code review
+
+https://review.gerrithub.io/admin/repos/Lecrapouille/OpenGLCppWrapper,general
