@@ -39,8 +39,7 @@ include $(P)/Makefile.common
 OBJS_WINDOW = \
   00_BasicWindow.o \
   01_BasicWindowIOEvents.o \
-  02_BasicWindowImGui.o \
-  03_BasicWindowImGuiEditor.o
+  02_BasicWindowImGui.o
 
 OBJS_CORE = \
   00_ColorfulTriangle.o \
@@ -97,7 +96,7 @@ endef
 # the doc/Install.md file.
 #FIXME: the static lib name shall be extracted from root makefile
 #
-THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.$(shell cat $(P)/VERSION))
+THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.$(shell cat $(P)/VERSION.txt))
 
 ###################################################
 # Compile tutorials

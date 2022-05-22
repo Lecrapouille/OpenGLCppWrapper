@@ -64,11 +64,10 @@ DEFINES += -Wno-old-style-cast -Wno-conversion -Wno-float-equal -Wno-sign-conver
 ###################################################
 # Bullet3 (3d physics)
 
+THIRDPART_LIBS += $(abspath $(THIRDPART)/bullet3/usr/local/lib/libBulletSoftBody.a)
 THIRDPART_LIBS += $(abspath $(THIRDPART)/bullet3/usr/local/lib/libBulletDynamics.a)
 THIRDPART_LIBS += $(abspath $(THIRDPART)/bullet3/usr/local/lib/libBulletCollision.a)
 THIRDPART_LIBS += $(abspath $(THIRDPART)/bullet3/usr/local/lib/libLinearMath.a)
-
-LINKER_FLAGS += -L$(THIRDPART)/bullet3/usr/local/lib
 INCLUDES += -I$(THIRDPART)/bullet3/usr/local/include
 INCLUDES += -I$(THIRDPART)/bullet3/usr/local/include/bullet
 
@@ -122,5 +121,5 @@ OBJ_GEOMETRIES = Axes.o Model.o Plane.o Tube.o Sphere.o Box.o
 OBJ_PHYSICS = Components.o BulletWrapper.o
 
 # Needed by MyMakefile
-OBJS += $(OBJ_COMMON) $(OBJ_OPENGL) $(OBJ_GUI) $(OBJ_LOADERS) $(OBJ_MATERIALS)
-OBJS += $(OBJ_GEOMETRIES) $(OBJ_PHYSICS) $(OBJ_CAMERA) $(OBJ_SCENE_GRAPH)
+LIB_OBJS += $(OBJ_COMMON) $(OBJ_OPENGL) $(OBJ_GUI) $(OBJ_LOADERS) $(OBJ_MATERIALS)
+LIB_OBJS += $(OBJ_GEOMETRIES) $(OBJ_PHYSICS) $(OBJ_CAMERA) $(OBJ_SCENE_GRAPH)

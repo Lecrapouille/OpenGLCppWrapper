@@ -99,8 +99,8 @@ public:
         //! transform matrix maked the node be placed at the origin of the
         //! world.
         //----------------------------------------------------------------------
-        Node(std::string const& name, std::string const& tag)
-            : GameObject(name, tag)
+        Node(std::string const& name, std::string const& tag_)
+            : GameObject(name, tag_)
         {}
 
         //----------------------------------------------------------------------

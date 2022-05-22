@@ -46,7 +46,7 @@ INCLUDES += -Isrc
 # the doc/Install.md file.
 #FIXME: the static lib name shall be extracted from root makefile
 #
-THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.$(shell cat $(P)/VERSION))
+THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.$(shell cat $(P)/VERSION.txt))
 
 ###################################################
 # Compile tutorials
