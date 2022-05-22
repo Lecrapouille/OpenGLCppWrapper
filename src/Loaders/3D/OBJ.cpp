@@ -30,9 +30,6 @@ static bool readObjFile(std::stringstream& ss, const std::string& fileName)
     objFile.open(fileName);
     if (!objFile)
     {
-        std::cerr << "Failed loading file '" << fileName
-                  << "'. Reason '" << std::strerror(errno)
-                  << std::endl;
         return false;
     }
 
@@ -51,7 +48,12 @@ bool OBJFileLoader::load(std::string const& fileName,
     std::stringstream objData;
 
     if (!readObjFile(objData, fileName))
+    {
+        m_error = "Failed loading 3D file '" + fileName + "'. Reason was: '"
+                  + std::strerror(errno) + "'";
+        std::cerr << m_error << std::endl;
         return false;
+    }
 
     std::vector<Vector3f> tmp_vertices;
     std::vector<Vector3f> tmp_normals;
@@ -59,9 +61,11 @@ bool OBJFileLoader::load(std::string const& fileName,
     std::vector<std::string> faces;
     std::string line;
     float x, y, z;
+    size_t lines = 0u;
 
     while (std::getline(objData, line))
     {
+        lines += 1u;
         std::istringstream ss(line);
         std::string token;
 
@@ -130,7 +134,9 @@ bool OBJFileLoader::load(std::string const& fileName,
             }
             catch (std::exception const&)
             {
-                std::cerr << "Erroneous face index" << std::endl;
+                m_error = "Failed loading 3D file '" + fileName + "'. Reason was: '"
+                        + "Erroneous face index at line " + std::to_string(lines) + "'";
+                std::cerr << m_error << std::endl;
                 return false;
             }
         }

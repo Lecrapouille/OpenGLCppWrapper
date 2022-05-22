@@ -22,41 +22,88 @@
 #  define TEXTURES_LOADER_HPP
 
 #  include "OpenGL/Textures/Texture.hpp"
-//#  include <algorithm>
 
+// ***************************************************************************
+//! \brief Interface class for loading and saving 2D texture from picture file
+//! (jpeg, bmp, png ...). The derived class shall implement concretly these
+//! method using for example an external library (SOIL ...)
+// ***************************************************************************
 class TextureLoader
 {
 public:
 
-    virtual bool setPixelFormat(GLTexture::PixelFormat const cpuformat) = 0;
+    //--------------------------------------------------------------------------
+    //! \brief Virtual destructor needed because of pure virtual methods.
+    //--------------------------------------------------------------------------
+    virtual ~TextureLoader() = default;
 
+    //--------------------------------------------------------------------------
+    //! \brief Mandatory method allowing to configurate the texture. This method
+    //! has to be called before methods such as load(), save() which depends on
+    //! this configuration.
+    //!
+    //! \param[in] pixelformat the desired format pixel format of the texture.
+    //! (i.e. GLTexture::PixelFormat::RGBA).
+    //!
+    //! \return true if the desired setting is valid, else return false and the
+    //! error message can be get through the method error().
+    //--------------------------------------------------------------------------
+    virtual bool setPixelFormat(GLTexture::PixelFormat const pixelformat) = 0;
+
+    //--------------------------------------------------------------------------
+    //! This method return the type of OpenGL pixel. For example with SOIL
+    //! library only array of unsigned chars is managed and therefore will
+    //! return GL_UNSIGNED_BYTE.
+    //--------------------------------------------------------------------------
+    virtual GLenum getPixelType() const = 0;
+
+    //--------------------------------------------------------------------------
+    //! \brief This method return the number of channels used if and only if the
+    //! setPixelFormat() has been called with success. For example if RGBA was
+    //! passed to setPixelFormat() then this method will return 4.
+    //--------------------------------------------------------------------------
+    virtual size_t getPixelCount() const = 0;
+
+    //--------------------------------------------------------------------------
+    //! \brief Load a picture file (jpeg, bmp, png, ...) from the disk into an
+    //! array of unsigned chars that can manipulated from CPU and GPU.
+    //!
+    //! \param[in] filename the path of the  picture file (jpeg, bmp, png, ...).
+    //! \param[in, out] The OpenGL texture buffer that will hold the texture.
+    //! \param[out] width Return the width of the loaded texture.
+    //! \param[out] height Return the height of the loaded texture.
+    //! \return true if the textures has been loaded with success, esle return
+    //! false and the error message can be get through the method error().
+    //--------------------------------------------------------------------------
     virtual bool load(std::string const& filename, GLTexture::Buffer& buffer,
                       size_t& width, size_t& height) = 0;
 
+    //--------------------------------------------------------------------------
+    //! \brief Save the OpenGL texture into a picture file (jpeg, bmp, png ...)
+    //! from the disk.
+    //!
+    //! \param[in] filename the path of the  picture file (bmp, tga or dds).
+    //! \param[in] The OpenGL texture buffer that holds the texture.
+    //! \param[in] width Return the width of the loaded texture.
+    //! \param[in] height Return the height of the loaded texture.
+    //! \return true if the textures has been saved with success, esle return
+    //! false and the error message can be get through the method error().
+    //--------------------------------------------------------------------------
     virtual bool save(std::string const& filename, GLTexture::Buffer const& buffer,
                       size_t const width, size_t const height) = 0;
 
-    virtual GLenum getPixelType() const = 0;
-
-    virtual size_t getPixelCount() const = 0;
-
-    static std::string getExtension(std::string const& path)
+    //--------------------------------------------------------------------------
+    //! \brief Return the last errorr (if occured).
+    //--------------------------------------------------------------------------
+    inline std::string const& error() const
     {
-        std::string::size_type pos = path.find_last_of(".");
-        if (pos != std::string::npos)
-        {
-            std::string ext = path.substr(pos + 1, std::string::npos);
-
-            // Ignore the ~ in the extension (ie. foo.txt~)
-            if ('~' == ext.back())
-                ext.pop_back();
-
-            // Get the file extension in lower case
-            std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-            return ext;
-        }
-        return "";
+        return m_error;
     }
+
+protected:
+
+    //! \brief Store the current error.
+    std::string m_error;
 };
 
 #endif

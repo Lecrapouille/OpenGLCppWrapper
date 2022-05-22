@@ -33,6 +33,15 @@ public:
                       GLVertexBuffer<Vector3f>& normals,
                       GLVertexBuffer<Vector2f>& uv,
                       GLIndex32& indices) = 0;
+
+    inline std::string const& error() const
+    {
+        return m_error;
+    }
+
+protected:
+
+   std::string m_error;
 };
 
 #endif

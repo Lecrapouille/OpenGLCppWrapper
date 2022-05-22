@@ -19,10 +19,13 @@
 //=====================================================================
 
 #include "Loaders/Textures/SOIL.hpp"
+#include "Common/File.hpp"
 
 //------------------------------------------------------------------------------
 bool SOIL::setPixelFormat(GLTexture::PixelFormat const cpuformat)
 {
+    m_error.clear();
+
     switch (cpuformat)
     {
     case GLTexture::PixelFormat::RGBA:
@@ -51,13 +54,14 @@ bool SOIL::setPixelFormat(GLTexture::PixelFormat const cpuformat)
     case GLTexture::PixelFormat::ALPHA:
     case GLTexture::PixelFormat::DEPTH_STENCIL:
     default:
-        std::cerr << "SOIL does not surport the given pixel format"
-                  << std::endl;
-        m_soilFormat = SOIL_LOAD_AUTO;
+        m_error = "SOIL does not suport the given CPU pixel format";
+        std::cerr << m_error << std::endl;
+        //m_soilFormat = SOIL_LOAD_AUTO;
         m_isValid = false;
         break;
     }
 
+    m_pixelType = GL_UNSIGNED_BYTE; // Only managed by SOIL
     return m_isValid;
 }
 
@@ -67,8 +71,10 @@ bool SOIL::load(std::string const& filename, GLTexture::Buffer& buffer,
 {
     if (unlikely(!m_isValid))
     {
-        std::cerr << "Cannot load texture: setPixelFormat() method did called or returned false"
-                  << std::endl;
+        m_error = "Failed loading picture file '" + filename + "'. Reason was: '"
+                  + "the setPixelFormat() method previously return false "
+                  + "or you have never called it !'";
+        std::cerr << m_error << std::endl;
         return false;
     }
 
@@ -86,40 +92,34 @@ bool SOIL::load(std::string const& filename, GLTexture::Buffer& buffer,
         size_t size = static_cast<size_t>(w * h) * m_pixelCount * sizeof(unsigned char);
         buffer.append(image, size); // FIXME: not working with preallocated size
         SOIL_free_image_data(image);
+        m_error.clear();
         return true;
     }
     else
     {
-        std::cerr << "Failed loading picture file '"
-                  << filename << "'. Reason was '"
-                  << SOIL_last_result()
-                  << "'" << std::endl;
         width = height = 0;
         buffer.clear();
+        m_error = "Failed loading picture file '" + filename + "'. Reason was: '"
+                  + SOIL_last_result() + "'";
+        std::cerr << m_error << std::endl;
         return false;
     }
 }
 
 //------------------------------------------------------------------------------
-bool SOIL::save(std::string const& filename, GLTexture::Buffer const& texture_buffer,
+bool SOIL::save(std::string const& filename, GLTexture::Buffer const& texture,
                 size_t const width, size_t const height)
 {
     if (unlikely(!m_isValid))
     {
-        std::cerr << "Cannot load texture: setPixelFormat() method did called or returned false"
-                  << std::endl;
+        m_error = "Failed saving picture file '" + filename + "'. Reason was: '"
+                  + "the setPixelFormat() method previously return false "
+                  + "or you have never called it !'";
+        std::cerr << m_error << std::endl;
         return false;
     }
 
-    const unsigned char* buffer = texture_buffer.to_array();
-    if (unlikely(nullptr == buffer))
-    {
-        std::cerr << "Cannot save a texture with no buffer"
-                  << std::endl;
-        return false;
-    }
-
-    std::string ext = getExtension(filename);
+    std::string ext = File::extension(filename);
     if (ext == "bmp")
         m_soilFormat = SOIL_SAVE_TYPE_BMP;
     else if (ext == "tga")
@@ -128,8 +128,18 @@ bool SOIL::save(std::string const& filename, GLTexture::Buffer const& texture_bu
         m_soilFormat = SOIL_SAVE_TYPE_DDS;
     else
     {
-        std::cerr << "Cannot save a texture into the given file format '"
-                  << ext << std::endl;
+        m_error = "Failed saving picture file '" + filename + "'. Reason was: '"
+                  + "'unsuported file format " + ext + "'";
+        std::cerr << m_error << std::endl;
+        return false;
+    }
+
+    const unsigned char* buffer = texture.to_array();
+    if (unlikely(nullptr == buffer))
+    {
+        m_error = "Failed saving picture file '" + filename + "'. Reason was: '"
+                  + "'Cannot save a texture with no buffer'";
+        std::cerr << m_error << std::endl;
         return false;
     }
 
@@ -141,10 +151,12 @@ bool SOIL::save(std::string const& filename, GLTexture::Buffer const& texture_bu
                                  buffer);
     if (unlikely(!res))
     {
-        std::cerr << "Failed saving the texture in the file '"
-                  << filename << "'. Reason was '"
-                  << SOIL_last_result()
-                  << "'" << std::endl;
+        m_error = "Failed saving picture file '" + filename + "'. Reason was: '"
+                  + SOIL_last_result() + "'";
+        std::cerr << m_error << std::endl;
+        return false;
     }
-    return res;
+
+    m_error.clear();
+    return true;
 }

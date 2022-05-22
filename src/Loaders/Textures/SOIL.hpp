@@ -33,12 +33,18 @@ class SOIL: public TextureLoader
 public:
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief See documention from TextureLoader class.
+    //! Accepted format:
+    //!   - GLTexture::PixelFormat::RGBA
+    //!   - GLTexture::PixelFormat::RGB
+    //!   - GLTexture::PixelFormat::LUMINANCE
+    //!   - GLTexture::PixelFormat::LUMINANCE_ALPHA
     //--------------------------------------------------------------------------
     virtual bool setPixelFormat(GLTexture::PixelFormat const cpuformat) override;
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief See documention from TextureLoader class.
+    //! Will always return GL_UNSIGNED_BYTE
     //--------------------------------------------------------------------------
     virtual GLenum getPixelType() const override
     {
@@ -46,7 +52,12 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief See documention from TextureLoader class.
+    //! Depending on param passed to setPixelFormat(), will return:
+    //!   - 4 if GLTexture::PixelFormat::RGBA was passed.
+    //!   - 3 if GLTexture::PixelFormat::RGB was passed.
+    //!   - 1 if GLTexture::PixelFormat::LUMINANCE was passed.
+    //!   - 2 if GLTexture::PixelFormat::LUMINANCE_ALPHA was passed.
     //--------------------------------------------------------------------------
     virtual size_t getPixelCount() const override
     {
@@ -54,29 +65,37 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! \brief Load picture file (jpg, png ...)
-    //! \param[in] filename the path of the picture file.
-    //! \param[inout] buffer the pending container holding the texture (CPU side)
-    //! \param[out] width return the texture width (in pixels)
-    //! \param[out] height return the texture height (in pixel)
-    //! \return true if the loading ends with success, else return false.
+    //! \brief See documention from TextureLoader class.
+    //! Accepted format:
+    //!   - BMP: non-1bpp, non-RLE (from stb_image documentation)
+    //!   - PNG: non-interlaced (from stb_image documentation)
+    //!   - JPG: JPEG baseline (from stb_image documentation)
+    //!   - TGA: greyscale or RGB or RGBA or indexed, uncompressed or RLE
+    //!   - DDS: DXT1/2/3/4/5, uncompressed, cubemaps (can't read 3D DDS files
+    //!          yet)
+    //!   - PSD: (from stb_image documentation)
+    //!   - HDR: converted to LDR, unless loaded with HDR functions (RGBE or
+    //!          RGBdivA or RGBdivA2)
     //--------------------------------------------------------------------------
     virtual bool load(std::string const&, GLTexture::Buffer& buffer,
                       size_t& width, size_t& height) override;
 
-
     //--------------------------------------------------------------------------
-    //! \brief
+    //! \brief See documention from TextureLoader class.
+    //! Accepted format:
+    //!   - TGA: Greyscale or RGB or RGBA, uncompressed
+    //!   - BMP: RGB, uncompressed
+    //!   - DDS: RGB as DXT1, or RGBA as DXT5
     //--------------------------------------------------------------------------
-    virtual bool save(std::string const&, GLTexture::Buffer const& texture_buffer,
+    virtual bool save(std::string const&, GLTexture::Buffer const& buffer,
                       size_t const width, size_t const height) override;
 
 private:
 
-    size_t m_pixelCount;
-    int    m_soilFormat;
-    GLenum m_pixelType = GL_UNSIGNED_BYTE; // Only managed by SOIL
-    bool   m_isValid;
+    size_t m_pixelCount = 0;
+    int    m_soilFormat = SOIL_LOAD_AUTO;
+    GLenum m_pixelType = GL_UNSIGNED_BYTE;
+    bool   m_isValid = false;
 };
 
 #endif // OPENGLCPPWRAPPER_SOIL_TEXTURES_LOADER_HPP
