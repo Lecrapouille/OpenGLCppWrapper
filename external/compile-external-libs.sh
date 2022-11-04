@@ -10,11 +10,11 @@ if [ "$1" == "" ]; then
   echo "Expected one argument. Select the architecture: Linux, Darwin or Windows"
   exit 1
 fi
-ARCHI="$1"
-TARGET=OpenGLCppWrapper
 
-### Download is made by ../Makefile
-# ./gitclone.sh $1
+ARCHI="$1"
+TARGET="$2"
+CC="$3"
+CXX="$4"
 
 function print-compile
 {
@@ -33,15 +33,8 @@ fi
 print-compile SOIL
 if [ -e SOIL ];
 then
-    (
-        cd SOIL
-        make -j$NPROC CXXFLAGS="-fPIC -O2 -s"
-        if [ "$ARCHI" == "Linux" ];
-        then
-            # Move header and static lib in the same location to be indentical than SOIL for Darwin
-            cp src/SOIL.h .
-            cp lib/libSOIL.a .
-        fi
+    (cd SOIL
+     VERBOSE=1 make -j$NPROC
     )
 else
     echo "Failed compiling external/SOIL: directory does not exist"
@@ -54,7 +47,7 @@ if [ -e bullet3 ]; then
      rm -fr build usr 2> /dev/null
      mkdir -p build
      cd build
-     cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
+     cmake CXX="$CXX" CC="$CC" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
 	   -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_EXTRAS=OFF \
 	   -DUSE_DOUBLE_PRECISION=OFF -DUSE_GLUT=OFF -DBT_USE_EGL=OFF \
 	   -DUSE_OPENVR=OFF -DBUILD_PYBULLET=OFF -DBUILD_PYBULLET_NUMPY=OFF \

@@ -17,39 +17,28 @@ TARGET="$2"
 ### fresh code source.
 rm -fr backward-cpp imgui SOIL units bullet3 2> /dev/null
 
-function print-clone
+function cloning
 {
-    echo -e "\033[35m*** Cloning:\033[00m \033[36m$TARGET\033[00m <= \033[33m$1\033[00m"
+    REPO="$1"
+    shift
+
+    echo -e "\033[35m*** Cloning: \033[36mhttps://github.com/$REPO\033[00m >= \033[33m$TARGET\033[00m"
+    git clone https://github.com/$REPO.git --depth=1 $* > /dev/null
 }
 
 ### Library for real-time collision detection and multi-physics simulation
 ### License: zlib
-print-clone bullet3
-git clone https://github.com/bulletphysics/bullet3.git --depth=1 --branch 3.24 > /dev/null
+cloning bulletphysics/bullet3 --branch 3.24
 
 ### Library SOIL for opening pictures files (jpeg, png ...)
-print-clone SOIL
-if [ "$ARCHI" == "Darwin" ];
-then
-
-    # License: public domain
-    git clone https://github.com/childhood/libSOIL.git --depth=1 > /dev/null
-    mv libSOIL SOIL
-
-else
-
-    # License: public domain
-    git clone https://github.com/kbranigan/Simple-OpenGL-Image-Library.git --depth=1 > /dev/null
-    mv Simple-OpenGL-Image-Library SOIL
-fi
-
-### Library for creating GUI in OpenGL
 ### License: MIT
-print-clone imgui
-git clone https://github.com/ocornut/imgui.git -b docking --depth=1 > /dev/null
+cloning Lecrapouille/SOIL
 
-### Library for unit conversion library
-### License: MIT
-print-clone units
-git clone https://github.com/nholthaus/units.git --depth=1 > /dev/null
+#### Library for creating GUI in OpenGL
+#### License: MIT
+cloning ocornut/imgui --branch docking
+
+#### Library for unit conversion library
+#### License: MIT
+cloning nholthaus/units
 (cd units/include && mkdir units && cp units.h units/units.hpp)

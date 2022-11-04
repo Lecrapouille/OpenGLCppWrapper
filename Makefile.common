@@ -41,14 +41,9 @@ endif
 ###################################################
 # SOIL (image loader for OpenGL texturing)
 
-ifeq ($(ARCHI),Darwin)
-THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/*.o)
-else
-THIRDPART_OBJS += $(abspath $(THIRDPART)/SOIL/obj/*.o)
-endif
-
-INCLUDES += -I$(THIRDPART)/SOIL
-VPATH += $(THIRDPART)/SOIL/obj
+THIRDPART_LIBS += $(abspath $(THIRDPART)/SOIL/build/libSOIL.a)
+INCLUDES += -I$(THIRDPART)/SOIL/include
+VPATH += $(THIRDPART)/SOIL/src
 
 ###################################################
 # Dear IM Gui (immediate mode rendering GUI)
