@@ -37,9 +37,10 @@
 class GLVAO;
 
 // *****************************************************************************
-//! \brief This class allows to track GLSL variables (uniforms and attributes)
-//! from given shaders (vertex, fragment, geometry). It allows to populate VBOs
-//! and textures to VAO instances bound to it.
+//! \brief This class allows to compile shader code (vertex, fragment, geometry)
+//! written in GLSL (OpenGL Shading Language) and track their variables (named
+//! uniforms and attributes) which then allows to create VBOs and textures when
+//! and instance of VAO is bound to the GLProgram.
 // *****************************************************************************
 class GLProgram: public GLObject<GLenum>
 {
@@ -64,7 +65,7 @@ public:
     //! \brief Destructor. Clear list of shaders, list of uniforms and list of
     //! attributes. Unbound last VAO. Clear errors.
     //--------------------------------------------------------------------------
-    virtual ~GLProgram() override;
+    virtual ~GLProgram();
 
     //--------------------------------------------------------------------------
     //! \brief Compile a vertex shader and a fragment shader and populate lists

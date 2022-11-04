@@ -30,18 +30,24 @@
 #  include "OpenGL/Context/OpenGL.hpp"
 #  include <cassert>
 
+// FIXME: peut on supprimer les virtual onCreate() par un Curiously recurring template pattern ??
 // ***************************************************************************
 //! \class GLObject GLObject.hpp
 //! \ingroup OpenGL
 //!
 //! \brief GLObject is an interface and ancestor class for wrapping OpenGL
 //! objects such as VAO, VBO, Uniform, Attribute, Shader, Program, Texture,
-//! FrameBuffer.
+//! FrameBuffer, and more ...
 //!
-//! This class implements the template method pattern through public methods
-//! begin() and end() defining the skeleton of calling virtual methods such as
-//! onCreate(), onActivate(), onSetup(), onUpdate(), onDeactivate() which have
-//! to be implemented in derived classes.
+//! Based on the observation that routines, for any kind of OpenGL objects (VAO,
+//! VBO, Uniform ...), can be grouped into six main categories: creation/relase,
+//! setup/update, activation/deactivation (see the table depicted in
+//! doc/Architecture.md for more information), this class will hide the call of
+//! these routines through public methods begin() and end() implementing the
+//! template method pattern: these methods implement an algorithm calling
+//! virtual methods onCreate(), onRelease(), onSetup(), onActivate(),
+//! onUpdate(), onActivate(), onDeactivate() which will implemented in derived
+//! classes (VAO, VBO, Uniform ...).
 //!
 //! \tparam T is the type of the OpenGL handle: either GLenum (aka GLunit) or
 //! GLint. C++ is strongly typed and OpenGL API not fully consistent on this
@@ -131,7 +137,7 @@ public:
 #  ifdef CHECK_OPENGL
         assert(m_context == GL::Context::getCurrentContext() &&
                "You are trying to manipulate an OpenGL object "
-               "that has been created in a different context");
+               "that has been created from a different context");
 #  endif
 
         // Usually call glBindXXX()
@@ -147,7 +153,9 @@ public:
             }
         }
 
-        // Transfer CPU data to GPU data (texture, VBOs ...)
+        // Transfer CPU data to GPU data (texture, VBOs ...).
+        // Note: We do not use if (m_need_update) because of particular case
+        // needed with textures.
         if (needUpdate())
         {
             m_need_update = onUpdate();
@@ -162,10 +170,10 @@ public:
 #  ifdef CHECK_OPENGL
         assert(m_context == GL::Context::getCurrentContext() &&
                "You are trying to manipulate an OpenGL object "
-               "that has been created in a different context");
+               "that has been created from a different context");
 #  endif
 
-        if (likely(m_handle > initialHandleValue()))
+        if (m_handle > initialHandleValue())
         {
             onDeactivate();
         }
@@ -187,7 +195,7 @@ public:
         m_context = nullptr;
 #  endif
 
-        if (likely(m_handle > initialHandleValue()))
+        if (m_handle > initialHandleValue())
         {
             onDeactivate();
             onRelease();
