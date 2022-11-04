@@ -31,7 +31,6 @@
 // Millington
 // *****************************************************************************
 
-#  include "Common/NonCppStd.hpp"
 #  include "Math/Maths.hpp"
 #  include <initializer_list>
 #  include <algorithm>
@@ -41,10 +40,12 @@
 //! \brief Macro for building constructors of any dimension (N).
 // *****************************************************************************
 #define VECTOR_DIM(N)                                                   \
+public:                                                                 \
+                                                                        \
     /*! \brief Empty constructor */                                     \
     Vector()                                                            \
     {                                                                   \
-        static_assert(N >= 2_z, "Minimun dimension for a vector is 2"); \
+        static_assert(N >= 2u, "Minimun dimension for a vector is 2"); \
     }                                                                   \
                                                                         \
     /*! \brief Constructor with initialization list */                  \
@@ -52,7 +53,7 @@
     {                                                                   \
         const size_t m = std::min(static_cast<size_t>(N), initList.size());  /* FIXME cast */ \
         auto iter = initList.begin();                                   \
-        for (size_t i = 0_z; i < m; ++i)                                \
+        for (size_t i = 0u; i < m; ++i)                                 \
         {                                                               \
             m_data[i] = *iter;                                          \
             ++iter;                                                     \
@@ -117,11 +118,13 @@
                                                                         \
     /*! \brief  */                                                      \
     template <typename U>                                               \
-    Vector<T,N>& operator*=(U const& b)                                 \
+    Vector<T,N>& operator*=(U const& other)                             \
     {                                                                   \
         size_t i = N;                                                   \
         while (i--)                                                     \
-            m_data[i] *= T(b);                                          \
+        {                                                               \
+            m_data[i] *= T(other);                                      \
+        }                                                               \
         return *this;                                                   \
     }                                                                   \
                                                                         \
@@ -147,9 +150,9 @@
                                                                         \
 private:                                                                \
                                                                         \
-/* Disallow bool conversions (without this, they'd happen implicitly*/  \
-/* via the array conversions) */                                        \
-operator bool()
+    /* Disallow bool conversions (without this, they'd happen */        \
+    /* implicitly via the array conversions) */                         \
+    operator bool()
 
 // *****************************************************************************
 //! \brief A mathematic element to represent coordinates in space. Note,
@@ -169,12 +172,12 @@ operator bool()
 template <typename T, size_t n>
 class Vector
 {
-public:
-
     //--------------------------------------------------------------------------
     // Generic methods
     //--------------------------------------------------------------------------
     VECTOR_DIM(n);
+
+public:
 
     //--------------------------------------------------------------------------
     //! \brief Return the norm of this instance.
@@ -185,7 +188,9 @@ public:
         size_t i = n;
 
         while (i--)
+        {
             l += (m_data[i] * m_data[i]);
+        }
         return maths::sqrt(l);
     }
 
@@ -199,7 +204,9 @@ public:
         size_t i = n;
 
         while (i--)
+        {
             m_data[i] *= l;
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -210,15 +217,15 @@ public:
         size_t i = n;
 
         while (i--)
+        {
             m_data[i] += (uv.m_data[i] - m_data[i]) * alpha;
+        }
     }
 
-protected:
+public:
 
-    //--------------------------------------------------------------------------
-    //! \brief static array holdind values.
-    //! \note be careful to not produce a stack overflow with a huge size.
-    //--------------------------------------------------------------------------
+    /* Static array holdind values. Be careful to not produce a stack*/ \
+    /* overflow with a huge size. */
     T m_data[n];
 };
 
@@ -226,8 +233,13 @@ protected:
 //! \brief Specialization for vector of dimension 2
 // *****************************************************************************
 template <typename T>
-class Vector<T, 2_z>
+class Vector<T, 2u>
 {
+    //--------------------------------------------------------------------------
+    // Generic methods
+    //--------------------------------------------------------------------------
+    VECTOR_DIM(2u);
+
 public:
 
     //--------------------------------------------------------------------------
@@ -238,11 +250,6 @@ public:
         x = scalar_x;
         y = scalar_y;
     }
-
-    //--------------------------------------------------------------------------
-    // Generic methods
-    //--------------------------------------------------------------------------
-    VECTOR_DIM(2_z);
 
     //--------------------------------------------------------------------------
     //! \brief Return the norm of this instance.
@@ -271,7 +278,7 @@ public:
     union
     {
         //! \brief static array holdind values.
-        T m_data[2_z];
+        T m_data[2u];
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -281,45 +288,50 @@ public:
     };
 
     //! \brief Create a vector filled with NaN (for float and double only).
-    const static Vector<T, 2_z> DUMMY;
+    const static Vector<T, 2u> DUMMY;
     //! \brief Create a vector filled with zero<T>().
-    const static Vector<T, 2_z> ZERO;
+    const static Vector<T, 2u> ZERO;
     //! \brief Create the vector filled with one<T>().
-    const static Vector<T, 2_z> UNIT_SCALE;
+    const static Vector<T, 2u> UNIT_SCALE;
     //! \brief Create the vector filled with negative one<T>().
-    const static Vector<T, 2_z> NEGATIVE_UNIT_SCALE;
+    const static Vector<T, 2u> NEGATIVE_UNIT_SCALE;
     //! \brief Create the vector [one<T>() zero<T>()].
-    const static Vector<T, 2_z> UNIT_X;
+    const static Vector<T, 2u> UNIT_X;
     //! \brief Create the vector [zero<T>() one<T>()].
-    const static Vector<T, 2_z> UNIT_Y;
+    const static Vector<T, 2u> UNIT_Y;
     //! \brief Create the vector [-one<T>() zero<T>()].
-    const static Vector<T, 2_z> NEGATIVE_UNIT_X;
+    const static Vector<T, 2u> NEGATIVE_UNIT_X;
     //! \brief Create the vector [zero<T>() -one<T>()].
-    const static Vector<T, 2_z> NEGATIVE_UNIT_Y;
+    const static Vector<T, 2u> NEGATIVE_UNIT_Y;
 };
 
 // Predifined vectors
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::DUMMY(T(NAN));
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::ZERO(maths::zero<T>());
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::UNIT_SCALE(maths::one<T>());
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::NEGATIVE_UNIT_SCALE(-maths::one<T>());
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::UNIT_X(maths::one<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::UNIT_Y(maths::zero<T>(), maths::one<T>());
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::NEGATIVE_UNIT_X(-maths::one<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 2_z> Vector<T, 2_z>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>());
+template <typename T> const Vector<T, 2u> Vector<T, 2u>::DUMMY(T(NAN));
+template <typename T> const Vector<T, 2u> Vector<T, 2u>::ZERO(maths::zero<T>());
+template <typename T> const Vector<T, 2u> Vector<T, 2u>::UNIT_SCALE(maths::one<T>());
+template <typename T> const Vector<T, 2u> Vector<T, 2u>::NEGATIVE_UNIT_SCALE(-maths::one<T>());
+template <typename T> const Vector<T, 2u> Vector<T, 2u>::UNIT_X(maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 2u> Vector<T, 2u>::UNIT_Y(maths::zero<T>(), maths::one<T>());
+template <typename T> const Vector<T, 2u> Vector<T, 2u>::NEGATIVE_UNIT_X(-maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 2u> Vector<T, 2u>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>());
 
 // *****************************************************************************
 //! \brief Specialization for vector of dimension 3
 // *****************************************************************************
 template <typename T>
-class Vector<T, 3_z>
+class Vector<T, 3u>
 {
+    //--------------------------------------------------------------------------
+    // Generic methods
+    //--------------------------------------------------------------------------
+    VECTOR_DIM(3u);
+
 public:
 
     //--------------------------------------------------------------------------
     //! \brief Constructor.
     //--------------------------------------------------------------------------
-    Vector(Vector<T, 2_z> const& v, const T scalar_z = maths::zero<T>())
+    Vector(Vector<T, 2u> const& v, const T scalar_z = maths::zero<T>())
     {
         x = v.x;
         y = v.y;
@@ -335,11 +347,6 @@ public:
         y = scalar_y;
         z = scalar_z;
     }
-
-    //--------------------------------------------------------------------------
-    // Generic methods
-    //--------------------------------------------------------------------------
-    VECTOR_DIM(3_z);
 
     //--------------------------------------------------------------------------
     //! \brief Return the norm of this instance.
@@ -362,14 +369,14 @@ public:
     }
 
     //--------------------------------------------------------------------------
-    //! brief Selft vector product (aka cross product).
+    //! brief Self vector product (aka cross product).
     //--------------------------------------------------------------------------
-    Vector<T,3_z>& operator%=(Vector<T,3_z> const& b)
+    Vector<T,3u>& operator%=(Vector<T,3u> const& other)
     {
         *this = {
-            y * b.z - z * b.y,
-            z * b.x - x * b.z,
-            x * b.y - y * b.x,
+            y * other.z - z * other.y,
+            z * other.x - x * other.z,
+            x * other.y - y * other.x,
         };
         return *this;
     }
@@ -381,12 +388,12 @@ public:
     //--------------------------------------------------------------------------
     union
     {
-        T m_data[3_z];
+        T m_data[3u];
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
         struct { T x; T y; T z; };
-        struct { T r; T g; T b_; }; // FIXME why T b is not compiling ?
+        struct { T r; T g; T b; };
 #pragma GCC diagnostic pop
     };
 
@@ -395,83 +402,88 @@ public:
     //--------------------------------------------------------------------------
 
     //! \brief Create a vector filled with NaN (for float and double only).
-    const static Vector<T, 3_z> DUMMY;
+    const static Vector<T, 3u> DUMMY;
     //! \brief Create a vector filled with zero<T>().
-    const static Vector<T, 3_z> ZERO;
+    const static Vector<T, 3u> ZERO;
     //! \brief Create the vector filled with one<T>().
-    const static Vector<T, 3_z> ONE;
+    const static Vector<T, 3u> ONE;
     //! \brief Create the vector filled with inf<T>().
-    const static Vector<T, 3_z> POSITIVE_INFINITY;
+    const static Vector<T, 3u> POSITIVE_INFINITY;
     //! \brief Create the vector filled with -inf<T>().
-    const static Vector<T, 3_z> NEGATIVE_INFINITY;
+    const static Vector<T, 3u> NEGATIVE_INFINITY;
     //! \brief Create the vector filled with one<T>().
-    const static Vector<T, 3_z> UNIT_SCALE;
+    const static Vector<T, 3u> UNIT_SCALE;
     //! \brief Create the vector filled with negative one<T>().
-    const static Vector<T, 3_z> NEGATIVE_UNIT_SCALE;
+    const static Vector<T, 3u> NEGATIVE_UNIT_SCALE;
     //! \brief Create the vector [one<T>() zero<T>() zero<T>()].
-    const static Vector<T, 3_z> UNIT_X;
+    const static Vector<T, 3u> UNIT_X;
     //! \brief Create the vector [zero<T>() one<T>() zero<T>()].
-    const static Vector<T, 3_z> UNIT_Y;
+    const static Vector<T, 3u> UNIT_Y;
     //! \brief Create the vector [zero<T>() zero<T>() one<T>()].
-    const static Vector<T, 3_z> UNIT_Z;
+    const static Vector<T, 3u> UNIT_Z;
     //! \brief Create the vector [-one<T>() zero<T>() zero<T>()].
-    const static Vector<T, 3_z> NEGATIVE_UNIT_X;
+    const static Vector<T, 3u> NEGATIVE_UNIT_X;
     //! \brief Create the vector [zero<T>() -one<T>() zero<T>()].
-    const static Vector<T, 3_z> NEGATIVE_UNIT_Y;
+    const static Vector<T, 3u> NEGATIVE_UNIT_Y;
     //! \brief Create the vector [zero<T>() zero<T>() -one<T>()].
-    const static Vector<T, 3_z> NEGATIVE_UNIT_Z;
+    const static Vector<T, 3u> NEGATIVE_UNIT_Z;
     //! \brief Alias for NEGATIVE_UNIT_X
-    const static Vector<T, 3_z> LEFT;
+    const static Vector<T, 3u> LEFT;
     //! \brief Alias for UNIT_X
-    const static Vector<T, 3_z> RIGHT;
+    const static Vector<T, 3u> RIGHT;
     //! \brief Alias for NEGATIVE_UNIT_Y
-    const static Vector<T, 3_z> BACK;
+    const static Vector<T, 3u> BACK;
     //! \brief Alias for UNIT_Y
-    const static Vector<T, 3_z> FORWARD;
+    const static Vector<T, 3u> FORWARD;
     //! \brief Alias for NEGATIVE_UNIT_Z
-    const static Vector<T, 3_z> DOWN;
+    const static Vector<T, 3u> DOWN;
     //! \brief Alias for UNIT_Z
-    const static Vector<T, 3_z> UP;
+    const static Vector<T, 3u> UP;
 };
 
 //------------------------------------------------------------------------------
 // Predefined vectors
 //------------------------------------------------------------------------------
 
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::DUMMY(maths::nan<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ZERO(maths::zero<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::ONE(maths::one<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::POSITIVE_INFINITY(maths::max<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_INFINITY(-maths::max<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::DUMMY(maths::nan<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::ZERO(maths::zero<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::ONE(maths::one<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::POSITIVE_INFINITY(maths::max<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::NEGATIVE_INFINITY(-maths::max<T>());
 
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_SCALE(maths::one<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_SCALE(-maths::one<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_X(maths::one<T>(), maths::zero<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_Y(maths::zero<T>(), maths::one<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UNIT_Z(maths::zero<T>(), maths::zero<T>(), maths::one<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_X(-maths::one<T>(), maths::zero<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::NEGATIVE_UNIT_Z(maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::UNIT_SCALE(maths::one<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::NEGATIVE_UNIT_SCALE(-maths::one<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::UNIT_X(maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::UNIT_Y(maths::zero<T>(), maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::UNIT_Z(maths::zero<T>(), maths::zero<T>(), maths::one<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::NEGATIVE_UNIT_X(-maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::NEGATIVE_UNIT_Z(maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
 
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::LEFT(-maths::one<T>(), maths::zero<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::RIGHT(maths::one<T>(), maths::zero<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::BACK(maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::FORWARD(maths::zero<T>(), maths::zero<T>(), maths::one<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::DOWN(maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 3_z> Vector<T, 3_z>::UP(maths::zero<T>(), maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::LEFT(-maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::RIGHT(maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::BACK(maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::FORWARD(maths::zero<T>(), maths::zero<T>(), maths::one<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::DOWN(maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 3u> Vector<T, 3u>::UP(maths::zero<T>(), maths::one<T>(), maths::zero<T>());
 
 // *****************************************************************************
 //! \brief Specialization for vector of dimension 4
 // *****************************************************************************
 template <typename T>
-class Vector<T, 4_z>
+class Vector<T, 4u>
 {
+    //--------------------------------------------------------------------------
+    // Generic methods
+    //--------------------------------------------------------------------------
+    VECTOR_DIM(4u);
+
 public:
 
     //--------------------------------------------------------------------------
     //! \brief Constructor.
     //--------------------------------------------------------------------------
-    Vector(Vector<T, 3_z> const& v, const T scalar_w = maths::zero<T>())
+    Vector(Vector<T, 3u> const& v, const T scalar_w = maths::zero<T>())
     {
         x = v.x;
         y = v.y;
@@ -482,7 +494,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Constructor.
     //--------------------------------------------------------------------------
-    Vector(Vector<T, 2_z> const& v, const T scalar_w = maths::zero<T>())
+    Vector(Vector<T, 2u> const& v, const T scalar_w = maths::zero<T>())
     {
         x = v.x;
         y = v.y;
@@ -500,8 +512,6 @@ public:
         z = scalar_z;
         w = scalar_w;
     }
-
-    VECTOR_DIM(4_z);
 
     //--------------------------------------------------------------------------
     //! \brief Return the norm of this instance.
@@ -531,12 +541,12 @@ public:
     //--------------------------------------------------------------------------
     union
     {
-        T m_data[4_z];
+        T m_data[4u];
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
         struct { T x; T y; T z; T w; };
-        struct { T r; T g; T b_; T a_; }; // FIXME b_
+        struct { T r; T g; T b; T a; };
 #pragma GCC diagnostic pop
     };
 
@@ -545,69 +555,69 @@ public:
     //--------------------------------------------------------------------------
 
     //! \brief Create a vector filled with NaN (for float and double only).
-    const static Vector<T, 4_z> DUMMY;
+    const static Vector<T, 4u> DUMMY;
     //! \brief Create a vector filled with zero<T>().
-    const static Vector<T, 4_z> ZERO;
+    const static Vector<T, 4u> ZERO;
     //! \brief Create the vector filled with one<T>().
-    const static Vector<T, 4_z> UNIT_SCALE;
+    const static Vector<T, 4u> UNIT_SCALE;
     //! \brief Create the vector filled with negative one<T>().
-    const static Vector<T, 4_z> NEGATIVE_UNIT_SCALE;
+    const static Vector<T, 4u> NEGATIVE_UNIT_SCALE;
     //! \brief Create the vector [one<T>() zero<T>() zero<T>() zero<T>()].
-    const static Vector<T, 4_z> UNIT_X;
+    const static Vector<T, 4u> UNIT_X;
     //! \brief Create the vector [zero<T>() one<T>() zero<T>() zero<T>()].
-    const static Vector<T, 4_z> UNIT_Y;
+    const static Vector<T, 4u> UNIT_Y;
     //! \brief Create the vector [zero<T>() zero<T>() one<T>() zero<T>()].
-    const static Vector<T, 4_z> UNIT_Z;
+    const static Vector<T, 4u> UNIT_Z;
     //! \brief Create the vector [zero<T>() zero<T>() zero<T>() one<T>()].
-    const static Vector<T, 4_z> UNIT_W;
+    const static Vector<T, 4u> UNIT_W;
     //! \brief Create the vector [-one<T>() zero<T>() zero<T>() zero<T>()].
-    const static Vector<T, 4_z> NEGATIVE_UNIT_X;
+    const static Vector<T, 4u> NEGATIVE_UNIT_X;
     //! \brief Create the vector [zero<T>() -one<T>() zero<T>() zero<T>()].
-    const static Vector<T, 4_z> NEGATIVE_UNIT_Y;
+    const static Vector<T, 4u> NEGATIVE_UNIT_Y;
     //! \brief Create the vector [zero<T>() zero<T>() -one<T>() zero<T>()].
-    const static Vector<T, 4_z> NEGATIVE_UNIT_Z;
+    const static Vector<T, 4u> NEGATIVE_UNIT_Z;
     //! \brief Create the vector [zero<T>() zero<T>() zero<T>() -one<T>()].
-    const static Vector<T, 4_z> NEGATIVE_UNIT_W;
+    const static Vector<T, 4u> NEGATIVE_UNIT_W;
 };
 
 //------------------------------------------------------------------------------
 // Predefined vectors
 //------------------------------------------------------------------------------
 
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::DUMMY(T(NAN));
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::ZERO(maths::zero<T>());
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_SCALE(maths::one<T>());
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_SCALE(-maths::one<T>());
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_X(maths::one<T>(), maths::zero<T>(), maths::zero<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_Y(maths::zero<T>(), maths::one<T>(), maths::zero<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_Z(maths::zero<T>(), maths::zero<T>(), maths::one<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::UNIT_W(maths::zero<T>(), maths::zero<T>(), maths::zero<T>(), maths::one<T>());
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_X(-maths::one<T>(), maths::zero<T>(), maths::zero<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>(), maths::zero<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_Z(maths::zero<T>(), maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
-template <typename T> const Vector<T, 4_z> Vector<T, 4_z>::NEGATIVE_UNIT_W(maths::zero<T>(), maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::DUMMY(T(NAN));
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::ZERO(maths::zero<T>());
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::UNIT_SCALE(maths::one<T>());
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::NEGATIVE_UNIT_SCALE(-maths::one<T>());
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::UNIT_X(maths::one<T>(), maths::zero<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::UNIT_Y(maths::zero<T>(), maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::UNIT_Z(maths::zero<T>(), maths::zero<T>(), maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::UNIT_W(maths::zero<T>(), maths::zero<T>(), maths::zero<T>(), maths::one<T>());
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::NEGATIVE_UNIT_X(-maths::one<T>(), maths::zero<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::NEGATIVE_UNIT_Y(maths::zero<T>(), -maths::one<T>(), maths::zero<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::NEGATIVE_UNIT_Z(maths::zero<T>(), maths::zero<T>(), -maths::one<T>(), maths::zero<T>());
+template <typename T> const Vector<T, 4u> Vector<T, 4u>::NEGATIVE_UNIT_W(maths::zero<T>(), maths::zero<T>(), maths::zero<T>(), -maths::one<T>());
 
 // *****************************************************************************
 // Typedefs for the most common types and dimensions
 // *****************************************************************************
-typedef Vector<bool, 2_z> Vector2b;
-typedef Vector<bool, 3_z> Vector3b;
-typedef Vector<bool, 4_z> Vector4b;
+typedef Vector<bool, 2u> Vector2b;
+typedef Vector<bool, 3u> Vector3b;
+typedef Vector<bool, 4u> Vector4b;
 
-typedef Vector<int32_t, 2_z> Vector2i;
-typedef Vector<int32_t, 3_z> Vector3i;
-typedef Vector<int32_t, 4_z> Vector4i;
+typedef Vector<int, 2u> Vector2i;
+typedef Vector<int, 3u> Vector3i;
+typedef Vector<int, 4u> Vector4i;
 
-typedef Vector<float, 2_z> Vector2f;
-typedef Vector<float, 3_z> Vector3f;
-typedef Vector<float, 4_z> Vector4f;
+typedef Vector<float, 2u> Vector2f;
+typedef Vector<float, 3u> Vector3f;
+typedef Vector<float, 4u> Vector4f;
 
-typedef Vector<double, 2_z> Vector2g;
-typedef Vector<double, 3_z> Vector3g;
-typedef Vector<double, 4_z> Vector4g;
+typedef Vector<double, 2u> Vector2g;
+typedef Vector<double, 3u> Vector3g;
+typedef Vector<double, 4u> Vector4g;
 
 // *****************************************************************************
-// Overloaded math operators
+// Overloaded math unary operators
 // *****************************************************************************
 
 #define DEFINE_UNARY_OPERATOR(op)                       \
@@ -620,6 +630,10 @@ typedef Vector<double, 4_z> Vector4g;
             result[i] = op a[i];                        \
         return result;                                  \
     }
+
+// *****************************************************************************
+// Overloaded math binary operators
+// *****************************************************************************
 
 #define DEFINE_BINARY_OPERATORS(op)                                     \
     /* Vector-Vector op */                                              \
@@ -653,6 +667,10 @@ typedef Vector<double, 4_z> Vector4g;
         return result;                                                  \
     }
 
+// *****************************************************************************
+// Overloaded math inplace operators
+// *****************************************************************************
+
 #define DEFINE_INPLACE_OPERATORS(op)                                    \
     /* Vector-Vector op */                                              \
     template <typename T, size_t n>                                     \
@@ -672,6 +690,10 @@ typedef Vector<double, 4_z> Vector4g;
             a[i] op b;                                                  \
         return a;                                                       \
     }
+
+// *****************************************************************************
+// Overloaded math relational operators
+// *****************************************************************************
 
 #define DEFINE_RELATIONAL_OPERATORS(op)                                 \
     /* Vector-Vector op */                                              \
@@ -705,6 +727,10 @@ typedef Vector<double, 4_z> Vector4g;
         return result;                                                  \
     }
 
+// *****************************************************************************
+// Overloaded math fun(x) operators
+// *****************************************************************************
+
 #define DEFINE_FUN1_OPERATOR(name, op)          \
     template <typename T, size_t n>             \
     Vector<T, n> name(Vector<T, n> const& a)    \
@@ -717,6 +743,10 @@ typedef Vector<double, 4_z> Vector4g;
         return result;                          \
     }
 
+// *****************************************************************************
+// Overloaded math fun(x, y) operators
+// *****************************************************************************
+
 #define DEFINE_FUN2_OPERATOR(name, op)                                  \
     template <typename T, size_t n>                                     \
     Vector<T, n> name(Vector<T, n> const& a, Vector<T, n> const& b)     \
@@ -728,6 +758,10 @@ typedef Vector<double, 4_z> Vector4g;
             result[i] = op(a[i], b[i]);                                 \
         return result;                                                  \
     }
+
+// *****************************************************************************
+// Overloaded math bool operators
+// *****************************************************************************
 
 #define DEFINE_BOOL_OPERATOR(name, op)                          \
     template <typename T, size_t n>                             \
@@ -742,6 +776,10 @@ typedef Vector<double, 4_z> Vector4g;
         }                                                       \
         return true;                                            \
     }
+
+// *****************************************************************************
+// Overloaded operators
+// *****************************************************************************
 
 DEFINE_BINARY_OPERATORS(+)
 DEFINE_BINARY_OPERATORS(-)
@@ -809,7 +847,7 @@ std::ostream& operator<<(std::ostream& os, Vector<T, n> const& v)
 //! \brief Display a vector (specialization for 2D vectors).
 // *****************************************************************************
 template <typename T>
-std::ostream& operator<<(std::ostream& os, Vector<T, 2_z> const& v)
+std::ostream& operator<<(std::ostream& os, Vector<T, 2u> const& v)
 {
     return os << "[" << v[0] << ", " << v[1] << ']';
 }
@@ -818,7 +856,7 @@ std::ostream& operator<<(std::ostream& os, Vector<T, 2_z> const& v)
 //! \brief Display a vector (specialization for 3D vectors).
 // *****************************************************************************
 template <typename T>
-std::ostream& operator<<(std::ostream& os, Vector<T, 3_z> const& v)
+std::ostream& operator<<(std::ostream& os, Vector<T, 3u> const& v)
 {
     return os << "[" << v[0] << ", " << v[1] << ", " << v[2] << ']';
 }
@@ -827,7 +865,7 @@ std::ostream& operator<<(std::ostream& os, Vector<T, 3_z> const& v)
 //! \brief Display a vector (specialization for 4D vectors).
 // *****************************************************************************
 template <typename T>
-std::ostream& operator<<(std::ostream& os, Vector<T, 4_z> const& v)
+std::ostream& operator<<(std::ostream& os, Vector<T, 4u> const& v)
 {
     return os << "[" << v[0] << ", " << v[1] << ", " << v[2]  << ", " << v[3] << ']';
 }
@@ -923,7 +961,7 @@ namespace vector
     //! \return k if vectors are collinear, else return NaN if vectors are not
     //! collinear, else return 0 if zero vector.
     //!
-    //! \note Use this function for T a familly of float and not for integers.
+    //! \note Use this function for T a real but not for integers.
     // *************************************************************************
     template <typename T, size_t n>
     T collinearity(Vector<T, n> const& u, Vector<T, n> const& v)
@@ -933,7 +971,7 @@ namespace vector
             return maths::zero<T>();
 
         const T k = u[0] / v[0];
-        for (size_t i = 1_z; i < n; ++i)
+        for (size_t i = 1u; i < n; ++i)
         {
             if (!maths::almostEqual(k * v[i], u[i]))
                 return T(NAN);
@@ -943,7 +981,7 @@ namespace vector
 
     // *************************************************************************
     //! \brief Check if two vectors are parallels.
-    //! \note Use this function for T a familly of float and not for integers.
+    //! \note Use this function for T a real but not for integers.
     // http://www.educastream.com/vecteurs-colineaires-seconde
     // *************************************************************************
     template <typename T, size_t n>
@@ -956,7 +994,7 @@ namespace vector
     // *************************************************************************
     //! \brief Check if two vectors are mathematicaly equivalent: same
     //! norm (magnitude), same direction (parallel) and same sign.
-    //! \note Use this function for T a familly of float and not for integers.
+    //! \note Use this function for T a real but not for integers.
     // *************************************************************************
     template <typename T, size_t n>
     bool areEquivalent(Vector<T, n> const& u, Vector<T, n> const& v)
@@ -967,7 +1005,7 @@ namespace vector
 
     // *************************************************************************
     //! \brief Check if three points A, B, C are aligned.
-    //! \note Use this function for T a familly of float and not for integers.
+    //! \note Use this function for T a real but not for integers.
     // *************************************************************************
     template <typename T, size_t n>
     bool arePointsAligned(Vector<T, n> const& a, Vector<T, n> const& b, Vector<T, n> const& c)
@@ -1024,7 +1062,7 @@ namespace vector
     //!
     // *************************************************************************
     template <typename T>
-    T cross(Vector<T, 2_z> const& a, Vector<T, 2_z> const& b)
+    T cross(Vector<T, 2u> const& a, Vector<T, 2u> const& b)
     {
         return a.x * b.y - a.y * b.x;
     }
@@ -1033,7 +1071,7 @@ namespace vector
     //! \brief Vector product, aka for cross product (specialization for 3D vectors).
     // *************************************************************************
     template <typename T>
-    Vector<T, 3_z> cross(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
+    Vector<T, 3u> cross(Vector<T, 3u> const& a, Vector<T, 3u> const& b)
     {
         return
                 {
@@ -1063,7 +1101,7 @@ namespace vector
     //! \return a . b = transpose([a_x a_y a_z]) . transpose([b_x b_y b_z])
     // *************************************************************************
     template <typename T, size_t n>
-    T dot(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
+    T dot(Vector<T, 3u> const& a, Vector<T, 3u> const& b)
     {
         return a.x * b.x + a.y * b.y + a.z * b.z;
     }
@@ -1073,7 +1111,7 @@ namespace vector
     //! \return a . b = transpose([a_x a_y]) . transpose([b_x b_y])
     // *************************************************************************
     template <typename T, size_t n>
-    T dot(Vector<T, 2_z> const& a, Vector<T, 2_z> const& b)
+    T dot(Vector<T, 2u> const& a, Vector<T, 2u> const& b)
     {
         return a.x * b.x + a.y * b.y;
     }
@@ -1174,7 +1212,7 @@ namespace vector
     //! \brief Return the perpendicular vector (specialization for 2D vectors).
     // *************************************************************************
     template <typename T>
-    Vector<T, 2_z> orthogonal(Vector<T, 2_z> const& a)
+    Vector<T, 2u> orthogonal(Vector<T, 2u> const& a)
     {
         return { -a.y, a.x };
     }
@@ -1183,7 +1221,7 @@ namespace vector
     //! \brief Return the perpendicular vector (specialization for 3D vectors).
     // *************************************************************************
     template <typename T>
-    Vector<T, 3_z> orthogonal(Vector<T, 3_z> const& a)
+    Vector<T, 3u> orthogonal(Vector<T, 3u> const& a)
     {
         // Implementation due to Sam Hocevar - see blog post:
         // http://lolengine.net/blog/2013/09/21/picking-orthogonal-Vector-combing-coconuts
@@ -1268,7 +1306,7 @@ namespace vector
     //! \brief Mean (specialization for 2D vectors).
     // *************************************************************************
     template <typename T>
-    T mean(Vector<T, 2_z> const& v)
+    T mean(Vector<T, 2u> const& v)
     {
         return (v[0] + v[1]) / T(2);
     }
@@ -1277,7 +1315,7 @@ namespace vector
     //! \brief Mean (specialization for 3D vectors).
     // *************************************************************************
     template <typename T>
-    T mean(Vector<T, 3_z> const& v)
+    T mean(Vector<T, 3u> const& v)
     {
         return (v[0] + v[1] + v[2]) / T(3);
     }
@@ -1286,7 +1324,7 @@ namespace vector
     //! \brief Mean (specialization for 4D vectors).
     // *************************************************************************
     template <typename T>
-    T mean(Vector<T, 4_z> const& v)
+    T mean(Vector<T, 4u> const& v)
     {
         return (v[0] + v[1] + v[2] + v[3]) / T(4);
     }
@@ -1324,7 +1362,7 @@ T operator*(Vector<T, n> const& a, Vector<T, n> const& b)
 //! \brief Vector product (aka cross product).
 // *****************************************************************************
 template <typename T>
-Vector<T, 3_z> operator%(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
+Vector<T, 3u> operator%(Vector<T, 3u> const& a, Vector<T, 3u> const& b)
 {
     return vector::cross<T>(a, b);
 }
@@ -1333,7 +1371,7 @@ Vector<T, 3_z> operator%(Vector<T, 3_z> const& a, Vector<T, 3_z> const& b)
 //! \brief Vector product (aka cross product).
 // *****************************************************************************
 template <typename T>
-T operator%(Vector<T, 2_z> const& a, Vector<T, 2_z> const& b)
+T operator%(Vector<T, 2u> const& a, Vector<T, 2u> const& b)
 {
     return vector::cross<T>(a, b);
 }

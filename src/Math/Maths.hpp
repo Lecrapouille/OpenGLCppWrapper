@@ -73,7 +73,7 @@ template<typename T> T nan() { return std::numeric_limits<T>::quiet_NaN(); }
 template<typename T> bool isNan(T const& x) { return std::isnan(x); }
 
 #   pragma GCC diagnostic push
-#   pragma GCC diagnostic ignored "-Wunused-const-variable"
+#     pragma GCC diagnostic ignored "-Wunused-const-variable"
 
 //------------------------------------------------------------------------------
 // Constant numbers
@@ -158,11 +158,11 @@ static inline double sqrt(double const x)
 }
 
 #   pragma GCC diagnostic push
-#   pragma GCC diagnostic ignored "-Wstrict-aliasing"
-#   pragma GCC diagnostic ignored "-Wfloat-equal"
-#   pragma GCC diagnostic ignored "-Wold-style-cast"
-#   pragma GCC diagnostic ignored "-Wcast-qual"
-#   pragma GCC diagnostic ignored "-Wsign-conversion"
+#     pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#     pragma GCC diagnostic ignored "-Wfloat-equal"
+#     pragma GCC diagnostic ignored "-Wold-style-cast"
+#     pragma GCC diagnostic ignored "-Wcast-qual"
+#     pragma GCC diagnostic ignored "-Wsign-conversion"
 
 //! \brief
 static uint32_t maxUlps = 6U;
@@ -325,7 +325,7 @@ static inline T wrapTo2PI(T const radians)
 }
 
 //------------------------------------------------------------------------------
-//! \brief Linear mapping of x from range [start1 stop1] to range [start2 stop2].
+//! \brief Linear mapping of x from range2 [start1 stop1] to range2 [start2 stop2].
 //------------------------------------------------------------------------------
 template<typename T>
 static inline T lmap(T const x, T const start1, T const stop1, T const start2, T const stop2)
@@ -395,7 +395,7 @@ static T linspace(T const start, T const end, size_t const N,
 //! https://en.wikipedia.org/wiki/Smoothstep
 //------------------------------------------------------------------------------
 template<typename T>
-T smoothstep(T const x, T const min, T const max)
+static T smoothstep(T const x, T const min, T const max)
 {
     if (x <= min) return zero<T>();
     if (x >= max) return one<T>();
@@ -408,7 +408,7 @@ T smoothstep(T const x, T const min, T const max)
 //! https://en.wikipedia.org/wiki/Smoothstep
 //------------------------------------------------------------------------------
 template<typename T>
-T smootherstep(T const x, T const min, T const max)
+static T smootherstep(T const x, T const min, T const max)
 {
     if (x <= min) return zero<T>();
     if (x >= max) return one<T>();

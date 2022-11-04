@@ -59,10 +59,10 @@ namespace matrix
     //--------------------------------------------------------------------------
 
     template<typename T>
-    Matrix<T, 4_z, 4_z> translate(Matrix<T, 4_z, 4_z> const& M,
-                                  Vector<T, 3_z> const& t)
+    Matrix<T, 4u, 4u> translate(Matrix<T, 4u, 4u> const& M,
+                                  Vector<T, 3u> const& t)
     {
-        Matrix<T, 4_z, 4_z> O(M);
+        Matrix<T, 4u, 4u> O(M);
 
         O[3] = M[0] * t.x + M[1] * t.y + M[2] * t.z + M[3];
 
@@ -85,10 +85,10 @@ namespace matrix
     //! \endcode
     //--------------------------------------------------------------------------
     template<typename T>
-    Matrix<T, 4_z, 4_z> scale(Matrix<T, 4_z, 4_z> const& M,
-                              Vector<T, 3_z> const& s)
+    Matrix<T, 4u, 4u> scale(Matrix<T, 4u, 4u> const& M,
+                              Vector<T, 3u> const& s)
     {
-        Matrix<T, 4_z, 4_z> O;
+        Matrix<T, 4u, 4u> O;
 
         O[0] = M[0] * s.x;
         O[1] = M[1] * s.y;
@@ -120,17 +120,17 @@ namespace matrix
     //! \endcode
     //--------------------------------------------------------------------------
     template<typename T>
-    Matrix<T, 4_z, 4_z> rotate(Matrix<T, 4_z, 4_z> const& M,
+    Matrix<T, 4u, 4u> rotate(Matrix<T, 4u, 4u> const& M,
                                units::angle::radian_t const angle,
-                               Vector<T, 3_z> const& r)
+                               Vector<T, 3u> const& r)
     {
         T const a = angle.to<T>();
         T const c = std::cos(a);
         T const s = std::sin(a);
 
-        Vector<T, 3_z> axis(vector::normalize(r));
-        Vector<T, 3_z> temp((maths::one<T>() - c) * axis);
-        Matrix<T, 4_z, 4_z> rotate;
+        Vector<T, 3u> axis(vector::normalize(r));
+        Vector<T, 3u> temp((maths::one<T>() - c) * axis);
+        Matrix<T, 4u, 4u> rotate;
 
         rotate[0][0] = c + temp[0] * axis[0];
         rotate[0][1] = temp[0] * axis[1] + s * axis[2];
@@ -144,7 +144,7 @@ namespace matrix
         rotate[2][1] = temp[2] * axis[1] - s * axis[0];
         rotate[2][2] = c + temp[2] * axis[2];
 
-        Matrix<T, 4_z, 4_z> O;
+        Matrix<T, 4u, 4u> O;
         O[0] = M[0] * rotate[0][0] + M[1] * rotate[0][1] + M[2] * rotate[0][2];
         O[1] = M[0] * rotate[1][0] + M[1] * rotate[1][1] + M[2] * rotate[1][2];
         O[2] = M[0] * rotate[2][0] + M[1] * rotate[2][1] + M[2] * rotate[2][2];
@@ -158,7 +158,7 @@ namespace matrix
     //! \return the transposed orthogonal matrix.
     //--------------------------------------------------------------------------
     template<typename T>
-    Matrix<T, 4_z, 4_z> ortho(T const left, T const right,
+    Matrix<T, 4u, 4u> ortho(T const left, T const right,
                               T const bottom, T const top,
                               T const near, T const far)
     {
@@ -195,7 +195,7 @@ namespace matrix
     //! \return the transposed perspective matrix.
     //--------------------------------------------------------------------------
     template<typename T>
-    Matrix<T, 4_z, 4_z> perspective(units::angle::radian_t const fovY,
+    Matrix<T, 4u, 4u> perspective(units::angle::radian_t const fovY,
                                     T const aspect, T const zNear, T const zFar)
     {
         assert(maths::abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
@@ -258,13 +258,13 @@ namespace matrix
     //! \endcode
     //--------------------------------------------------------------------------
     template<typename T>
-    Matrix<T, 4_z, 4_z> lookAt(Vector<T, 3_z> const& position,
-                               Vector<T, 3_z> const& target,
-                               Vector<T, 3_z> const& upwards)
+    Matrix<T, 4u, 4u> lookAt(Vector<T, 3u> const& position,
+                               Vector<T, 3u> const& target,
+                               Vector<T, 3u> const& upwards)
     {
-        Vector<T, 3_z> const direction(vector::normalize(target - position));
-        Vector<T, 3_z> const right(vector::normalize(vector::cross(direction, upwards)));
-        Vector<T, 3_z> const up(vector::cross(right, direction));
+        Vector<T, 3u> const direction(vector::normalize(target - position));
+        Vector<T, 3u> const right(vector::normalize(vector::cross(direction, upwards)));
+        Vector<T, 3u> const up(vector::cross(right, direction));
 
         return {
             //
@@ -297,17 +297,17 @@ namespace matrix
     //! \brief
     //--------------------------------------------------------------------------
     template<typename T>
-    Matrix<T, 3_z, 3_z> normalMatrix(Matrix<T, 4_z, 4_z> const& modelViewMatrix)
+    Matrix<T, 3u, 3u> normalMatrix(Matrix<T, 4u, 4u> const& modelViewMatrix)
     {
-        return Matrix<T, 3_z, 3_z>(transpose(inverse(modelViewMatrix)));
+        return Matrix<T, 3u, 3u>(transpose(inverse(modelViewMatrix)));
     }
 
     //--------------------------------------------------------------------------
     //! \brief
     //--------------------------------------------------------------------------
     template<typename T>
-    Matrix<T, 3_z, 3_z> normalMatrix(Matrix<T, 4_z, 4_z> const& modelMatrix,
-                                     Matrix<T, 4_z, 4_z> const& viewMatrix)
+    Matrix<T, 3u, 3u> normalMatrix(Matrix<T, 4u, 4u> const& modelMatrix,
+                                     Matrix<T, 4u, 4u> const& viewMatrix)
     {
         return normalMatrix(modelMatrix * viewMatrix);
     }

@@ -99,7 +99,7 @@ public:
     {
         size_t m = std::min(rows * cols, size_t(initList.size()));
         auto iter = initList.begin();
-        for (size_t i = 0_z; i < m; ++i)
+        for (size_t i = 0u; i < m; ++i)
         {
             m_data[i] = T(*iter);
             ++iter;
@@ -173,9 +173,9 @@ public:
     {
         size_t r = std::min(rows, rowsOther);
         size_t c = std::min(cols, colsOther);
-        for (size_t i = 0_z; i < r; ++i)
+        for (size_t i = 0u; i < r; ++i)
         {
-            for (size_t j = 0_z; j < c; ++j)
+            for (size_t j = 0u; j < c; ++j)
             {
                 m_data[cols * i + j] = T(m(i, j));
             }
@@ -304,29 +304,29 @@ public:
 // *****************************************************************************
 // Typedefs for the most common types and dimensions
 // *****************************************************************************
-typedef Matrix<bool, 2_z, 2_z> Matrix22b;
-typedef Matrix<bool, 2_z, 3_z> Matrix23b;
-typedef Matrix<bool, 3_z, 3_z> Matrix33b;
-typedef Matrix<bool, 3_z, 2_z> Matrix32b;
-typedef Matrix<bool, 4_z, 4_z> Matrix44b;
+typedef Matrix<bool, 2u, 2u> Matrix22b;
+typedef Matrix<bool, 2u, 3u> Matrix23b;
+typedef Matrix<bool, 3u, 3u> Matrix33b;
+typedef Matrix<bool, 3u, 2u> Matrix32b;
+typedef Matrix<bool, 4u, 4u> Matrix44b;
 
-typedef Matrix<int, 2_z, 2_z> Matrix22i;
-typedef Matrix<int, 2_z, 3_z> Matrix23i;
-typedef Matrix<int, 3_z, 3_z> Matrix33i;
-typedef Matrix<int, 3_z, 2_z> Matrix32i;
-typedef Matrix<int, 4_z, 4_z> Matrix44i;
+typedef Matrix<int, 2u, 2u> Matrix22i;
+typedef Matrix<int, 2u, 3u> Matrix23i;
+typedef Matrix<int, 3u, 3u> Matrix33i;
+typedef Matrix<int, 3u, 2u> Matrix32i;
+typedef Matrix<int, 4u, 4u> Matrix44i;
 
-typedef Matrix<double, 2_z, 2_z> Matrix22g;
-typedef Matrix<double, 2_z, 3_z> Matrix23g;
-typedef Matrix<double, 3_z, 3_z> Matrix33g;
-typedef Matrix<double, 3_z, 2_z> Matrix32g;
-typedef Matrix<double, 4_z, 4_z> Matrix44g;
+typedef Matrix<double, 2u, 2u> Matrix22g;
+typedef Matrix<double, 2u, 3u> Matrix23g;
+typedef Matrix<double, 3u, 3u> Matrix33g;
+typedef Matrix<double, 3u, 2u> Matrix32g;
+typedef Matrix<double, 4u, 4u> Matrix44g;
 
-typedef Matrix<float, 2_z, 2_z> Matrix22f;
-typedef Matrix<float, 2_z, 3_z> Matrix23f;
-typedef Matrix<float, 3_z, 3_z> Matrix33f;
-typedef Matrix<float, 3_z, 2_z> Matrix32f;
-typedef Matrix<float, 4_z, 4_z> Matrix44f;
+typedef Matrix<float, 2u, 2u> Matrix22f;
+typedef Matrix<float, 2u, 3u> Matrix23f;
+typedef Matrix<float, 3u, 3u> Matrix33f;
+typedef Matrix<float, 3u, 2u> Matrix32f;
+typedef Matrix<float, 4u, 4u> Matrix44f;
 
 // *****************************************************************************
 // Overloaded math operators
@@ -477,8 +477,8 @@ Matrix<T, rows, cols> operator*(Matrix<T, rows, inner> const &a, Matrix<T, inner
 {
     Matrix<T, rows, cols> result(maths::zero<T>());
 
-    for (size_t i = 0_z; i < rows; ++i)
-        for (size_t j = 0_z; j < cols; ++j)
+    for (size_t i = 0u; i < rows; ++i)
+        for (size_t j = 0u; j < cols; ++j)
             for (size_t k = 0; k < inner; ++k)
                 result(i, j) += a(i, k) * b(k, j);
 
@@ -567,10 +567,10 @@ Matrix<T, rows, cols>& operator*=(Matrix<T, rows, cols> &a, Matrix<T, cols, cols
 template <typename T, size_t rows, size_t cols>
 std::ostream& operator<<(std::ostream& os, Matrix<T, rows, cols> const& m)
 {
-    for (size_t i = 0_z; i < rows; ++i)
+    for (size_t i = 0u; i < rows; ++i)
     {
         os << ((i == 0) ? "[" : "; ") << m[i][0];
-        for (size_t j = 1_z; j < cols; ++j)
+        for (size_t j = 1u; j < cols; ++j)
             os << " " << m[i][j];
     }
     os << "]";
@@ -583,9 +583,9 @@ namespace matrix
     //! \brief Convert a generic vector to a row vector.
     // *************************************************************************
     template <typename T, size_t rows>
-    Matrix<T, rows, 1_z> castToRowVector(Vector<T, rows> const& v)
+    Matrix<T, rows, 1u> castToRowVector(Vector<T, rows> const& v)
     {
-        Matrix<T, rows, 1_z> result;
+        Matrix<T, rows, 1u> result;
 
         size_t i = rows;
         while (i--)
@@ -598,9 +598,9 @@ namespace matrix
     //! \brief Convert a generic vector to a column vector.
     // *************************************************************************
     template <typename T, size_t cols>
-    Matrix<T, 1_z, cols> castToColumnVector(Vector<T, cols> const& v)
+    Matrix<T, 1u, cols> castToColumnVector(Vector<T, cols> const& v)
     {
-        Matrix<T, 1_z, cols> result;
+        Matrix<T, 1u, cols> result;
 
         size_t i = cols;
         while (i--)
@@ -811,7 +811,7 @@ namespace matrix
     //! \brief
     // *************************************************************************
     template <typename T>
-    T determinant(Matrix<T, 2_z, 2_z> const& m)
+    T determinant(Matrix<T, 2u, 2u> const& m)
     {
         return m[0][0] * m[1][1] - m[1][0] * m[0][1];
     }
@@ -820,7 +820,7 @@ namespace matrix
     //! \brief
     // *************************************************************************
     template <typename T>
-    T determinant(Matrix<T, 3_z, 3_z> const& m)
+    T determinant(Matrix<T, 3u, 3u> const& m)
     {
         return m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
                 - m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
@@ -831,7 +831,7 @@ namespace matrix
     //! \brief https://www.dcode.fr/determinant-matrice
     // *************************************************************************
     template <typename T>
-    T determinant(Matrix<T, 4_z, 4_z> const& m)
+    T determinant(Matrix<T, 4u, 4u> const& m)
     {
         const T* ptr = m.m_data;
 
@@ -876,7 +876,7 @@ namespace matrix
     // det | C D | = det (A) * det(D - CA'B)
     //
     //template <typename T, size_t rows, size_t cols>
-    //T determinant(Matrix<T, 4_z, 4_z> const& m)
+    //T determinant(Matrix<T, 4u, 4u> const& m)
     //{}
     // TODO:https://stackoverflow.com/a/2625420/8877076
     // *************************************************************************
@@ -885,7 +885,7 @@ namespace matrix
     //! \brief
     // *************************************************************************
     template <typename T>
-    Matrix<T, 4_z, 4_z> inverse(Matrix<T, 4_z, 4_z> const& m)
+    Matrix<T, 4u, 4u> inverse(Matrix<T, 4u, 4u> const& m)
     {
         T m00 = m[0][0], m01 = m[0][1], m02 = m[0][2], m03 = m[0][3];
         T m10 = m[1][0], m11 = m[1][1], m12 = m[1][2], m13 = m[1][3];
@@ -907,7 +907,7 @@ namespace matrix
         T invDet = maths::one<T>() / (t00 * m00 + t10 * m01 + t20 * m02 + t30 * m03);
         //assert(invDet != maths::zero<T>() && "The matrix cannot be inversed");
 
-        Matrix<T, 4_z, 4_z> inv;
+        Matrix<T, 4u, 4u> inv;
         inv[0][0] = t00 * invDet;
         inv[1][0] = t10 * invDet;
         inv[2][0] = t20 * invDet;
@@ -971,7 +971,7 @@ namespace matrix
             double max = maths::abs(A(i, i));
             size_t pivot = i;
 
-            for (j = i + 1_z; j < rows; ++j)
+            for (j = i + 1u; j < rows; ++j)
             {
                 if (maths::abs(A(j, i)) > max)
                 {
@@ -992,20 +992,20 @@ namespace matrix
             // we cannot use == with floats or double !!!!
             if (A(i, i) != maths::zero<T>())
             {
-                for (j = i + 1_z; j < rows; ++j)
+                for (j = i + 1u; j < rows; ++j)
                 {
                     A(j, i) = A(j, i) / A(i, i);
-                    for (size_t k = i + 1_z; k < rows; ++k)
+                    for (size_t k = i + 1u; k < rows; ++k)
                     {
                         A(j, k) = A(j, k) - A(j, i) * A(i, k);
                     }
                 }
             }
         }
-        for (i = 0_z; i < rows; ++i)
+        for (i = 0u; i < rows; ++i)
         {
             L(i, i) = maths::one<T>();
-            for (j = 0_z; j < rows; ++j)
+            for (j = 0u; j < rows; ++j)
             {
                 if (j < i)
                 {
@@ -1037,10 +1037,10 @@ namespace matrix
         // y = U.x, thus Ly = b
         // solve for y by forward substitution
         y[0] = b[0] / L(0, 0);
-        for (size_t i = 1_z; i < rows; ++i)
+        for (size_t i = 1u; i < rows; ++i)
         {
             y[i] = b[i] / L(i, i);
-            for (size_t j = 0_z; j < i; ++j)
+            for (size_t j = 0u; j < i; ++j)
             {
                 y[i] -= (L(i, j) * y[j] / L(i, i));
             }
@@ -1048,7 +1048,7 @@ namespace matrix
 
         // U.x = y
         // Solve for x by backward substitution
-        size_t r = rows - 1_z;
+        size_t r = rows - 1u;
         solution[r] = y[r] / U(r, r);
 
         size_t i = r;

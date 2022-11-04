@@ -94,7 +94,7 @@ public:
     //! \note do not confuse with angleAxis() which builds a quaternion from a
     //!   given angle and a given rotation axis.
     //--------------------------------------------------------------------------
-    Quat(Scalar a, Vector<Scalar, 3_z> const& bcd)
+    Quat(Scalar a, Vector<Scalar, 3u> const& bcd)
     {
         data[0] = a;
         data[1] = bcd[0];
@@ -132,7 +132,7 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Construct a quaternion from a rotation matrix
     //--------------------------------------------------------------------------
-    Quat(Matrix<Scalar, 4_z, 4_z> const& m)
+    Quat(Matrix<Scalar, 4u, 4u> const& m)
     {
         *this = Quat::fromMatrix(m);
     }
@@ -190,13 +190,13 @@ public:
     //--------------------------------------------------------------------------
     //! \brief Return the rotation axis (x,y,z).
     //--------------------------------------------------------------------------
-    Vector<Scalar, 3_z> axis()
+    Vector<Scalar, 3u> axis()
     {
         Scalar tmp1 = static_cast<Scalar>(1) - a() * a();
         if(tmp1 <= static_cast<Scalar>(0))
-            return Vector<Scalar, 3_z>(0, 0, 1);
+            return Vector<Scalar, 3u>(0, 0, 1);
         Scalar tmp2 = static_cast<Scalar>(1) / std::sqrt(tmp1);
-        return Vector<Scalar, 3_z>(b() * tmp2, c() * tmp2, d() * tmp2);
+        return Vector<Scalar, 3u>(b() * tmp2, c() * tmp2, d() * tmp2);
     }
 
     //--------------------------------------------------------------------------
@@ -247,10 +247,10 @@ public:
     //!   S(4).
     //! \return 4x4 Rotation matrix.
     //--------------------------------------------------------------------------
-    Matrix<Scalar, 4_z, 4_z> toMatrix() const
+    Matrix<Scalar, 4u, 4u> toMatrix() const
     {
         // glm code
-        Matrix<Scalar, 4_z, 4_z> Result(matrix::Identity);
+        Matrix<Scalar, 4u, 4u> Result(matrix::Identity);
         Scalar qxx(b() * b());
         Scalar qyy(c() * c());
         Scalar qzz(d() * d());
@@ -276,7 +276,7 @@ public:
         return Result;
 
 #if 0 // FIXME original code
-        Matrix<Scalar, 4_z, 4_z> R(matrix::Identity); // TODO to be optimized
+        Matrix<Scalar, 4u, 4u> R(matrix::Identity); // TODO to be optimized
 
         const Scalar aa = a() * a();
         const Scalar bb = b() * b();
@@ -380,7 +380,7 @@ public:
     //! \note All singularities are handled, provided \c m belongs to SO[3].
     //! \see http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
     //--------------------------------------------------------------------------
-    static Quat fromMatrix(Matrix<Scalar, 4_z, 4_z> const& m)
+    static Quat fromMatrix(Matrix<Scalar, 4u, 4u> const& m)
     {
         Quat Q;
         const Scalar trace = m(0, 0) + m(1, 1) + m(2, 2);
