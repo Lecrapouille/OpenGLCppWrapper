@@ -23,6 +23,9 @@
 #include <fstream>
 #include <cstring>
 
+// TODO manage o, g and s
+// https://web.cse.ohio-state.edu/~shen.94/581/Site/Lab3_files/Labhelp_Obj_parser.htm
+
 //------------------------------------------------------------------------------
 static bool readObjFile(std::stringstream& ss, const std::string& fileName)
 {
