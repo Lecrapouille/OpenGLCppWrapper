@@ -59,19 +59,18 @@ OBJS_CORE = \
 
 OBJS_SCENE = \
   00_SG_Base.o \
-  02_SG_MaterialsAndShapes.o \
+  02_SG_MaterialsAndShapes.o
 
 #  01_BasicMaterial.o \
 #  02_NormalsMaterial.o \
 #  03_SceneNodes.o \
 #  04_SceneGraph.o \
 #  05_SceneFog.o \
+#  06_SceneLighting.o \
 #  07_AlphaTest.o
 
-#OBJS_THREE = \
-#  00_MiscLookAt.o
-
-#  06_SceneLighting.o \
+OBJS_THREE = \
+  00_MiscLookAt.o
 
 OBJS += \
   $(OBJS_WINDOW) $(OBJS_CORE) $(OBJS_SCENE) $(OBJS_THREE) debug.o main.o
@@ -94,8 +93,6 @@ endef
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-#FIXME: the static lib name shall be extracted from root makefile
-#
 THIRDPART_LIBS += $(abspath $(P)/build/libopenglcppwrapper.a.$(shell cat $(P)/VERSION.txt))
 
 ###################################################

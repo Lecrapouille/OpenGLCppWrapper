@@ -23,34 +23,37 @@
 
 #  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
 
-using namespace glwrap;
-using namespace glwrap::window;
-
 // *****************************************************************************
 //! \brief
 // *****************************************************************************
-class MiscLookAt : public IGLWindow
+class MiscLookAt : public GLWindow
 {
-  friend class GUI;
+    friend class GUI;
 
 public:
 
-  MiscLookAt();
-  ~MiscLookAt();
+    MiscLookAt(uint32_t const width, uint32_t const height, const char *title);
+    ~MiscLookAt();
+
+    static std::string info()
+    {
+        return "Example from three.js";
+    }
 
 private:
 
-  virtual void onMouseMoved(Mouse const& mouse) override;
-  virtual void onWindowSizeChanged() override;
-  virtual bool setup() override;
-  virtual bool draw() override;
+    virtual void onWindowResized() override;
+    virtual void onMouseMoved() override;
+    virtual bool onSetup() override;
+    virtual bool onPaint() override;
+    virtual void onSetupFailed(std::string const& reason) override;
+    virtual void onPaintFailed(std::string const& reason) override;
 
 private:
 
-  Vector3f            m_mouse_position;
-  Cube_SP             m_cube;
-  Node3D_SP           m_scene;
-  CameraController_SP m_cameraController;
+    Camera    m_camera;
+    SceneTree m_scene;
+    Vector3f  m_mouse_position;
 };
 
 #endif // EXAMPLE_00_MISCLOOKAT_HPP
