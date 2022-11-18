@@ -72,6 +72,11 @@ INCLUDES += -I$(THIRDPART)/bullet3/usr/local/include/bullet
 INCLUDES += -I$(THIRDPART)/units/include
 
 ###################################################
+# JSON parser
+
+INCLUDES += -I$(THIRDPART)/json/include
+
+###################################################
 # OpenGLCppWrapper defines.
 #
 # CHECK_OPENGL allows to check if bad parameters are
@@ -108,7 +113,7 @@ VPATH += $(THIRDPART)
 OBJ_COMMON = Exception.o File.o Path.o
 OBJ_OPENGL = OpenGL.o Variables.o EBO.o VBO.o VAO.o Texture2D.o Texture3D.o Textures.o Shader.o Program.o
 OBJ_GUI = Window.o Layer.o DearImGui.o
-OBJ_SCENE_GRAPH = SceneTree.o
+OBJ_SCENE_GRAPH = SceneTree.o AnimatedModelNode.o
 OBJ_CAMERA = Perspective.o Orthographic.o CameraNode.o CameraRigNode.o
 OBJ_LOADERS = OBJ.o SOIL.o
 OBJ_MATERIALS = Material.o DepthMaterial.o NormalsMaterial.o MeshBasicMaterial.o LineBasicMaterial.o Color.o

@@ -39,6 +39,7 @@
 
 #include "02_SceneGraph/00_SG_Base.hpp"
 #include "02_SceneGraph/02_SG_MaterialsAndShapes.hpp"
+#include "02_SceneGraph/04_SG_AnimatedModel.hpp"
 
 #include "03_ThreeJs/00_MiscLookAt.hpp"
 
@@ -73,7 +74,8 @@ enum class Examples
     PostProdFrameBuffer,
     SGBase,
     SGMatAndShape,
-    MiscLookAt
+    SGAnimatedModel,
+    MiscLookAt,
 };
 
 //------------------------------------------------------------------------------
@@ -105,6 +107,7 @@ static void usage(char *argv[])
     std::cout << "SceneGraph API:" << std::endl;
     std::cout << "  " << int(Examples::SGBase) << ": " << SGBase::info() << std::endl;
     std::cout << "  " << int(Examples::SGMatAndShape) << ": " << SGMatAndShape::info() << std::endl;
+    std::cout << "  " << int(Examples::SGAnimatedModel) << ": " << SGAnimatedModel::info() << std::endl;
     std::cout << "Examples from Three.js:" << std::endl;
     std::cout << "  " << int(Examples::MiscLookAt) << ": " << MiscLookAt::info() << std::endl;
     exit(EXIT_FAILURE);
@@ -191,6 +194,9 @@ int main(int argc, char *argv[])
             break;
         case Examples::SGMatAndShape:
             app = std::make_unique<SGMatAndShape>(WIDTH, HEIGHT, "Scene Graph of Shapes and Meterials");
+            break;
+        case Examples::SGAnimatedModel:
+            app = std::make_unique<SGAnimatedModel>(WIDTH, HEIGHT, "Animated Model");
             break;
         case Examples::MiscLookAt:
             app = std::make_unique<MiscLookAt>(WIDTH, HEIGHT, "Three.js example");

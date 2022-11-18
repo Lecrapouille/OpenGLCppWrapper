@@ -59,7 +59,8 @@ OBJS_CORE = \
 
 OBJS_SCENE = \
   00_SG_Base.o \
-  02_SG_MaterialsAndShapes.o
+  02_SG_MaterialsAndShapes.o \
+  04_SG_AnimatedModel.o
 
 #  01_BasicMaterial.o \
 #  02_NormalsMaterial.o \

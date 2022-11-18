@@ -40,7 +40,7 @@ namespace matrix
         //! \brief Create a matrix filled with zeros.
         Zero,
         //! \brief Create a matrix filled with ones.
-        One
+        One,
     };
 } // namespace matrix
 
@@ -1076,6 +1076,28 @@ namespace matrix
 
         matrix::LUdecomposition(A, L, U, P);
         return matrix::LUsolve(L, U, P, b);
+    }
+
+    template <typename T>
+    Matrix<T, 4u, 4u> translationMatrix(Vector<T,3u> const& trans)
+    {
+        Matrix<T, 4u, 4u> m(matrix::Type::Identity);
+        m[0][3] = trans[0];
+        m[1][3] = trans[1];
+        m[2][3] = trans[2];
+        m[3][3] = T(1);
+        return m;
+    }
+
+    template <typename T>
+    Matrix<T, 4u, 4u> scalingMatrix(Vector<T,3u> const& scal)
+    {
+        Matrix<T, 4u, 4u> m(matrix::Type::Zero);
+        m[0][0] = scal[0];
+        m[1][1] = scal[1];
+        m[2][2] = scal[2];
+        m[3][3] = T(1);
+        return m;
     }
 } // namespace matrix
 

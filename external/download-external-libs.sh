@@ -15,7 +15,7 @@ TARGET="$2"
 
 ### Delete all previous directories to be sure to have and compile
 ### fresh code source.
-rm -fr backward-cpp imgui SOIL units bullet3 2> /dev/null
+rm -fr backward-cpp imgui SOIL units bullet3 json 2> /dev/null
 
 function cloning
 {
@@ -42,3 +42,7 @@ cloning ocornut/imgui --branch docking
 #### License: MIT
 cloning nholthaus/units
 (cd units/include && mkdir units && cp units.h units/units.hpp)
+
+#### JSON for Modern C++
+#### License: MIT
+cloning nlohmann/json

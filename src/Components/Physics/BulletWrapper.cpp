@@ -68,7 +68,7 @@ inline static Vector3f cast_vector(btVector3 const& v)
 //------------------------------------------------------------------------------
 inline static btQuaternion cast_quaternion(Quatf const& q)
 {
-    return btQuaternion(q.x(), q.y(), q.z(), q.w());
+    return btQuaternion(q.x, q.y, q.z, q.w);
 }
 
 //------------------------------------------------------------------------------
