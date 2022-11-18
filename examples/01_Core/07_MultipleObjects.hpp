@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_07_MULTIPLE_MOVING_OBJECTS_HPP
 #  define EXAMPLE_07_MULTIPLE_MOVING_OBJECTS_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------

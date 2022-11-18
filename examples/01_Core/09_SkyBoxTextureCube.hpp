@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_09_SKYBOX_TEXTURECUBE_HPP
 #  define EXAMPLE_09_SKYBOX_TEXTURECUBE_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------

@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_08_TERRAIN_TEXTURE3D_HPP
 #  define EXAMPLE_08_TERRAIN_TEXTURE3D_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------

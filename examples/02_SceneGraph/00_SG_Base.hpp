@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_00_SG_BASE_HPP
 #  define EXAMPLE_00_SG_BASE_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 // *****************************************************************************

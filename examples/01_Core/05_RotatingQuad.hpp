@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_05_ROTATING_BOX_HPP
 #  define EXAMPLE_05_ROTATING_BOX_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 // *****************************************************************************

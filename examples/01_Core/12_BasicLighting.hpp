@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_12_BASIC_LIGHTING_HPP
 #  define EXAMPLE_12_BASIC_LIGHTING_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 // *****************************************************************************

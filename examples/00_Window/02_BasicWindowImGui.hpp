@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_02_EMPTY_WINDOW_WITH_DEAR_IMGUI_HPP
 #  define EXAMPLE_02_EMPTY_WINDOW_WITH_DEAR_IMGUI_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 
 //------------------------------------------------------------------------------
 //! \brief This example shows how to add and use Dear ImGui widgets.

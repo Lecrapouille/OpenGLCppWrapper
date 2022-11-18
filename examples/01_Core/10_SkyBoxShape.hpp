@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_10_SKYBOX_SHAPE_HPP
 #  define EXAMPLE_10_SKYBOX_SHAPE_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------

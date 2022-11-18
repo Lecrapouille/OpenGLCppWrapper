@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_00_MISCLOOKAT_HPP
 #  define EXAMPLE_00_MISCLOOKAT_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 
 // *****************************************************************************
 //! \brief

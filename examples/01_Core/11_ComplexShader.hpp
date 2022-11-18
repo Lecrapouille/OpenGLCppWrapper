@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_11_COMPLEX_SHADER_HPP
 #define EXAMPLE_11_COMPLEX_SHADER_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 // *****************************************************************************

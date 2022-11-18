@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_01_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
 #  define EXAMPLE_01_EMPTY_WINDOW_WITH_IO_EVENTS_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 
 //------------------------------------------------------------------------------
 //! \brief This example shows how to create a window for OpenGL reacting to

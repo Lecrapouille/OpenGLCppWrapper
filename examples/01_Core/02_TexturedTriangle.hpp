@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_02_TEXTURED_TRIANGLE_HPP
 #  define EXAMPLE_02_TEXTURED_TRIANGLE_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------

@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_00_COLORFUL_TRIANGLE_HPP
 #  define EXAMPLE_00_COLORFUL_TRIANGLE_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------

@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_03_MULTI_TEXTURED_SQUARE_HPP
 #  define EXAMPLE_03_MULTI_TEXTURED_SQUARE_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 //------------------------------------------------------------------------------

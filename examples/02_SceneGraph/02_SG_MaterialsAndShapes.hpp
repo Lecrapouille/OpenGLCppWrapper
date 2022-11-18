@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_02_SG_MATERIALS_AND_SHAPES_HPP
 #  define EXAMPLE_02_SG_MATERIALS_AND_SHAPES_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 #  include "../debug.hpp"
 
 // *****************************************************************************

@@ -21,7 +21,7 @@
 #ifndef EXAMPLE_04_SCENEGRAPH_HPP
 #  define EXAMPLE_04_SCENEGRAPH_HPP
 
-#  include <OpenGLCppWrapper/OpenGLCppWrapper.hpp>
+#  include "OpenGLCppWrapper/OpenGLCppWrapper.hpp"
 
 using namespace glwrap;
 
