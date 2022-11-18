@@ -595,6 +595,10 @@ template<> inline GLenum GLProgram::getGLAttributeType<int>() { return GL_INT; }
 template<> inline GLenum GLProgram::getGLAttributeType<Vector2i>() { return GL_INT; }
 template<> inline GLenum GLProgram::getGLAttributeType<Vector3i>() { return GL_INT; }
 template<> inline GLenum GLProgram::getGLAttributeType<Vector4i>() { return GL_INT; }
+template<> inline GLenum GLProgram::getGLAttributeType<unsigned int>() { return GL_UNSIGNED_INT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Vector2u>() { return GL_UNSIGNED_INT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Vector3u>() { return GL_UNSIGNED_INT; }
+template<> inline GLenum GLProgram::getGLAttributeType<Vector4u>() { return GL_UNSIGNED_INT; }
 template<> inline GLenum GLProgram::getGLAttributeType<Matrix22f>() { return GL_FLOAT; }
 template<> inline GLenum GLProgram::getGLAttributeType<Matrix33f>() { return GL_FLOAT; }
 template<> inline GLenum GLProgram::getGLAttributeType<Matrix44f>() { return GL_FLOAT; }
@@ -610,6 +614,10 @@ template<> inline GLenum GLProgram::getGLUniformType<int>() { return GL_INT; }
 template<> inline GLenum GLProgram::getGLUniformType<Vector2i>() { return GL_INT_VEC2; }
 template<> inline GLenum GLProgram::getGLUniformType<Vector3i>() { return GL_INT_VEC3; }
 template<> inline GLenum GLProgram::getGLUniformType<Vector4i>() { return GL_INT_VEC4; }
+template<> inline GLenum GLProgram::getGLUniformType<unsigned int>() { return GL_UNSIGNED_INT; }
+template<> inline GLenum GLProgram::getGLUniformType<Vector2u>() { return GL_UNSIGNED_INT_VEC2; }
+template<> inline GLenum GLProgram::getGLUniformType<Vector3u>() { return GL_UNSIGNED_INT_VEC3; }
+template<> inline GLenum GLProgram::getGLUniformType<Vector4u>() { return GL_UNSIGNED_INT_VEC4; }
 
 template<> inline GLint GLProgram::getGLDimension<float>() { return 1; }
 template<> inline GLint GLProgram::getGLDimension<Vector2f>() { return 2; }
@@ -622,5 +630,9 @@ template<> inline GLint GLProgram::getGLDimension<int>() { return 1; }
 template<> inline GLint GLProgram::getGLDimension<Vector2i>() { return 2; }
 template<> inline GLint GLProgram::getGLDimension<Vector3i>() { return 3; }
 template<> inline GLint GLProgram::getGLDimension<Vector4i>() { return 4; }
+template<> inline GLint GLProgram::getGLDimension<unsigned int>() { return 1; }
+template<> inline GLint GLProgram::getGLDimension<Vector2u>() { return 2; }
+template<> inline GLint GLProgram::getGLDimension<Vector3u>() { return 3; }
+template<> inline GLint GLProgram::getGLDimension<Vector4u>() { return 4; }
 
 #endif // OPENGLCPPWRAPPER_GLPROGRAM_HPP

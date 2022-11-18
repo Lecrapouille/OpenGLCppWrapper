@@ -608,6 +608,10 @@ typedef Vector<int, 2u> Vector2i;
 typedef Vector<int, 3u> Vector3i;
 typedef Vector<int, 4u> Vector4i;
 
+typedef Vector<unsigned int, 2u> Vector2u;
+typedef Vector<unsigned int, 3u> Vector3u;
+typedef Vector<unsigned int, 4u> Vector4u;
+
 typedef Vector<float, 2u> Vector2f;
 typedef Vector<float, 3u> Vector3f;
 typedef Vector<float, 4u> Vector4f;

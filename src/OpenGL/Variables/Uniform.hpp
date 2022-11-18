@@ -179,12 +179,6 @@ protected:
 };
 
 template<>
-inline void GLUniform<int>::apply(const int& value) const
-{
-    glCheck(glUniform1i(m_handle, value));
-}
-
-template<>
 inline void GLUniform<float>::apply(const float& value) const
 {
     glCheck(glUniform1f(m_handle, value));
@@ -209,6 +203,12 @@ inline void GLUniform<Vector4f>::apply(const Vector4f& value) const
 }
 
 template<>
+inline void GLUniform<int>::apply(const int& value) const
+{
+    glCheck(glUniform1i(m_handle, value));
+}
+
+template<>
 inline void GLUniform<Vector2i>::apply(const Vector2i& value) const
 {
     glCheck(glUniform2i(m_handle, value.x, value.y));
@@ -224,6 +224,30 @@ template<>
 inline void GLUniform<Vector4i>::apply(const Vector4i& value) const
 {
     glCheck(glUniform4i(m_handle, value.x, value.y, value.z, value.w));
+}
+
+template<>
+inline void GLUniform<unsigned int>::apply(const unsigned int& value) const
+{
+    glCheck(glUniform1ui(m_handle, value));
+}
+
+template<>
+inline void GLUniform<Vector2u>::apply(const Vector2u& value) const
+{
+    glCheck(glUniform2ui(m_handle, value.x, value.y));
+}
+
+template<>
+inline void GLUniform<Vector3u>::apply(const Vector3u& value) const
+{
+    glCheck(glUniform3ui(m_handle, value.x, value.y, value.z));
+}
+
+template<>
+inline void GLUniform<Vector4u>::apply(const Vector4u& value) const
+{
+    glCheck(glUniform4ui(m_handle, value.x, value.y, value.z, value.w));
 }
 
 template<>

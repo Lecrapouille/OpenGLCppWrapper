@@ -115,6 +115,27 @@ void GLVAO::createVBOsFromAttribs(GLProgram::Attributes const& attributes)
                 break;
             }
         }
+        else if (gltype == GL_UNSIGNED_INT)
+        {
+            switch (size)
+            {
+            case 1u:
+                createVBO<unsigned int>(name);
+                break;
+            case 2u:
+                createVBO<Vector2u>(name);
+                break;
+            case 3u:
+                createVBO<Vector3u>(name);
+                break;
+            case 4u:
+                createVBO<Vector4u>(name);
+                break;
+            default:
+                throw GL::Exception("Attribute with dimension > 4 is not managed");
+                break;
+            }
+        }
         else
         {
             throw GL::Exception("Attribute with dimension > 4 is not managed");

@@ -223,6 +223,61 @@ public:
 
     //--------------------------------------------------------------------------
     //! \brief Return the reference of the named VBO holding a 4D vector of type
+    //! unsigned int.
+    //!
+    //! This method wraps the \a VBO() method hidding the misery of the template.
+    //!
+    //! \throw GL::Exception if the VBO does not exist or does not have the
+    //! correct type.
+    //--------------------------------------------------------------------------
+    inline GLVertexBuffer<Vector4u>& vector4u(const char *name)
+    {
+        return getVBO<Vector4u>(name);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the reference of the named VBO holding a 3D vector of type
+    //! unsigned int.
+    //!
+    //! This method wraps the \a VBO() method hidding the misery of the template.
+    //!
+    //! \throw GL::Exception if the VBO does not exist or does not have the
+    //! correct type.
+    //--------------------------------------------------------------------------
+    inline GLVertexBuffer<Vector3u>& vector3u(const char *name)
+    {
+        return getVBO<Vector3u>(name);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the reference of the named VBO holding a 2D vector of type
+    //! unsigned int.
+    //!
+    //! This method wraps the \a VBO() method hidding the misery of the template.
+    //!
+    //! \throw GL::Exception if the VBO does not exist or does not have the
+    //! correct type.
+    //--------------------------------------------------------------------------
+    inline GLVertexBuffer<Vector2u>& vector2u(const char *name)
+    {
+        return getVBO<Vector2u>(name);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the reference of the named VBO holding a unsigned int scalar.
+    //!
+    //! This method wraps the \a VBO() method hidding the misery of the template.
+    //!
+    //! \throw GL::Exception if the VBO does not exist or does not have the
+    //! correct type.
+    //--------------------------------------------------------------------------
+    inline GLVertexBuffer<unsigned int>& scalaru(const char *name)
+    {
+        return getVBO<unsigned int>(name);
+    }
+
+    //--------------------------------------------------------------------------
+    //! \brief Return the reference of the named VBO holding a 4D vector of type
     //! float.
     //!
     //! This method wraps the \a VBO() method hidding the misery of the template.

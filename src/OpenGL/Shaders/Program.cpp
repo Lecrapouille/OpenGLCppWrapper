@@ -361,7 +361,30 @@ void GLProgram::storeAttribute(GLenum type, const char *name)
 {
     switch (type)
     {
-        // TODO: manage integers
+    case GL_INT:
+        createAttribute<int>(name);
+        return;
+    case GL_INT_VEC2:
+        createAttribute<Vector2i>(name);
+        return;
+    case GL_INT_VEC3:
+        createAttribute<Vector3i>(name);
+        return;
+    case GL_INT_VEC4:
+        createAttribute<Vector4i>(name);
+        return;
+    case GL_UNSIGNED_INT:
+        createAttribute<unsigned int>(name);
+        return;
+    case GL_UNSIGNED_INT_VEC2:
+        createAttribute<Vector2u>(name);
+        return;
+    case GL_UNSIGNED_INT_VEC3:
+        createAttribute<Vector3u>(name);
+        return;
+    case GL_UNSIGNED_INT_VEC4:
+        createAttribute<Vector4u>(name);
+        return;
     case GL_FLOAT:
         createAttribute<float>(name);
         return;
@@ -376,7 +399,8 @@ void GLProgram::storeAttribute(GLenum type, const char *name)
         return;
     default:
         std::string msg =
-                "The type of Attribute for " + std::string(name) +
+                "The type of Attribute " + std::to_string(type) + " for " +
+                std::string(name) +
                 " is not managed. Please report this bug to developpers!";
         throw GL::Exception(msg);
     }
@@ -386,7 +410,7 @@ bool GLProgram::storeUniformOrSampler(GLenum type, const char *name)
 {
     switch (type)
     {
-        // Store new uniform
+        // Store new vector or scalar
 
     case GL_FLOAT:
         return updateOrCreateUniform<float>(name);
@@ -404,6 +428,17 @@ bool GLProgram::storeUniformOrSampler(GLenum type, const char *name)
         return updateOrCreateUniform<Vector3i>(name);
     case GL_INT_VEC4:
         return updateOrCreateUniform<Vector4i>(name);
+    case GL_UNSIGNED_INT:
+        return updateOrCreateUniform<unsigned int>(name);
+    case GL_UNSIGNED_INT_VEC2:
+        return updateOrCreateUniform<Vector2u>(name);
+    case GL_UNSIGNED_INT_VEC3:
+        return updateOrCreateUniform<Vector3u>(name);
+    case GL_UNSIGNED_INT_VEC4:
+        return updateOrCreateUniform<Vector4u>(name);
+
+        // Store matrices
+
     case GL_FLOAT_MAT2:
         return updateOrCreateUniform<Matrix22f>(name);
     case GL_FLOAT_MAT3:
@@ -427,7 +462,7 @@ bool GLProgram::storeUniformOrSampler(GLenum type, const char *name)
         return true;
     default:
         std::string msg =
-                "The type of Uniform for " + std::string(name) +
+                "The type " + std::to_string(type) + " of Uniform for " + std::string(name) +
                 " is not managed. Please report this bug to developpers!";
         throw GL::Exception(msg);
         return false;
