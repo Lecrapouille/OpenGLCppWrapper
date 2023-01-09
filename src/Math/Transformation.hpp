@@ -124,9 +124,8 @@ namespace matrix
                                units::angle::radian_t const angle,
                                Vector<T, 3u> const& r)
     {
-        T const a = angle.to<T>();
-        T const c = std::cos(a);
-        T const s = std::sin(a);
+        T const c = units::math::cos(angle);
+        T const s = units::math::sin(angle);
 
         Vector<T, 3u> axis(vector::normalize(r));
         Vector<T, 3u> temp((maths::one<T>() - c) * axis);

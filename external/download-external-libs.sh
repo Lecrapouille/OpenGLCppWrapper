@@ -41,7 +41,7 @@ cloning ocornut/imgui --branch docking
 #### Library for unit conversion library
 #### License: MIT
 cloning nholthaus/units
-(cd units/include && mkdir units && cp units.h units/units.hpp)
+(cd units/include && mkdir units && mv units.h units/units.hpp)
 
 #### JSON for Modern C++
 #### License: MIT
