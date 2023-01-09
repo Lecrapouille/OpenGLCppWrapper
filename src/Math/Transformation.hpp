@@ -59,8 +59,7 @@ namespace matrix
     //--------------------------------------------------------------------------
 
     template<typename T>
-    Matrix<T, 4u, 4u> translate(Matrix<T, 4u, 4u> const& M,
-                                  Vector<T, 3u> const& t)
+    Matrix<T, 4u, 4u> translate(Matrix<T, 4u, 4u> const& M, Vector<T, 3u> const& t)
     {
         Matrix<T, 4u, 4u> O(M);
 
@@ -85,8 +84,7 @@ namespace matrix
     //! \endcode
     //--------------------------------------------------------------------------
     template<typename T>
-    Matrix<T, 4u, 4u> scale(Matrix<T, 4u, 4u> const& M,
-                              Vector<T, 3u> const& s)
+    Matrix<T, 4u, 4u> scale(Matrix<T, 4u, 4u> const& M, Vector<T, 3u> const& s)
     {
         Matrix<T, 4u, 4u> O;
 
@@ -121,8 +119,8 @@ namespace matrix
     //--------------------------------------------------------------------------
     template<typename T>
     Matrix<T, 4u, 4u> rotate(Matrix<T, 4u, 4u> const& M,
-                               units::angle::radian_t const angle,
-                               Vector<T, 3u> const& r)
+                             units::angle::radian_t const angle,
+                             Vector<T, 3u> const& r)
     {
         T const c = units::math::cos(angle);
         T const s = units::math::sin(angle);
@@ -157,9 +155,8 @@ namespace matrix
     //! \return the transposed orthogonal matrix.
     //--------------------------------------------------------------------------
     template<typename T>
-    Matrix<T, 4u, 4u> ortho(T const left, T const right,
-                              T const bottom, T const top,
-                              T const near, T const far)
+    Matrix<T, 4u, 4u> ortho(T const left, T const right, T const bottom,
+                            T const top, T const near, T const far)
     {
         return {
             //
@@ -195,7 +192,7 @@ namespace matrix
     //--------------------------------------------------------------------------
     template<typename T>
     Matrix<T, 4u, 4u> perspective(units::angle::radian_t const fovY,
-                                    T const aspect, T const zNear, T const zFar)
+                                  T const aspect, T const zNear, T const zFar)
     {
         assert(maths::abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
 
@@ -258,8 +255,8 @@ namespace matrix
     //--------------------------------------------------------------------------
     template<typename T>
     Matrix<T, 4u, 4u> lookAt(Vector<T, 3u> const& position,
-                               Vector<T, 3u> const& target,
-                               Vector<T, 3u> const& upwards)
+                             Vector<T, 3u> const& target,
+                             Vector<T, 3u> const& upwards)
     {
         Vector<T, 3u> const direction(vector::normalize(target - position));
         Vector<T, 3u> const right(vector::normalize(vector::cross(direction, upwards)));
@@ -270,19 +267,19 @@ namespace matrix
             right.x,
             up.x,
             -direction.x,
-             maths::zero<T>(),
+            maths::zero<T>(),
 
             //
             right.y,
             up.y,
             -direction.y,
-             maths::zero<T>(),
+            maths::zero<T>(),
 
             //
             right.z,
             up.z,
             -direction.z,
-             maths::zero<T>(),
+            maths::zero<T>(),
 
             //
             -(vector::dot(right, position)),
@@ -306,7 +303,7 @@ namespace matrix
     //--------------------------------------------------------------------------
     template<typename T>
     Matrix<T, 3u, 3u> normalMatrix(Matrix<T, 4u, 4u> const& modelMatrix,
-                                     Matrix<T, 4u, 4u> const& viewMatrix)
+                                   Matrix<T, 4u, 4u> const& viewMatrix)
     {
         return normalMatrix(modelMatrix * viewMatrix);
     }
