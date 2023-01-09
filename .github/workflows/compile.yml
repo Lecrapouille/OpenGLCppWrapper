@@ -18,7 +18,7 @@ jobs:
       - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install wget pkg-config lcov libglew-dev libglfw3-dev libbz2-dev libdw-dev
+          sudo apt-get install wget pkg-config lcov libglew-dev libglfw3-dev libbz2-dev libdw-dev tree
       - name: Checkout OpenGLCppWrapper
         uses: actions/checkout@v3
         with:
@@ -34,6 +34,10 @@ jobs:
         run: |
           cd examples
           make -j`nproc`
+      - name: Install OpenGLCppWrapper as libraries
+        run: |
+          sudo make install
+          tree /usr/include/OpenGLCppWrapper*
       - name: Download, configure and install Google test
         run: |
           wget https://github.com/google/googletest/archive/release-1.11.0.tar.gz
@@ -46,6 +50,11 @@ jobs:
 #          cd tests
 #          make -j`nproc --all`
 #          ./build/OpenGLCppWrapper-UnitTest
+      - name: Check if the library can be linked against a project
+        run: |
+          git clone https://github.com/Lecrapouille/LinkAgainstMyLibs.git --recurse-submodules --depth=1
+          cd LinkAgainstMyLibs/OpenGL
+          make -j`nproc --all`
 
   non_regression_macos:
     name: Non regression tests on MacOS X
@@ -69,6 +78,9 @@ jobs:
         run: |
           cd examples
           make -j`sysctl -n hw.logicalcpu`
+#      - name: Install OpenGLCppWrapper as libraries
+#        run: |
+#          sudo make install
       - name: Download, configure and install Google test
         run: |
           wget https://github.com/google/googletest/archive/release-1.11.0.tar.gz
@@ -81,3 +93,8 @@ jobs:
 #          cd tests
 #          make -j`nproc --all`
 #          ./build/OpenGLCppWrapper-UnitTest
+#      - name: Check if the library can be linked against a project
+#        run: |
+#          git clone https://github.com/Lecrapouille/LinkAgainstMyLibs.git --recurse-submodules --depth=1
+#          cd LinkAgainstMyLibs/OpenGL
+#          make -j`nproc --all`
