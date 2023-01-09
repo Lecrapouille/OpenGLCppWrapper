@@ -56,8 +56,15 @@ install: $(STATIC_LIB_TARGET) $(SHARED_LIB_TARGET) $(PKG_FILE)
 	@$(call INSTALL_DOCUMENTATION)
 	@$(call INSTALL_PROJECT_LIBRARIES)
 	@$(call INSTALL_PROJECT_HEADERS)
-	@$(call INSTALL_THIRDPART_FOLDER,SOIL/src,SOIL,-name "*.h")
-	@$(call INSTALL_THIRDPART_FILES,imgui,imgui,-name "*.h")
+	@$(call INSTALL_THIRDPART_FOLDER,json/include/nlohmann,nlohmann,)
+	@$(call INSTALL_THIRDPART_FOLDER,SOIL/include/SOIL,SOIL,-name "*.h")
+	@$(call INSTALL_THIRDPART_FOLDER,bullet3/usr/local/include/bullet,bullet,-name "*.h")
+	@$(call INSTALL_THIRDPART_FOLDER,bullet3/usr/local/include/bullet,,)
+	@$(call INSTALL_THIRDPART_FILES,imgui/backends,imgui/backends,-name "imgui_impl_glfw.h")
+	@$(call INSTALL_THIRDPART_FILES,imgui/backends,imgui/backends,-name "imgui_impl_opengl3.h")
+	@$(call INSTALL_THIRDPART_FILES,imgui,,-name "imgui.h")
+	@$(call INSTALL_THIRDPART_FILES,imgui,,-name "imconfig.h")
+	@$(call INSTALL_THIRDPART_FILES,units/include/units,units,-name "*.hpp")
 
 ###################################################
 # Uninstall the project. You need to be root. FIXME: to be updated
