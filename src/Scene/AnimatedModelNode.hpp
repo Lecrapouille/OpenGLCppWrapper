@@ -263,7 +263,7 @@ private:
         double delta = end.first - start.first;
         double factor = (m_animationTime - start.first) / delta;
         Vector3f deltaPos = end.second - start.second;
-        Vector3f pos = start.second + (float)factor * deltaPos;
+        Vector3f pos = start.second + float(factor) * deltaPos;
         return pos;
     }
 
@@ -272,7 +272,7 @@ private:
     {
         double delta = end.first - start.first;
         double factor = (m_animationTime - start.first) / delta;
-        Quatf rot = Slerp(start.second, end.second, (float)factor);
+        Quatf rot = Slerp(start.second, end.second, float(factor));
         rot.normalize();
         return rot;
     }
@@ -283,7 +283,7 @@ private:
         double delta = end.first - start.first;
         double factor = (m_animationTime - start.first) / delta;
         Vector3f deltaScale = end.second - start.second;
-        Vector3f scale = start.second + (float)factor * deltaScale;
+        Vector3f scale = start.second + float(factor) * deltaScale;
         return scale;
     }
 
@@ -307,11 +307,11 @@ private:
         }
 
         maths::clamp(d, -1.0f, 1.0f); // Robustness: Stay within domain of acos()
-        float theta_0 = acos(d);      // theta_0 = angle between input vectors
+        float theta_0 = std::acos(d); // theta_0 = angle between input vectors
         float theta = theta_0 * t;    // theta = angle between q0 and result
 
-        float s0 = cos(theta) - d * sin(theta) / sin(theta_0);  // == sin(theta_0 - theta) / sin(theta_0)
-        float s1 = sin(theta) / sin(theta_0);
+        float s0 = std::cos(theta) - d * std::sin(theta) / std::sin(theta_0);  // == sin(theta_0 - theta) / sin(theta_0)
+        float s1 = std::sin(theta) / std::sin(theta_0);
 
         return (s0 * q0) + (s1 * q1);
     }
