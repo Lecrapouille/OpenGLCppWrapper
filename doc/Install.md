@@ -4,6 +4,9 @@ OpenGLCppWrapper is mainly made for Linux but it also works for OS X (while I
 can hardly test on it because I have to borrow a MacBook).  OpenGLCppWrapper is
 yet working for Windows because I do not have windows to develop with.
 
+Note: In this doc the `-j8` with the `make` command is the number of your CPU
+cores. Please adapt this number to your case.
+
 ## Prerequisite
 
 This project depends on:
@@ -39,11 +42,14 @@ brew install glfw glew
 ##### Optional:
 
 Optionally, if you want to help developing, want to write/launch unit tests,
-install `crpcut` (only runnable with Linux)
+install [googletest](https://github.com/google/googletest)
 
 ```sh
-add-apt-repository ppa:jonlar/crpcut
-sudo apt-get update && apt-get install crpcut crpcut-dev
+wget https://github.com/google/googletest/archive/release-1.11.0.tar.gz
+tar xf release-1.11.0.tar.gz
+cd googletest-release-1.11.0
+cmake .
+sudo make install -j8
 ```
 
 ## Compilation of the API
@@ -54,11 +60,8 @@ git clone --recurse-submodules https://github.com/Lecrapouille/OpenGLCppWrapper.
 cd OpenGLCppWrapper
 make download-external-libs
 make compile-external-libs
-make
+make -j8
 ```
-
-**note:** you can add `-j4` or `-j8` for faster the compiler where 4 or 8
-depends on the number of core your CPU have.
 
 If you are a developper `make download-external-libs` and `make
 compile-external-libs` has to be called once or when you want to upgrade the
@@ -82,11 +85,8 @@ If, after that, you want to modify code source, just do `make`. You can type
 To compile API examples:
 ```sh
 cd examples
-make
+make -j8
 ```
-
-**note:** you can add `-j4` or `-j8` for faster the compiler where 4 or 8
-depends on the number of core your CPU have.
 
 A `build/` folder shall have been created containing the compiled and runnable
 files. Run examples:
@@ -96,12 +96,6 @@ files. Run examples:
 
 Will display the list of possible examples. Type `./build/OpenGLExamples 0` for
 example for running the 1st example.
-
-**note:** You may need indicate where are shared libraries. For example on Mac OS X (for Linux define instead ):
-
-```sh
-export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/your/parth/OpenGLCppWrapper/external/bullet3/usr/local/lib/
-```
 
 ## Installation
 
@@ -154,17 +148,25 @@ Example with a simple file main.cpp:
 g++ -W -Wall --std=c++11 main.cpp -o prog `pkg-config openglcppwrapper --cflags --libs`
 ```
 
-Example with Makefile given in [here](../tests/BasicProject)
+**note:** You may need indicate where are shared libraries. For example on Mac OS X:
+
+```sh
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/your/path/to/your/lib/folder
+```
+
+Example with Makefile given in [here](https://github.com/Lecrapouille/LinkAgainstMyLibs/tree/master/OpenGL).
 
 ### What code to write in my project ?
 
-* [Tutorials](doc/tutorials/Core.md)
-* [Examples](examples/README.md)
-* [Code Architecture](doc/Architecture.md)
+* [Tutorial](tutorials/Core.md)
+* [Examples](../examples/README.md)
+* [Architecture](Architecture.md)
+* [Debug OpenGL](Traces.md)
 
 ### Doxygen
 
-Documentation of the code source can be found [here](https://lecrapouille.github.io/OpenGLCppWrapper.github.io/). It can be localy generated as `doc/html/index.html` by typing `make doc`.
+Documentation of the code source can be found [here](https://lecrapouille.github.io/OpenGLCppWrapper.github.io/).
+It can be localy generated as `doc/html/index.html` by typing `make doc`.
 
 ### Unit tests
 

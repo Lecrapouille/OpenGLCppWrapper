@@ -1,4 +1,5 @@
 @startuml
+skin rose
 
 ' OpenGL class inheritance
 

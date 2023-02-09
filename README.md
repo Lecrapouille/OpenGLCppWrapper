@@ -6,8 +6,9 @@
 C++11 wrapper for writing OpenGL `Core Profile` applications in few lines of
 code.
 
-**Warning:** Do not confuse Core Profile OpenGL (>= 2.2) with Legacy OpenGL (<=
-2.1). This API does not manage OpenGL Legacy, but manages OpenGL version 3.3.
+**Warning:** Do not confuse Core Profile OpenGL (>= 2.2) with Legacy Profile
+OpenGL (<= 2.1). This API does not manage OpenGL Legacy Profile, but manages
+OpenGL Core Profile version >= 3.3.
 
 This API is split in two parts:
 
@@ -39,7 +40,8 @@ complexity and staying generic.
 
 ### Table Of Contents
 
-* [Installation](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Install.md)
-* [Examples](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/examples/Examples.md)
-* [Software Architecture](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Architecture.md)
-* [Credits](https://github.com/Lecrapouille/OpenGLCppWrapper/blob/master/doc/Credits.md)
+* [Installation](doc/Install.md)
+* [Tutorial](doc/tutorials/Core.md)
+* [Examples](examples/README.md)
+* [Architecture](doc/Architecture.md)
+* [Credits](doc/Credits.md)

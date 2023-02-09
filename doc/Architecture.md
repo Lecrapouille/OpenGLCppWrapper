@@ -1,11 +1,12 @@
-# OpenGL Wrapper API Architecture
+# OpenGLWrapper Software Architecture / Details Design
 
-This API allows to wrap OpenGL Core API (>= 3.3) within C++
+This API allows to wrap OpenGL Core Profile (>= 3.3) within C++
 classes. It has been greatly inspired by the Python library
 [GLumpy](https://glumpy.github.io/),
 
-**Warning:** Do not confuse OpenGL Core (>= 3.3) with OpenGL Legacy (<=
-3.2). This API does not manage OpenGL Legacy.
+**Warning:** Do not confuse OpenGL Core Profile (>= 3.3) with
+OpenGL Legacy Profile (<= 3.2). This API does not manage OpenGL
+Legacy Profile.
 
 **Warning:** *this API is currently in gestation. This document is the
 expected final API behavior, when reading this line, the current
@@ -176,13 +177,11 @@ the very last moment to GPU through the update() method.
 Let suppose the following VBO array storing three consecutive 3D
 position (x,y,z). Let suppose there is no current pending data.
 
-|---|---|---|---|---|---|---|---|---|-----------------|
 | 0 | 0 | 0 | 1 | 1 | 1 | 2 | 2 | 2 | PendingData={,} |
 |---|---|---|---|---|---|---|---|---|-----------------|
 
 Let change the 1st element with the value 42 which is now "dirty".
 
-|---|----|---|---|---|---|---|---|---|-------------------|
 | 0 | 42 | 0 | 1 | 1 | 1 | 2 | 2 | 2 | PendingData={1,1} |
 |---|----|---|---|---|---|---|---|---|-------------------|
 
@@ -191,7 +190,6 @@ Pending data is now referring to the first position of the array.
 Now Let change the 1st element with the value 42 which is now "dirty".
 let change the 5th element with the value 43 which is now "dirty".
 
-|---|----|---|---|---|----|---|---|---|-------------------|
 | 0 | 42 | 0 | 1 | 1 | 43 | 2 | 2 | 2 | PendingData={1,5} |
 |---|----|---|---|---|----|---|---|---|-------------------|
 
@@ -199,8 +197,7 @@ Now all data from position 1 to 5 are considered as dirty. Pending
 data is now referring to the first and fifth position of the array.
 
 Now let 0th element with the value 44 which is now "dirty".
-
-|----|----|---|---|---|----|---|---|---|-------------------|
+|
 | 44 | 42 | 0 | 1 | 1 | 43 | 2 | 2 | 2 | PendingData={0,5} |
 |----|----|---|---|---|----|---|---|---|-------------------|
 
@@ -210,8 +207,7 @@ data is now referring to the zeroth and fifth position of the array.
 Let suppose that VBO::update() is now called. All dirty data (position
 0 to 5) are flushed to the GPU, there is no more dirty data and
 pending data indices are cleared.
-
-|----|----|---|---|---|----|---|---|---|-----------------|
+|
 | 44 | 42 | 0 | 1 | 1 | 43 | 2 | 2 | 2 | PendingData={,} |
 |----|----|---|---|---|----|---|---|---|-----------------|
 

@@ -1,6 +1,6 @@
-# Traces OpenGL calls
+# How to debug OpenGL ?
 
-I'm using [apitrace](https://github.com/apitrace/apitrace) for debuging OpenGL calls in my API.
+I'm using [apitrace](https://github.com/apitrace/apitrace) for debuging the correct OpenGL calls in my API.
 
 General way to call apitrace:
 ```sh
